@@ -50,7 +50,7 @@ export async function registerUser(user: {
   language?: string;
 }): Promise<string> {
   const lang = user.language || "en-GB";
-  const url = SERVER_DOMAIN + "Registration/registration2.php";
+  const url = SERVER_DOMAIN + "menu1/Registration/registration2.php";
 
   const formData = new URLSearchParams();
   formData.append("user_name", user.name);
