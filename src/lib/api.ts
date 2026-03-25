@@ -14,7 +14,7 @@ export interface DigitalPerson {
 }
 
 export async function loginUser(email: string, password: string): Promise<DigitalPerson | null> {
-  const url = SERVER_DOMAIN + "PHPwrite/User/login2.php";
+  const url = SERVER_DOMAIN + "menu1/PHPwrite/User/login2.php";
 
   const formData = new URLSearchParams();
   formData.append("Email", email);
