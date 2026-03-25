@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Eye, EyeOff, Globe, Palette, HelpCircle } from "lucide-react";
+import { Eye, EyeOff, Globe, Palette, HelpCircle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -10,6 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { loginUser, registerUser, type DigitalPerson } from "@/lib/api";
+import { toast } from "sonner";
 
 const Index = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -17,6 +19,67 @@ const Index = () => {
   const [password, setPassword] = useState("");
   const [helpEnabled, setHelpEnabled] = useState(false);
   const [view, setView] = useState<"login" | "register">("login");
+  const [loading, setLoading] = useState(false);
+
+  // Register fields
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [mobileNumber, setMobileNumber] = useState("");
+  const [language, setLanguage] = useState("en-GB");
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      toast.error("Please enter email and password");
+      return;
+    }
+    setLoading(true);
+    try {
+      const user = await loginUser(email, password);
+      if (user && user.Email) {
+        toast.success(`Welcome back, ${user.Name || user.Email}!`);
+        // Store user session
+        localStorage.setItem("digitalUser", JSON.stringify(user));
+      } else {
+        toast.error("Invalid email or password");
+      }
+    } catch (err) {
+      toast.error("Connection error. Please try again.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRegister = async () => {
+    if (!firstName || !lastName || !email || !password) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+    setLoading(true);
+    try {
+      const result = await registerUser({
+        name: firstName,
+        surname: lastName,
+        dateOfBirth,
+        email,
+        password,
+        mobileNumber,
+        language,
+      });
+      if (result && !result.toLowerCase().includes("error") && !result.toLowerCase().includes("exist")) {
+        toast.success("Registration successful! You can now sign in.");
+        setView("login");
+      } else {
+        toast.error(result || "Registration failed");
+      }
+    } catch (err) {
+      toast.error("Connection error. Please try again.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
@@ -30,6 +93,17 @@ const Index = () => {
         className="relative w-full max-w-md animate-fade-in"
         style={{ animationDelay: "0.1s" }}
       >
+        {/* Back arrow for register */}
+        {view === "register" && (
+          <button
+            onClick={() => setView("login")}
+            className="mb-4 flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft size={16} />
+            Back to Sign In
+          </button>
+        )}
+
         {/* Logo / Brand */}
         <div className="mb-8 text-center">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary animate-glow-pulse">
@@ -48,6 +122,36 @@ const Index = () => {
         {/* Card */}
         <div className="rounded-2xl border border-border bg-card p-6 shadow-xl shadow-primary/5">
           <div className="space-y-4">
+            {/* Register-only fields */}
+            {view === "register" && (
+              <>
+                <div className="space-y-2">
+                  <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground font-heading">
+                    First Name
+                  </label>
+                  <Input
+                    type="text"
+                    placeholder="First Name"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    className="h-11 bg-secondary border-0 text-foreground placeholder:text-muted-foreground focus-visible:ring-primary"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground font-heading">
+                    Last Name
+                  </label>
+                  <Input
+                    type="text"
+                    placeholder="Last Name"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    className="h-11 bg-secondary border-0 text-foreground placeholder:text-muted-foreground focus-visible:ring-primary"
+                  />
+                </div>
+              </>
+            )}
+
             {/* Email */}
             <div className="space-y-2">
               <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground font-heading">
@@ -92,6 +196,35 @@ const Index = () => {
               )}
             </div>
 
+            {/* Register-only: DOB & Mobile */}
+            {view === "register" && (
+              <>
+                <div className="space-y-2">
+                  <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground font-heading">
+                    Date of Birth
+                  </label>
+                  <Input
+                    type="date"
+                    value={dateOfBirth}
+                    onChange={(e) => setDateOfBirth(e.target.value)}
+                    className="h-11 bg-secondary border-0 text-foreground placeholder:text-muted-foreground focus-visible:ring-primary"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground font-heading">
+                    Mobile Number
+                  </label>
+                  <Input
+                    type="tel"
+                    placeholder="Mobile Number"
+                    value={mobileNumber}
+                    onChange={(e) => setMobileNumber(e.target.value)}
+                    className="h-11 bg-secondary border-0 text-foreground placeholder:text-muted-foreground focus-visible:ring-primary"
+                  />
+                </div>
+              </>
+            )}
+
             {/* Help Toggle */}
             <div className="flex items-center gap-3 py-1">
               <Switch
@@ -128,7 +261,7 @@ const Index = () => {
                 <Globe size={12} className="mr-1 inline" />
                 Language
               </label>
-              <Select defaultValue="en-US">
+              <Select value={language} onValueChange={setLanguage}>
                 <SelectTrigger className="h-11 bg-secondary border-0 text-foreground">
                   <SelectValue />
                 </SelectTrigger>
@@ -144,8 +277,14 @@ const Index = () => {
 
           {/* Buttons */}
           <div className="mt-6 space-y-3">
-            <Button variant="glow" size="lg" className="w-full">
-              {view === "login" ? "Sign In" : "Register"}
+            <Button
+              variant="glow"
+              size="lg"
+              className="w-full"
+              disabled={loading}
+              onClick={view === "login" ? handleLogin : handleRegister}
+            >
+              {loading ? "Please wait..." : view === "login" ? "Sign In" : "Register"}
             </Button>
             <Button
               variant="outline"
