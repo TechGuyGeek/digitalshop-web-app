@@ -1,22 +1,57 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { LogOut, User, Mail, Phone, MapPin, Calendar } from "lucide-react";
+import { LogOut, User, Camera, Image, Save, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { type DigitalPerson } from "@/lib/api";
 import { toast } from "sonner";
 
 const Profile = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<DigitalPerson | null>(null);
+  const [form, setForm] = useState({
+    name: "",
+    surname: "",
+    gender: "",
+    mobileNumber: "",
+    lineOne: "",
+    lineTwo: "",
+    lineThree: "",
+    lineFour: "",
+    country: "",
+    deliveryNotes: "",
+  });
 
   useEffect(() => {
     const stored = localStorage.getItem("digitalUser");
     if (stored) {
-      setUser(JSON.parse(stored));
+      const parsed = JSON.parse(stored) as DigitalPerson;
+      setUser(parsed);
+      setForm({
+        name: (parsed.name || parsed.Name || "") as string,
+        surname: (parsed.surname || parsed.Surname || "") as string,
+        gender: ((parsed as any).Gender || "") as string,
+        mobileNumber: (parsed.MobileNumber || "") as string,
+        lineOne: ((parsed as any).LineOneAddress || "") as string,
+        lineTwo: ((parsed as any).LineTwoAddress || "") as string,
+        lineThree: ((parsed as any).LineThreeAddress || "") as string,
+        lineFour: ((parsed as any).LineFourAddress || "") as string,
+        country: ((parsed as any).LineCountryAddress || "") as string,
+        deliveryNotes: ((parsed as any).DeliveryNotes || "") as string,
+      });
     } else {
       navigate("/");
     }
   }, [navigate]);
+
+  const handleChange = (field: string, value: string) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSave = () => {
+    toast.success("Profile saved");
+    // TODO: POST updated profile to backend
+  };
 
   const handleLogout = () => {
     localStorage.removeItem("digitalUser");
@@ -24,77 +59,125 @@ const Profile = () => {
     navigate("/");
   };
 
+  const handleDeleteProfile = () => {
+    if (window.confirm("Are you sure you want to delete your profile? This cannot be undone.")) {
+      localStorage.removeItem("digitalUser");
+      toast.success("Profile deleted");
+      navigate("/");
+      // TODO: call backend delete endpoint
+    }
+  };
+
   if (!user) return null;
 
-  const displayName = `${user.name || user.Name || ""} ${user.surname || user.Surname || ""}`.trim();
-  const email = user.email || user.Email || "";
-  const mobile = user.MobileNumber || "";
-  const dob = user.DateofBirth || "";
   const imagePath = user.Imagepath
     ? `https://app.techguygeek.co.uk${user.Imagepath}`
     : null;
 
-  const addressLines = [
-    (user as any).LineOneAddress,
-    (user as any).LineTwoAddress,
-    (user as any).LineThreeAddress,
-    (user as any).LineFourAddress,
-    (user as any).LineCountryAddress,
-  ].filter(Boolean);
-
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-primary/5 blur-3xl" />
-      </div>
-
-      <div className="relative w-full max-w-md animate-fade-in">
-        <div className="mb-8 text-center">
+    <div className="min-h-screen bg-background">
+      {/* Header image area */}
+      <div className="relative w-full max-w-lg mx-auto pt-6 px-4">
+        <div className="w-full aspect-[4/3] rounded-xl overflow-hidden bg-card border border-border mb-4">
           {imagePath ? (
             <img
               src={imagePath}
-              alt={displayName}
-              className="mx-auto mb-4 h-20 w-20 rounded-full border-2 border-primary object-cover"
+              alt="Profile"
+              className="w-full h-full object-cover"
             />
           ) : (
-            <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-primary">
-              <User size={36} className="text-primary-foreground" />
+            <div className="w-full h-full flex items-center justify-center">
+              <User size={64} className="text-muted-foreground" />
             </div>
           )}
-          <h1 className="text-2xl font-bold text-foreground font-heading">
-            {displayName || "Your Profile"}
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">Welcome back!</p>
         </div>
 
-        <div className="rounded-2xl border border-border bg-card p-6 shadow-xl shadow-primary/5 space-y-4">
-          <InfoRow icon={<Mail size={16} />} label="Email" value={email} />
-          {mobile && <InfoRow icon={<Phone size={16} />} label="Mobile" value={mobile} />}
-          {dob && <InfoRow icon={<Calendar size={16} />} label="Date of Birth" value={dob} />}
-          {addressLines.length > 0 && (
-            <InfoRow icon={<MapPin size={16} />} label="Address" value={addressLines.join(", ")} />
-          )}
-
-          <div className="pt-4">
-            <Button variant="outline" className="w-full" onClick={handleLogout}>
-              <LogOut size={16} className="mr-2" />
-              Sign Out
-            </Button>
-          </div>
+        {/* Action buttons under image */}
+        <div className="flex justify-center gap-3 mb-6">
+          <Button size="sm" className="rounded-full px-5">
+            <Camera size={14} className="mr-1.5" />
+            Camera
+          </Button>
+          <Button size="sm" className="rounded-full px-5">
+            <Image size={14} className="mr-1.5" />
+            Gallery
+          </Button>
+          <Button size="sm" className="rounded-full px-5" onClick={handleSave}>
+            <Save size={14} className="mr-1.5" />
+            Save
+          </Button>
         </div>
+
+        {/* Title */}
+        <h1 className="text-lg font-bold text-foreground font-heading text-center mb-6">
+          Edit User Profile
+        </h1>
+
+        {/* Editable fields */}
+        <div className="space-y-4 mb-8">
+          <ProfileField label="Name" value={form.name} onChange={(v) => handleChange("name", v)} />
+          <ProfileField label="Last Name" value={form.surname} onChange={(v) => handleChange("surname", v)} />
+          <ProfileField label="Gender" value={form.gender} onChange={(v) => handleChange("gender", v)} />
+          <ProfileField label="Mobile Number" value={form.mobileNumber} onChange={(v) => handleChange("mobileNumber", v)} />
+          <ProfileField label="1st line Address" value={form.lineOne} onChange={(v) => handleChange("lineOne", v)} />
+          <ProfileField label="2nd line Address" value={form.lineTwo} onChange={(v) => handleChange("lineTwo", v)} />
+          <ProfileField label="3rd line Address" value={form.lineThree} onChange={(v) => handleChange("lineThree", v)} />
+          <ProfileField label="4th line Address" value={form.lineFour} onChange={(v) => handleChange("lineFour", v)} />
+          <ProfileField label="Country" value={form.country} onChange={(v) => handleChange("country", v)} />
+          <ProfileField label="Delivery Notes" value={form.deliveryNotes} onChange={(v) => handleChange("deliveryNotes", v)} />
+        </div>
+
+        {/* Delete profile */}
+        <Button
+          variant="destructive"
+          className="w-full mb-4 rounded-full font-semibold"
+          onClick={handleDeleteProfile}
+        >
+          <Trash2 size={16} className="mr-2" />
+          DELETE YOUR PROFILE
+        </Button>
+
+        {/* Bottom action buttons */}
+        <div className="flex gap-2 mb-6">
+          <Button variant="secondary" className="flex-1 rounded-full text-sm">
+            Build Shop
+          </Button>
+          <Button variant="secondary" className="flex-1 rounded-full text-sm">
+            View Shops
+          </Button>
+          <Button variant="secondary" className="flex-1 rounded-full text-sm">
+            Orders
+          </Button>
+        </div>
+
+        {/* Sign out */}
+        <Button variant="outline" className="w-full mb-8 rounded-full" onClick={handleLogout}>
+          <LogOut size={16} className="mr-2" />
+          Sign Out
+        </Button>
       </div>
     </div>
   );
 };
 
-const InfoRow = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) => (
-  <div className="flex items-start gap-3">
-    <span className="mt-0.5 text-muted-foreground">{icon}</span>
-    <div>
-      <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground font-heading">{label}</p>
-      <p className="text-sm text-foreground">{value}</p>
-    </div>
+const ProfileField = ({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+}) => (
+  <div>
+    <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground font-heading mb-1 block">
+      {label}
+    </label>
+    <Input
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="border-0 border-b border-border rounded-none bg-transparent px-0 focus-visible:ring-0 focus-visible:border-primary"
+    />
   </div>
 );
 
