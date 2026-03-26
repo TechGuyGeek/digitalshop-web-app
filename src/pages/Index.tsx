@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Globe, Palette, HelpCircle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +15,7 @@ import { loginUser, registerUser, type DigitalPerson } from "@/lib/api";
 import { toast } from "sonner";
 
 const Index = () => {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -38,8 +40,8 @@ const Index = () => {
       const user = await loginUser(email, password);
       if (user && (user.Email || user.email)) {
         toast.success(`Welcome back, ${user.Name || user.name || user.Email || user.email}!`);
-        // Store user session
         localStorage.setItem("digitalUser", JSON.stringify(user));
+        navigate("/profile");
       } else {
         toast.error("Invalid email or password");
       }
