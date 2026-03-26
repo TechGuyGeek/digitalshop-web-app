@@ -1,16 +1,29 @@
 const SERVER_DOMAIN = "https://app.techguygeek.co.uk/";
 
 export interface DigitalPerson {
-  PersonID?: string;
+  PersonID?: number | string;
   Name?: string;
+  name?: string;
   Surname?: string;
+  surname?: string;
   Email?: string;
+  email?: string;
   Password?: string;
+  password?: string;
   DateofBirth?: string;
   MobileNumber?: string;
   PaidUser?: string;
+  Paiduser?: string;
   ID?: string;
   Token?: string;
+  ServerMessage?: string;
+  imagename?: string;
+  Imagepath?: string;
+  hash?: string;
+  active?: number;
+  LastLoggedOn?: string;
+  PurchaseStated?: string;
+  [key: string]: unknown; // allow additional fields
 }
 
 export async function loginUser(email: string, password: string): Promise<DigitalPerson | null> {
