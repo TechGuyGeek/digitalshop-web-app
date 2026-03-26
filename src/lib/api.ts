@@ -28,13 +28,25 @@ export async function loginUser(email: string, password: string): Promise<Digita
 
   const text = await response.text();
 
-  if (!text || text === "User with that email doesn't exist!") {
+  if (!text) {
     return null;
   }
 
   try {
-    return JSON.parse(text) as DigitalPerson;
+    const parsed = JSON.parse(text);
+    
+    // Handle server error messages (e.g. {"ServerMessage":"User with that email doesn't exist!"})
+    if (parsed.ServerMessage) {
+      console.warn("Server message:", parsed.ServerMessage);
+      return null;
+    }
+    
+    return parsed as DigitalPerson;
   } catch {
+    // If not JSON, check for plain text error
+    if (text.includes("doesn't exist") || text.includes("error")) {
+      return null;
+    }
     console.error("Login parse error:", text);
     return null;
   }
