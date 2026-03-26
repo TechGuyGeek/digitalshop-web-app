@@ -48,7 +48,12 @@ export async function loginUser(email: string, password: string): Promise<Digita
   try {
     const parsed = JSON.parse(text);
     
-    // Handle server error messages (e.g. {"ServerMessage":"User with that email doesn't exist!"})
+    // "Success" means valid login — return the user object
+    if (parsed.ServerMessage === "Success") {
+      return parsed as DigitalPerson;
+    }
+
+    // Any other ServerMessage is an error
     if (parsed.ServerMessage) {
       console.warn("Server message:", parsed.ServerMessage);
       return null;
