@@ -15,6 +15,7 @@ import { loginUser, registerUser, type DigitalPerson } from "@/lib/api";
 import { toast } from "sonner";
 
 const Index = () => {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
