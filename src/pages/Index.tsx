@@ -40,8 +40,8 @@ const Index = () => {
       const user = await loginUser(email, password);
       if (user && (user.Email || user.email)) {
         toast.success(`Welcome back, ${user.Name || user.name || user.Email || user.email}!`);
-        // Store user session
         localStorage.setItem("digitalUser", JSON.stringify(user));
+        navigate("/profile");
       } else {
         toast.error("Invalid email or password");
       }
