@@ -36,8 +36,8 @@ const Index = () => {
     setLoading(true);
     try {
       const user = await loginUser(email, password);
-      if (user && user.Email) {
-        toast.success(`Welcome back, ${user.Name || user.Email}!`);
+      if (user && (user.Email || user.email)) {
+        toast.success(`Welcome back, ${user.Name || user.name || user.Email || user.email}!`);
         // Store user session
         localStorage.setItem("digitalUser", JSON.stringify(user));
       } else {
