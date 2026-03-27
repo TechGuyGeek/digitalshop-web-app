@@ -1,29 +1,39 @@
 /// <reference types="google.maps" />
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface GoogleMapProps {
   className?: string;
   shops?: { name: string; icon: string; lat?: number; lng?: number }[];
 }
 
+const MAPS_KEY = "AIzaSyAN76Tb-dL_5pvp-w1iFhxWqI52sDnoz5c";
+
 const GoogleMap = ({ className = "", shops = [] }: GoogleMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
+  const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null);
+  const [locating, setLocating] = useState(true);
+
+  // Get user GPS
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setUserPos({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+          setLocating(false);
+        },
+        () => setLocating(false),
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    } else {
+      setLocating(false);
+    }
+  }, []);
 
   useEffect(() => {
-    if (!mapRef.current) return;
+    if (locating || !mapRef.current) return;
 
-    const loadGoogleMaps = () => {
-      if ((window as any).google?.maps) {
-        initMap();
-        return;
-      }
-      const script = document.createElement("script");
-      script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAN76Tb-dL_5pvp-w1iFhxWqI52sDnoz5c&callback=Function.prototype`;
-      script.async = true;
-      script.onload = () => initMap();
-      document.head.appendChild(script);
-    };
+    const center = userPos || { lat: 53.3498, lng: -6.2603 };
 
     const initMap = () => {
       if (!(window as any).google?.maps) {
@@ -31,11 +41,9 @@ const GoogleMap = ({ className = "", shops = [] }: GoogleMapProps) => {
         return;
       }
 
-      const center = { lat: 53.3498, lng: -6.2603 }; // Dublin default
-
       const map = new google.maps.Map(mapRef.current!, {
         center,
-        zoom: 13,
+        zoom: 14,
         disableDefaultUI: true,
         zoomControl: true,
         styles: [
@@ -45,7 +53,24 @@ const GoogleMap = ({ className = "", shops = [] }: GoogleMapProps) => {
 
       mapInstanceRef.current = map;
 
-      // Add markers for shops that have coordinates
+      // User location marker
+      if (userPos) {
+        new google.maps.Marker({
+          position: userPos,
+          map,
+          title: "You are here",
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 8,
+            fillColor: "#4285F4",
+            fillOpacity: 1,
+            strokeColor: "#fff",
+            strokeWeight: 2,
+          },
+        });
+      }
+
+      // Shop markers
       shops.forEach((shop) => {
         if (shop.lat && shop.lng) {
           new google.maps.Marker({
@@ -58,10 +83,26 @@ const GoogleMap = ({ className = "", shops = [] }: GoogleMapProps) => {
       });
     };
 
-    loadGoogleMaps();
-  }, [shops]);
+    if ((window as any).google?.maps) {
+      initMap();
+    } else {
+      const script = document.createElement("script");
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${MAPS_KEY}&callback=Function.prototype`;
+      script.async = true;
+      script.onload = () => initMap();
+      document.head.appendChild(script);
+    }
+  }, [locating, userPos, shops]);
 
-  return <div ref={mapRef} className={className} />;
+  return (
+    <div ref={mapRef} className={className}>
+      {locating && (
+        <div className="flex items-center justify-center h-full bg-muted text-muted-foreground text-sm">
+          Finding your location…
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default GoogleMap;
