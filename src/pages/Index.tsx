@@ -107,16 +107,12 @@ const Index = () => {
         )}
 
         {/* Header */}
-        <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold text-foreground font-heading">
-            {view === "login" ? "Sign In" : "Create Account"}
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {view === "login"
-              ? "Sign in to continue"
-              : "Register for a new account"}
-          </p>
-        </div>
+        {view === "register" && (
+          <div className="mb-8 text-center">
+            <h1 className="text-2xl font-bold text-foreground font-heading">Create Account</h1>
+            <p className="mt-1 text-sm text-muted-foreground">Register for a new account</p>
+          </div>
+        )}
 
         {/* Card */}
         <div className="rounded-2xl border border-border bg-card p-6 shadow-xl shadow-primary/5">
