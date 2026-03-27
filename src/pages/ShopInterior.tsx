@@ -6,7 +6,7 @@ import { useBasket } from "@/contexts/BasketContext";
 const ShopInterior = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { count } = useBasket();
+  const { count, clearBasket } = useBasket();
 
   const shopName = searchParams.get("name") || "Shop";
 
