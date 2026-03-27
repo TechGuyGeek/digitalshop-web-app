@@ -15,6 +15,7 @@ import ShopProfile from "./pages/ShopProfile.tsx";
 import ShopInterior from "./pages/ShopInterior.tsx";
 import CategoryItems from "./pages/CategoryItems.tsx";
 import Basket from "./pages/Basket.tsx";
+import Orders from "./pages/Orders.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
