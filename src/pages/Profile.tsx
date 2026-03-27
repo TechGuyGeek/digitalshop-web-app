@@ -147,7 +147,7 @@ const Profile = () => {
 
         {/* Bottom action buttons */}
         <div className="flex gap-2 mb-6">
-          <Button variant="secondary" className="flex-1 rounded-full text-sm">
+          <Button variant="secondary" className="flex-1 rounded-full text-sm" onClick={() => navigate("/build-shop")}>
             Build Shop
           </Button>
           <Button variant="secondary" className="flex-1 rounded-full text-sm" onClick={() => navigate("/view-shops")}>
