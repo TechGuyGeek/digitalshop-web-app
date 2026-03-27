@@ -3,10 +3,10 @@ import { ArrowLeft, Store, Globe, CreditCard, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const shopCategories = [
-  { label: "View Free Shops", icon: Store, description: "Browse shops with no subscription fee" },
-  { label: "View Paid Shops", icon: CreditCard, description: "Premium shops with advanced features" },
-  { label: "View Global Shops", icon: Globe, description: "Explore shops from around the world" },
-  { label: "QR Code Scanner", icon: QrCode, description: "Scan a shop's QR code to visit instantly" },
+  { label: "View Free Shops", icon: Store, description: "Browse shops with no subscription fee", path: "/free-shops" },
+  { label: "View Paid Shops", icon: CreditCard, description: "Premium shops with advanced features", path: "/paid-shops" },
+  { label: "View Global Shops", icon: Globe, description: "Explore shops from around the world", path: "/global-shops" },
+  { label: "QR Code Scanner", icon: QrCode, description: "Scan a shop's QR code to visit instantly", path: "" },
 ];
 
 const ViewShops = () => {
@@ -37,7 +37,7 @@ const ViewShops = () => {
               key={cat.label}
               className="w-full group relative overflow-hidden rounded-xl border border-border bg-card p-4 text-left transition-all hover:border-primary hover:shadow-lg hover:shadow-primary/10 active:scale-[0.98]"
               onClick={() => {
-                // TODO: navigate to specific shop list
+                if (cat.path) navigate(cat.path);
               }}
             >
               <div className="flex items-center gap-4">
