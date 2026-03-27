@@ -106,13 +106,10 @@ const Index = () => {
           </button>
         )}
 
-        {/* Logo / Brand */}
+        {/* Header */}
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary animate-glow-pulse">
-            <span className="text-2xl font-bold text-primary-foreground font-heading">L</span>
-          </div>
           <h1 className="text-2xl font-bold text-foreground font-heading">
-            {view === "login" ? "Welcome Back" : "Create Account"}
+            {view === "login" ? "Sign In" : "Create Account"}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {view === "login"
