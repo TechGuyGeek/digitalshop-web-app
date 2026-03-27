@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 const Basket = () => {
   const navigate = useNavigate();
+  const [tableNumber, setTableNumber] = useState<string>("");
   const [searchParams] = useSearchParams();
   const shopName = searchParams.get("shop") || "Shop";
   const { items, count, total, removeItem, clearItem } = useBasket();
