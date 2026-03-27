@@ -37,7 +37,7 @@ const ViewShops = () => {
               key={cat.label}
               className="w-full group relative overflow-hidden rounded-xl border border-border bg-card p-4 text-left transition-all hover:border-primary hover:shadow-lg hover:shadow-primary/10 active:scale-[0.98]"
               onClick={() => {
-                // TODO: navigate to specific shop list
+                if (cat.path) navigate(cat.path);
               }}
             >
               <div className="flex items-center gap-4">
