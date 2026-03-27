@@ -25,6 +25,9 @@ const App = () => (
           <Route path="/profile" element={<Profile />} />
           <Route path="/oauth-callback" element={<OAuthCallback />} />
           <Route path="/view-shops" element={<ViewShops />} />
+          <Route path="/free-shops" element={<FreeShops />} />
+          <Route path="/paid-shops" element={<PaidShops />} />
+          <Route path="/global-shops" element={<GlobalShops />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
