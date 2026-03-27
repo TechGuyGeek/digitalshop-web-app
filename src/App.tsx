@@ -29,6 +29,7 @@ const App = () => (
           <Route path="/free-shops" element={<FreeShops />} />
           <Route path="/paid-shops" element={<PaidShops />} />
           <Route path="/global-shops" element={<GlobalShops />} />
+          <Route path="/shop-profile" element={<ShopProfile />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
