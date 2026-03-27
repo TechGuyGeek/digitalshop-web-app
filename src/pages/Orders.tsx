@@ -42,7 +42,7 @@ const Orders = () => {
           variant="ghost"
           size="icon"
           className="text-primary-foreground hover:bg-primary/80"
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/profile")}
         >
           <ArrowLeft size={20} />
         </Button>
