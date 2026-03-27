@@ -14,7 +14,7 @@ const GoogleMap = ({ className = "", shops = [] }: GoogleMapProps) => {
     if (!mapRef.current) return;
 
     const initMap = () => {
-      if (!window.google?.maps) {
+      if (!(window as any).google?.maps) {
         setTimeout(initMap, 200);
         return;
       }
