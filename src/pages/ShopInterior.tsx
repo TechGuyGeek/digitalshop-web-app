@@ -6,7 +6,7 @@ import { useBasket } from "@/contexts/BasketContext";
 const ShopInterior = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { count } = useBasket();
+  const { count, clearBasket } = useBasket();
 
   const shopName = searchParams.get("name") || "Shop";
 
@@ -25,7 +25,10 @@ const ShopInterior = () => {
           variant="ghost"
           size="icon"
           className="text-primary-foreground hover:bg-primary/80"
-          onClick={() => navigate(-1)}
+          onClick={() => {
+            clearBasket();
+            navigate(`/shop-profile?name=${encodeURIComponent(shopName)}`);
+          }}
         >
           <ArrowLeft size={20} />
         </Button>
