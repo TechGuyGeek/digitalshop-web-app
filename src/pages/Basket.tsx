@@ -115,8 +115,20 @@ const Basket = () => {
       </div>
 
       {/* Table Number placeholder */}
-      <div className="bg-card border-t border-border px-4 py-3">
+      <div className="bg-card border-t border-border px-4 py-3 shrink-0 flex items-center justify-between">
         <p className="text-muted-foreground text-sm font-medium">Table Number</p>
+        <Select value={tableNumber} onValueChange={setTableNumber}>
+          <SelectTrigger className="w-28 h-9 rounded-full">
+            <SelectValue placeholder="Select" />
+          </SelectTrigger>
+          <SelectContent className="max-h-60">
+            {Array.from({ length: 501 }, (_, i) => (
+              <SelectItem key={i} value={String(i)}>
+                {i}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Order type buttons */}
