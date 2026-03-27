@@ -11,6 +11,7 @@ import FreeShops from "./pages/FreeShops.tsx";
 import PaidShops from "./pages/PaidShops.tsx";
 import GlobalShops from "./pages/GlobalShops.tsx";
 import ShopProfile from "./pages/ShopProfile.tsx";
+import ShopInterior from "./pages/ShopInterior.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
