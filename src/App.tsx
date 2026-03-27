@@ -10,6 +10,7 @@ import ViewShops from "./pages/ViewShops.tsx";
 import FreeShops from "./pages/FreeShops.tsx";
 import PaidShops from "./pages/PaidShops.tsx";
 import GlobalShops from "./pages/GlobalShops.tsx";
+import ShopProfile from "./pages/ShopProfile.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/free-shops" element={<FreeShops />} />
           <Route path="/paid-shops" element={<PaidShops />} />
           <Route path="/global-shops" element={<GlobalShops />} />
+          <Route path="/shop-profile" element={<ShopProfile />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

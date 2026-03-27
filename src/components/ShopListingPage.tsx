@@ -88,18 +88,24 @@ const ShopListingPage = ({ title, shops = placeholderShops }: ShopListingPagePro
   );
 };
 
-const ShopList = ({ shops }: { shops: { name: string; icon: string }[] }) => (
-  <div className="divide-y divide-border">
-    {shops.map((shop, i) => (
-      <button
-        key={i}
-        className="w-full flex items-center gap-4 px-6 py-4 text-left hover:bg-accent/50 transition-colors"
-      >
-        <span className="text-2xl">{shop.icon}</span>
-        <span className="text-sm font-medium text-foreground">{shop.name}</span>
-      </button>
-    ))}
-  </div>
-);
+const ShopList = ({ shops }: { shops: { name: string; icon: string }[] }) => {
+  const navigate = useNavigate();
+  return (
+    <div className="divide-y divide-border">
+      {shops.map((shop, i) => (
+        <button
+          key={i}
+          className="w-full flex items-center gap-4 px-6 py-4 text-left hover:bg-accent/50 transition-colors"
+          onClick={() =>
+            navigate(`/shop-profile?name=${encodeURIComponent(shop.name)}&icon=${encodeURIComponent(shop.icon)}`)
+          }
+        >
+          <span className="text-2xl">{shop.icon}</span>
+          <span className="text-sm font-medium text-foreground">{shop.name}</span>
+        </button>
+      ))}
+    </div>
+  );
+};
 
 export default ShopListingPage;
