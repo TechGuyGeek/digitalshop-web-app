@@ -70,9 +70,17 @@ const Profile = () => {
 
   if (!user) return null;
 
-  const imagePath = user.Imagepath
-    ? `https://app.techguygeek.co.uk${user.Imagepath}`
-    : null;
+  const imagePath = (() => {
+    const raw = user.Imagepath as string | undefined;
+    if (!raw) return null;
+    if (raw.startsWith("http://") || raw.startsWith("https://")) return raw;
+    // Normalize: ensure path is under /menu1/Images/...
+    const base = "https://app.techguygeek.co.uk";
+    const cleaned = raw.replace(/^\/+/, "");
+    // If path starts with "Images/", prepend menu1/
+    const fullPath = cleaned.startsWith("menu1/") ? cleaned : `menu1/${cleaned}`;
+    return `${base}/${fullPath}`;
+  })();
 
   return (
     <div className="min-h-screen bg-background">
