@@ -79,9 +79,9 @@ const ShopProfile = () => {
         <Button
           variant="outline"
           className="rounded-full px-6"
-          onClick={() => {
-            /* Enter shop — will be wired later */
-          }}
+          onClick={() =>
+            navigate(`/shop-interior?name=${encodeURIComponent(shopName)}`)
+          }
         >
           Enter Shop
         </Button>
