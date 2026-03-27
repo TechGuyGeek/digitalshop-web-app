@@ -228,15 +228,23 @@ const CompanyProfile = () => {
             <Button variant="secondary" className="w-full rounded-md">
               QR Code Generator
             </Button>
-            <Button variant="outline" className="w-full rounded-md">
+            <Button variant="outline" className="w-full rounded-md" onClick={() => setMarkerPickerOpen(true)}>
               Choose a Map Marker
             </Button>
           </div>
 
-          {/* Map marker preview placeholder */}
-          <div className="flex justify-center py-4">
-            <span className="text-6xl">🧸</span>
+          {/* Map marker preview */}
+          <div className="flex flex-col items-center py-4">
+            <span className="text-6xl">{selectedMarker.emoji}</span>
+            <span className="text-xs font-bold text-muted-foreground mt-1">{selectedMarker.label}</span>
           </div>
+
+          <MapMarkerPicker
+            open={markerPickerOpen}
+            onOpenChange={setMarkerPickerOpen}
+            selected={selectedMarker.emoji}
+            onSelect={(emoji, label) => setSelectedMarker({ emoji, label })}
+          />
 
           {/* Update GPS */}
           <Button variant="secondary" className="w-full rounded-md">
