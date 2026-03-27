@@ -14,6 +14,8 @@ interface BasketContextType {
   count: number;
   total: number;
   addItem: (product: Omit<BasketItem, "quantity">) => void;
+  removeItem: (id: number) => void;
+  clearItem: (id: number) => void;
   clearBasket: () => void;
 }
 
