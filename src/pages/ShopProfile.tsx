@@ -43,7 +43,7 @@ const ShopProfile = () => {
       </div>
 
       {/* Shop image / placeholder */}
-      <div className="w-full aspect-video bg-card flex items-center justify-center overflow-hidden">
+      <div className="w-full h-48 bg-card flex items-center justify-center overflow-hidden">
         {shop.image ? (
           <img
             src={shop.image}
@@ -51,7 +51,7 @@ const ShopProfile = () => {
             className="w-full h-full object-cover"
           />
         ) : (
-          <span className="text-7xl">{shop.icon}</span>
+          <span className="text-5xl">{shop.icon}</span>
         )}
       </div>
 
