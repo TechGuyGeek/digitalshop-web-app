@@ -147,7 +147,11 @@ const Profile = () => {
 
         {/* Bottom action buttons */}
         <div className="flex gap-2 mb-6">
-          <Button variant="secondary" className="flex-1 rounded-full text-sm" onClick={() => navigate("/build-shop")}>
+          <Button variant="secondary" className="flex-1 rounded-full text-sm" onClick={() => {
+            // TODO: Check via PHP if user has a shop. For now check localStorage flag.
+            const hasShop = localStorage.getItem("hasShop") === "true";
+            navigate(hasShop ? "/company-profile" : "/build-shop");
+          }}>
             Build Shop
           </Button>
           <Button variant="secondary" className="flex-1 rounded-full text-sm" onClick={() => navigate("/view-shops")}>
