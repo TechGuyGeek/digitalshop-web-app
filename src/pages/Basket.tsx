@@ -117,7 +117,7 @@ const Basket = () => {
       </div>
 
       {/* Order type buttons */}
-      <div className="absolute bottom-0 left-0 right-0 bg-card border-t border-border px-4 py-4 flex items-center justify-between gap-3">
+      <div className="bg-card border-t border-border px-4 py-4 flex items-center justify-between gap-3 shrink-0">
         <Button variant="outline" className="flex-1 rounded-full">
           Take Away
         </Button>
