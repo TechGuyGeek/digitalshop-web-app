@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, MapPin, List, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import GoogleMap from "@/components/GoogleMap";
 
 interface ShopListingPageProps {
   title: string;
@@ -65,21 +66,13 @@ const ShopListingPage = ({ title, shops = placeholderShops }: ShopListingPagePro
       <div className="flex-1 flex flex-col">
         {activeTab === "hybrid" && (
           <>
-            {/* Map placeholder */}
-            <div className="h-56 bg-muted flex items-center justify-center text-muted-foreground text-sm">
-              <MapPin size={24} className="mr-2 opacity-50" />
-              Map will appear here
-            </div>
-            {/* Shop list */}
+            <GoogleMap className="h-56 w-full" shops={shops} />
             <ShopList shops={shops} />
           </>
         )}
 
         {activeTab === "map" && (
-          <div className="flex-1 bg-muted flex items-center justify-center text-muted-foreground text-sm">
-            <MapPin size={24} className="mr-2 opacity-50" />
-            Full map will appear here
-          </div>
+          <GoogleMap className="flex-1 min-h-[400px] w-full" shops={shops} />
         )}
 
         {activeTab === "list" && <ShopList shops={shops} />}
