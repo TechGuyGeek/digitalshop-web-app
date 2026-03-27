@@ -34,6 +34,8 @@ const CompanyProfile = () => {
   });
 
   const [shopImage, setShopImage] = useState<string>("");
+  const [markerPickerOpen, setMarkerPickerOpen] = useState(false);
+  const [selectedMarker, setSelectedMarker] = useState({ emoji: "🧸", label: "TOYS ICON" });
 
   useEffect(() => {
     // TODO: Fetch company profile from PHP backend
