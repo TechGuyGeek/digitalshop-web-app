@@ -1,7 +1,7 @@
-import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, ShoppingBasket } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useBasket } from "@/contexts/BasketContext";
 
 interface Product {
   id: number;
@@ -17,7 +17,7 @@ const CategoryItems = () => {
   const shopName = searchParams.get("shop") || "Shop";
   const category = searchParams.get("category") || "Items";
 
-  const [basketCount, setBasketCount] = useState(0);
+  const { count, addItem } = useBasket();
 
   // Placeholder products — will be replaced with PHP API data later
   const products: Product[] = [
@@ -45,8 +45,7 @@ const CategoryItems = () => {
   ];
 
   const handleAddToBasket = (product: Product) => {
-    setBasketCount((prev) => prev + 1);
-    // TODO: wire to basket state/context later
+    addItem(product);
   };
 
   return (
@@ -110,15 +109,9 @@ const CategoryItems = () => {
 
       {/* Basket bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border px-6 py-4 flex items-center justify-center">
-        <Button
-          variant="default"
-          className="rounded-full px-8 gap-2"
-          onClick={() => {
-            /* Navigate to basket — will be wired later */
-          }}
-        >
+        <Button variant="default" className="rounded-full px-8 gap-2">
           <ShoppingBasket size={18} />
-          Basket {basketCount}
+          Basket {count}
         </Button>
       </div>
     </div>

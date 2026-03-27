@@ -1,10 +1,12 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ShoppingBasket } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useBasket } from "@/contexts/BasketContext";
 
 const ShopInterior = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { count } = useBasket();
 
   const shopName = searchParams.get("name") || "Shop";
 
@@ -48,6 +50,16 @@ const ShopInterior = () => {
           </button>
         ))}
       </div>
+
+      {/* Basket bar */}
+      {count > 0 && (
+        <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border px-6 py-4 flex items-center justify-center">
+          <Button variant="default" className="rounded-full px-8 gap-2">
+            <ShoppingBasket size={18} />
+            Basket {count}
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

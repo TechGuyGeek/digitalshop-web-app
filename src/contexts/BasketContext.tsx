@@ -1,0 +1,53 @@
+import { createContext, useContext, useState, ReactNode } from "react";
+
+export interface BasketItem {
+  id: number;
+  name: string;
+  price: number;
+  description: string;
+  image: string;
+  quantity: number;
+}
+
+interface BasketContextType {
+  items: BasketItem[];
+  count: number;
+  total: number;
+  addItem: (product: Omit<BasketItem, "quantity">) => void;
+  clearBasket: () => void;
+}
+
+const BasketContext = createContext<BasketContextType | undefined>(undefined);
+
+export const BasketProvider = ({ children }: { children: ReactNode }) => {
+  const [items, setItems] = useState<BasketItem[]>([]);
+
+  const count = items.reduce((sum, i) => sum + i.quantity, 0);
+  const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+
+  const addItem = (product: Omit<BasketItem, "quantity">) => {
+    setItems((prev) => {
+      const existing = prev.find((i) => i.id === product.id);
+      if (existing) {
+        return prev.map((i) =>
+          i.id === product.id ? { ...i, quantity: i.quantity + 1 } : i
+        );
+      }
+      return [...prev, { ...product, quantity: 1 }];
+    });
+  };
+
+  const clearBasket = () => setItems([]);
+
+  return (
+    <BasketContext.Provider value={{ items, count, total, addItem, clearBasket }}>
+      {children}
+    </BasketContext.Provider>
+  );
+};
+
+export const useBasket = () => {
+  const ctx = useContext(BasketContext);
+  if (!ctx) throw new Error("useBasket must be used within BasketProvider");
+  return ctx;
+};
