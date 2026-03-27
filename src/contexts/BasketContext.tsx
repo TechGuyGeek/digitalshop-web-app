@@ -14,6 +14,8 @@ interface BasketContextType {
   count: number;
   total: number;
   addItem: (product: Omit<BasketItem, "quantity">) => void;
+  removeItem: (id: number) => void;
+  clearItem: (id: number) => void;
   clearBasket: () => void;
 }
 
@@ -52,10 +54,20 @@ export const BasketProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
+  const removeItem = (id: number) => {
+    setItems((prev) => prev.filter((i) => i.id !== id));
+  };
+
+  const clearItem = (id: number) => {
+    setItems((prev) =>
+      prev.map((i) => (i.id === id ? { ...i, quantity: 1 } : i))
+    );
+  };
+
   const clearBasket = () => setItems([]);
 
   return (
-    <BasketContext.Provider value={{ items, count, total, addItem, clearBasket }}>
+    <BasketContext.Provider value={{ items, count, total, addItem, removeItem, clearItem, clearBasket }}>
       {children}
     </BasketContext.Provider>
   );
