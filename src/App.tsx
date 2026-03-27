@@ -7,6 +7,9 @@ import Index from "./pages/Index.tsx";
 import Profile from "./pages/Profile.tsx";
 import OAuthCallback from "./pages/OAuthCallback.tsx";
 import ViewShops from "./pages/ViewShops.tsx";
+import FreeShops from "./pages/FreeShops.tsx";
+import PaidShops from "./pages/PaidShops.tsx";
+import GlobalShops from "./pages/GlobalShops.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
