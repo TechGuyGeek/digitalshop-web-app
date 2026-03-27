@@ -38,9 +38,11 @@ const ShopInterior = () => {
           <button
             key={cat.name}
             className="w-full py-5 text-center text-foreground font-bold text-lg uppercase tracking-wide border-b border-border bg-card hover:bg-accent/50 transition-colors"
-            onClick={() => {
-              /* Navigate to category — will be wired later */
-            }}
+            onClick={() =>
+              navigate(
+                `/category-items?shop=${encodeURIComponent(shopName)}&category=${encodeURIComponent(cat.name)}`
+              )
+            }
           >
             {cat.name}
           </button>
