@@ -16,6 +16,7 @@ import ShopInterior from "./pages/ShopInterior.tsx";
 import CategoryItems from "./pages/CategoryItems.tsx";
 import Basket from "./pages/Basket.tsx";
 import Orders from "./pages/Orders.tsx";
+import BuildShop from "./pages/BuildShop.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -42,6 +43,7 @@ const App = () => (
                 <Route path="/category-items" element={<CategoryItems />} />
                 <Route path="/basket" element={<Basket />} />
                 <Route path="/orders" element={<Orders />} />
+                <Route path="/build-shop" element={<BuildShop />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
