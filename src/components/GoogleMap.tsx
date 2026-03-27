@@ -58,7 +58,7 @@ const GoogleMap = ({ className = "", shops = [] }: GoogleMapProps) => {
       });
     };
 
-    initMap();
+    loadGoogleMaps();
   }, [shops]);
 
   return <div ref={mapRef} className={className} />;
