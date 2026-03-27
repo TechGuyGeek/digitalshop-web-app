@@ -10,7 +10,7 @@ const Basket = () => {
   const { items, count, total, removeItem, clearItem } = useBasket();
 
   return (
-    <div className="min-h-screen bg-muted flex flex-col max-w-md mx-auto w-full">
+    <div className="h-screen bg-muted flex flex-col max-w-md mx-auto w-full">
       {/* Header */}
       <div className="bg-primary px-4 py-4 flex items-center gap-3">
         <Button
