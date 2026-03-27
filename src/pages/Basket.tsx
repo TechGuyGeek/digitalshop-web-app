@@ -39,7 +39,7 @@ const Basket = () => {
       </div>
 
       {/* Item list */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-6 pb-24">
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-6">
         {items.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
             <span className="text-4xl mb-4">🛒</span>
