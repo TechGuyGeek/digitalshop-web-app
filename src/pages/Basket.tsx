@@ -133,13 +133,13 @@ const Basket = () => {
 
       {/* Order type buttons */}
       <div className="bg-card border-t border-border px-4 py-4 flex items-center justify-between gap-3 shrink-0">
-        <Button variant="outline" className="flex-1 rounded-full">
+        <Button variant="outline" className="flex-1 rounded-full" onClick={() => navigate("/orders")}>
           Take Away
         </Button>
-        <Button variant="outline" className="flex-1 rounded-full">
+        <Button variant="outline" className="flex-1 rounded-full" onClick={() => navigate("/orders")}>
           On Site
         </Button>
-        <Button variant="outline" className="flex-1 rounded-full">
+        <Button variant="outline" className="flex-1 rounded-full" onClick={() => navigate("/orders")}>
           Deliver
         </Button>
       </div>
