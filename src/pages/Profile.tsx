@@ -153,7 +153,7 @@ const Profile = () => {
           <Button variant="secondary" className="flex-1 rounded-full text-sm" onClick={() => navigate("/view-shops")}>
             View Shops
           </Button>
-          <Button variant="secondary" className="flex-1 rounded-full text-sm">
+          <Button variant="secondary" className="flex-1 rounded-full text-sm" onClick={() => navigate("/orders")}>
             Orders
           </Button>
         </div>
