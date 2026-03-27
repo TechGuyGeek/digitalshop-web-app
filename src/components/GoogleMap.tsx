@@ -19,7 +19,7 @@ const GoogleMap = ({ className = "", shops = [] }: GoogleMapProps) => {
         return;
       }
       const script = document.createElement("script");
-      script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyC2FqDdFRLWpEeGLijR2zN8b2Ue-AeWgbo&callback=Function.prototype`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ""}&callback=Function.prototype`;
       script.async = true;
       script.onload = () => initMap();
       document.head.appendChild(script);
