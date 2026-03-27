@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Camera, Image as ImageIcon, Save, Trash2 } from "lucide-react";
+import MapMarkerPicker from "@/components/MapMarkerPicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -33,6 +34,8 @@ const CompanyProfile = () => {
   });
 
   const [shopImage, setShopImage] = useState<string>("");
+  const [markerPickerOpen, setMarkerPickerOpen] = useState(false);
+  const [selectedMarker, setSelectedMarker] = useState({ emoji: "🧸", label: "TOYS ICON" });
 
   useEffect(() => {
     // TODO: Fetch company profile from PHP backend
@@ -225,15 +228,23 @@ const CompanyProfile = () => {
             <Button variant="secondary" className="w-full rounded-md">
               QR Code Generator
             </Button>
-            <Button variant="outline" className="w-full rounded-md">
+            <Button variant="outline" className="w-full rounded-md" onClick={() => setMarkerPickerOpen(true)}>
               Choose a Map Marker
             </Button>
           </div>
 
-          {/* Map marker preview placeholder */}
-          <div className="flex justify-center py-4">
-            <span className="text-6xl">🧸</span>
+          {/* Map marker preview */}
+          <div className="flex flex-col items-center py-4">
+            <span className="text-6xl">{selectedMarker.emoji}</span>
+            <span className="text-xs font-bold text-muted-foreground mt-1">{selectedMarker.label}</span>
           </div>
+
+          <MapMarkerPicker
+            open={markerPickerOpen}
+            onOpenChange={setMarkerPickerOpen}
+            selected={selectedMarker.emoji}
+            onSelect={(emoji, label) => setSelectedMarker({ emoji, label })}
+          />
 
           {/* Update GPS */}
           <Button variant="secondary" className="w-full rounded-md">
