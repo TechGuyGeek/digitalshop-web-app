@@ -75,7 +75,7 @@ const ShopProfile = () => {
       </div>
 
       {/* Bottom actions */}
-      <div className="fixed bottom-0 left-0 right-0 bg-muted border-t border-border px-6 py-4 flex items-center justify-between">
+      <div className="absolute bottom-0 left-0 right-0 bg-muted border-t border-border px-6 py-4 flex items-center justify-between">
         <Button
           variant="outline"
           className="rounded-full px-6"

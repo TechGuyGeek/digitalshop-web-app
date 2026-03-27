@@ -56,7 +56,7 @@ const ShopInterior = () => {
 
       {/* Basket bar */}
       {count > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border px-6 py-4 flex items-center justify-center">
+        <div className="absolute bottom-0 left-0 right-0 bg-card border-t border-border px-6 py-4 flex items-center justify-center">
           <Button variant="default" className="rounded-full px-8 gap-2">
             <ShoppingBasket size={18} />
             Basket {count}

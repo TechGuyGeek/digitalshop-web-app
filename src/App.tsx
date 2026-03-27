@@ -23,24 +23,28 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-        <BrowserRouter>
-          <BasketProvider>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/oauth-callback" element={<OAuthCallback />} />
-              <Route path="/view-shops" element={<ViewShops />} />
-              <Route path="/free-shops" element={<FreeShops />} />
-              <Route path="/paid-shops" element={<PaidShops />} />
-              <Route path="/global-shops" element={<GlobalShops />} />
-              <Route path="/shop-profile" element={<ShopProfile />} />
-              <Route path="/shop-interior" element={<ShopInterior />} />
-              <Route path="/category-items" element={<CategoryItems />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BasketProvider>
-        </BrowserRouter>
+      <div className="flex justify-center min-h-screen bg-black">
+        <div className="w-full max-w-[430px] min-h-screen shadow-2xl relative">
+          <BrowserRouter>
+            <BasketProvider>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/oauth-callback" element={<OAuthCallback />} />
+                <Route path="/view-shops" element={<ViewShops />} />
+                <Route path="/free-shops" element={<FreeShops />} />
+                <Route path="/paid-shops" element={<PaidShops />} />
+                <Route path="/global-shops" element={<GlobalShops />} />
+                <Route path="/shop-profile" element={<ShopProfile />} />
+                <Route path="/shop-interior" element={<ShopInterior />} />
+                <Route path="/category-items" element={<CategoryItems />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BasketProvider>
+          </BrowserRouter>
+        </div>
+      </div>
     </TooltipProvider>
   </QueryClientProvider>
 );
