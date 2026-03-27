@@ -101,9 +101,10 @@ const BuildShop = () => {
     // const user = JSON.parse(localStorage.getItem("digitalUser") || "{}");
     // await fetch(SERVER_DOMAIN + "...", { method: "POST", body: ... });
 
+    localStorage.setItem("hasShop", "true");
     toast.success("Shop registered successfully!");
     setSaving(false);
-    navigate("/profile");
+    navigate("/company-profile");
   };
 
   return (
