@@ -13,6 +13,18 @@ const GoogleMap = ({ className = "", shops = [] }: GoogleMapProps) => {
   useEffect(() => {
     if (!mapRef.current) return;
 
+    const loadGoogleMaps = () => {
+      if ((window as any).google?.maps) {
+        initMap();
+        return;
+      }
+      const script = document.createElement("script");
+      script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyC2FqDdFRLWpEeGLijR2zN8b2Ue-AeWgbo&callback=Function.prototype`;
+      script.async = true;
+      script.onload = () => initMap();
+      document.head.appendChild(script);
+    };
+
     const initMap = () => {
       if (!(window as any).google?.maps) {
         setTimeout(initMap, 200);
@@ -46,7 +58,7 @@ const GoogleMap = ({ className = "", shops = [] }: GoogleMapProps) => {
       });
     };
 
-    initMap();
+    loadGoogleMaps();
   }, [shops]);
 
   return <div ref={mapRef} className={className} />;
