@@ -1,10 +1,13 @@
+import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useBasket } from "@/contexts/BasketContext";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Basket = () => {
   const navigate = useNavigate();
+  const [tableNumber, setTableNumber] = useState<string>("");
   const [searchParams] = useSearchParams();
   const shopName = searchParams.get("shop") || "Shop";
   const { items, count, total, removeItem, clearItem } = useBasket();
@@ -112,8 +115,20 @@ const Basket = () => {
       </div>
 
       {/* Table Number placeholder */}
-      <div className="bg-card border-t border-border px-4 py-3">
+      <div className="bg-card border-t border-border px-4 py-3 shrink-0 flex items-center justify-between">
         <p className="text-muted-foreground text-sm font-medium">Table Number</p>
+        <Select value={tableNumber} onValueChange={setTableNumber}>
+          <SelectTrigger className="w-28 h-9 rounded-full">
+            <SelectValue placeholder="Select" />
+          </SelectTrigger>
+          <SelectContent className="max-h-60">
+            {Array.from({ length: 501 }, (_, i) => (
+              <SelectItem key={i} value={String(i)}>
+                {i}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Order type buttons */}
