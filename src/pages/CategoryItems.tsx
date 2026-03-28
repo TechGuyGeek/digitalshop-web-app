@@ -11,8 +11,8 @@ interface Product {
   ID: string;
   OrderName: string;
   OrderPrice?: string;
-  OrderDescription?: string;
-  OrderImage?: string;
+  OrderDesription?: string;
+  imagepath?: string;
   count?: number;
 }
 
@@ -79,9 +79,9 @@ const CategoryItems = () => {
       id: parseInt(product.ID) || 0,
       name: product.OrderName,
       price,
-      description: product.OrderDescription || "",
-      image: product.OrderImage
-        ? SERVER_DOMAIN + "menu1" + encodeURI(product.OrderImage)
+      description: product.OrderDesription || "",
+      image: product.imagepath
+        ? SERVER_DOMAIN + "menu1" + encodeURI(product.imagepath)
         : "",
     });
     toast.success(`${product.OrderName} added to basket`);
@@ -139,8 +139,8 @@ const CategoryItems = () => {
 
         {!loading && !error && products.map((product) => {
           const price = parseFloat(product.OrderPrice || "0");
-          const imageUrl = product.OrderImage
-            ? SERVER_DOMAIN + "menu1" + encodeURI(product.OrderImage)
+          const imageUrl = product.imagepath
+            ? SERVER_DOMAIN + "menu1" + encodeURI(product.imagepath)
             : "";
 
           return (
@@ -176,10 +176,10 @@ const CategoryItems = () => {
               </div>
 
               {/* Description */}
-              {product.OrderDescription && (
+              {product.OrderDesription && (
                 <div className="px-4 py-3">
                   <p className="text-muted-foreground text-sm">
-                    {product.OrderDescription}
+                    {product.OrderDesription}
                   </p>
                 </div>
               )}
