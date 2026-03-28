@@ -116,6 +116,53 @@ export async function registerUser(user: {
   return text ? "SUCCESS" : "Registration failed. No response from server.";
 }
 
+export interface CompanyDetails {
+  companyid: number;
+  PersonID?: number;
+  companyname?: string;
+  companyphoto?: string;
+  CompanyMobile?: string;
+  CompanyEmail?: string;
+  OpeningTimes?: string;
+  ClosingTimes?: string;
+  TableNumbers?: string;
+  MenuNotifications?: string;
+  OrderEnable?: string;
+  TakeawayEnable?: string;
+  DeliveryEnable?: string;
+  PayOnPhoneEnable?: string;
+  LineOneAddress?: string;
+  LineTwoAddress?: string;
+  LineThreeAddress?: string;
+  LineFourAddress?: string;
+  LineCountryAddress?: string;
+  CompanyDescription?: string;
+  LastLoggedOn?: string;
+}
+
+export async function fetchCompanyById(companyId: number): Promise<CompanyDetails | null> {
+  const url = SERVER_DOMAIN + "menu1/PHPread/ClientMenu/DoesCompanyExistCompanyIDnewUpgraded.php";
+  const formData = new URLSearchParams();
+  formData.append("companyID", String(companyId));
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formData.toString(),
+    });
+    const text = await response.text();
+    if (!text || text.includes("doesn't exist")) return null;
+    const parsed = JSON.parse(text);
+    const company = Array.isArray(parsed) ? parsed[0] : parsed;
+    if (!company || !company.companyid) return null;
+    return company as CompanyDetails;
+  } catch (err) {
+    console.error("fetchCompanyById error:", err);
+    return null;
+  }
+}
+
 export async function updateUserProfile(user: DigitalPerson, newImageBase64?: string): Promise<{ success: boolean; data?: DigitalPerson; error?: string }> {
   const url = SERVER_DOMAIN + "menu1/PHPwrite/User/UpdateUsersDetailsSecure.php";
 
