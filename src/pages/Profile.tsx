@@ -187,6 +187,7 @@ const Profile = () => {
       {/* Hidden file inputs */}
       <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={onFileChange} />
       <input ref={galleryInputRef} type="file" accept="image/*" className="hidden" onChange={onFileChange} />
+      <WebcamCapture open={webcamOpen} onOpenChange={setWebcamOpen} onCapture={handleWebcamCapture} />
 
       <div className="relative w-full max-w-lg mx-auto pt-6 px-4">
         <div className="w-full aspect-[4/3] rounded-xl overflow-hidden bg-card border border-border mb-4">
