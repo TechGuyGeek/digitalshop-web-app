@@ -109,7 +109,7 @@ const ShopProfile = () => {
   const activityDays = company ? daysSinceActivity(company.LastLoggedOn) : null;
   const address = company ? buildAddress(company) : "";
   const imageUrl = company?.companyphoto
-    ? SERVER_DOMAIN + company.companyphoto
+    ? SERVER_DOMAIN + encodeURI(company.companyphoto)
     : "";
 
   const handleEnterShop = () => {
