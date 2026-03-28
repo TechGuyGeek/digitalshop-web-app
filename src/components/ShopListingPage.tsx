@@ -7,6 +7,7 @@ import { fetchNearbyShops, NearbyShop } from "@/lib/nearbyShops";
 
 interface ShopListingPageProps {
   title: string;
+  variant?: "free" | "paid";
 }
 
 const tabs = [
@@ -17,7 +18,7 @@ const tabs = [
 
 type TabId = (typeof tabs)[number]["id"];
 
-const ShopListingPage = ({ title }: ShopListingPageProps) => {
+const ShopListingPage = ({ title, variant = "free" }: ShopListingPageProps) => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabId>("hybrid");
   const [shops, setShops] = useState<NearbyShop[]>([]);
@@ -29,7 +30,7 @@ const ShopListingPage = ({ title }: ShopListingPageProps) => {
     setLoading(true);
     setError(null);
     try {
-      const results = await fetchNearbyShops(lat, lng);
+      const results = await fetchNearbyShops(lat, lng, variant);
       setShops(results);
     } catch {
       setError("Could not load nearby shops. Tap to retry.");

@@ -26,8 +26,11 @@ export interface NearbyShop {
   distance: number;
 }
 
-export async function fetchNearbyShops(lat: number, lng: number): Promise<NearbyShop[]> {
-  const url = SERVER_DOMAIN + "menu1/PHPread/ClientMenu/GetlocationPoints.php";
+export async function fetchNearbyShops(lat: number, lng: number, variant: "free" | "paid" = "free"): Promise<NearbyShop[]> {
+  const endpoint = variant === "paid"
+    ? "menu1/PHPread/ClientMenu/GetlocationPointsPaid.php"
+    : "menu1/PHPread/ClientMenu/GetlocationPoints.php";
+  const url = SERVER_DOMAIN + endpoint;
 
   const formData = new URLSearchParams();
   formData.append("lat", String(lat));
