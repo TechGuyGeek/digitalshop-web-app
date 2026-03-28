@@ -56,6 +56,8 @@ const Profile = () => {
   });
   const [pendingImageBase64, setPendingImageBase64] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [webcamOpen, setWebcamOpen] = useState(false);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
 
