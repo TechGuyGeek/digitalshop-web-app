@@ -3,11 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, MapPin, List, Layers, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import GoogleMap from "@/components/GoogleMap";
-import { fetchNearbyShops, NearbyShop } from "@/lib/nearbyShops";
+import { fetchNearbyShops, fetchGlobalShops, NearbyShop } from "@/lib/nearbyShops";
 
 interface ShopListingPageProps {
   title: string;
-  variant?: "free" | "paid";
+  variant?: "free" | "paid" | "global";
 }
 
 const tabs = [

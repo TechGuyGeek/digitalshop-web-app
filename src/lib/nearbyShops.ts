@@ -26,6 +26,12 @@ export interface NearbyShop {
   distance: number;
 }
 
+export async function fetchGlobalShops(): Promise<NearbyShop[]> {
+  const url = SERVER_DOMAIN + "menu1/PHPread/ClientMenu/GetlocationPointsGlobal.php";
+  const response = await fetch(url);
+  return parseShopsResponse(await response.text(), false);
+}
+
 export async function fetchNearbyShops(lat: number, lng: number, variant: "free" | "paid" = "free"): Promise<NearbyShop[]> {
   const endpoint = variant === "paid"
     ? "menu1/PHPread/ClientMenu/GetlocationPointsPaid.php"
