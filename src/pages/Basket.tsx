@@ -92,7 +92,11 @@ const Basket = () => {
           variant="ghost"
           size="icon"
           className="text-primary-foreground hover:bg-primary/80"
-          onClick={() => navigate(-1)}
+          onClick={() =>
+            navigate(
+              `/shop-interior?name=${encodeURIComponent(shopName)}&companyid=${encodeURIComponent(companyId)}`
+            )
+          }
         >
           <ArrowLeft size={20} />
         </Button>
