@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { type DigitalPerson, updateUserProfile } from "@/lib/api";
 import { toast } from "sonner";
+import WebcamCapture from "@/components/WebcamCapture";
 
 const MAX_IMAGE_SIZE = 800; // max width/height in pixels
 
