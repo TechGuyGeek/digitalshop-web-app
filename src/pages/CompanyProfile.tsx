@@ -136,6 +136,7 @@ const CompanyProfile = () => {
       {/* Hidden file inputs */}
       <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={onFileChange} />
       <input ref={galleryInputRef} type="file" accept="image/*" className="hidden" onChange={onFileChange} />
+      <WebcamCapture open={webcamOpen} onOpenChange={setWebcamOpen} onCapture={handleWebcamCapture} />
 
       {/* Header */}
       <div className="flex items-center gap-3 p-4 bg-primary">
