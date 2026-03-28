@@ -1,10 +1,42 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { LogOut, User, Camera, Image, Save, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { type DigitalPerson, updateUserProfile } from "@/lib/api";
 import { toast } from "sonner";
+
+const MAX_IMAGE_SIZE = 800; // max width/height in pixels
+
+function resizeAndConvertToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new window.Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let w = img.width;
+        let h = img.height;
+        if (w > MAX_IMAGE_SIZE || h > MAX_IMAGE_SIZE) {
+          if (w > h) { h = Math.round(h * MAX_IMAGE_SIZE / w); w = MAX_IMAGE_SIZE; }
+          else { w = Math.round(w * MAX_IMAGE_SIZE / h); h = MAX_IMAGE_SIZE; }
+        }
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(img, 0, 0, w, h);
+        // Return base64 JPEG without the data:image/jpeg;base64, prefix
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
+        const base64 = dataUrl.split(",")[1];
+        resolve(base64);
+      };
+      img.onerror = reject;
+      img.src = reader.result as string;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -21,6 +53,10 @@ const Profile = () => {
     country: "",
     deliveryNotes: "",
   });
+  const [pendingImageBase64, setPendingImageBase64] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const stored = localStorage.getItem("digitalUser");
@@ -48,13 +84,29 @@ const Profile = () => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleImageSelected = async (file: File) => {
+    try {
+      const base64 = await resizeAndConvertToBase64(file);
+      setPendingImageBase64(base64);
+      setPreviewUrl(`data:image/jpeg;base64,${base64}`);
+      toast.success("Photo selected — tap Save to upload");
+    } catch {
+      toast.error("Failed to process image");
+    }
+  };
+
+  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) handleImageSelected(file);
+    e.target.value = "";
+  };
+
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
     if (!user) return;
     setSaving(true);
 
-    // Build updated user object with form values mapped to backend field names
     const updatedUser: DigitalPerson = {
       ...user,
       Name: form.name,
@@ -71,14 +123,15 @@ const Profile = () => {
       LineDeliveryNotesAddress: form.deliveryNotes,
     } as any;
 
-    const result = await updateUserProfile(updatedUser);
+    const result = await updateUserProfile(updatedUser, pendingImageBase64 || undefined);
     setSaving(false);
 
     if (result.success && result.data) {
-      // Update local storage with fresh data from server
       const merged = { ...user, ...result.data };
       localStorage.setItem("digitalUser", JSON.stringify(merged));
       setUser(merged);
+      setPendingImageBase64(null);
+      setPreviewUrl(null);
       toast.success("Profile saved successfully");
     } else {
       toast.error(result.error || "Failed to save profile");
@@ -96,35 +149,32 @@ const Profile = () => {
       localStorage.removeItem("digitalUser");
       toast.success("Profile deleted");
       navigate("/");
-      // TODO: call backend delete endpoint
     }
   };
 
   if (!user) return null;
 
   const imagePath = (() => {
+    if (previewUrl) return previewUrl;
     const raw = user.Imagepath as string | undefined;
     if (!raw) return null;
     if (raw.startsWith("http://") || raw.startsWith("https://")) return raw;
-    // Normalize: ensure path is under /menu1/Images/...
     const base = "https://app.techguygeek.co.uk";
     const cleaned = raw.replace(/^\/+/, "");
-    // If path starts with "Images/", prepend menu1/
     const fullPath = cleaned.startsWith("menu1/") ? cleaned : `menu1/${cleaned}`;
     return `${base}/${fullPath}`;
   })();
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header image area */}
+      {/* Hidden file inputs */}
+      <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={onFileChange} />
+      <input ref={galleryInputRef} type="file" accept="image/*" className="hidden" onChange={onFileChange} />
+
       <div className="relative w-full max-w-lg mx-auto pt-6 px-4">
         <div className="w-full aspect-[4/3] rounded-xl overflow-hidden bg-card border border-border mb-4">
           {imagePath ? (
-            <img
-              src={imagePath}
-              alt="Profile"
-              className="w-full h-full object-cover"
-            />
+            <img src={imagePath} alt="Profile" className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <User size={64} className="text-muted-foreground" />
@@ -132,13 +182,12 @@ const Profile = () => {
           )}
         </div>
 
-        {/* Action buttons under image */}
         <div className="flex justify-center gap-3 mb-6">
-          <Button size="sm" className="rounded-full px-5">
+          <Button size="sm" className="rounded-full px-5" onClick={() => cameraInputRef.current?.click()}>
             <Camera size={14} className="mr-1.5" />
             Camera
           </Button>
-          <Button size="sm" className="rounded-full px-5">
+          <Button size="sm" className="rounded-full px-5" onClick={() => galleryInputRef.current?.click()}>
             <Image size={14} className="mr-1.5" />
             Gallery
           </Button>
