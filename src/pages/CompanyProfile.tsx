@@ -165,7 +165,6 @@ const CompanyProfile = () => {
             <Camera size={14} />
             Camera
           </Button>
-          </Button>
           <Button variant="secondary" className="rounded-full px-5 gap-2" size="sm" onClick={() => galleryInputRef.current?.click()}>
             <ImageIcon size={14} />
             Gallery
