@@ -229,6 +229,3 @@ const ShopList = ({ shops, isGlobal = false }: { shops: NearbyShop[]; isGlobal?:
   );
 };
 
-export default ShopListingPage;
-
-export default ShopListingPage;
