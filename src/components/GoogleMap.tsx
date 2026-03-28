@@ -70,14 +70,28 @@ const GoogleMap = ({ className = "", shops = [] }: GoogleMapProps) => {
         });
       }
 
-      // Shop markers
+      // Shop markers – emoji only, no red pin
       shops.forEach((shop) => {
         if (shop.lat && shop.lng) {
+          const canvas = document.createElement("canvas");
+          canvas.width = 48;
+          canvas.height = 48;
+          const ctx = canvas.getContext("2d");
+          if (ctx) {
+            ctx.font = "36px serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(shop.icon, 24, 24);
+          }
           new google.maps.Marker({
             position: { lat: shop.lat, lng: shop.lng },
             map,
             title: shop.name,
-            label: shop.icon,
+            icon: {
+              url: canvas.toDataURL(),
+              scaledSize: new google.maps.Size(40, 40),
+              anchor: new google.maps.Point(20, 20),
+            },
           });
         }
       });
