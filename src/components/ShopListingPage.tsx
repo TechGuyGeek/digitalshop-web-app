@@ -7,6 +7,7 @@ import { fetchNearbyShops, NearbyShop } from "@/lib/nearbyShops";
 
 interface ShopListingPageProps {
   title: string;
+  variant?: "free" | "paid";
 }
 
 const tabs = [
