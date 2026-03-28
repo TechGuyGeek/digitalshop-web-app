@@ -48,7 +48,10 @@ export async function fetchNearbyShops(lat: number, lng: number, variant: "free"
     body: formData.toString(),
   });
 
-  const text = await response.text();
+  return parseShopsResponse(await response.text(), true);
+}
+
+function parseShopsResponse(text: string, hasDistance: boolean): NearbyShop[] {
   if (!text || text.trim() === "") return [];
 
   try {
@@ -67,11 +70,11 @@ export async function fetchNearbyShops(lat: number, lng: number, variant: "free"
         description: c.CompanyDescription || undefined,
         categoryCode: cat.id,
         categoryLabel: cat.label,
-        distance: Number(c.distance) || 0,
+        distance: hasDistance ? (Number(c.distance) || 0) : 0,
       };
     });
   } catch {
-    console.error("Failed to parse nearby shops response:", text);
+    console.error("Failed to parse shops response:", text);
     return [];
   }
 }

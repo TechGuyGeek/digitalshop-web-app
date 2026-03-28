@@ -25,21 +25,37 @@ const ShopListingPage = ({ title, variant = "free" }: ShopListingPageProps) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null);
+  const isGlobal = variant === "global";
 
-  const loadShops = async (lat: number, lng: number) => {
+  const loadShops = async (lat?: number, lng?: number) => {
     setLoading(true);
     setError(null);
     try {
-      const results = await fetchNearbyShops(lat, lng, variant);
+      const results = isGlobal
+        ? await fetchGlobalShops()
+        : await fetchNearbyShops(lat!, lng!, variant as "free" | "paid");
       setShops(results);
     } catch {
-      setError("Could not load nearby shops. Tap to retry.");
+      setError("Could not load shops. Tap to retry.");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    if (isGlobal) {
+      // Global: fetch all shops immediately, GPS only for map centering
+      loadShops();
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => setUserPos({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+          () => {},
+          { enableHighAccuracy: true, timeout: 10000 }
+        );
+      }
+      return;
+    }
+
     if (!navigator.geolocation) {
       setError("Location is not supported by your browser.");
       setLoading(false);
