@@ -27,7 +27,7 @@ const ShopInterior = () => {
           className="text-primary-foreground hover:bg-primary/80"
           onClick={() => {
             clearBasket();
-            navigate(`/shop-profile?name=${encodeURIComponent(shopName)}`);
+            navigate(-1);
           }}
         >
           <ArrowLeft size={20} />
