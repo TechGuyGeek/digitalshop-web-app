@@ -68,3 +68,13 @@
     font-family: var(--font-heading);
   }
 }
+
+@keyframes scan-line {
+  0% { top: 2rem; }
+  50% { top: calc(100% - 2rem); }
+  100% { top: 2rem; }
+}
+
+.animate-scan-line {
+  animation: scan-line 2s ease-in-out infinite;
+}
