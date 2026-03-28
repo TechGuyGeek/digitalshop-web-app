@@ -176,10 +176,10 @@ const CategoryItems = () => {
               </div>
 
               {/* Description */}
-              {product.OrderDescription && (
+              {product.OrderDesription && (
                 <div className="px-4 py-3">
                   <p className="text-muted-foreground text-sm">
-                    {product.OrderDescription}
+                    {product.OrderDesription}
                   </p>
                 </div>
               )}
