@@ -79,9 +79,9 @@ const CategoryItems = () => {
       id: parseInt(product.ID) || 0,
       name: product.OrderName,
       price,
-      description: product.OrderDescription || "",
-      image: product.OrderImage
-        ? SERVER_DOMAIN + "menu1" + encodeURI(product.OrderImage)
+      description: product.OrderDesription || "",
+      image: product.imagepath
+        ? SERVER_DOMAIN + "menu1" + encodeURI(product.imagepath)
         : "",
     });
     toast.success(`${product.OrderName} added to basket`);
