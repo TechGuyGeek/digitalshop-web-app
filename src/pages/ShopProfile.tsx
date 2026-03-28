@@ -85,6 +85,7 @@ const ShopProfile = () => {
   const [company, setCompany] = useState<CompanyDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   useEffect(() => {
     const id = companyIdParam ? parseInt(companyIdParam, 10) : NaN;
