@@ -7,8 +7,10 @@ import { useEffect, useState } from "react";
 const SERVER_DOMAIN = "https://app.techguygeek.co.uk/";
 
 interface MenuGroup {
-  ID: number;
-  Name: string;
+  ID: string;
+  OrderGroup: string;
+  companyid?: string;
+  MenuEnable?: string;
 }
 
 const ShopInterior = () => {
@@ -121,11 +123,11 @@ const ShopInterior = () => {
               className="w-full py-5 text-center text-foreground font-bold text-lg uppercase tracking-wide border-b border-border bg-card hover:bg-accent/50 transition-colors"
               onClick={() =>
                 navigate(
-                  `/category-items?companyid=${encodeURIComponent(companyId)}&shop=${encodeURIComponent(shopName)}&groupId=${group.ID}&category=${encodeURIComponent(group.Name)}`
+                  `/category-items?companyid=${encodeURIComponent(companyId)}&shop=${encodeURIComponent(shopName)}&groupId=${group.ID}&category=${encodeURIComponent(group.OrderGroup)}`
                 )
               }
             >
-              {group.Name}
+              {group.OrderGroup}
             </button>
           ))
         }
