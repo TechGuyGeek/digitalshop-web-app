@@ -201,7 +201,7 @@ const Profile = () => {
         </div>
 
         <div className="flex justify-center gap-3 mb-6">
-          <Button size="sm" className="rounded-full px-5" onClick={() => cameraInputRef.current?.click()}>
+          <Button size="sm" className="rounded-full px-5" onClick={handleCameraClick}>
             <Camera size={14} className="mr-1.5" />
             Camera
           </Button>
