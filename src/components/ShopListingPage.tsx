@@ -30,7 +30,7 @@ const ShopListingPage = ({ title, variant = "free" }: ShopListingPageProps) => {
     setLoading(true);
     setError(null);
     try {
-      const results = await fetchNearbyShops(lat, lng);
+      const results = await fetchNearbyShops(lat, lng, variant);
       setShops(results);
     } catch {
       setError("Could not load nearby shops. Tap to retry.");
