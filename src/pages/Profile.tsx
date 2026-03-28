@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { LogOut, User, Camera, Image, Save, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { type DigitalPerson } from "@/lib/api";
+import { type DigitalPerson, updateUserProfile } from "@/lib/api";
 import { toast } from "sonner";
 
 const Profile = () => {
@@ -48,9 +48,41 @@ const Profile = () => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSave = () => {
-    toast.success("Profile saved");
-    // TODO: POST updated profile to backend
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async () => {
+    if (!user) return;
+    setSaving(true);
+
+    // Build updated user object with form values mapped to backend field names
+    const updatedUser: DigitalPerson = {
+      ...user,
+      Name: form.name,
+      name: form.name,
+      Surname: form.surname,
+      surname: form.surname,
+      MobileNumber: form.mobileNumber,
+      Gender: form.gender,
+      LineOneAddress: form.lineOne,
+      LineTwoAddress: form.lineTwo,
+      LineThreeAddress: form.lineThree,
+      LineFourAddress: form.lineFour,
+      LineCountryAddress: form.country,
+      LineDeliveryNotesAddress: form.deliveryNotes,
+    } as any;
+
+    const result = await updateUserProfile(updatedUser);
+    setSaving(false);
+
+    if (result.success && result.data) {
+      // Update local storage with fresh data from server
+      const merged = { ...user, ...result.data };
+      localStorage.setItem("digitalUser", JSON.stringify(merged));
+      setUser(merged);
+      toast.success("Profile saved successfully");
+    } else {
+      toast.error(result.error || "Failed to save profile");
+    }
   };
 
   const handleLogout = () => {
@@ -110,9 +142,9 @@ const Profile = () => {
             <Image size={14} className="mr-1.5" />
             Gallery
           </Button>
-          <Button size="sm" className="rounded-full px-5" onClick={handleSave}>
+          <Button size="sm" className="rounded-full px-5" onClick={handleSave} disabled={saving}>
             <Save size={14} className="mr-1.5" />
-            Save
+            {saving ? "Saving..." : "Save"}
           </Button>
         </div>
 

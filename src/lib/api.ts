@@ -115,3 +115,43 @@ export async function registerUser(user: {
   // Fallback: treat non-empty as potential success
   return text ? "SUCCESS" : "Registration failed. No response from server.";
 }
+
+export async function updateUserProfile(user: DigitalPerson, newImageBase64?: string): Promise<{ success: boolean; data?: DigitalPerson; error?: string }> {
+  const url = SERVER_DOMAIN + "menu1/PHPwrite/User/UpdateUsersDetailsSecure.php";
+
+  const payload: Record<string, unknown> = {
+    PersonID: String(user.PersonID || user.ID || ""),
+    Email: (user.Email || user.email || "") as string,
+    Name: (user.Name || user.name || "") as string,
+    Surname: (user.Surname || user.surname || "") as string,
+    DateofBirth: (user.DateofBirth || "") as string,
+    MobileNumber: (user.MobileNumber || "") as string,
+    Imagepath: (user.Imagepath || "") as string,
+    SelectImage: newImageBase64 || "0",
+    LineOneAddress: ((user as any).LineOneAddress || "") as string,
+    LineTwoAddress: ((user as any).LineTwoAddress || "") as string,
+    LineThreeAddress: ((user as any).LineThreeAddress || "") as string,
+    LineFourAddress: ((user as any).LineFourAddress || "") as string,
+    LineCountryAddress: ((user as any).LineCountryAddress || "") as string,
+    LineDeliveryNotesAddress: ((user as any).LineDeliveryNotesAddress || "") as string,
+  };
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const result = await response.json();
+
+    if (result.success && result.data && result.data.length > 0) {
+      return { success: true, data: result.data[0] as DigitalPerson };
+    }
+
+    return { success: false, error: result.ServerMessage || "Update failed" };
+  } catch (err) {
+    console.error("Profile update error:", err);
+    return { success: false, error: "Network error. Please try again." };
+  }
+}
