@@ -3,7 +3,8 @@ import { useEffect, useRef, useState } from "react";
 
 interface GoogleMapProps {
   className?: string;
-  shops?: { name: string; icon: string; lat?: number; lng?: number }[];
+  shops?: { name: string; icon: string; lat?: number; lng?: number; companyid?: number }[];
+  onShopClick?: (shop: { name: string; icon: string; companyid?: number }) => void;
 }
 
 const MAPS_KEY = "AIzaSyAN76Tb-dL_5pvp-w1iFhxWqI52sDnoz5c";
