@@ -6,7 +6,7 @@ const shopCategories = [
   { label: "View Free Shops", icon: Store, description: "Browse shops with no subscription fee", path: "/free-shops" },
   { label: "View Paid Shops", icon: CreditCard, description: "Premium shops with advanced features", path: "/paid-shops" },
   { label: "View Global Shops", icon: Globe, description: "Explore shops from around the world", path: "/global-shops" },
-  { label: "QR Code Scanner", icon: QrCode, description: "Scan a shop's QR code to visit instantly", path: "" },
+  { label: "QR Code Scanner", icon: QrCode, description: "Scan a shop's QR code to visit instantly", path: "/qr-scanner" },
 ];
 
 const ViewShops = () => {
