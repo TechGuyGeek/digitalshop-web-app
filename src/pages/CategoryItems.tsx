@@ -11,8 +11,8 @@ interface Product {
   ID: string;
   OrderName: string;
   OrderPrice?: string;
-  OrderDescription?: string;
-  OrderImage?: string;
+  OrderDesription?: string;
+  imagepath?: string;
   count?: number;
 }
 
