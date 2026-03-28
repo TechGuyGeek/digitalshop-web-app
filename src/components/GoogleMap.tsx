@@ -45,7 +45,7 @@ const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14 }
 
       const map = new google.maps.Map(mapRef.current!, {
         center,
-        zoom: 14,
+        zoom: defaultZoom,
         disableDefaultUI: true,
         zoomControl: true,
         styles: [
