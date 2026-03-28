@@ -84,7 +84,7 @@ const GoogleMap = ({ className = "", shops = [], onShopClick }: GoogleMapProps) 
             ctx.textBaseline = "middle";
             ctx.fillText(shop.icon, 24, 24);
           }
-          new google.maps.Marker({
+          const marker = new google.maps.Marker({
             position: { lat: shop.lat, lng: shop.lng },
             map,
             title: shop.name,
@@ -94,6 +94,9 @@ const GoogleMap = ({ className = "", shops = [], onShopClick }: GoogleMapProps) 
               anchor: new google.maps.Point(20, 20),
             },
           });
+          if (onShopClick) {
+            marker.addListener("click", () => onShopClick(shop));
+          }
         }
       });
     };
