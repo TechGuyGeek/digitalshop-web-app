@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Camera, Image as ImageIcon, Save, Trash2 } from "lucide-react";
 import MapMarkerPicker from "@/components/MapMarkerPicker";
@@ -7,8 +7,41 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 
+const MAX_IMAGE_SIZE = 800;
+
+function resizeAndConvertToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new window.Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let w = img.width;
+        let h = img.height;
+        if (w > MAX_IMAGE_SIZE || h > MAX_IMAGE_SIZE) {
+          if (w > h) { h = Math.round(h * MAX_IMAGE_SIZE / w); w = MAX_IMAGE_SIZE; }
+          else { w = Math.round(w * MAX_IMAGE_SIZE / h); h = MAX_IMAGE_SIZE; }
+        }
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(img, 0, 0, w, h);
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
+        resolve(dataUrl.split(",")[1]);
+      };
+      img.onerror = reject;
+      img.src = reader.result as string;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 const CompanyProfile = () => {
   const navigate = useNavigate();
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+  const [pendingImageBase64, setPendingImageBase64] = useState<string | null>(null);
 
   const [form, setForm] = useState({
     shopName: "",
@@ -38,8 +71,6 @@ const CompanyProfile = () => {
   const [selectedMarker, setSelectedMarker] = useState({ emoji: "🧸", label: "TOYS ICON" });
 
   useEffect(() => {
-    // TODO: Fetch company profile from PHP backend
-    // For now use placeholder data
     const stored = localStorage.getItem("digitalUser");
     if (!stored) {
       navigate("/");
@@ -55,13 +86,29 @@ const CompanyProfile = () => {
     setToggles((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleImageSelected = async (file: File) => {
+    try {
+      const base64 = await resizeAndConvertToBase64(file);
+      setPendingImageBase64(base64);
+      setShopImage(`data:image/jpeg;base64,${base64}`);
+      toast.success("Photo selected — tap Save to upload");
+    } catch {
+      toast.error("Failed to process image");
+    }
+  };
+
+  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) handleImageSelected(file);
+    e.target.value = "";
+  };
+
   const handleSave = () => {
-    // TODO: POST to PHP backend
+    // TODO: POST to PHP backend (include pendingImageBase64 as SelectImage)
     toast.success("Company profile saved!");
   };
 
   const handleDelete = () => {
-    // TODO: DELETE shop via PHP backend
     toast.error("Shop deletion will be implemented with PHP backend");
   };
 
@@ -70,6 +117,10 @@ const CompanyProfile = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      {/* Hidden file inputs */}
+      <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={onFileChange} />
+      <input ref={galleryInputRef} type="file" accept="image/*" className="hidden" onChange={onFileChange} />
+
       {/* Header */}
       <div className="flex items-center gap-3 p-4 bg-primary">
         <button onClick={() => navigate("/profile")} className="text-primary-foreground">
@@ -93,11 +144,11 @@ const CompanyProfile = () => {
 
         {/* Camera / Gallery / Save buttons */}
         <div className="flex justify-center gap-3 py-4">
-          <Button variant="secondary" className="rounded-full px-5 gap-2" size="sm">
+          <Button variant="secondary" className="rounded-full px-5 gap-2" size="sm" onClick={() => cameraInputRef.current?.click()}>
             <Camera size={14} />
             Camera
           </Button>
-          <Button variant="secondary" className="rounded-full px-5 gap-2" size="sm">
+          <Button variant="secondary" className="rounded-full px-5 gap-2" size="sm" onClick={() => galleryInputRef.current?.click()}>
             <ImageIcon size={14} />
             Gallery
           </Button>
