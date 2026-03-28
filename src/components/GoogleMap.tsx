@@ -5,11 +5,12 @@ interface GoogleMapProps {
   className?: string;
   shops?: { name: string; icon: string; lat?: number; lng?: number; companyid?: number }[];
   onShopClick?: (shop: { name: string; icon: string; companyid?: number }) => void;
+  defaultZoom?: number;
 }
 
 const MAPS_KEY = "AIzaSyAN76Tb-dL_5pvp-w1iFhxWqI52sDnoz5c";
 
-const GoogleMap = ({ className = "", shops = [], onShopClick }: GoogleMapProps) => {
+const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14 }: GoogleMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null);
@@ -44,7 +45,7 @@ const GoogleMap = ({ className = "", shops = [], onShopClick }: GoogleMapProps) 
 
       const map = new google.maps.Map(mapRef.current!, {
         center,
-        zoom: 14,
+        zoom: defaultZoom,
         disableDefaultUI: true,
         zoomControl: true,
         styles: [

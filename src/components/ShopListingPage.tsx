@@ -3,11 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, MapPin, List, Layers, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import GoogleMap from "@/components/GoogleMap";
-import { fetchNearbyShops, NearbyShop } from "@/lib/nearbyShops";
+import { fetchNearbyShops, fetchGlobalShops, NearbyShop } from "@/lib/nearbyShops";
 
 interface ShopListingPageProps {
   title: string;
-  variant?: "free" | "paid";
+  variant?: "free" | "paid" | "global";
 }
 
 const tabs = [
@@ -25,21 +25,37 @@ const ShopListingPage = ({ title, variant = "free" }: ShopListingPageProps) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null);
+  const isGlobal = variant === "global";
 
-  const loadShops = async (lat: number, lng: number) => {
+  const loadShops = async (lat?: number, lng?: number) => {
     setLoading(true);
     setError(null);
     try {
-      const results = await fetchNearbyShops(lat, lng, variant);
+      const results = isGlobal
+        ? await fetchGlobalShops()
+        : await fetchNearbyShops(lat!, lng!, variant as "free" | "paid");
       setShops(results);
     } catch {
-      setError("Could not load nearby shops. Tap to retry.");
+      setError("Could not load shops. Tap to retry.");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    if (isGlobal) {
+      // Global: fetch all shops immediately, GPS only for map centering
+      loadShops();
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => setUserPos({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+          () => {},
+          { enableHighAccuracy: true, timeout: 10000 }
+        );
+      }
+      return;
+    }
+
     if (!navigator.geolocation) {
       setError("Location is not supported by your browser.");
       setLoading(false);
@@ -112,14 +128,14 @@ const ShopListingPage = ({ title, variant = "free" }: ShopListingPageProps) => {
       <div className="flex-1 flex flex-col">
         {activeTab === "hybrid" && (
           <>
-            <GoogleMap className="h-56 w-full" shops={mapShops} onShopClick={handleShopMapClick} />
-            <ShopContent shops={shops} loading={loading} error={error} onRetry={() => userPos && loadShops(userPos.lat, userPos.lng)} />
+            <GoogleMap className="h-56 w-full" shops={mapShops} onShopClick={handleShopMapClick} defaultZoom={isGlobal ? 3 : 14} />
+            <ShopContent shops={shops} loading={loading} error={error} isGlobal={isGlobal} onRetry={() => isGlobal ? loadShops() : userPos && loadShops(userPos.lat, userPos.lng)} />
           </>
         )}
 
         {activeTab === "map" && (
           <>
-            <GoogleMap className="flex-1 min-h-[400px] w-full" shops={mapShops} onShopClick={handleShopMapClick} />
+            <GoogleMap className="flex-1 min-h-[400px] w-full" shops={mapShops} onShopClick={handleShopMapClick} defaultZoom={isGlobal ? 3 : 14} />
             {loading && (
               <div className="p-4 text-center text-sm text-muted-foreground">Loading shops…</div>
             )}
@@ -127,7 +143,7 @@ const ShopListingPage = ({ title, variant = "free" }: ShopListingPageProps) => {
         )}
 
         {activeTab === "list" && (
-          <ShopContent shops={shops} loading={loading} error={error} onRetry={() => userPos && loadShops(userPos.lat, userPos.lng)} />
+          <ShopContent shops={shops} loading={loading} error={error} isGlobal={isGlobal} onRetry={() => isGlobal ? loadShops() : userPos && loadShops(userPos.lat, userPos.lng)} />
         )}
       </div>
     </div>
@@ -138,11 +154,13 @@ const ShopContent = ({
   shops,
   loading,
   error,
+  isGlobal = false,
   onRetry,
 }: {
   shops: NearbyShop[];
   loading: boolean;
   error: string | null;
+  isGlobal?: boolean;
   onRetry: () => void;
 }) => {
   if (loading) {
@@ -150,7 +168,7 @@ const ShopContent = ({
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="text-center text-muted-foreground">
           <RefreshCw size={24} className="animate-spin mx-auto mb-2" />
-          <p className="text-sm">Finding nearby shops…</p>
+          <p className="text-sm">{isGlobal ? "Loading global shops…" : "Finding nearby shops…"}</p>
         </div>
       </div>
     );
@@ -176,17 +194,17 @@ const ShopContent = ({
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="text-center">
           <span className="text-4xl mb-3 block">🏪</span>
-          <p className="text-sm font-medium text-foreground mb-1">No shops nearby</p>
-          <p className="text-xs text-muted-foreground">No shops found within 0.5 miles of your location</p>
+          <p className="text-sm font-medium text-foreground mb-1">{isGlobal ? "No global shops" : "No shops nearby"}</p>
+          <p className="text-xs text-muted-foreground">{isGlobal ? "No shops are currently listed globally" : "No shops found within 0.5 miles of your location"}</p>
         </div>
       </div>
     );
   }
 
-  return <ShopList shops={shops} />;
+  return <ShopList shops={shops} isGlobal={isGlobal} />;
 };
 
-const ShopList = ({ shops }: { shops: NearbyShop[] }) => {
+const ShopList = ({ shops, isGlobal = false }: { shops: NearbyShop[]; isGlobal?: boolean }) => {
   const navigate = useNavigate();
   return (
     <div className="divide-y divide-border">
@@ -201,7 +219,9 @@ const ShopList = ({ shops }: { shops: NearbyShop[] }) => {
           <span className="text-2xl">{shop.icon}</span>
           <div className="flex-1 min-w-0">
             <span className="text-sm font-medium text-foreground block truncate">{shop.name}</span>
-            <span className="text-xs text-muted-foreground">{shop.categoryLabel} · {shop.distance.toFixed(2)} mi</span>
+            <span className="text-xs text-muted-foreground">
+              {shop.categoryLabel}{!isGlobal && shop.distance > 0 ? ` · ${shop.distance.toFixed(2)} mi` : ""}
+            </span>
           </div>
         </button>
       ))}
