@@ -142,9 +142,9 @@ const Profile = () => {
             <Image size={14} className="mr-1.5" />
             Gallery
           </Button>
-          <Button size="sm" className="rounded-full px-5" onClick={handleSave}>
+          <Button size="sm" className="rounded-full px-5" onClick={handleSave} disabled={saving}>
             <Save size={14} className="mr-1.5" />
-            Save
+            {saving ? "Saving..." : "Save"}
           </Button>
         </div>
 
