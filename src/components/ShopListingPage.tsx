@@ -128,14 +128,14 @@ const ShopListingPage = ({ title, variant = "free" }: ShopListingPageProps) => {
       <div className="flex-1 flex flex-col">
         {activeTab === "hybrid" && (
           <>
-            <GoogleMap className="h-56 w-full" shops={mapShops} onShopClick={handleShopMapClick} />
-            <ShopContent shops={shops} loading={loading} error={error} onRetry={() => userPos && loadShops(userPos.lat, userPos.lng)} />
+            <GoogleMap className="h-56 w-full" shops={mapShops} onShopClick={handleShopMapClick} defaultZoom={isGlobal ? 3 : 14} />
+            <ShopContent shops={shops} loading={loading} error={error} isGlobal={isGlobal} onRetry={() => isGlobal ? loadShops() : userPos && loadShops(userPos.lat, userPos.lng)} />
           </>
         )}
 
         {activeTab === "map" && (
           <>
-            <GoogleMap className="flex-1 min-h-[400px] w-full" shops={mapShops} onShopClick={handleShopMapClick} />
+            <GoogleMap className="flex-1 min-h-[400px] w-full" shops={mapShops} onShopClick={handleShopMapClick} defaultZoom={isGlobal ? 3 : 14} />
             {loading && (
               <div className="p-4 text-center text-sm text-muted-foreground">Loading shops…</div>
             )}
@@ -143,7 +143,7 @@ const ShopListingPage = ({ title, variant = "free" }: ShopListingPageProps) => {
         )}
 
         {activeTab === "list" && (
-          <ShopContent shops={shops} loading={loading} error={error} onRetry={() => userPos && loadShops(userPos.lat, userPos.lng)} />
+          <ShopContent shops={shops} loading={loading} error={error} isGlobal={isGlobal} onRetry={() => isGlobal ? loadShops() : userPos && loadShops(userPos.lat, userPos.lng)} />
         )}
       </div>
     </div>
