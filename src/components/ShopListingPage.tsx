@@ -1,20 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, MapPin, List, Layers } from "lucide-react";
+import { ArrowLeft, MapPin, List, Layers, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import GoogleMap from "@/components/GoogleMap";
+import { fetchNearbyShops, NearbyShop } from "@/lib/nearbyShops";
 
 interface ShopListingPageProps {
   title: string;
-  shops?: { name: string; icon: string }[];
 }
-
-const placeholderShops = [
-  { name: "test", icon: "📍" },
-  { name: "The Big Shop", icon: "🧸" },
-  { name: "Micks gaff", icon: "🍻" },
-  { name: "test", icon: "👕" },
-];
 
 const tabs = [
   { id: "hybrid", label: "Hybrid View", icon: Layers },
@@ -24,9 +17,54 @@ const tabs = [
 
 type TabId = (typeof tabs)[number]["id"];
 
-const ShopListingPage = ({ title, shops = placeholderShops }: ShopListingPageProps) => {
+const ShopListingPage = ({ title }: ShopListingPageProps) => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabId>("hybrid");
+  const [shops, setShops] = useState<NearbyShop[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null);
+
+  const loadShops = async (lat: number, lng: number) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const results = await fetchNearbyShops(lat, lng);
+      setShops(results);
+    } catch {
+      setError("Could not load nearby shops. Tap to retry.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setError("Location is not supported by your browser.");
+      setLoading(false);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        setUserPos(coords);
+        loadShops(coords.lat, coords.lng);
+      },
+      () => {
+        setError("Please enable location access to see nearby shops.");
+        setLoading(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }, []);
+
+  const mapShops = shops.map((s) => ({
+    name: s.name,
+    icon: s.icon,
+    lat: s.lat,
+    lng: s.lng,
+  }));
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -66,35 +104,97 @@ const ShopListingPage = ({ title, shops = placeholderShops }: ShopListingPagePro
       <div className="flex-1 flex flex-col">
         {activeTab === "hybrid" && (
           <>
-            <GoogleMap className="h-56 w-full" shops={shops} />
-            <ShopList shops={shops} />
+            <GoogleMap className="h-56 w-full" shops={mapShops} />
+            <ShopContent shops={shops} loading={loading} error={error} onRetry={() => userPos && loadShops(userPos.lat, userPos.lng)} />
           </>
         )}
 
         {activeTab === "map" && (
-          <GoogleMap className="flex-1 min-h-[400px] w-full" shops={shops} />
+          <>
+            <GoogleMap className="flex-1 min-h-[400px] w-full" shops={mapShops} />
+            {loading && (
+              <div className="p-4 text-center text-sm text-muted-foreground">Loading shops…</div>
+            )}
+          </>
         )}
 
-        {activeTab === "list" && <ShopList shops={shops} />}
+        {activeTab === "list" && (
+          <ShopContent shops={shops} loading={loading} error={error} onRetry={() => userPos && loadShops(userPos.lat, userPos.lng)} />
+        )}
       </div>
     </div>
   );
 };
 
-const ShopList = ({ shops }: { shops: { name: string; icon: string }[] }) => {
+const ShopContent = ({
+  shops,
+  loading,
+  error,
+  onRetry,
+}: {
+  shops: NearbyShop[];
+  loading: boolean;
+  error: string | null;
+  onRetry: () => void;
+}) => {
+  if (loading) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-8">
+        <div className="text-center text-muted-foreground">
+          <RefreshCw size={24} className="animate-spin mx-auto mb-2" />
+          <p className="text-sm">Finding nearby shops…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-8">
+        <div className="text-center">
+          <MapPin size={32} className="mx-auto mb-3 text-muted-foreground" />
+          <p className="text-sm text-muted-foreground mb-3">{error}</p>
+          <Button variant="outline" size="sm" onClick={onRetry}>
+            <RefreshCw size={14} className="mr-1.5" />
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (shops.length === 0) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-8">
+        <div className="text-center">
+          <span className="text-4xl mb-3 block">🏪</span>
+          <p className="text-sm font-medium text-foreground mb-1">No shops nearby</p>
+          <p className="text-xs text-muted-foreground">No shops found within 0.5 miles of your location</p>
+        </div>
+      </div>
+    );
+  }
+
+  return <ShopList shops={shops} />;
+};
+
+const ShopList = ({ shops }: { shops: NearbyShop[] }) => {
   const navigate = useNavigate();
   return (
     <div className="divide-y divide-border">
-      {shops.map((shop, i) => (
+      {shops.map((shop) => (
         <button
-          key={i}
+          key={shop.companyid}
           className="w-full flex items-center gap-4 px-6 py-4 text-left hover:bg-accent/50 transition-colors"
           onClick={() =>
-            navigate(`/shop-profile?name=${encodeURIComponent(shop.name)}&icon=${encodeURIComponent(shop.icon)}`)
+            navigate(`/shop-profile?companyid=${shop.companyid}&name=${encodeURIComponent(shop.name)}&icon=${encodeURIComponent(shop.icon)}`)
           }
         >
           <span className="text-2xl">{shop.icon}</span>
-          <span className="text-sm font-medium text-foreground">{shop.name}</span>
+          <div className="flex-1 min-w-0">
+            <span className="text-sm font-medium text-foreground block truncate">{shop.name}</span>
+            <span className="text-xs text-muted-foreground">{shop.categoryLabel} · {shop.distance.toFixed(2)} mi</span>
+          </div>
         </button>
       ))}
     </div>
