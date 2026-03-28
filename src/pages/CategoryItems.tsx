@@ -139,8 +139,8 @@ const CategoryItems = () => {
 
         {!loading && !error && products.map((product) => {
           const price = parseFloat(product.OrderPrice || "0");
-          const imageUrl = product.OrderImage
-            ? SERVER_DOMAIN + "menu1" + encodeURI(product.OrderImage)
+          const imageUrl = product.imagepath
+            ? SERVER_DOMAIN + "menu1" + encodeURI(product.imagepath)
             : "";
 
           return (
