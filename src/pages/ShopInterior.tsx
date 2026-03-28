@@ -7,8 +7,10 @@ import { useEffect, useState } from "react";
 const SERVER_DOMAIN = "https://app.techguygeek.co.uk/";
 
 interface MenuGroup {
-  ID: number;
-  Name: string;
+  ID: string;
+  OrderGroup: string;
+  companyid?: string;
+  MenuEnable?: string;
 }
 
 const ShopInterior = () => {
