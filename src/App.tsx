@@ -18,6 +18,7 @@ import Basket from "./pages/Basket.tsx";
 import Orders from "./pages/Orders.tsx";
 import BuildShop from "./pages/BuildShop.tsx";
 import CompanyProfile from "./pages/CompanyProfile.tsx";
+import QRScanner from "./pages/QRScanner.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
