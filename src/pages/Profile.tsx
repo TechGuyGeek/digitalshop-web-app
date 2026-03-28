@@ -48,9 +48,41 @@ const Profile = () => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSave = () => {
-    toast.success("Profile saved");
-    // TODO: POST updated profile to backend
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async () => {
+    if (!user) return;
+    setSaving(true);
+
+    // Build updated user object with form values mapped to backend field names
+    const updatedUser: DigitalPerson = {
+      ...user,
+      Name: form.name,
+      name: form.name,
+      Surname: form.surname,
+      surname: form.surname,
+      MobileNumber: form.mobileNumber,
+      Gender: form.gender,
+      LineOneAddress: form.lineOne,
+      LineTwoAddress: form.lineTwo,
+      LineThreeAddress: form.lineThree,
+      LineFourAddress: form.lineFour,
+      LineCountryAddress: form.country,
+      LineDeliveryNotesAddress: form.deliveryNotes,
+    } as any;
+
+    const result = await updateUserProfile(updatedUser);
+    setSaving(false);
+
+    if (result.success && result.data) {
+      // Update local storage with fresh data from server
+      const merged = { ...user, ...result.data };
+      localStorage.setItem("digitalUser", JSON.stringify(merged));
+      setUser(merged);
+      toast.success("Profile saved successfully");
+    } else {
+      toast.error(result.error || "Failed to save profile");
+    }
   };
 
   const handleLogout = () => {
