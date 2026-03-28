@@ -64,7 +64,14 @@ const ShopListingPage = ({ title }: ShopListingPageProps) => {
     icon: s.icon,
     lat: s.lat,
     lng: s.lng,
+    companyid: s.companyid,
   }));
+
+  const handleShopMapClick = (shop: { name: string; icon: string; companyid?: number }) => {
+    if (shop.companyid) {
+      navigate(`/shop-profile?companyid=${shop.companyid}&name=${encodeURIComponent(shop.name)}&icon=${encodeURIComponent(shop.icon)}`);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -104,14 +111,14 @@ const ShopListingPage = ({ title }: ShopListingPageProps) => {
       <div className="flex-1 flex flex-col">
         {activeTab === "hybrid" && (
           <>
-            <GoogleMap className="h-56 w-full" shops={mapShops} />
+            <GoogleMap className="h-56 w-full" shops={mapShops} onShopClick={handleShopMapClick} />
             <ShopContent shops={shops} loading={loading} error={error} onRetry={() => userPos && loadShops(userPos.lat, userPos.lng)} />
           </>
         )}
 
         {activeTab === "map" && (
           <>
-            <GoogleMap className="flex-1 min-h-[400px] w-full" shops={mapShops} />
+            <GoogleMap className="flex-1 min-h-[400px] w-full" shops={mapShops} onShopClick={handleShopMapClick} />
             {loading && (
               <div className="p-4 text-center text-sm text-muted-foreground">Loading shops…</div>
             )}

@@ -3,12 +3,13 @@ import { useEffect, useRef, useState } from "react";
 
 interface GoogleMapProps {
   className?: string;
-  shops?: { name: string; icon: string; lat?: number; lng?: number }[];
+  shops?: { name: string; icon: string; lat?: number; lng?: number; companyid?: number }[];
+  onShopClick?: (shop: { name: string; icon: string; companyid?: number }) => void;
 }
 
 const MAPS_KEY = "AIzaSyAN76Tb-dL_5pvp-w1iFhxWqI52sDnoz5c";
 
-const GoogleMap = ({ className = "", shops = [] }: GoogleMapProps) => {
+const GoogleMap = ({ className = "", shops = [], onShopClick }: GoogleMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null);
@@ -83,7 +84,7 @@ const GoogleMap = ({ className = "", shops = [] }: GoogleMapProps) => {
             ctx.textBaseline = "middle";
             ctx.fillText(shop.icon, 24, 24);
           }
-          new google.maps.Marker({
+          const marker = new google.maps.Marker({
             position: { lat: shop.lat, lng: shop.lng },
             map,
             title: shop.name,
@@ -93,6 +94,9 @@ const GoogleMap = ({ className = "", shops = [] }: GoogleMapProps) => {
               anchor: new google.maps.Point(20, 20),
             },
           });
+          if (onShopClick) {
+            marker.addListener("click", () => onShopClick(shop));
+          }
         }
       });
     };
