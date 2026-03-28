@@ -154,11 +154,13 @@ const ShopContent = ({
   shops,
   loading,
   error,
+  isGlobal = false,
   onRetry,
 }: {
   shops: NearbyShop[];
   loading: boolean;
   error: string | null;
+  isGlobal?: boolean;
   onRetry: () => void;
 }) => {
   if (loading) {
@@ -166,7 +168,7 @@ const ShopContent = ({
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="text-center text-muted-foreground">
           <RefreshCw size={24} className="animate-spin mx-auto mb-2" />
-          <p className="text-sm">Finding nearby shops…</p>
+          <p className="text-sm">{isGlobal ? "Loading global shops…" : "Finding nearby shops…"}</p>
         </div>
       </div>
     );
@@ -192,14 +194,14 @@ const ShopContent = ({
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="text-center">
           <span className="text-4xl mb-3 block">🏪</span>
-          <p className="text-sm font-medium text-foreground mb-1">No shops nearby</p>
-          <p className="text-xs text-muted-foreground">No shops found within 0.5 miles of your location</p>
+          <p className="text-sm font-medium text-foreground mb-1">{isGlobal ? "No global shops" : "No shops nearby"}</p>
+          <p className="text-xs text-muted-foreground">{isGlobal ? "No shops are currently listed globally" : "No shops found within 0.5 miles of your location"}</p>
         </div>
       </div>
     );
   }
 
-  return <ShopList shops={shops} />;
+  return <ShopList shops={shops} isGlobal={isGlobal} />;
 };
 
 const ShopList = ({ shops }: { shops: NearbyShop[] }) => {
