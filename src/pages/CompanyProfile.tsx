@@ -105,6 +105,20 @@ const CompanyProfile = () => {
     e.target.value = "";
   };
 
+  const handleWebcamCapture = (base64: string) => {
+    setPendingImageBase64(base64);
+    setShopImage(`data:image/jpeg;base64,${base64}`);
+    toast.success("Photo captured — tap Save to upload");
+  };
+
+  const handleCameraClick = () => {
+    if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      cameraInputRef.current?.click();
+    } else {
+      setWebcamOpen(true);
+    }
+  };
+
   const handleSave = () => {
     // TODO: POST to PHP backend (include pendingImageBase64 as SelectImage)
     toast.success("Company profile saved!");
