@@ -111,7 +111,7 @@ const ShopListingPage = ({ title }: ShopListingPageProps) => {
       <div className="flex-1 flex flex-col">
         {activeTab === "hybrid" && (
           <>
-            <GoogleMap className="h-56 w-full" shops={mapShops} />
+            <GoogleMap className="h-56 w-full" shops={mapShops} onShopClick={handleShopMapClick} />
             <ShopContent shops={shops} loading={loading} error={error} onRetry={() => userPos && loadShops(userPos.lat, userPos.lng)} />
           </>
         )}
