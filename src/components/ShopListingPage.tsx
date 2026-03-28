@@ -204,7 +204,7 @@ const ShopContent = ({
   return <ShopList shops={shops} isGlobal={isGlobal} />;
 };
 
-const ShopList = ({ shops }: { shops: NearbyShop[] }) => {
+const ShopList = ({ shops, isGlobal = false }: { shops: NearbyShop[]; isGlobal?: boolean }) => {
   const navigate = useNavigate();
   return (
     <div className="divide-y divide-border">
@@ -219,12 +219,16 @@ const ShopList = ({ shops }: { shops: NearbyShop[] }) => {
           <span className="text-2xl">{shop.icon}</span>
           <div className="flex-1 min-w-0">
             <span className="text-sm font-medium text-foreground block truncate">{shop.name}</span>
-            <span className="text-xs text-muted-foreground">{shop.categoryLabel} · {shop.distance.toFixed(2)} mi</span>
+            <span className="text-xs text-muted-foreground">
+              {shop.categoryLabel}{!isGlobal && shop.distance > 0 ? ` · ${shop.distance.toFixed(2)} mi` : ""}
+            </span>
           </div>
         </button>
       ))}
     </div>
   );
 };
+
+export default ShopListingPage;
 
 export default ShopListingPage;
