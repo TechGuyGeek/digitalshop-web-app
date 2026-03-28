@@ -118,7 +118,7 @@ const ShopListingPage = ({ title }: ShopListingPageProps) => {
 
         {activeTab === "map" && (
           <>
-            <GoogleMap className="flex-1 min-h-[400px] w-full" shops={mapShops} />
+            <GoogleMap className="flex-1 min-h-[400px] w-full" shops={mapShops} onShopClick={handleShopMapClick} />
             {loading && (
               <div className="p-4 text-center text-sm text-muted-foreground">Loading shops…</div>
             )}
