@@ -104,6 +104,21 @@ const Profile = () => {
     e.target.value = "";
   };
 
+  const handleWebcamCapture = (base64: string) => {
+    setPendingImageBase64(base64);
+    setPreviewUrl(`data:image/jpeg;base64,${base64}`);
+    toast.success("Photo captured — tap Save to upload");
+  };
+
+  const handleCameraClick = () => {
+    // On mobile, use native camera. On desktop, use webcam modal.
+    if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      cameraInputRef.current?.click();
+    } else {
+      setWebcamOpen(true);
+    }
+  };
+
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
