@@ -5,6 +5,7 @@ interface GoogleMapProps {
   className?: string;
   shops?: { name: string; icon: string; lat?: number; lng?: number; companyid?: number }[];
   onShopClick?: (shop: { name: string; icon: string; companyid?: number }) => void;
+  defaultZoom?: number;
 }
 
 const MAPS_KEY = "AIzaSyAN76Tb-dL_5pvp-w1iFhxWqI52sDnoz5c";
