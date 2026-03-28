@@ -83,6 +83,7 @@ const CategoryItems = () => {
       image: product.imagepath
         ? SERVER_DOMAIN + "menu1" + encodeURI(product.imagepath)
         : "",
+      groupId: groupId,
     });
     toast.success(`${product.OrderName} added to basket`);
   };

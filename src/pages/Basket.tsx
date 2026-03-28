@@ -1,16 +1,88 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Trash2, X } from "lucide-react";
+import { ArrowLeft, Trash2, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useBasket } from "@/contexts/BasketContext";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
+
+const SERVER_DOMAIN = "https://app.techguygeek.co.uk/";
+
+const generateRandomCode = (length: number) => {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+};
+
+type OrderMode = "onsite" | "takeaway" | "delivery";
 
 const Basket = () => {
   const navigate = useNavigate();
   const [tableNumber, setTableNumber] = useState<string>("");
   const [searchParams] = useSearchParams();
   const shopName = searchParams.get("shop") || "Shop";
-  const { items, count, total, removeItem, clearItem } = useBasket();
+  const companyId = searchParams.get("companyid") || "";
+  const { items, count, total, removeItem, clearItem, clearBasket } = useBasket();
+  const [submitting, setSubmitting] = useState(false);
+
+  const placeOrder = async (mode: OrderMode) => {
+    if (submitting) return;
+    if (items.length === 0) {
+      toast.error("Your basket is empty");
+      return;
+    }
+
+    setSubmitting(true);
+    const randomCode = generateRandomCode(64);
+    const needTakeaway = mode === "takeaway" ? "1" : "0";
+    const needDelivery = mode === "delivery" ? "1" : "0";
+
+    try {
+      const url = SERVER_DOMAIN + "menu1/PHPwrite/LiveOrders/PlaceOrderToCompany2.php";
+
+      for (const item of items) {
+        for (let q = 0; q < item.quantity; q++) {
+          const formData = new URLSearchParams();
+          formData.append("companyID", companyId);
+          formData.append("CompanyName", shopName);
+          formData.append("CompanyEmail", "");
+          formData.append("CompanyMobile", "");
+          formData.append("MenuNotifications", "0");
+          formData.append("PersonID", "0");
+          formData.append("Name", "Guest");
+          formData.append("Surname", "");
+          formData.append("GroupID", item.groupId || "0");
+          formData.append("OrderID", String(item.id));
+          formData.append("TableNumber", tableNumber || "0");
+          formData.append("NeedTakeaway", needTakeaway);
+          formData.append("NeedDelivery", needDelivery);
+          formData.append("RandomeCode", randomCode);
+
+          const response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: formData.toString(),
+          });
+
+          if (!response.ok) {
+            throw new Error(`Server error: ${response.status}`);
+          }
+        }
+      }
+
+      clearBasket();
+      toast.success("Order placed successfully!");
+      navigate("/orders");
+    } catch (err) {
+      console.error("Order submission failed:", err);
+      toast.error("Failed to place order. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="h-screen bg-muted flex flex-col max-w-md mx-auto w-full">
@@ -37,7 +109,7 @@ const Basket = () => {
         </div>
         <div className="flex justify-between text-foreground font-semibold text-sm">
           <span>Total Price</span>
-          <span>{total.toFixed(2)}</span>
+          <span>£{total.toFixed(2)}</span>
         </div>
       </div>
 
@@ -54,7 +126,6 @@ const Basket = () => {
               key={item.id}
               className="rounded-xl overflow-hidden bg-card shadow-md"
             >
-              {/* Item image */}
               <div className="relative w-full h-40 bg-muted">
                 {item.image ? (
                   <img
@@ -67,34 +138,28 @@ const Basket = () => {
                     <span className="text-4xl">🍽️</span>
                   </div>
                 )}
-                {/* Overlay with name and price */}
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-4 py-3 flex items-end justify-between">
                   <span className="text-white font-bold text-sm uppercase tracking-wide">
                     {item.name}
                   </span>
                   <span className="text-white font-bold text-sm">
-                    {item.price.toFixed(2)}
+                    £{item.price.toFixed(2)}
                   </span>
                 </div>
               </div>
 
-              {/* Description */}
               <div className="px-4 py-3">
-                <p className="text-muted-foreground text-sm">
-                  {item.description}
-                </p>
-                <p className="text-foreground text-xs mt-1">
-                  Qty: {item.quantity}
-                </p>
+                <p className="text-muted-foreground text-sm">{item.description}</p>
+                <p className="text-foreground text-xs mt-1">Qty: {item.quantity}</p>
               </div>
 
-              {/* Actions */}
               <div className="px-4 pb-3 flex items-center justify-center gap-3">
                 <Button
                   variant="destructive"
                   size="sm"
                   className="rounded-full px-5 gap-1"
                   onClick={() => removeItem(item.id)}
+                  disabled={submitting}
                 >
                   <Trash2 size={14} />
                   Delete
@@ -104,6 +169,7 @@ const Basket = () => {
                   size="sm"
                   className="rounded-full px-5 gap-1"
                   onClick={() => clearItem(item.id)}
+                  disabled={submitting}
                 >
                   <X size={14} />
                   Clear
@@ -114,7 +180,7 @@ const Basket = () => {
         )}
       </div>
 
-      {/* Table Number placeholder */}
+      {/* Table Number */}
       <div className="bg-card border-t border-border px-4 py-3 shrink-0 flex items-center justify-between">
         <p className="text-muted-foreground text-sm font-medium">Table Number</p>
         <Select value={tableNumber} onValueChange={setTableNumber}>
@@ -133,13 +199,31 @@ const Basket = () => {
 
       {/* Order type buttons */}
       <div className="bg-card border-t border-border px-4 py-4 flex items-center justify-between gap-3 shrink-0">
-        <Button variant="outline" className="flex-1 rounded-full" onClick={() => navigate("/orders")}>
+        <Button
+          variant="outline"
+          className="flex-1 rounded-full"
+          onClick={() => placeOrder("takeaway")}
+          disabled={submitting || items.length === 0}
+        >
+          {submitting ? <Loader2 className="animate-spin mr-1" size={14} /> : null}
           Take Away
         </Button>
-        <Button variant="outline" className="flex-1 rounded-full" onClick={() => navigate("/orders")}>
+        <Button
+          variant="outline"
+          className="flex-1 rounded-full"
+          onClick={() => placeOrder("onsite")}
+          disabled={submitting || items.length === 0}
+        >
+          {submitting ? <Loader2 className="animate-spin mr-1" size={14} /> : null}
           On Site
         </Button>
-        <Button variant="outline" className="flex-1 rounded-full" onClick={() => navigate("/orders")}>
+        <Button
+          variant="outline"
+          className="flex-1 rounded-full"
+          onClick={() => placeOrder("delivery")}
+          disabled={submitting || items.length === 0}
+        >
+          {submitting ? <Loader2 className="animate-spin mr-1" size={14} /> : null}
           Deliver
         </Button>
       </div>

@@ -7,6 +7,7 @@ export interface BasketItem {
   description: string;
   image: string;
   quantity: number;
+  groupId?: string;
 }
 
 interface BasketContextType {
