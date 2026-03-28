@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { LogOut, User, Camera, Image, Save, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { type DigitalPerson } from "@/lib/api";
+import { type DigitalPerson, updateUserProfile } from "@/lib/api";
 import { toast } from "sonner";
 
 const Profile = () => {
