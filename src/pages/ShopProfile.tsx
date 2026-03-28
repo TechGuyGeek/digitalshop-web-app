@@ -205,20 +205,16 @@ const ShopProfile = () => {
 
       {/* Shop image */}
       <div className="w-full h-48 bg-card flex items-center justify-center overflow-hidden">
-        {imageUrl ? (
+        {imageUrl && !imgError ? (
           <img
             src={imageUrl}
             alt={shopName}
             className="w-full h-full object-cover"
-            onError={(e) => {
-              (e.target as HTMLImageElement).style.display = "none";
-              (e.target as HTMLImageElement).nextElementSibling?.classList.remove("hidden");
-            }}
+            onError={() => setImgError(true)}
           />
-        ) : null}
-        <span className={`text-5xl ${imageUrl ? "hidden" : ""}`}>
-          {fallbackIcon}
-        </span>
+        ) : (
+          <span className="text-5xl">{fallbackIcon}</span>
+        )}
       </div>
 
       {/* Shop info */}
