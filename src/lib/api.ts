@@ -97,5 +97,21 @@ export async function registerUser(user: {
     body: formData.toString(),
   });
 
-  return await response.text();
+  const text = await response.text();
+
+  // Backend returns HTML on success, not JSON
+  // Check for known error patterns first
+  const lower = text.toLowerCase();
+  if (lower.includes("already exists")) {
+    return "User with this email already exists!";
+  }
+  if (lower.includes("unsuccessful") || lower.includes("error")) {
+    return "Registration failed. Please try again.";
+  }
+  // Success: backend outputs HTML email template and/or "Success!" text
+  if (lower.includes("success") || lower.includes("email has been sent") || text.includes("<html") || text.includes("<!DOCTYPE")) {
+    return "SUCCESS";
+  }
+  // Fallback: treat non-empty as potential success
+  return text ? "SUCCESS" : "Registration failed. No response from server.";
 }

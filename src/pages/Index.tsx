@@ -69,9 +69,15 @@ const Index = () => {
         mobileNumber,
         language,
       });
-      if (result && !result.toLowerCase().includes("error") && !result.toLowerCase().includes("exist")) {
-        toast.success("Registration successful! You can now sign in.");
+      if (result === "SUCCESS") {
+        toast.success("Account created! Please check your email to activate your account before signing in.");
         setView("login");
+        setFirstName("");
+        setLastName("");
+        setDateOfBirth("");
+        setMobileNumber("");
+        setEmail("");
+        setPassword("");
       } else {
         toast.error(result || "Registration failed");
       }
