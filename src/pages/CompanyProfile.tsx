@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
+import WebcamCapture from "@/components/WebcamCapture";
 
 const MAX_IMAGE_SIZE = 800;
 
@@ -42,6 +43,7 @@ const CompanyProfile = () => {
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const [pendingImageBase64, setPendingImageBase64] = useState<string | null>(null);
+  const [webcamOpen, setWebcamOpen] = useState(false);
 
   const [form, setForm] = useState({
     shopName: "",
@@ -103,6 +105,20 @@ const CompanyProfile = () => {
     e.target.value = "";
   };
 
+  const handleWebcamCapture = (base64: string) => {
+    setPendingImageBase64(base64);
+    setShopImage(`data:image/jpeg;base64,${base64}`);
+    toast.success("Photo captured — tap Save to upload");
+  };
+
+  const handleCameraClick = () => {
+    if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      cameraInputRef.current?.click();
+    } else {
+      setWebcamOpen(true);
+    }
+  };
+
   const handleSave = () => {
     // TODO: POST to PHP backend (include pendingImageBase64 as SelectImage)
     toast.success("Company profile saved!");
@@ -120,6 +136,7 @@ const CompanyProfile = () => {
       {/* Hidden file inputs */}
       <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={onFileChange} />
       <input ref={galleryInputRef} type="file" accept="image/*" className="hidden" onChange={onFileChange} />
+      <WebcamCapture open={webcamOpen} onOpenChange={setWebcamOpen} onCapture={handleWebcamCapture} />
 
       {/* Header */}
       <div className="flex items-center gap-3 p-4 bg-primary">
@@ -144,7 +161,7 @@ const CompanyProfile = () => {
 
         {/* Camera / Gallery / Save buttons */}
         <div className="flex justify-center gap-3 py-4">
-          <Button variant="secondary" className="rounded-full px-5 gap-2" size="sm" onClick={() => cameraInputRef.current?.click()}>
+          <Button variant="secondary" className="rounded-full px-5 gap-2" size="sm" onClick={handleCameraClick}>
             <Camera size={14} />
             Camera
           </Button>

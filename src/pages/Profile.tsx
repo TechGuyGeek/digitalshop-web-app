@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { type DigitalPerson, updateUserProfile } from "@/lib/api";
 import { toast } from "sonner";
+import WebcamCapture from "@/components/WebcamCapture";
 
 const MAX_IMAGE_SIZE = 800; // max width/height in pixels
 
@@ -55,6 +56,7 @@ const Profile = () => {
   });
   const [pendingImageBase64, setPendingImageBase64] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [webcamOpen, setWebcamOpen] = useState(false);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
 
@@ -99,6 +101,21 @@ const Profile = () => {
     const file = e.target.files?.[0];
     if (file) handleImageSelected(file);
     e.target.value = "";
+  };
+
+  const handleWebcamCapture = (base64: string) => {
+    setPendingImageBase64(base64);
+    setPreviewUrl(`data:image/jpeg;base64,${base64}`);
+    toast.success("Photo captured — tap Save to upload");
+  };
+
+  const handleCameraClick = () => {
+    // On mobile, use native camera. On desktop, use webcam modal.
+    if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      cameraInputRef.current?.click();
+    } else {
+      setWebcamOpen(true);
+    }
   };
 
   const [saving, setSaving] = useState(false);
@@ -170,6 +187,7 @@ const Profile = () => {
       {/* Hidden file inputs */}
       <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={onFileChange} />
       <input ref={galleryInputRef} type="file" accept="image/*" className="hidden" onChange={onFileChange} />
+      <WebcamCapture open={webcamOpen} onOpenChange={setWebcamOpen} onCapture={handleWebcamCapture} />
 
       <div className="relative w-full max-w-lg mx-auto pt-6 px-4">
         <div className="w-full aspect-[4/3] rounded-xl overflow-hidden bg-card border border-border mb-4">
@@ -183,7 +201,7 @@ const Profile = () => {
         </div>
 
         <div className="flex justify-center gap-3 mb-6">
-          <Button size="sm" className="rounded-full px-5" onClick={() => cameraInputRef.current?.click()}>
+          <Button size="sm" className="rounded-full px-5" onClick={handleCameraClick}>
             <Camera size={14} className="mr-1.5" />
             Camera
           </Button>
