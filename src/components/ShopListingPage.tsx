@@ -18,7 +18,7 @@ const tabs = [
 
 type TabId = (typeof tabs)[number]["id"];
 
-const ShopListingPage = ({ title }: ShopListingPageProps) => {
+const ShopListingPage = ({ title, variant = "free" }: ShopListingPageProps) => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabId>("hybrid");
   const [shops, setShops] = useState<NearbyShop[]>([]);
