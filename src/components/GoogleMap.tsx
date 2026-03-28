@@ -9,7 +9,7 @@ interface GoogleMapProps {
 
 const MAPS_KEY = "AIzaSyAN76Tb-dL_5pvp-w1iFhxWqI52sDnoz5c";
 
-const GoogleMap = ({ className = "", shops = [] }: GoogleMapProps) => {
+const GoogleMap = ({ className = "", shops = [], onShopClick }: GoogleMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null);

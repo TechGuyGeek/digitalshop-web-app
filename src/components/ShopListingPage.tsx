@@ -64,7 +64,14 @@ const ShopListingPage = ({ title }: ShopListingPageProps) => {
     icon: s.icon,
     lat: s.lat,
     lng: s.lng,
+    companyid: s.companyid,
   }));
+
+  const handleShopMapClick = (shop: { name: string; icon: string; companyid?: number }) => {
+    if (shop.companyid) {
+      navigate(`/shop-profile?companyid=${shop.companyid}&name=${encodeURIComponent(shop.name)}&icon=${encodeURIComponent(shop.icon)}`);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
