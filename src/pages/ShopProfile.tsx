@@ -146,11 +146,7 @@ const ShopProfile = () => {
   };
 
   const handleBack = () => {
-    if (window.history.length > 1) {
-      navigate(-1);
-    } else {
-      navigate("/view-shops");
-    }
+    navigate("/view-shops");
   };
 
   if (loading) {
