@@ -14,10 +14,8 @@ interface OrderLineItem {
   orderName?: string;
   OrderPrice?: string;
   orderPrice?: string;
-  MenuPhoto?: string;
-  menuphoto?: string;
-  MenuDescription?: string;
-  menudescription?: string;
+  imagepath?: string;
+  OrderDesription?: string;
   [key: string]: unknown;
 }
 
@@ -131,12 +129,8 @@ const OrderDetail = () => {
           items.map((item, idx) => {
             const name = String(item.OrderName || item.orderName || "Item");
             const price = String(item.OrderPrice || item.orderPrice || "0.00");
-            const photo = getProductPhotoUrl(
-              (item.MenuPhoto || item.menuphoto || "") as string
-            );
-            const description = String(
-              item.MenuDescription || item.menudescription || ""
-            );
+            const photo = getProductPhotoUrl(item.imagepath);
+            const description = String(item.OrderDesription || "");
 
             return (
               <div
