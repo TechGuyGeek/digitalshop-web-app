@@ -93,6 +93,18 @@ const Orders = () => {
     setCancellingId(null);
   };
 
+  const handleOrderTap = (order: GroupedOrder) => {
+    const first = order.items[0];
+    const clientId = String(first.clientid || first.Companyid || "");
+    const params = new URLSearchParams({
+      companyid: order.companyId,
+      clientid: clientId,
+      datetime: order.dateTime,
+      companyname: order.companyName,
+    });
+    navigate(`/order-detail?${params.toString()}`);
+  };
+
   const handleCompanyProfile = (order: GroupedOrder) => {
     if (order.companyId) {
       navigate(`/shop-profile?companyid=${encodeURIComponent(order.companyId)}&from=orders`);
@@ -172,7 +184,8 @@ const Orders = () => {
             return (
               <div
                 key={order.randomCode}
-                className="rounded-xl border border-border bg-card p-4 shadow-sm"
+                className="rounded-xl border border-border bg-card p-4 shadow-sm cursor-pointer"
+                onClick={() => handleOrderTap(order)}
               >
                 <div className="flex gap-3">
                   {/* Order details */}
@@ -238,7 +251,7 @@ const Orders = () => {
                 </div>
 
                 {/* Action buttons */}
-                <div className="flex gap-3 mt-4">
+                <div className="flex gap-3 mt-4" onClick={(e) => e.stopPropagation()}>
                   <Button
                     variant="outline"
                     className="flex-1 rounded-full text-sm"
