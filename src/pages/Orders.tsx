@@ -106,7 +106,7 @@ const Orders = () => {
     const detailRoutes: Record<TabKey, string> = {
       today: "/order-detail",
       week: "/order-detail-week",
-      month: "/order-detail",
+      month: "/order-detail-month",
     };
 
     navigate(`${detailRoutes[activeTab]}?${params.toString()}`);
