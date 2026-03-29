@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { LogOut, User, Camera, Image, Save, Trash2 } from "lucide-react";
+import { LogOut, User, Camera, Image, Save, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { type DigitalPerson, updateUserProfile } from "@/lib/api";
+import { loadCompanyProfile } from "@/lib/companyApi";
 import { toast } from "sonner";
 import WebcamCapture from "@/components/WebcamCapture";
 
