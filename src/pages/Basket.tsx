@@ -28,12 +28,31 @@ const Basket = () => {
   const { items, count, total, removeItem, clearItem, clearBasket } = useBasket();
   const [submitting, setSubmitting] = useState(false);
 
+  // Read logged-in user from localStorage
+  const getLoggedInUser = () => {
+    try {
+      const stored = localStorage.getItem("digitalUser");
+      if (stored) return JSON.parse(stored);
+    } catch {}
+    return null;
+  };
+
   const placeOrder = async (mode: OrderMode) => {
     if (submitting) return;
     if (items.length === 0) {
       toast.error("Your basket is empty");
       return;
     }
+
+    const user = getLoggedInUser();
+    if (!user || !(user.PersonID || user.ID)) {
+      toast.error("Please log in before placing an order");
+      return;
+    }
+
+    const personId = String(user.PersonID || user.ID || "");
+    const userName = String(user.Name || user.name || "");
+    const userSurname = String(user.Surname || user.surname || "");
 
     setSubmitting(true);
     const randomCode = generateRandomCode(64);
@@ -51,9 +70,9 @@ const Basket = () => {
           formData.append("CompanyEmail", "");
           formData.append("CompanyMobile", "");
           formData.append("MenuNotifications", "0");
-          formData.append("PersonID", "0");
-          formData.append("Name", "Guest");
-          formData.append("Surname", "");
+          formData.append("PersonID", personId);
+          formData.append("Name", userName);
+          formData.append("Surname", userSurname);
           formData.append("GroupID", item.groupId || "0");
           formData.append("OrderID", String(item.id));
           formData.append("TableNumber", tableNumber || "0");
