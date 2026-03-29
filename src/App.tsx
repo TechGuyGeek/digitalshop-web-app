@@ -18,6 +18,7 @@ import Basket from "./pages/Basket.tsx";
 import Orders from "./pages/Orders.tsx";
 import OrderDetail from "./pages/OrderDetail.tsx";
 import OrderDetailWeek from "./pages/OrderDetailWeek.tsx";
+import OrderDetailMonth from "./pages/OrderDetailMonth.tsx";
 import BuildShop from "./pages/BuildShop.tsx";
 import CompanyProfile from "./pages/CompanyProfile.tsx";
 import QRScanner from "./pages/QRScanner.tsx";
