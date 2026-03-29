@@ -4,6 +4,7 @@ export interface OrderSummary {
   clientid?: string;
   Companyid?: string;
   companyid?: string;
+  orderid?: string;
   Orderid?: string;
   CompanyName?: string;
   companyname?: string;
@@ -14,10 +15,32 @@ export interface OrderSummary {
   TableNumber?: string;
   NeedTakeaway?: string;
   NeedDelivery?: string;
+  HasPaid?: string;
+  HasDelivered?: string;
   PaymentStatus?: string;
   DeliveryStatus?: string;
+  RequestCancel?: string;
   RandomeCode?: string;
+  GroupID?: string;
+  productid?: string;
   [key: string]: unknown;
+}
+
+/** A grouped order representing one checkout session */
+export interface GroupedOrder {
+  randomCode: string;
+  companyId: string;
+  companyName: string;
+  companyphoto: string;
+  dateTime: string;
+  tableNumber: string;
+  needTakeaway: string;
+  needDelivery: string;
+  hasPaid: string;
+  hasDelivered: string;
+  requestCancel: string;
+  itemCount: number;
+  items: OrderSummary[];
 }
 
 export async function fetchOrdersToday(personId: string): Promise<OrderSummary[]> {
@@ -56,7 +79,7 @@ async function fetchOrders(endpoint: string, personId: string): Promise<OrderSum
 }
 
 export async function requestCancelOrder(
-  order: OrderSummary,
+  order: GroupedOrder,
   personId: string,
   bucket: "today" | "week" | "month"
 ): Promise<boolean> {
@@ -69,9 +92,8 @@ export async function requestCancelOrder(
   try {
     const formData = new URLSearchParams();
     formData.append("PersonID", personId);
-    formData.append("companyID", order.Companyid || order.companyid || "");
-    formData.append("Orderid", order.Orderid || "");
-    formData.append("DateandTime", order.DateandTime || "");
+    formData.append("companyID", order.companyId);
+    formData.append("DateandTime", order.dateTime);
 
     const response = await fetch(SERVER_DOMAIN + endpoints[bucket], {
       method: "POST",
@@ -87,22 +109,44 @@ export async function requestCancelOrder(
   }
 }
 
-/** Group orders by DateandTime, taking the first of each group (matching MAUI behaviour) */
-export function groupOrdersByDate(orders: OrderSummary[]): OrderSummary[] {
-  const sorted = [...orders].sort((a, b) => {
-    const da = a.DateandTime || "";
-    const db = b.DateandTime || "";
-    return db.localeCompare(da);
-  });
+/** Group raw order rows by RandomeCode into checkout sessions */
+export function groupOrdersBySession(orders: OrderSummary[]): GroupedOrder[] {
+  const map = new Map<string, OrderSummary[]>();
 
-  const seen = new Set<string>();
-  const grouped: OrderSummary[] = [];
-  for (const o of sorted) {
-    const key = o.DateandTime || "";
-    if (!seen.has(key)) {
-      seen.add(key);
-      grouped.push(o);
-    }
+  for (const o of orders) {
+    const key = o.RandomeCode || o.DateandTime || o.orderid || "";
+    if (!map.has(key)) map.set(key, []);
+    map.get(key)!.push(o);
   }
+
+  const grouped: GroupedOrder[] = [];
+  for (const [code, items] of map) {
+    const first = items[0];
+    grouped.push({
+      randomCode: code,
+      companyId: first.companyid || first.Companyid || "",
+      companyName: first.CompanyName || first.companyname || "Shop",
+      companyphoto: first.companyphoto || "",
+      dateTime: first.DateandTime || "",
+      tableNumber: first.TableNumber || "",
+      needTakeaway: first.NeedTakeaway || "0",
+      needDelivery: first.NeedDelivery || "0",
+      hasPaid: first.HasPaid || "0",
+      hasDelivered: first.HasDelivered || "0",
+      requestCancel: first.RequestCancel || "0",
+      itemCount: items.length,
+      items,
+    });
+  }
+
+  // Sort newest first
+  grouped.sort((a, b) => b.dateTime.localeCompare(a.dateTime));
   return grouped;
+}
+
+export function getCompanyPhotoUrl(photo: string | undefined): string {
+  if (!photo) return "";
+  if (photo.startsWith("http")) return photo;
+  const cleaned = photo.startsWith("/") ? photo.slice(1) : photo;
+  return `${SERVER_DOMAIN}menu1/${cleaned}`;
 }
