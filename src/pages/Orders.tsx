@@ -251,7 +251,7 @@ const Orders = () => {
                 </div>
 
                 {/* Action buttons */}
-                <div className="flex gap-3 mt-4">
+                <div className="flex gap-3 mt-4" onClick={(e) => e.stopPropagation()}>
                   <Button
                     variant="outline"
                     className="flex-1 rounded-full text-sm"
