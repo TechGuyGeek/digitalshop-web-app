@@ -1,0 +1,245 @@
+const SERVER_DOMAIN = "https://app.techguygeek.co.uk/";
+
+// ─── Endpoints (configurable) ───────────────────────────────────
+const ENDPOINTS = {
+  loadCompany: "menu1/PHPread/Company/DoesCompanyExistorNotSecure.php",
+  saveCompany: "menu1/PHPwrite/Company/UpdateCompanyDetailsSecure.php",
+  toggleOrder: "menu1/PHPwrite/Company/SaveCompanyOrdersToggle.php",
+  toggleTakeaway: "menu1/PHPwrite/Company/SaveCompanyTakeawaysToggle.php",
+  toggleDelivery: "menu1/PHPwrite/Company/SaveCompanyDeliveriesToggle.php",
+  toggleGlobal: "menu1/PHPwrite/Company/SaveCompanyLocalGlobal.php",
+  updateGPS: "menu1/PHPwrite/Company/UpdateGPS.php",
+  countMenuGroup: "menu1/PHPread/CompanyMenu/CountMenuGroup.php",
+  liveOrderCountAll: "menu1/PHPread/CompanyLiveOrders/LiveOrderCountAll.php",
+  deleteCountMenuGroup: "menu1/PHPread/CompanyMenu/DeleteCountMenuGroup.php",
+  liveOrderCount: "menu1/PHPread/CompanyLiveOrders/LiveOrderCount.php",
+  liveOrderCountWeek: "menu1/PHPread/CompanyLiveOrders/LiveOrderCountweek.php",
+  liveOrderCountMonth: "menu1/PHPread/CompanyLiveOrders/LiveOrderCountmonth.php",
+  deleteCompany: "menu1/PHPwrite/Company/DeleteCompanySecure.php",
+};
+
+export { SERVER_DOMAIN };
+
+export interface CompanyProfile {
+  companyid: number;
+  PersonID?: number;
+  CompanyName?: string;
+  companyname?: string;
+  CompanyMobile?: string;
+  CompanyEmail?: string;
+  OpeningTimes?: string;
+  ClosingTimes?: string;
+  TableNumbers?: string;
+  MenuNotifications?: string;
+  LineOneAddress?: string;
+  LineTwoAddress?: string;
+  LineThreeAddress?: string;
+  LineFourAddress?: string;
+  LineCountryAddress?: string;
+  CompanyDescription?: string;
+  companyphoto?: string;
+  Imagepath?: string;
+  OrderEnable?: string;
+  TakeawayEnable?: string;
+  DeliveryEnable?: string;
+  PayOnPhoneEnable?: string;
+  PublicNumber?: string;
+  PrivateNumber?: string;
+  snippet?: string;
+  companyPhotoBackGround?: string;
+  LastLoggedOn?: string;
+  companylat?: number;
+  companylong?: number;
+  [key: string]: unknown;
+}
+
+// ─── Load company ───────────────────────────────────────────────
+export async function loadCompanyProfile(personId: string, email: string): Promise<CompanyProfile | null> {
+  const res = await fetch(SERVER_DOMAIN + ENDPOINTS.loadCompany, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ PersonID: personId, UserEmail: email }),
+  });
+  const data = await res.json();
+  if (data.Success && data.Companies && data.Companies.length > 0) {
+    return data.Companies[0] as CompanyProfile;
+  }
+  // fallback: array response
+  if (Array.isArray(data) && data.length > 0 && data[0].companyid) {
+    return data[0] as CompanyProfile;
+  }
+  return null;
+}
+
+// ─── Save company ───────────────────────────────────────────────
+export async function saveCompanyProfile(payload: Record<string, unknown>): Promise<{ success: boolean; error?: string }> {
+  try {
+    const res = await fetch(SERVER_DOMAIN + ENDPOINTS.saveCompany, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const text = await res.text();
+    try {
+      const json = JSON.parse(text);
+      if (json.ServerMessage && json.ServerMessage !== "Success") {
+        return { success: false, error: json.ServerMessage };
+      }
+      return { success: true };
+    } catch {
+      return { success: true };
+    }
+  } catch (err) {
+    return { success: false, error: "Network error" };
+  }
+}
+
+// ─── Toggle helpers ─────────────────────────────────────────────
+async function postToggle(endpoint: string, body: Record<string, unknown>): Promise<boolean> {
+  try {
+    const res = await fetch(SERVER_DOMAIN + endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    return data.success === true || data.Success === true;
+  } catch {
+    return false;
+  }
+}
+
+export function toggleOrderEnable(companyid: number, value: string, userId: number, email: string, password: string) {
+  return postToggle(ENDPOINTS.toggleOrder, { companyid, OrderEnable: value, UserID: userId, UserEmail: email, UserPassword: password });
+}
+
+export function toggleTakeawayEnable(companyid: number, value: string, userId: number, email: string, password: string) {
+  return postToggle(ENDPOINTS.toggleTakeaway, { companyid, TakeawayEnable: value, UserID: userId, UserEmail: email, UserPassword: password });
+}
+
+export function toggleDeliveryEnable(companyid: number, value: string, userId: number, email: string, password: string) {
+  return postToggle(ENDPOINTS.toggleDelivery, { companyid, DeliveryEnable: value, UserID: userId, UserEmail: email, UserPassword: password });
+}
+
+export function toggleGlobalEnable(companyid: number, value: string, userId: number, email: string, password: string) {
+  return postToggle(ENDPOINTS.toggleGlobal, { companyid, PayOnPhoneEnable: value, UserID: userId, UserEmail: email, UserPassword: password });
+}
+
+// ─── Update GPS ─────────────────────────────────────────────────
+export async function updateCompanyGPS(companyid: number, lat: number, lng: number, personId: number, email: string, password: string): Promise<boolean> {
+  return postToggle(ENDPOINTS.updateGPS, { companyid, companylat: lat, companylong: lng, PersonID: personId, Email: email, Password: password });
+}
+
+// ─── Count menu groups ──────────────────────────────────────────
+export async function countMenuGroups(companyid: number): Promise<string> {
+  try {
+    const form = new URLSearchParams();
+    form.append("companyID", String(companyid));
+    const res = await fetch(SERVER_DOMAIN + ENDPOINTS.countMenuGroup, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: form.toString(),
+    });
+    return (await res.text()).trim();
+  } catch {
+    return "ZERO";
+  }
+}
+
+// ─── Live order counts ─────────────────────────────────────────
+export async function liveOrderCountAll(companyid: number): Promise<{ today: number; week: number; month: number }> {
+  try {
+    const form = new URLSearchParams();
+    form.append("companyID", String(companyid));
+    const res = await fetch(SERVER_DOMAIN + ENDPOINTS.liveOrderCountAll, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: form.toString(),
+    });
+    const data = await res.json();
+    return { today: Number(data.today) || 0, week: Number(data.week) || 0, month: Number(data.month) || 0 };
+  } catch {
+    return { today: 0, week: 0, month: 0 };
+  }
+}
+
+// ─── Delete blockers ────────────────────────────────────────────
+async function fetchCount(endpoint: string, companyid: number): Promise<number> {
+  try {
+    const form = new URLSearchParams();
+    form.append("companyID", String(companyid));
+    const res = await fetch(SERVER_DOMAIN + endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: form.toString(),
+    });
+    const text = (await res.text()).trim();
+    const n = parseInt(text, 10);
+    return isNaN(n) ? 0 : n;
+  } catch {
+    return 0;
+  }
+}
+
+export async function getDeleteBlockers(companyid: number) {
+  const [menuGroups, dayOrders, weekOrders, monthOrders] = await Promise.all([
+    fetchCount(ENDPOINTS.deleteCountMenuGroup, companyid),
+    fetchCount(ENDPOINTS.liveOrderCount, companyid),
+    fetchCount(ENDPOINTS.liveOrderCountWeek, companyid),
+    fetchCount(ENDPOINTS.liveOrderCountMonth, companyid),
+  ]);
+  return { menuGroups, dayOrders, weekOrders, monthOrders, total: menuGroups + dayOrders + weekOrders + monthOrders };
+}
+
+// ─── Delete company (form POST) ────────────────────────────────
+export async function deleteCompany(companyid: number, userId: number, email: string, password: string): Promise<{ success: boolean; message?: string }> {
+  try {
+    const form = new URLSearchParams();
+    form.append("UserID", String(userId));
+    form.append("UserEmail", email);
+    form.append("UserPassword", password);
+    form.append("companyID", String(companyid));
+    form.append("companyid", String(companyid));
+    const res = await fetch(SERVER_DOMAIN + ENDPOINTS.deleteCompany, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: form.toString(),
+    });
+    const data = await res.json();
+    return { success: data.success === true, message: data.ServerMessage };
+  } catch {
+    return { success: false, message: "Network error" };
+  }
+}
+
+// ─── Image URL helper ───────────────────────────────────────────
+export function getCompanyImageUrl(companyphoto?: string): string {
+  if (!companyphoto) return "";
+  if (companyphoto.startsWith("/")) {
+    return encodeURI(SERVER_DOMAIN + "menu1" + companyphoto);
+  }
+  if (companyphoto.startsWith("http")) return companyphoto;
+  return encodeURI(SERVER_DOMAIN + "menu1/" + companyphoto);
+}
+
+// ─── Map marker mapping ────────────────────────────────────────
+export const MAP_MARKER_EMOJIS: Record<string, { emoji: string; label: string }> = {
+  "0": { emoji: "📍", label: "Google" },
+  "1": { emoji: "🏪", label: "Shop" },
+  "2": { emoji: "🍻", label: "Pub" },
+  "3": { emoji: "☕", label: "Cafe" },
+  "4": { emoji: "🍴", label: "Restaurant" },
+  "5": { emoji: "🏠", label: "Home" },
+  "6": { emoji: "🎪", label: "Mobile" },
+  "7": { emoji: "🧸", label: "Toys" },
+  "8": { emoji: "🥪", label: "Sandwiches" },
+  "9": { emoji: "📍", label: "Google" },
+  "10": { emoji: "🍳", label: "Breakfast" },
+  "11": { emoji: "👔", label: "Mens Clothing" },
+  "12": { emoji: "👗", label: "Ladies Clothing" },
+  "13": { emoji: "🔢", label: "Digits" },
+};
+
+export function getMarkerForPublicNumber(publicNumber?: string) {
+  return MAP_MARKER_EMOJIS[publicNumber || "0"] || MAP_MARKER_EMOJIS["0"];
+}
