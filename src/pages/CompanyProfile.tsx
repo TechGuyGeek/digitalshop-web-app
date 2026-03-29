@@ -1,16 +1,10 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  ArrowLeft, Camera, Image as ImageIcon, Save, Trash2, QrCode,
-  MapPin, ShoppingBag, ClipboardList, Map, Loader2
-} from "lucide-react";
+import { ArrowLeft, Camera, Image as ImageIcon, Save, Trash2, Loader2 } from "lucide-react";
 import MapMarkerPicker from "@/components/MapMarkerPicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import WebcamCapture from "@/components/WebcamCapture";
 import {
@@ -26,11 +20,6 @@ import {
 } from "@/components/ui/alert-dialog";
 
 const MAX_IMAGE_SIZE = 800;
-const TIME_OPTIONS = [
-  "01:00","02:00","03:00","04:00","05:00","06:00","07:00","08:00","09:00","10:00",
-  "11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00",
-  "21:00","22:00","23:00","23:59"
-];
 
 function resizeAndConvertToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -66,33 +55,27 @@ const CompanyProfile = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [pendingImageBase64, setPendingImageBase64] = useState<string | null>(null);
-  const [previewImage, setPreviewImage] = useState("");
+  const [shopImage, setShopImage] = useState("");
   const [webcamOpen, setWebcamOpen] = useState(false);
   const [markerPickerOpen, setMarkerPickerOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteBlockerMsg, setDeleteBlockerMsg] = useState("");
 
   // Form state
-  const [companyName, setCompanyName] = useState("");
-  const [companyMobile, setCompanyMobile] = useState("");
-  const [companyEmail, setCompanyEmail] = useState("");
-  const [openingTime, setOpeningTime] = useState("09:00");
-  const [closingTime, setClosingTime] = useState("17:00");
-  const [tableNumbers, setTableNumbers] = useState("0");
-  const [menuNotifications, setMenuNotifications] = useState("Email");
-  const [lineOne, setLineOne] = useState("");
-  const [lineTwo, setLineTwo] = useState("");
-  const [lineThree, setLineThree] = useState("");
-  const [lineFour, setLineFour] = useState("");
-  const [lineCountry, setLineCountry] = useState("");
-  const [description, setDescription] = useState("");
-  const [publicNumber, setPublicNumber] = useState("0");
+  const [form, setForm] = useState({
+    shopName: "", mobileNumber: "", companyEmail: "",
+    lineOne: "", lineTwo: "", lineThree: "", lineFour: "", country: "",
+    openTime: "06:00", closeTime: "23:00",
+    notificationCount: "24", notifications: "",
+    description: "",
+  });
 
-  // Toggles
-  const [orderEnable, setOrderEnable] = useState(false);
-  const [takeawayEnable, setTakeawayEnable] = useState(false);
-  const [deliveryEnable, setDeliveryEnable] = useState(false);
-  const [globalEnable, setGlobalEnable] = useState(false);
+  const [toggles, setToggles] = useState({
+    liveOrders: true, takeaways: true, deliveries: true, allowGlobal: false,
+  });
+
+  const [publicNumber, setPublicNumber] = useState("0");
+  const [selectedMarker, setSelectedMarker] = useState({ emoji: "🧸", label: "TOYS ICON" });
 
   // Load user & company
   useEffect(() => {
@@ -107,26 +90,32 @@ const CompanyProfile = () => {
     loadCompanyProfile(personId, email).then(c => {
       if (c) {
         setCompany(c);
-        setCompanyName(c.CompanyName || c.companyname || "");
-        setCompanyMobile(c.CompanyMobile || "");
-        setCompanyEmail(c.CompanyEmail || "");
-        setOpeningTime(c.OpeningTimes || "09:00");
-        setClosingTime(c.ClosingTimes || "17:00");
-        setTableNumbers(c.TableNumbers || "0");
-        setMenuNotifications(c.MenuNotifications || "Email");
-        setLineOne(c.LineOneAddress || "");
-        setLineTwo(c.LineTwoAddress || "");
-        setLineThree(c.LineThreeAddress || "");
-        setLineFour(c.LineFourAddress || "");
-        setLineCountry(c.LineCountryAddress || "");
-        setDescription(c.CompanyDescription || "");
+        setForm({
+          shopName: c.CompanyName || c.companyname || "",
+          mobileNumber: c.CompanyMobile || "",
+          companyEmail: c.CompanyEmail || "",
+          openTime: c.OpeningTimes || "06:00",
+          closeTime: c.ClosingTimes || "23:00",
+          notificationCount: c.TableNumbers || "24",
+          notifications: c.MenuNotifications || "",
+          lineOne: c.LineOneAddress || "",
+          lineTwo: c.LineTwoAddress || "",
+          lineThree: c.LineThreeAddress || "",
+          lineFour: c.LineFourAddress || "",
+          country: c.LineCountryAddress || "",
+          description: c.CompanyDescription || "",
+        });
+        setToggles({
+          liveOrders: c.OrderEnable === "1",
+          takeaways: c.TakeawayEnable === "1",
+          deliveries: c.DeliveryEnable === "1",
+          allowGlobal: c.PayOnPhoneEnable === "1",
+        });
         setPublicNumber(c.PublicNumber || "0");
-        setOrderEnable(c.OrderEnable === "1");
-        setTakeawayEnable(c.TakeawayEnable === "1");
-        setDeliveryEnable(c.DeliveryEnable === "1");
-        setGlobalEnable(c.PayOnPhoneEnable === "1");
+        const marker = getMarkerForPublicNumber(c.PublicNumber);
+        setSelectedMarker({ emoji: marker.emoji, label: marker.label.toUpperCase() + " ICON" });
         const imgUrl = getCompanyImageUrl(c.companyphoto);
-        if (imgUrl) setPreviewImage(imgUrl);
+        if (imgUrl) setShopImage(imgUrl);
       }
       setLoading(false);
     }).catch(() => setLoading(false));
@@ -141,12 +130,16 @@ const CompanyProfile = () => {
     };
   }, [user, company]);
 
+  const handleChange = (field: string, value: string) => {
+    setForm(prev => ({ ...prev, [field]: value }));
+  };
+
   // Image handling
   const handleImageSelected = async (file: File) => {
     try {
       const base64 = await resizeAndConvertToBase64(file);
       setPendingImageBase64(base64);
-      setPreviewImage(`data:image/jpeg;base64,${base64}`);
+      setShopImage(`data:image/jpeg;base64,${base64}`);
       toast.success("Photo selected — tap Save to upload");
     } catch { toast.error("Failed to process image"); }
   };
@@ -155,6 +148,12 @@ const CompanyProfile = () => {
     const file = e.target.files?.[0];
     if (file) handleImageSelected(file);
     e.target.value = "";
+  };
+
+  const handleWebcamCapture = (base64: string) => {
+    setPendingImageBase64(base64);
+    setShopImage(`data:image/jpeg;base64,${base64}`);
+    toast.success("Photo captured — tap Save to upload");
   };
 
   const handleCameraClick = () => {
@@ -175,34 +174,34 @@ const CompanyProfile = () => {
       PersonID: auth.userId,
       Email: auth.email,
       Password: auth.password,
-      companyname: companyName,
+      companyname: form.shopName,
       Imagepath: company.Imagepath || "",
       companyphoto: company.companyphoto || "",
       companylat: company.companylat || 0,
       companylong: company.companylong || 0,
       snippet: company.snippet || "",
       companyPhotoBackGround: company.companyPhotoBackGround || "",
-      CompanyMobile: companyMobile,
-      CompanyEmail: companyEmail,
+      CompanyMobile: form.mobileNumber,
+      CompanyEmail: form.companyEmail,
       companypath: "",
       Switchischecked: "",
-      OpeningTimes: openingTime,
-      ClosingTimes: closingTime,
-      TableNumbers: tableNumbers,
-      MenuNotifications: menuNotifications,
+      OpeningTimes: form.openTime,
+      ClosingTimes: form.closeTime,
+      TableNumbers: form.notificationCount,
+      MenuNotifications: form.notifications,
       PictureBlob: pendingImageBase64 || "0",
-      OrderEnable: orderEnable ? "1" : "0",
-      TakeawayEnable: takeawayEnable ? "1" : "0",
-      DeliveryEnable: deliveryEnable ? "1" : "0",
-      PayOnPhoneEnable: globalEnable ? "1" : "0",
+      OrderEnable: toggles.liveOrders ? "1" : "0",
+      TakeawayEnable: toggles.takeaways ? "1" : "0",
+      DeliveryEnable: toggles.deliveries ? "1" : "0",
+      PayOnPhoneEnable: toggles.allowGlobal ? "1" : "0",
       PublicNumber: publicNumber,
       PrivateNumber: company.PrivateNumber || "",
-      LineOneAddress: lineOne,
-      LineTwoAddress: lineTwo,
-      LineThreeAddress: lineThree,
-      LineFourAddress: lineFour,
-      LineCountryAddress: lineCountry,
-      CompanyDescription: description,
+      LineOneAddress: form.lineOne,
+      LineTwoAddress: form.lineTwo,
+      LineThreeAddress: form.lineThree,
+      LineFourAddress: form.lineFour,
+      LineCountryAddress: form.country,
+      CompanyDescription: form.description,
       LastLoggedOn: "",
     };
 
@@ -217,40 +216,30 @@ const CompanyProfile = () => {
   };
 
   // Toggle handlers
-  const handleToggleOrder = async (checked: boolean) => {
-    setOrderEnable(checked);
+  const handleToggle = async (field: string, value: boolean) => {
+    setToggles(prev => ({ ...prev, [field]: value }));
     const auth = getUserAuth();
     if (!auth || !company) return;
-    const ok = await toggleOrderEnable(company.companyid, checked ? "1" : "0", auth.userId, auth.email, auth.password);
-    if (!ok) { setOrderEnable(!checked); toast.error("Failed to update order toggle"); }
-  };
 
-  const handleToggleTakeaway = async (checked: boolean) => {
-    setTakeawayEnable(checked);
-    const auth = getUserAuth();
-    if (!auth || !company) return;
-    const ok = await toggleTakeawayEnable(company.companyid, checked ? "1" : "0", auth.userId, auth.email, auth.password);
-    if (!ok) { setTakeawayEnable(!checked); toast.error("Failed to update takeaway toggle"); }
-  };
-
-  const handleToggleDelivery = async (checked: boolean) => {
-    setDeliveryEnable(checked);
-    const auth = getUserAuth();
-    if (!auth || !company) return;
-    const ok = await toggleDeliveryEnable(company.companyid, checked ? "1" : "0", auth.userId, auth.email, auth.password);
-    if (!ok) { setDeliveryEnable(!checked); toast.error("Failed to update delivery toggle"); }
-  };
-
-  const handleToggleGlobal = async (checked: boolean) => {
-    if (checked && user?.PaidUser === "0") {
-      toast.error("Only paid users can enable Global. Please upgrade.");
-      return;
+    let ok = true;
+    if (field === "liveOrders") {
+      ok = await toggleOrderEnable(company.companyid, value ? "1" : "0", auth.userId, auth.email, auth.password);
+    } else if (field === "takeaways") {
+      ok = await toggleTakeawayEnable(company.companyid, value ? "1" : "0", auth.userId, auth.email, auth.password);
+    } else if (field === "deliveries") {
+      ok = await toggleDeliveryEnable(company.companyid, value ? "1" : "0", auth.userId, auth.email, auth.password);
+    } else if (field === "allowGlobal") {
+      if (value && user?.PaidUser === "0") {
+        setToggles(prev => ({ ...prev, allowGlobal: false }));
+        toast.error("Only paid users can enable Global. Please upgrade.");
+        return;
+      }
+      ok = await toggleGlobalEnable(company.companyid, value ? "1" : "0", auth.userId, auth.email, auth.password);
     }
-    setGlobalEnable(checked);
-    const auth = getUserAuth();
-    if (!auth || !company) return;
-    const ok = await toggleGlobalEnable(company.companyid, checked ? "1" : "0", auth.userId, auth.email, auth.password);
-    if (!ok) { setGlobalEnable(!checked); toast.error("Failed to update global toggle"); }
+    if (!ok) {
+      setToggles(prev => ({ ...prev, [field]: !value }));
+      toast.error("Failed to update toggle");
+    }
   };
 
   // Update GPS
@@ -259,18 +248,13 @@ const CompanyProfile = () => {
       toast.error("Only pro members can update GPS");
       return;
     }
-    if (!company) return;
-    if (!navigator.geolocation) { toast.error("Geolocation not supported"); return; }
-
+    if (!company || !navigator.geolocation) { toast.error("Geolocation not supported"); return; }
     navigator.geolocation.getCurrentPosition(async (pos) => {
       const { latitude, longitude } = pos.coords;
-      const oldLat = company.companylat || 0;
-      const oldLng = company.companylong || 0;
       const confirm = window.confirm(
-        `Update GPS?\n\nOld: ${oldLat}, ${oldLng}\nNew: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
+        `Update GPS?\n\nOld: ${company.companylat || 0}, ${company.companylong || 0}\nNew: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
       );
       if (!confirm) return;
-
       const auth = getUserAuth()!;
       const ok = await updateCompanyGPS(company.companyid, latitude, longitude, auth.userId, auth.email, auth.password);
       if (ok) toast.success("GPS updated!");
@@ -285,10 +269,8 @@ const CompanyProfile = () => {
     const count = await countMenuGroups(company.companyid);
     if (count === "ZERO") {
       toast.info("No menu groups yet — opening Add Menu flow");
-      // placeholder navigation
     } else {
       toast.info("Opening Edit Menu flow");
-      // placeholder navigation
     }
   };
 
@@ -315,11 +297,10 @@ const CompanyProfile = () => {
       if (blockers.weekOrders > 0) msgs.push(`${blockers.weekOrders} week order(s)`);
       if (blockers.monthOrders > 0) msgs.push(`${blockers.monthOrders} month order(s)`);
       setDeleteBlockerMsg(`Please delete the following before removing your shop:\n• ${msgs.join("\n• ")}`);
-      setDeleteDialogOpen(true);
     } else {
       setDeleteBlockerMsg("");
-      setDeleteDialogOpen(true);
     }
+    setDeleteDialogOpen(true);
   };
 
   const handleConfirmDelete = async () => {
@@ -336,9 +317,8 @@ const CompanyProfile = () => {
     }
   };
 
-  // Marker select is handled inline in the MapMarkerPicker onSelect below
-
-  const markerInfo = getMarkerForPublicNumber(publicNumber);
+  const inputClass =
+    "border-0 border-b border-border rounded-none bg-transparent px-0 focus-visible:ring-0 focus-visible:border-primary text-center";
 
   if (loading) {
     return (
@@ -365,247 +345,142 @@ const CompanyProfile = () => {
     );
   }
 
-  const inputClass = "bg-secondary/50 border-border/50 focus-visible:ring-primary/30";
-
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Hidden inputs */}
+      {/* Hidden file inputs */}
       <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={onFileChange} />
       <input ref={galleryInputRef} type="file" accept="image/*" className="hidden" onChange={onFileChange} />
-      <WebcamCapture open={webcamOpen} onOpenChange={setWebcamOpen} onCapture={(b64) => { setPendingImageBase64(b64); setPreviewImage(`data:image/jpeg;base64,${b64}`); toast.success("Photo captured"); }} />
+      <WebcamCapture open={webcamOpen} onOpenChange={setWebcamOpen} onCapture={handleWebcamCapture} />
 
       {/* Header */}
       <div className="flex items-center gap-3 p-4 bg-primary">
-        <button onClick={() => navigate("/profile")} className="text-primary-foreground"><ArrowLeft size={24} /></button>
+        <button onClick={() => navigate("/profile")} className="text-primary-foreground">
+          <ArrowLeft size={24} />
+        </button>
         <h1 className="text-lg font-bold text-primary-foreground font-heading">Company Profile</h1>
-        <div className="ml-auto">
-          <Button size="sm" variant="ghost" className="text-primary-foreground" onClick={handleSave} disabled={saving}>
-            {saving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
-          </Button>
-        </div>
       </div>
 
+      {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto pb-8">
-        {/* Company Image */}
-        <div className="relative w-full h-52 bg-muted flex items-center justify-center overflow-hidden">
-          {previewImage ? (
-            <img src={previewImage} alt="Company" className="w-full h-full object-cover" />
+        {/* Shop Image */}
+        <div className="w-full h-48 bg-muted flex items-center justify-center overflow-hidden">
+          {shopImage ? (
+            <img src={shopImage} alt="Shop" className="w-full h-full object-cover" />
           ) : (
-            <span className="text-6xl">🏪</span>
+            <span className="text-5xl">🏪</span>
           )}
-          <div className="absolute bottom-3 right-3 flex gap-2">
-            <Button size="sm" variant="secondary" className="rounded-full shadow-lg gap-1.5" onClick={handleCameraClick}>
-              <Camera size={14} /> Camera
-            </Button>
-            <Button size="sm" variant="secondary" className="rounded-full shadow-lg gap-1.5" onClick={() => galleryInputRef.current?.click()}>
-              <ImageIcon size={14} /> Gallery
-            </Button>
-          </div>
         </div>
 
-        <div className="px-4 space-y-4 mt-4">
-          {/* Company Info */}
-          <Card className="bg-card border-border/30">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-heading">Company Info</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block">Shop Name</label>
-                <Input value={companyName} onChange={e => setCompanyName(e.target.value)} className={inputClass} />
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block">Mobile Number</label>
-                <Input value={companyMobile} onChange={e => setCompanyMobile(e.target.value)} className={inputClass} />
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block">Company Email</label>
-                <Input type="email" value={companyEmail} onChange={e => setCompanyEmail(e.target.value)} className={inputClass} />
-              </div>
-            </CardContent>
-          </Card>
+        {/* Camera / Gallery / Save buttons */}
+        <div className="flex justify-center gap-3 py-4">
+          <Button variant="secondary" className="rounded-full px-5 gap-2" size="sm" onClick={handleCameraClick}>
+            <Camera size={14} /> Camera
+          </Button>
+          <Button variant="secondary" className="rounded-full px-5 gap-2" size="sm" onClick={() => galleryInputRef.current?.click()}>
+            <ImageIcon size={14} /> Gallery
+          </Button>
+          <Button variant="secondary" className="rounded-full px-5 gap-2" size="sm" onClick={handleSave} disabled={saving}>
+            {saving ? <Loader2 className="animate-spin" size={14} /> : <Save size={14} />}
+            Save
+          </Button>
+        </div>
 
-          {/* Hours & Settings */}
-          <Card className="bg-card border-border/30">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-heading">Hours & Settings</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs text-muted-foreground mb-1 block">Opening Time</label>
-                  <Select value={openingTime} onValueChange={setOpeningTime}>
-                    <SelectTrigger className={inputClass}><SelectValue /></SelectTrigger>
-                    <SelectContent>{TIME_OPTIONS.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <label className="text-xs text-muted-foreground mb-1 block">Closing Time</label>
-                  <Select value={closingTime} onValueChange={setClosingTime}>
-                    <SelectTrigger className={inputClass}><SelectValue /></SelectTrigger>
-                    <SelectContent>{TIME_OPTIONS.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block">Table Numbers</label>
-                <Select value={tableNumbers} onValueChange={setTableNumbers}>
-                  <SelectTrigger className={inputClass}><SelectValue /></SelectTrigger>
-                  <SelectContent className="max-h-48">
-                    {Array.from({ length: 1001 }, (_, i) => (
-                      <SelectItem key={i} value={String(i)}>{i}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block">Notifications</label>
-                <Select value={menuNotifications} onValueChange={setMenuNotifications}>
-                  <SelectTrigger className={inputClass}><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Email">Email</SelectItem>
-                    <SelectItem value="NoNotifications">No Notifications</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardContent>
-          </Card>
+        <h2 className="text-lg font-bold text-foreground text-center mb-4 font-heading">
+          Edit Company Profile
+        </h2>
 
-          {/* Address */}
-          <Card className="bg-card border-border/30">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-heading">Address</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Input placeholder="1st line address" value={lineOne} onChange={e => setLineOne(e.target.value)} className={inputClass} />
-              <Input placeholder="2nd line address" value={lineTwo} onChange={e => setLineTwo(e.target.value)} className={inputClass} />
-              <Input placeholder="3rd line address" value={lineThree} onChange={e => setLineThree(e.target.value)} className={inputClass} />
-              <Input placeholder="4th line address" value={lineFour} onChange={e => setLineFour(e.target.value)} className={inputClass} />
-              <Input placeholder="Country" value={lineCountry} onChange={e => setLineCountry(e.target.value)} className={inputClass} />
-            </CardContent>
-          </Card>
+        {/* Form fields */}
+        <div className="px-6 space-y-5">
+          <Input value={form.shopName} onChange={e => handleChange("shopName", e.target.value)} placeholder="Shop Name" className={inputClass} />
+          <Input value={form.mobileNumber} onChange={e => handleChange("mobileNumber", e.target.value)} placeholder="Mobile Number" className={inputClass} />
+          <Input type="email" value={form.companyEmail} onChange={e => handleChange("companyEmail", e.target.value)} placeholder="Company Email" className={inputClass} />
+          <Input value={form.lineOne} onChange={e => handleChange("lineOne", e.target.value)} placeholder="1st line Address" className={inputClass} />
+          <Input value={form.lineTwo} onChange={e => handleChange("lineTwo", e.target.value)} placeholder="2nd line Address" className={inputClass} />
+          <Input value={form.lineThree} onChange={e => handleChange("lineThree", e.target.value)} placeholder="3rd line Address" className={inputClass} />
+          <Input value={form.lineFour} onChange={e => handleChange("lineFour", e.target.value)} placeholder="4th line Address" className={inputClass} />
+          <Input value={form.country} onChange={e => handleChange("country", e.target.value)} placeholder="Country" className={inputClass} />
 
-          {/* Description */}
-          <Card className="bg-card border-border/30">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-heading">Description</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Textarea
-                value={description}
-                onChange={e => setDescription(e.target.value)}
-                placeholder="Describe your shop..."
-                className={`${inputClass} min-h-[100px]`}
-              />
-            </CardContent>
-          </Card>
+          {/* Opening / Closing times */}
+          <Input type="time" value={form.openTime} onChange={e => handleChange("openTime", e.target.value)} className={inputClass} />
+          <Input type="time" value={form.closeTime} onChange={e => handleChange("closeTime", e.target.value)} className={inputClass} />
+
+          {/* Notification count & notifications */}
+          <Input type="number" value={form.notificationCount} onChange={e => handleChange("notificationCount", e.target.value)} className={inputClass} />
+          <Input value={form.notifications} onChange={e => handleChange("notifications", e.target.value)} placeholder="Notifications" className={inputClass} />
 
           {/* Toggles */}
-          <Card className="bg-card border-border/30">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-heading">Order Settings</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-foreground">Live Orders</p>
-                  <p className="text-xs text-muted-foreground">{orderEnable ? "You're live to receive orders" : "Enable to receive orders"}</p>
-                </div>
-                <Switch checked={orderEnable} onCheckedChange={handleToggleOrder} />
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-foreground">Takeaway</p>
-                  <p className="text-xs text-muted-foreground">{takeawayEnable ? "Takeaway enabled" : "Enable takeaway orders"}</p>
-                </div>
-                <Switch checked={takeawayEnable} onCheckedChange={handleToggleTakeaway} />
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-foreground">Delivery</p>
-                  <p className="text-xs text-muted-foreground">{deliveryEnable ? "Delivery enabled" : "Enable delivery orders"}</p>
-                </div>
-                <Switch checked={deliveryEnable} onCheckedChange={handleToggleDelivery} />
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-foreground">Global</p>
-                  <p className="text-xs text-muted-foreground">{globalEnable ? "Visible globally" : "Local visibility only"}</p>
-                </div>
-                <Switch checked={globalEnable} onCheckedChange={handleToggleGlobal} />
-              </div>
-            </CardContent>
-          </Card>
+          <div className="space-y-4 pt-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-foreground">Your Live to receive Orders</span>
+              <Switch checked={toggles.liveOrders} onCheckedChange={v => handleToggle("liveOrders", v)} />
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-foreground">Takeaways is Enabled</span>
+              <Switch checked={toggles.takeaways} onCheckedChange={v => handleToggle("takeaways", v)} />
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-foreground">Deliveries are Enabled</span>
+              <Switch checked={toggles.deliveries} onCheckedChange={v => handleToggle("deliveries", v)} />
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-foreground">Enable to Allow Global</span>
+              <Switch checked={toggles.allowGlobal} onCheckedChange={v => handleToggle("allowGlobal", v)} />
+            </div>
+          </div>
 
-          {/* Map Marker */}
-          <Card className="bg-card border-border/30">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-heading">Map Marker</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-4">
-                <span className="text-5xl">{markerInfo.emoji}</span>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-foreground">{markerInfo.label}</p>
-                  <p className="text-xs text-muted-foreground">Your shop icon on the map</p>
-                </div>
-                <Button variant="outline" size="sm" onClick={() => setMarkerPickerOpen(true)}>
-                  <Map size={14} className="mr-1" /> Change
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Action buttons */}
+          <div className="space-y-3 pt-4">
+            <Button variant="secondary" className="w-full rounded-md" onClick={() => navigate("/qr-scanner")}>
+              QR Code Generator
+            </Button>
+            <Button variant="outline" className="w-full rounded-md" onClick={() => setMarkerPickerOpen(true)}>
+              Choose a Map Marker
+            </Button>
+          </div>
+
+          {/* Map marker preview */}
+          <div className="flex flex-col items-center py-4">
+            <span className="text-6xl">{selectedMarker.emoji}</span>
+            <span className="text-xs font-bold text-muted-foreground mt-1">{selectedMarker.label}</span>
+          </div>
 
           <MapMarkerPicker
             open={markerPickerOpen}
             onOpenChange={setMarkerPickerOpen}
-            selected={markerInfo.emoji}
+            selected={selectedMarker.emoji}
             onSelect={(emoji, label) => {
-              // Map emoji back to PublicNumber
-              const MAP_MARKER_EMOJIS_IMPORT = {
+              setSelectedMarker({ emoji, label });
+              const emojiToNumber: Record<string, string> = {
                 "📍": "0", "🏪": "1", "🍻": "2", "☕": "3", "🍴": "4",
                 "🏠": "5", "🎪": "6", "🧸": "7", "🥪": "8", "🍳": "10",
                 "👔": "11", "👗": "12", "🔢": "13",
-              } as Record<string, string>;
-              setPublicNumber(MAP_MARKER_EMOJIS_IMPORT[emoji] || "0");
+              };
+              setPublicNumber(emojiToNumber[emoji] || "0");
             }}
           />
 
-          {/* Management Actions */}
-          <Card className="bg-card border-border/30">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-heading">Management</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <Button variant="secondary" className="w-full justify-start gap-2" onClick={handleSave} disabled={saving}>
-                <Save size={16} /> {saving ? "Saving..." : "Save Profile"}
-              </Button>
-              <Button variant="secondary" className="w-full justify-start gap-2" onClick={handleAddProducts}>
-                <ShoppingBag size={16} /> Add Products
-              </Button>
-              <Button variant="secondary" className="w-full justify-start gap-2" onClick={handleViewOrders}>
-                <ClipboardList size={16} /> View Orders
-              </Button>
-              <Button variant="secondary" className="w-full justify-start gap-2" onClick={handleUpdateGPS}>
-                <MapPin size={16} /> Update GPS
-              </Button>
-              <Button variant="secondary" className="w-full justify-start gap-2" onClick={() => navigate("/qr-scanner")}>
-                <QrCode size={16} /> QR Code Generator
-              </Button>
-            </CardContent>
-          </Card>
+          {/* Update GPS */}
+          <Button variant="secondary" className="w-full rounded-md" onClick={handleUpdateGPS}>
+            Update GPS
+          </Button>
 
-          {/* Danger Zone */}
-          <Card className="bg-destructive/5 border-destructive/20">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-heading text-destructive">Danger Zone</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Button variant="destructive" className="w-full gap-2" onClick={handleDeleteClick}>
-                <Trash2 size={16} /> Delete Your Shop
-              </Button>
-            </CardContent>
-          </Card>
+          {/* Description */}
+          <Input value={form.description} onChange={e => handleChange("description", e.target.value)} placeholder="Shop description" className={inputClass} />
+
+          {/* Delete */}
+          <Button variant="destructive" className="w-full rounded-md font-bold uppercase" onClick={handleDeleteClick}>
+            <Trash2 size={16} className="mr-2" /> Delete Your Shop
+          </Button>
+
+          {/* Bottom actions */}
+          <div className="flex gap-3 pb-4">
+            <Button variant="outline" className="flex-1 rounded-md" onClick={handleAddProducts}>
+              Add Products
+            </Button>
+            <Button variant="outline" className="flex-1 rounded-md" onClick={handleViewOrders}>
+              View Orders
+            </Button>
+          </div>
         </div>
       </div>
 
