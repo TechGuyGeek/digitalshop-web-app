@@ -29,8 +29,8 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <div className="flex justify-center min-h-screen bg-black">
-        <div className="w-full max-w-[430px] min-h-screen shadow-2xl relative">
+        <div className="w-full min-h-screen bg-black md:bg-[url('/images/bg-desktop.png')] md:bg-cover md:bg-center md:bg-fixed flex justify-center">
+          <div className="w-full max-w-[430px] min-h-screen shadow-2xl relative">
           <BrowserRouter>
             <BasketProvider>
               <Routes>
