@@ -14,10 +14,8 @@ interface OrderLineItem {
   orderName?: string;
   OrderPrice?: string;
   orderPrice?: string;
-  MenuPhoto?: string;
-  menuphoto?: string;
-  MenuDescription?: string;
-  menudescription?: string;
+  imagepath?: string;
+  OrderDesription?: string;
   [key: string]: unknown;
 }
 
