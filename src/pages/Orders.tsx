@@ -184,7 +184,8 @@ const Orders = () => {
             return (
               <div
                 key={order.randomCode}
-                className="rounded-xl border border-border bg-card p-4 shadow-sm"
+                className="rounded-xl border border-border bg-card p-4 shadow-sm cursor-pointer"
+                onClick={() => handleOrderTap(order)}
               >
                 <div className="flex gap-3">
                   {/* Order details */}
