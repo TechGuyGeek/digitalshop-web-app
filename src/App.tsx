@@ -17,6 +17,7 @@ import CategoryItems from "./pages/CategoryItems.tsx";
 import Basket from "./pages/Basket.tsx";
 import Orders from "./pages/Orders.tsx";
 import OrderDetail from "./pages/OrderDetail.tsx";
+import OrderDetailWeek from "./pages/OrderDetailWeek.tsx";
 import BuildShop from "./pages/BuildShop.tsx";
 import CompanyProfile from "./pages/CompanyProfile.tsx";
 import QRScanner from "./pages/QRScanner.tsx";
@@ -47,6 +48,7 @@ const App = () => (
                 <Route path="/basket" element={<Basket />} />
                 <Route path="/orders" element={<Orders />} />
                 <Route path="/order-detail" element={<OrderDetail />} />
+                <Route path="/order-detail-week" element={<OrderDetailWeek />} />
                 <Route path="/build-shop" element={<BuildShop />} />
                 <Route path="/company-profile" element={<CompanyProfile />} />
                 <Route path="/qr-scanner" element={<QRScanner />} />

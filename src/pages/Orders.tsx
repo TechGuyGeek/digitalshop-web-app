@@ -102,7 +102,14 @@ const Orders = () => {
       datetime: order.dateTime,
       companyname: order.companyName,
     });
-    navigate(`/order-detail?${params.toString()}`);
+
+    const detailRoutes: Record<TabKey, string> = {
+      today: "/order-detail",
+      week: "/order-detail-week",
+      month: "/order-detail",
+    };
+
+    navigate(`${detailRoutes[activeTab]}?${params.toString()}`);
   };
 
   const handleCompanyProfile = (order: GroupedOrder) => {
