@@ -247,10 +247,18 @@ const Profile = () => {
 
         {/* Bottom action buttons */}
         <div className="flex gap-2 mb-6">
-          <Button variant="secondary" className="flex-1 rounded-full text-sm" onClick={() => {
-            // TODO: Check via PHP if user has a shop. For now check localStorage flag.
-            const hasShop = localStorage.getItem("hasShop") === "true";
-            navigate(hasShop ? "/company-profile" : "/build-shop");
+          <Button variant="secondary" className="flex-1 rounded-full text-sm" onClick={async () => {
+            if (!user) return;
+            toast.loading("Checking shop...", { id: "shop-check" });
+            const personId = String(user.PersonID || user.ID || "");
+            const email = (user.Email || user.email || "") as string;
+            const company = await loadCompanyProfile(personId, email);
+            toast.dismiss("shop-check");
+            if (company) {
+              navigate("/company-profile");
+            } else {
+              navigate("/build-shop");
+            }
           }}>
             Build Shop
           </Button>
