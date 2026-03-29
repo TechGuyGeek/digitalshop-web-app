@@ -336,13 +336,7 @@ const CompanyProfile = () => {
     }
   };
 
-  const handleMarkerSelect = (emoji: string, label: string) => {
-    // reverse lookup PublicNumber from emoji
-    const entry = Object.entries(
-      (await import("@/lib/companyApi")).MAP_MARKER_EMOJIS
-    ).find(([, v]) => v.emoji === emoji);
-    // We'll do a simpler approach with the MapMarkerPicker index
-  };
+  // Marker select is handled inline in the MapMarkerPicker onSelect below
 
   const markerInfo = getMarkerForPublicNumber(publicNumber);
 
