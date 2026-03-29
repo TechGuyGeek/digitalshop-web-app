@@ -55,20 +55,36 @@ export interface CompanyProfile {
 
 // ─── Load company ───────────────────────────────────────────────
 export async function loadCompanyProfile(personId: string, email: string): Promise<CompanyProfile | null> {
-  const res = await fetch(SERVER_DOMAIN + ENDPOINTS.loadCompany, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ PersonID: personId, UserEmail: email }),
-  });
-  const data = await res.json();
-  if (data.Success && data.Companies && data.Companies.length > 0) {
-    return data.Companies[0] as CompanyProfile;
+  try {
+    console.log("Loading company for PersonID:", personId, "Email:", email);
+    const url = SERVER_DOMAIN + ENDPOINTS.loadCompany;
+    console.log("Company API URL:", url);
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ PersonID: personId, UserEmail: email }),
+    });
+    const text = await res.text();
+    console.log("Company API response:", text.substring(0, 500));
+    if (!text) return null;
+    const data = JSON.parse(text);
+    if (data.Success && data.Companies && data.Companies.length > 0) {
+      return data.Companies[0] as CompanyProfile;
+    }
+    // fallback: array response
+    if (Array.isArray(data) && data.length > 0 && data[0].companyid) {
+      return data[0] as CompanyProfile;
+    }
+    // fallback: single object
+    if (data.companyid) {
+      return data as CompanyProfile;
+    }
+    console.log("No company found in response:", data);
+    return null;
+  } catch (err) {
+    console.error("loadCompanyProfile error:", err);
+    return null;
   }
-  // fallback: array response
-  if (Array.isArray(data) && data.length > 0 && data[0].companyid) {
-    return data[0] as CompanyProfile;
-  }
-  return null;
 }
 
 // ─── Save company ───────────────────────────────────────────────
