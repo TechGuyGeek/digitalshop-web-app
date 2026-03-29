@@ -52,7 +52,7 @@ const OrderDetailMonth = () => {
         formData.append("getDateandTime", dateTime);
 
         const response = await fetch(
-          SERVER_DOMAIN + "menu1/PHPread/CompanyLiveUserOrders/RetriveLiveUserOrdersDetailsmonth.php",
+          SERVER_DOMAIN + "menu1/PHPread/CompanyLiveUserOrders/RetriveLiveUserOrderDetailsmonth.php",
           {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
