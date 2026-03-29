@@ -93,6 +93,18 @@ const Orders = () => {
     setCancellingId(null);
   };
 
+  const handleOrderTap = (order: GroupedOrder) => {
+    const first = order.items[0];
+    const clientId = String(first.clientid || first.Companyid || "");
+    const params = new URLSearchParams({
+      companyid: order.companyId,
+      clientid: clientId,
+      datetime: order.dateTime,
+      companyname: order.companyName,
+    });
+    navigate(`/order-detail?${params.toString()}`);
+  };
+
   const handleCompanyProfile = (order: GroupedOrder) => {
     if (order.companyId) {
       navigate(`/shop-profile?companyid=${encodeURIComponent(order.companyId)}&from=orders`);
