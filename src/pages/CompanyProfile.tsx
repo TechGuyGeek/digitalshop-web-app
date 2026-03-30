@@ -505,6 +505,10 @@ const CompanyProfile = () => {
           userId={Number(user.PersonID || user.ID || 0)}
           userEmail={(user.Email || user.email || "") as string}
           userPassword={(user.Password || user.password || user.Token || "") as string}
+          onNavigateToGroup={(groupId, groupName) => {
+            setMenuGroupsOpen(false);
+            navigate(`/group-products?groupId=${groupId}&companyId=${company.companyid}&groupName=${encodeURIComponent(groupName)}`);
+          }}
         />
       )}
 
