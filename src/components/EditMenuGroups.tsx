@@ -18,6 +18,7 @@ interface MenuGroup {
   OrderGroup: string;
   companyid: number;
   menuGroupEnabled?: string;
+  MenuEnable?: string;
 }
 
 interface EditMenuGroupsProps {
