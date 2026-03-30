@@ -18,6 +18,7 @@ interface MenuGroup {
   OrderGroup: string;
   companyid: number;
   menuGroupEnabled?: string;
+  MenuEnable?: string;
 }
 
 interface EditMenuGroupsProps {
@@ -27,6 +28,7 @@ interface EditMenuGroupsProps {
   userId: number;
   userEmail: string;
   userPassword: string;
+  onNavigateToGroup?: (groupId: number, groupName: string) => void;
 }
 
 async function loadMenuGroups(companyId: number): Promise<MenuGroup[]> {
@@ -107,7 +109,7 @@ async function toggleMenuGroupEnabled(groupId: number, enabled: string, companyI
   }
 }
 
-const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, userPassword }: EditMenuGroupsProps) => {
+const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, userPassword, onNavigateToGroup }: EditMenuGroupsProps) => {
   const [groups, setGroups] = useState<MenuGroup[]>([]);
   const [loading, setLoading] = useState(false);
   const [addingGroup, setAddingGroup] = useState(false);
@@ -178,17 +180,21 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, user
           ) : (
             <div className="space-y-4">
               {groups.map(group => (
-                <div key={group.ID} className="border border-border rounded-lg p-4 space-y-3">
+                <div
+                  key={group.ID}
+                  className="border border-border rounded-lg p-4 space-y-3 cursor-pointer hover:border-primary/50 transition-colors"
+                  onClick={() => onNavigateToGroup?.(group.ID, group.OrderGroup)}
+                >
                   <h3 className="text-center text-lg font-bold text-foreground">{group.OrderGroup}</h3>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between" onClick={e => e.stopPropagation()}>
                     <span className="text-sm text-muted-foreground">The Item is Enabled</span>
                     <Switch
-                      checked={group.menuGroupEnabled === "1"}
+                      checked={(group.MenuEnable || group.menuGroupEnabled) === "1"}
                       onCheckedChange={(v) => handleToggle(group, v)}
                     />
                   </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    <Button variant="secondary" size="sm" onClick={() => toast.info("Add items coming soon")}>
+                  <div className="grid grid-cols-3 gap-2" onClick={e => e.stopPropagation()}>
+                    <Button variant="secondary" size="sm" onClick={() => onNavigateToGroup?.(group.ID, group.OrderGroup)}>
                       Add
                     </Button>
                     <Button variant="secondary" size="sm" onClick={() => toast.info("Edit group coming soon")}>
