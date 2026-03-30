@@ -61,6 +61,8 @@ const CompanyProfile = () => {
   const [markerPickerOpen, setMarkerPickerOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteBlockerMsg, setDeleteBlockerMsg] = useState("");
+  const [menuGroupsOpen, setMenuGroupsOpen] = useState(false);
+  const [addProductsLoading, setAddProductsLoading] = useState(false);
 
   // Form state
   const [form, setForm] = useState({
