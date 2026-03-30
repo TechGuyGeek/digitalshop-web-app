@@ -179,7 +179,11 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, user
           ) : (
             <div className="space-y-4">
               {groups.map(group => (
-                <div key={group.ID} className="border border-border rounded-lg p-4 space-y-3">
+                <div
+                  key={group.ID}
+                  className="border border-border rounded-lg p-4 space-y-3 cursor-pointer hover:border-primary/50 transition-colors"
+                  onClick={() => onNavigateToGroup?.(group.ID, group.OrderGroup)}
+                >
                   <h3 className="text-center text-lg font-bold text-foreground">{group.OrderGroup}</h3>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">The Item is Enabled</span>
