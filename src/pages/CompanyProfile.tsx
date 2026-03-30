@@ -267,13 +267,21 @@ const CompanyProfile = () => {
 
   // Add Products
   const handleAddProducts = async () => {
-    await handleSave();
-    if (!company) return;
-    const count = await countMenuGroups(company.companyid);
-    if (count === "ZERO") {
-      toast.info("No menu groups yet — opening Add Menu flow");
-    } else {
-      toast.info("Opening Edit Menu flow");
+    if (addProductsLoading) return;
+    if (!company || !Number(company.companyid)) {
+      toast.error("Please create a company first");
+      return;
+    }
+    setAddProductsLoading(true);
+    try {
+      await handleSave();
+      const count = await countMenuGroups(company.companyid);
+      // Both cases open the same dialog - it handles empty state internally
+      setMenuGroupsOpen(true);
+    } catch {
+      toast.error("Unable to load menu groups. Please try again.");
+    } finally {
+      setAddProductsLoading(false);
     }
   };
 
