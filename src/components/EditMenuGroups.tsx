@@ -185,15 +185,15 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, user
                   onClick={() => onNavigateToGroup?.(group.ID, group.OrderGroup)}
                 >
                   <h3 className="text-center text-lg font-bold text-foreground">{group.OrderGroup}</h3>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between" onClick={e => e.stopPropagation()}>
                     <span className="text-sm text-muted-foreground">The Item is Enabled</span>
                     <Switch
                       checked={group.menuGroupEnabled === "1"}
                       onCheckedChange={(v) => handleToggle(group, v)}
                     />
                   </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    <Button variant="secondary" size="sm" onClick={() => toast.info("Add items coming soon")}>
+                  <div className="grid grid-cols-3 gap-2" onClick={e => e.stopPropagation()}>
+                    <Button variant="secondary" size="sm" onClick={() => onNavigateToGroup?.(group.ID, group.OrderGroup)}>
                       Add
                     </Button>
                     <Button variant="secondary" size="sm" onClick={() => toast.info("Edit group coming soon")}>
