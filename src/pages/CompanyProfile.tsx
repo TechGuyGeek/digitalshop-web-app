@@ -485,7 +485,8 @@ const CompanyProfile = () => {
 
           {/* Bottom actions */}
           <div className="flex gap-3 pb-4">
-            <Button variant="outline" className="flex-1 rounded-md" onClick={handleAddProducts}>
+            <Button variant="outline" className="flex-1 rounded-md" onClick={handleAddProducts} disabled={addProductsLoading}>
+              {addProductsLoading ? <Loader2 className="animate-spin mr-2" size={14} /> : null}
               Add Products
             </Button>
             <Button variant="outline" className="flex-1 rounded-md" onClick={handleViewOrders}>
