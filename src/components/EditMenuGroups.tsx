@@ -189,7 +189,7 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, user
                   <div className="flex items-center justify-between" onClick={e => e.stopPropagation()}>
                     <span className="text-sm text-muted-foreground">The Item is Enabled</span>
                     <Switch
-                      checked={group.menuGroupEnabled === "1"}
+                      checked={(group.MenuEnable || group.menuGroupEnabled) === "1"}
                       onCheckedChange={(v) => handleToggle(group, v)}
                     />
                   </div>
