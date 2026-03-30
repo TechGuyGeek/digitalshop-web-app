@@ -22,6 +22,7 @@ import OrderDetailMonth from "./pages/OrderDetailMonth.tsx";
 import BuildShop from "./pages/BuildShop.tsx";
 import CompanyProfile from "./pages/CompanyProfile.tsx";
 import QRScanner from "./pages/QRScanner.tsx";
+import GroupProducts from "./pages/GroupProducts.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
