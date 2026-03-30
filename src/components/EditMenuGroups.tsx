@@ -108,7 +108,7 @@ async function toggleMenuGroupEnabled(groupId: number, enabled: string, companyI
   }
 }
 
-const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, userPassword }: EditMenuGroupsProps) => {
+const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, userPassword, onNavigateToGroup }: EditMenuGroupsProps) => {
   const [groups, setGroups] = useState<MenuGroup[]>([]);
   const [loading, setLoading] = useState(false);
   const [addingGroup, setAddingGroup] = useState(false);
