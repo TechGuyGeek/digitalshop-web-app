@@ -247,19 +247,34 @@ const Profile = () => {
 
         {/* Bottom action buttons */}
         <div className="flex gap-2 mb-6">
-          <Button variant="secondary" className="flex-1 rounded-full text-sm" onClick={async () => {
-            if (!user) return;
-            toast.loading("Checking shop...", { id: "shop-check" });
-            const personId = String(user.PersonID || user.ID || "");
-            const email = (user.Email || user.email || "") as string;
-            const company = await loadCompanyProfile(personId, email);
-            toast.dismiss("shop-check");
-            if (company) {
-              navigate("/company-profile");
-            } else {
-              navigate("/build-shop");
-            }
-          }}>
+          <Button
+            variant="secondary"
+            className="flex-1 rounded-full text-sm"
+            disabled={!user}
+            onClick={async (e) => {
+              const btn = e.currentTarget;
+              if (btn.dataset.loading === "true") return;
+              btn.dataset.loading = "true";
+              if (!user) return;
+              toast.loading("Checking shop...", { id: "shop-check" });
+              try {
+                const personId = String(user.PersonID || user.ID || "");
+                const email = (user.Email || user.email || "") as string;
+                const company = await loadCompanyProfile(personId, email);
+                toast.dismiss("shop-check");
+                if (company && Number(company.companyid) > 0) {
+                  navigate("/company-profile", { state: { company } });
+                } else {
+                  navigate("/build-shop");
+                }
+              } catch {
+                toast.dismiss("shop-check");
+                toast.error("Could not check shop status. Please try again.");
+              } finally {
+                btn.dataset.loading = "false";
+              }
+            }}
+          >
             Build Shop
           </Button>
           <Button variant="secondary" className="flex-1 rounded-full text-sm" onClick={() => navigate("/view-shops")}>

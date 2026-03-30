@@ -68,15 +68,21 @@ export async function loadCompanyProfile(personId: string, email: string): Promi
     console.log("Company API response:", text.substring(0, 500));
     if (!text) return null;
     const data = JSON.parse(text);
-    if (data.Success && data.Companies && data.Companies.length > 0) {
-      return data.Companies[0] as CompanyProfile;
+    // Handle { success: true, companies: [...] } (case-insensitive keys)
+    const companies = data.companies || data.Companies;
+    const success = data.success ?? data.Success;
+    if (success && Array.isArray(companies) && companies.length > 0) {
+      const first = companies[0];
+      if (first && Number(first.companyid) > 0) {
+        return first as CompanyProfile;
+      }
     }
     // fallback: array response
-    if (Array.isArray(data) && data.length > 0 && data[0].companyid) {
+    if (Array.isArray(data) && data.length > 0 && Number(data[0].companyid) > 0) {
       return data[0] as CompanyProfile;
     }
     // fallback: single object
-    if (data.companyid) {
+    if (data.companyid && Number(data.companyid) > 0) {
       return data as CompanyProfile;
     }
     console.log("No company found in response:", data);
