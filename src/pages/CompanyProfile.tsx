@@ -18,6 +18,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import EditMenuGroups from "@/components/EditMenuGroups";
 
 const MAX_IMAGE_SIZE = 800;
 
@@ -60,6 +61,8 @@ const CompanyProfile = () => {
   const [markerPickerOpen, setMarkerPickerOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteBlockerMsg, setDeleteBlockerMsg] = useState("");
+  const [menuGroupsOpen, setMenuGroupsOpen] = useState(false);
+  const [addProductsLoading, setAddProductsLoading] = useState(false);
 
   // Form state
   const [form, setForm] = useState({
@@ -264,13 +267,21 @@ const CompanyProfile = () => {
 
   // Add Products
   const handleAddProducts = async () => {
-    await handleSave();
-    if (!company) return;
-    const count = await countMenuGroups(company.companyid);
-    if (count === "ZERO") {
-      toast.info("No menu groups yet — opening Add Menu flow");
-    } else {
-      toast.info("Opening Edit Menu flow");
+    if (addProductsLoading) return;
+    if (!company || !Number(company.companyid)) {
+      toast.error("Please create a company first");
+      return;
+    }
+    setAddProductsLoading(true);
+    try {
+      await handleSave();
+      const count = await countMenuGroups(company.companyid);
+      // Both cases open the same dialog - it handles empty state internally
+      setMenuGroupsOpen(true);
+    } catch {
+      toast.error("Unable to load menu groups. Please try again.");
+    } finally {
+      setAddProductsLoading(false);
     }
   };
 
@@ -474,7 +485,8 @@ const CompanyProfile = () => {
 
           {/* Bottom actions */}
           <div className="flex gap-3 pb-4">
-            <Button variant="outline" className="flex-1 rounded-md" onClick={handleAddProducts}>
+            <Button variant="outline" className="flex-1 rounded-md" onClick={handleAddProducts} disabled={addProductsLoading}>
+              {addProductsLoading ? <Loader2 className="animate-spin mr-2" size={14} /> : null}
               Add Products
             </Button>
             <Button variant="outline" className="flex-1 rounded-md" onClick={handleViewOrders}>
@@ -483,6 +495,18 @@ const CompanyProfile = () => {
           </div>
         </div>
       </div>
+
+      {/* Edit Menu Groups Dialog */}
+      {company && user && (
+        <EditMenuGroups
+          open={menuGroupsOpen}
+          onOpenChange={setMenuGroupsOpen}
+          companyId={company.companyid}
+          userId={Number(user.PersonID || user.ID || 0)}
+          userEmail={(user.Email || user.email || "") as string}
+          userPassword={(user.Password || user.password || user.Token || "") as string}
+        />
+      )}
 
       {/* Delete Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
