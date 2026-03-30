@@ -27,6 +27,7 @@ interface EditMenuGroupsProps {
   userId: number;
   userEmail: string;
   userPassword: string;
+  onNavigateToGroup?: (groupId: number, groupName: string) => void;
 }
 
 async function loadMenuGroups(companyId: number): Promise<MenuGroup[]> {
