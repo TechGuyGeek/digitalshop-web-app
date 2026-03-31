@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { SERVER_DOMAIN } from "@/lib/companyApi";
 import ProductCard, { type ProductCardItem } from "@/components/ProductCard";
 
+const OWNER_PRODUCTS_CACHE_PREFIX = "owner-group-products:";
+
 async function fetchGroupProducts(groupId: string): Promise<ProductCardItem[]> {
   const form = new URLSearchParams();
   form.append("GroupID", groupId);
@@ -15,6 +17,80 @@ async function fetchGroupProducts(groupId: string): Promise<ProductCardItem[]> {
   });
   const data = await res.json();
   return Array.isArray(data) ? data : [];
+}
+
+function getOwnerProductsCacheKey(groupId: string) {
+  return `${OWNER_PRODUCTS_CACHE_PREFIX}${groupId}`;
+}
+
+function normalizeProduct(product: ProductCardItem): ProductCardItem {
+  const menuEnable = product.MenuEnable ?? product.MenuItemEnable ?? "0";
+  return {
+    ...product,
+    MenuEnable: menuEnable,
+    MenuItemEnable: menuEnable,
+  };
+}
+
+function readCachedGroupProducts(groupId: string): ProductCardItem[] {
+  if (!groupId || typeof window === "undefined") return [];
+
+  try {
+    const raw = window.localStorage.getItem(getOwnerProductsCacheKey(groupId));
+    if (!raw) return [];
+
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.map(normalizeProduct) : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeCachedGroupProducts(groupId: string, products: ProductCardItem[]) {
+  if (!groupId || typeof window === "undefined") return;
+
+  try {
+    window.localStorage.setItem(
+      getOwnerProductsCacheKey(groupId),
+      JSON.stringify(products.map(normalizeProduct)),
+    );
+  } catch {
+    // Ignore cache write failures.
+  }
+}
+
+function mergeOwnerProducts(groupId: string, fetchedProducts: ProductCardItem[]): ProductCardItem[] {
+  const normalizedFetched = fetchedProducts.map(normalizeProduct);
+  const cachedProducts = readCachedGroupProducts(groupId);
+
+  if (cachedProducts.length === 0) {
+    return normalizedFetched;
+  }
+
+  const fetchedById = new Map(normalizedFetched.map((product) => [product.ID, product]));
+  const merged: ProductCardItem[] = [];
+
+  for (const cachedProduct of cachedProducts) {
+    const fetchedProduct = fetchedById.get(cachedProduct.ID);
+
+    if (fetchedProduct) {
+      merged.push(normalizeProduct({ ...cachedProduct, ...fetchedProduct }));
+      continue;
+    }
+
+    if ((cachedProduct.MenuEnable ?? cachedProduct.MenuItemEnable) === "0") {
+      merged.push(normalizeProduct(cachedProduct));
+    }
+  }
+
+  const mergedIds = new Set(merged.map((product) => product.ID));
+  for (const product of normalizedFetched) {
+    if (!mergedIds.has(product.ID)) {
+      merged.push(product);
+    }
+  }
+
+  return merged;
 }
 
 const GroupProducts = () => {
@@ -35,11 +111,15 @@ const GroupProducts = () => {
       setLoading(false);
       return;
     }
+
     setLoading(true);
     setError(null);
+
     try {
       const data = await fetchGroupProducts(groupId);
-      setProducts(data);
+      const mergedProducts = mergeOwnerProducts(groupId, data);
+      setProducts(mergedProducts);
+      writeCachedGroupProducts(groupId, mergedProducts);
     } catch {
       setError("Failed to load products. Please try again.");
     } finally {
@@ -54,9 +134,15 @@ const GroupProducts = () => {
   }, [groupId]);
 
   const handleToggleUpdate = (productId: string, newValue: string) => {
-    setProducts(prev =>
-      prev.map(p => p.ID === productId ? { ...p, MenuItemEnable: newValue } : p)
-    );
+    setProducts((prev) => {
+      const next = prev.map((product) =>
+        product.ID === productId
+          ? { ...product, MenuEnable: newValue, MenuItemEnable: newValue }
+          : product,
+      );
+      writeCachedGroupProducts(groupId, next);
+      return next;
+    });
   };
 
   return (
@@ -98,7 +184,7 @@ const GroupProducts = () => {
           </div>
         )}
 
-        {!loading && !error && products.map(product => (
+        {!loading && !error && products.map((product) => (
           <ProductCard
             key={product.ID}
             product={product}
