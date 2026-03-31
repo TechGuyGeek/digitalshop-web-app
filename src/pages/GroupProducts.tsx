@@ -169,7 +169,7 @@ const GroupProducts = () => {
                   />
                 </div>
                 <div className="grid grid-cols-3 gap-2">
-                  <Button variant="secondary" size="sm" onClick={() => toast.info("Add coming soon")}>
+                  <Button variant="secondary" size="sm" onClick={() => navigate(`/add-product?groupId=${groupId}&companyId=${companyId}&groupName=${encodeURIComponent(groupName)}`)}>
                     Add
                   </Button>
                   <Button variant="secondary" size="sm" onClick={() => openEditProduct(product)}>
