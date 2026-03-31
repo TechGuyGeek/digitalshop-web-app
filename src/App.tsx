@@ -61,6 +61,7 @@ const App = () => (
                 <Route path="/group-products" element={<GroupProducts />} />
                 <Route path="/edit-menu-groups" element={<EditMenuGroupsPage />} />
                 <Route path="/edit-product" element={<EditProduct />} />
+                <Route path="/add-product" element={<AddProduct />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
