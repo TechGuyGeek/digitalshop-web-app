@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Camera, Image as ImageIcon, Save, Trash2, Loader2 } from "lucide-react";
 import MapMarkerPicker from "@/components/MapMarkerPicker";
 import { Button } from "@/components/ui/button";
@@ -48,6 +48,7 @@ function resizeAndConvertToBase64(file: File): Promise<string> {
 
 const CompanyProfile = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
 
@@ -123,6 +124,15 @@ const CompanyProfile = () => {
       setLoading(false);
     }).catch(() => setLoading(false));
   }, [navigate]);
+
+  // Auto-open menu groups dialog when navigated back from group products
+  useEffect(() => {
+    if (location.state?.openMenuGroups && company) {
+      setMenuGroupsOpen(true);
+      // Clear the state so it doesn't re-open on re-render
+      window.history.replaceState({}, "");
+    }
+  }, [location.state, company]);
 
   const getUserAuth = useCallback(() => {
     if (!user || !company) return null;
