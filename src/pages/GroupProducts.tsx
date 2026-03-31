@@ -118,7 +118,7 @@ const GroupProducts = () => {
             <p className="text-muted-foreground text-center text-lg">
               No products in this group yet
             </p>
-            <Button onClick={() => toast.info("Add product coming soon")}>
+            <Button onClick={() => navigate(`/add-product?groupId=${groupId}&companyId=${companyId}&groupName=${encodeURIComponent(groupName)}`)}>
               <Plus size={16} className="mr-2" /> Add first product
             </Button>
           </div>
@@ -169,7 +169,7 @@ const GroupProducts = () => {
                   />
                 </div>
                 <div className="grid grid-cols-3 gap-2">
-                  <Button variant="secondary" size="sm" onClick={() => toast.info("Add coming soon")}>
+                  <Button variant="secondary" size="sm" onClick={() => navigate(`/add-product?groupId=${groupId}&companyId=${companyId}&groupName=${encodeURIComponent(groupName)}`)}>
                     Add
                   </Button>
                   <Button variant="secondary" size="sm" onClick={() => openEditProduct(product)}>
