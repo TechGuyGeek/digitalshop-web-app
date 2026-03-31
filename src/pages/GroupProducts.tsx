@@ -172,7 +172,7 @@ const GroupProducts = () => {
                   <Button variant="secondary" size="sm" onClick={() => toast.info("Add coming soon")}>
                     Add
                   </Button>
-                  <Button variant="secondary" size="sm" onClick={() => toast.info("Edit coming soon")}>
+                  <Button variant="secondary" size="sm" onClick={() => openEditProduct(product)}>
                     Edit
                   </Button>
                   <Button variant="secondary" size="sm" onClick={() => toast.info("Delete coming soon")}>

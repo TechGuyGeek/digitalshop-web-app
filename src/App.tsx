@@ -59,6 +59,7 @@ const App = () => (
                 <Route path="/qr-scanner" element={<QRScanner />} />
                 <Route path="/group-products" element={<GroupProducts />} />
                 <Route path="/edit-menu-groups" element={<EditMenuGroupsPage />} />
+                <Route path="/edit-product" element={<EditProduct />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
