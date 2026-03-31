@@ -24,6 +24,7 @@ import CompanyProfile from "./pages/CompanyProfile.tsx";
 import QRScanner from "./pages/QRScanner.tsx";
 import GroupProducts from "./pages/GroupProducts.tsx";
 import EditMenuGroupsPage from "./pages/EditMenuGroups.tsx";
+import EditProduct from "./pages/EditProduct.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
