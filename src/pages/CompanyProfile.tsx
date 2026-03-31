@@ -48,7 +48,6 @@ function resizeAndConvertToBase64(file: File): Promise<string> {
 
 const CompanyProfile = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
 
