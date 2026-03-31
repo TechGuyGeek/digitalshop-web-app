@@ -118,7 +118,7 @@ const GroupProducts = () => {
             <p className="text-muted-foreground text-center text-lg">
               No products in this group yet
             </p>
-            <Button onClick={() => toast.info("Add product coming soon")}>
+            <Button onClick={() => navigate(`/add-product?groupId=${groupId}&companyId=${companyId}&groupName=${encodeURIComponent(groupName)}`)}>
               <Plus size={16} className="mr-2" /> Add first product
             </Button>
           </div>
