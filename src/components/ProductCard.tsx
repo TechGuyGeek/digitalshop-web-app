@@ -77,8 +77,8 @@ const ProductCard = ({ product, groupId, companyId, groupName, onToggleUpdate }:
       if (stored) {
         const u = JSON.parse(stored);
         userId = String(u.PersonID || u.ID || u.id || "");
-        userEmail = u.Email || "";
-        userPassword = u.Password || "";
+        userEmail = u.Email || u.email || "";
+        userPassword = u.Password || u.password || "";
       }
 
       const result = await saveToggle({
