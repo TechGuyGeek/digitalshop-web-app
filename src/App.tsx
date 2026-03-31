@@ -24,6 +24,7 @@ import CompanyProfile from "./pages/CompanyProfile.tsx";
 import QRScanner from "./pages/QRScanner.tsx";
 import GroupProducts from "./pages/GroupProducts.tsx";
 import EditMenuGroupsPage from "./pages/EditMenuGroups.tsx";
+import EditProduct from "./pages/EditProduct.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -58,6 +59,7 @@ const App = () => (
                 <Route path="/qr-scanner" element={<QRScanner />} />
                 <Route path="/group-products" element={<GroupProducts />} />
                 <Route path="/edit-menu-groups" element={<EditMenuGroupsPage />} />
+                <Route path="/edit-product" element={<EditProduct />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

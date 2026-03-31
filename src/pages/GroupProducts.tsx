@@ -46,6 +46,20 @@ const GroupProducts = () => {
   const [error, setError] = useState<string | null>(null);
   const fetchRef = useRef(false);
 
+  const openEditProduct = (product: GroupProduct) => {
+    const params = new URLSearchParams({
+      productId: product.ID,
+      groupId: groupId,
+      companyId: companyId,
+      groupName: groupName,
+      name: product.OrderName || "",
+      desc: product.OrderDesription || "",
+      price: product.OrderPrice || "",
+      image: product.imagepath || "",
+    });
+    navigate(`/edit-product?${params.toString()}`);
+  };
+
   const loadProducts = async () => {
     if (!groupId) {
       setError("No group ID provided.");
@@ -115,7 +129,7 @@ const GroupProducts = () => {
           return (
             <div key={product.ID} className="border border-border rounded-lg overflow-hidden bg-card">
               {imgUrl && (
-                <div className="relative h-48 w-full">
+                <div className="relative h-48 w-full cursor-pointer" onClick={() => openEditProduct(product)}>
                   <img
                     src={imgUrl}
                     alt={product.OrderName}
@@ -158,7 +172,7 @@ const GroupProducts = () => {
                   <Button variant="secondary" size="sm" onClick={() => toast.info("Add coming soon")}>
                     Add
                   </Button>
-                  <Button variant="secondary" size="sm" onClick={() => toast.info("Edit coming soon")}>
+                  <Button variant="secondary" size="sm" onClick={() => openEditProduct(product)}>
                     Edit
                   </Button>
                   <Button variant="secondary" size="sm" onClick={() => toast.info("Delete coming soon")}>
