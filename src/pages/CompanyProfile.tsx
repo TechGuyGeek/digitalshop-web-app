@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Camera, Image as ImageIcon, Save, Trash2, Loader2 } from "lucide-react";
 import MapMarkerPicker from "@/components/MapMarkerPicker";
 import { Button } from "@/components/ui/button";
