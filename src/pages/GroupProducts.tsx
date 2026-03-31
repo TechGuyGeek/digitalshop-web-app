@@ -2,20 +2,10 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Loader2, AlertCircle, Plus, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { toast } from "sonner";
 import { SERVER_DOMAIN } from "@/lib/companyApi";
+import ProductCard, { type ProductCardItem } from "@/components/ProductCard";
 
-interface GroupProduct {
-  ID: string;
-  OrderName: string;
-  OrderPrice?: string;
-  OrderDesription?: string;
-  imagepath?: string;
-  MenuItemEnable?: string;
-}
-
-async function fetchGroupProducts(groupId: string): Promise<GroupProduct[]> {
+async function fetchGroupProducts(groupId: string): Promise<ProductCardItem[]> {
   const form = new URLSearchParams();
   form.append("GroupID", groupId);
   const res = await fetch(SERVER_DOMAIN + "menu1/PHPread/CompanyMenu/PoppulateSubMenuDetail.php", {
@@ -27,13 +17,6 @@ async function fetchGroupProducts(groupId: string): Promise<GroupProduct[]> {
   return Array.isArray(data) ? data : [];
 }
 
-function getImageUrl(path?: string) {
-  if (!path) return "";
-  const cleaned = path.startsWith("/") ? path.slice(1) : path;
-  const withPrefix = cleaned.startsWith("menu1/") ? cleaned : "menu1/" + cleaned;
-  return SERVER_DOMAIN + withPrefix;
-}
-
 const GroupProducts = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -41,24 +24,10 @@ const GroupProducts = () => {
   const groupName = searchParams.get("groupName") || "Products";
   const companyId = searchParams.get("companyId") || "";
 
-  const [products, setProducts] = useState<GroupProduct[]>([]);
+  const [products, setProducts] = useState<ProductCardItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const fetchRef = useRef(false);
-
-  const openEditProduct = (product: GroupProduct) => {
-    const params = new URLSearchParams({
-      productId: product.ID,
-      groupId: groupId,
-      companyId: companyId,
-      groupName: groupName,
-      name: product.OrderName || "",
-      desc: product.OrderDesription || "",
-      price: product.OrderPrice || "",
-      image: product.imagepath || "",
-    });
-    navigate(`/edit-product?${params.toString()}`);
-  };
 
   const loadProducts = async () => {
     if (!groupId) {
@@ -84,9 +53,14 @@ const GroupProducts = () => {
     loadProducts();
   }, [groupId]);
 
+  const handleToggleUpdate = (productId: string, newValue: string) => {
+    setProducts(prev =>
+      prev.map(p => p.ID === productId ? { ...p, MenuItemEnable: newValue } : p)
+    );
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
       <div className="flex items-center gap-3 p-4 border-b border-border bg-card">
         <Button variant="ghost" size="icon" onClick={() => navigate(`/edit-menu-groups?companyId=${companyId}`)}>
           <ArrowLeft size={20} />
@@ -124,65 +98,16 @@ const GroupProducts = () => {
           </div>
         )}
 
-        {!loading && !error && products.map(product => {
-          const imgUrl = getImageUrl(product.imagepath);
-          return (
-            <div key={product.ID} className="border border-border rounded-lg overflow-hidden bg-card">
-              {imgUrl && (
-                <div className="relative h-48 w-full cursor-pointer" onClick={() => openEditProduct(product)}>
-                  <img
-                    src={imgUrl}
-                    alt={product.OrderName}
-                    className="w-full h-full object-cover"
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3 flex items-end justify-between">
-                    <span className="text-white font-bold text-base uppercase">{product.OrderName}</span>
-                    {product.OrderPrice && (
-                      <span className="text-white font-bold text-base">
-                        {parseFloat(product.OrderPrice).toFixed(2)}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              )}
-              {!imgUrl && (
-                <div className="p-3 flex items-center justify-between">
-                  <span className="font-bold text-foreground text-base uppercase">{product.OrderName}</span>
-                  {product.OrderPrice && (
-                    <span className="font-bold text-foreground text-base">
-                      {parseFloat(product.OrderPrice).toFixed(2)}
-                    </span>
-                  )}
-                </div>
-              )}
-
-              <div className="p-3 space-y-3">
-                {product.OrderDesription && (
-                  <p className="text-sm text-muted-foreground">{product.OrderDesription}</p>
-                )}
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">The Item is Enabled</span>
-                  <Switch
-                    checked={product.MenuItemEnable === "1"}
-                    onCheckedChange={() => toast.info("Toggle coming soon")}
-                  />
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                  <Button variant="secondary" size="sm" onClick={() => navigate(`/add-product?groupId=${groupId}&companyId=${companyId}&groupName=${encodeURIComponent(groupName)}`)}>
-                    Add
-                  </Button>
-                  <Button variant="secondary" size="sm" onClick={() => openEditProduct(product)}>
-                    Edit
-                  </Button>
-                  <Button variant="secondary" size="sm" onClick={() => toast.info("Delete coming soon")}>
-                    Delete
-                  </Button>
-                </div>
-              </div>
-            </div>
-          );
-        })}
+        {!loading && !error && products.map(product => (
+          <ProductCard
+            key={product.ID}
+            product={product}
+            groupId={groupId}
+            companyId={companyId}
+            groupName={groupName}
+            onToggleUpdate={handleToggleUpdate}
+          />
+        ))}
       </div>
     </div>
   );
