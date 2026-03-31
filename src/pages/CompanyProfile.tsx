@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import WebcamCapture from "@/components/WebcamCapture";
 import {
   loadCompanyProfile, saveCompanyProfile, toggleOrderEnable, toggleTakeawayEnable,
-  toggleDeliveryEnable, toggleGlobalEnable, updateCompanyGPS, countMenuGroups,
+  toggleDeliveryEnable, toggleGlobalEnable, updateCompanyGPS,
   liveOrderCountAll, getDeleteBlockers, deleteCompany, getCompanyImageUrl,
   getMarkerForPublicNumber, type CompanyProfile as CompanyProfileType
 } from "@/lib/companyApi";
