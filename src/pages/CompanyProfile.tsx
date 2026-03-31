@@ -493,21 +493,6 @@ const CompanyProfile = () => {
         </div>
       </div>
 
-      {/* Edit Menu Groups Dialog */}
-      {company && user && (
-        <EditMenuGroups
-          open={menuGroupsOpen}
-          onOpenChange={setMenuGroupsOpen}
-          companyId={company.companyid}
-          userId={Number(user.PersonID || user.ID || 0)}
-          userEmail={(user.Email || user.email || "") as string}
-          userPassword={(user.Password || user.password || user.Token || "") as string}
-          onNavigateToGroup={(groupId, groupName) => {
-            setMenuGroupsOpen(false);
-            navigate(`/group-products?groupId=${groupId}&companyId=${company.companyid}&groupName=${encodeURIComponent(groupName)}`);
-          }}
-        />
-      )}
 
       {/* Delete Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
