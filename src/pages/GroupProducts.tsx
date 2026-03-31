@@ -129,7 +129,7 @@ const GroupProducts = () => {
           return (
             <div key={product.ID} className="border border-border rounded-lg overflow-hidden bg-card">
               {imgUrl && (
-                <div className="relative h-48 w-full">
+                <div className="relative h-48 w-full cursor-pointer" onClick={() => openEditProduct(product)}>
                   <img
                     src={imgUrl}
                     alt={product.OrderName}
