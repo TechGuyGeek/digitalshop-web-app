@@ -81,7 +81,7 @@ const AddProduct = () => {
     const finalDesc = description.trim() || "-";
 
     // Retrieve user info from localStorage
-    const stored = localStorage.getItem("digitalPerson");
+    const stored = localStorage.getItem("digitalUser");
     let userId = "", userEmail = "", userPassword = "";
     if (stored) {
       try {
