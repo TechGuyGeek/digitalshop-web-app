@@ -13,6 +13,7 @@ export interface ProductCardItem {
   OrderDesription?: string;
   imagepath?: string;
   MenuItemEnable?: string;
+  MenuEnable?: string;
   companyid?: string;
   GroupID?: string;
 }
