@@ -125,6 +125,15 @@ const CompanyProfile = () => {
     }).catch(() => setLoading(false));
   }, [navigate]);
 
+  // Auto-open menu groups dialog when navigated back from group products
+  useEffect(() => {
+    if (location.state?.openMenuGroups && company) {
+      setMenuGroupsOpen(true);
+      // Clear the state so it doesn't re-open on re-render
+      window.history.replaceState({}, "");
+    }
+  }, [location.state, company]);
+
   const getUserAuth = useCallback(() => {
     if (!user || !company) return null;
     return {
