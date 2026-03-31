@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Camera, Image as ImageIcon, Save, Trash2, Loader2 } from "lucide-react";
 import MapMarkerPicker from "@/components/MapMarkerPicker";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import WebcamCapture from "@/components/WebcamCapture";
 import {
   loadCompanyProfile, saveCompanyProfile, toggleOrderEnable, toggleTakeawayEnable,
-  toggleDeliveryEnable, toggleGlobalEnable, updateCompanyGPS, countMenuGroups,
+  toggleDeliveryEnable, toggleGlobalEnable, updateCompanyGPS,
   liveOrderCountAll, getDeleteBlockers, deleteCompany, getCompanyImageUrl,
   getMarkerForPublicNumber, type CompanyProfile as CompanyProfileType
 } from "@/lib/companyApi";
@@ -18,7 +18,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import EditMenuGroups from "@/components/EditMenuGroups";
+
 
 const MAX_IMAGE_SIZE = 800;
 
@@ -48,7 +48,6 @@ function resizeAndConvertToBase64(file: File): Promise<string> {
 
 const CompanyProfile = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
 
@@ -62,7 +61,6 @@ const CompanyProfile = () => {
   const [markerPickerOpen, setMarkerPickerOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteBlockerMsg, setDeleteBlockerMsg] = useState("");
-  const [menuGroupsOpen, setMenuGroupsOpen] = useState(false);
   const [addProductsLoading, setAddProductsLoading] = useState(false);
 
   // Form state
@@ -124,15 +122,6 @@ const CompanyProfile = () => {
       setLoading(false);
     }).catch(() => setLoading(false));
   }, [navigate]);
-
-  // Auto-open menu groups dialog when navigated back from group products
-  useEffect(() => {
-    if (location.state?.openMenuGroups && company) {
-      setMenuGroupsOpen(true);
-      // Clear the state so it doesn't re-open on re-render
-      window.history.replaceState({}, "");
-    }
-  }, [location.state, company]);
 
   const getUserAuth = useCallback(() => {
     if (!user || !company) return null;
@@ -285,9 +274,7 @@ const CompanyProfile = () => {
     setAddProductsLoading(true);
     try {
       await handleSave();
-      const count = await countMenuGroups(company.companyid);
-      // Both cases open the same dialog - it handles empty state internally
-      setMenuGroupsOpen(true);
+      navigate(`/edit-menu-groups?companyId=${company.companyid}`);
     } catch {
       toast.error("Unable to load menu groups. Please try again.");
     } finally {
@@ -506,21 +493,6 @@ const CompanyProfile = () => {
         </div>
       </div>
 
-      {/* Edit Menu Groups Dialog */}
-      {company && user && (
-        <EditMenuGroups
-          open={menuGroupsOpen}
-          onOpenChange={setMenuGroupsOpen}
-          companyId={company.companyid}
-          userId={Number(user.PersonID || user.ID || 0)}
-          userEmail={(user.Email || user.email || "") as string}
-          userPassword={(user.Password || user.password || user.Token || "") as string}
-          onNavigateToGroup={(groupId, groupName) => {
-            setMenuGroupsOpen(false);
-            navigate(`/group-products?groupId=${groupId}&companyId=${company.companyid}&groupName=${encodeURIComponent(groupName)}`);
-          }}
-        />
-      )}
 
       {/* Delete Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
