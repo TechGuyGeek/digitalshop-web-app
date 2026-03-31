@@ -44,7 +44,7 @@ async function saveToggle(payload: Record<string, string>): Promise<{ Result: bo
 
 const ProductCard = ({ product, groupId, companyId, groupName, onToggleUpdate }: ProductCardProps) => {
   const navigate = useNavigate();
-  const [enabled, setEnabled] = useState(product.MenuItemEnable === "1");
+  const [enabled, setEnabled] = useState((product.MenuEnable ?? product.MenuItemEnable) === "1");
   const [toggling, setToggling] = useState(false);
   const toggleRef = useRef(false);
 
