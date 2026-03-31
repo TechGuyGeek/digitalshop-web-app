@@ -86,7 +86,7 @@ const AddProduct = () => {
     if (stored) {
       try {
         const user = JSON.parse(stored);
-        userId = user.ID || user.id || "";
+        userId = user.PersonID || user.ID || user.id || "";
         userEmail = user.Email || user.email || "";
         userPassword = user.Password || user.password || "";
       } catch { /* ignore */ }
