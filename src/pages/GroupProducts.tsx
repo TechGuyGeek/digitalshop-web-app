@@ -46,6 +46,20 @@ const GroupProducts = () => {
   const [error, setError] = useState<string | null>(null);
   const fetchRef = useRef(false);
 
+  const openEditProduct = (product: GroupProduct) => {
+    const params = new URLSearchParams({
+      productId: product.ID,
+      groupId: groupId,
+      companyId: companyId,
+      groupName: groupName,
+      name: product.OrderName || "",
+      desc: product.OrderDesription || "",
+      price: product.OrderPrice || "",
+      image: product.imagepath || "",
+    });
+    navigate(`/edit-product?${params.toString()}`);
+  };
+
   const loadProducts = async () => {
     if (!groupId) {
       setError("No group ID provided.");
