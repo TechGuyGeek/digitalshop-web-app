@@ -74,7 +74,7 @@ const GroupProducts = () => {
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <div className="flex items-center gap-3 p-4 border-b border-border bg-card">
-        <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+        <Button variant="ghost" size="icon" onClick={() => navigate(`/company-profile`, { state: { openMenuGroups: true } })}>
           <ArrowLeft size={20} />
         </Button>
         <h1 className="text-lg font-bold text-foreground flex-1 text-center pr-10">
