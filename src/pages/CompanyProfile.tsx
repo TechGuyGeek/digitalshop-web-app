@@ -274,9 +274,7 @@ const CompanyProfile = () => {
     setAddProductsLoading(true);
     try {
       await handleSave();
-      const count = await countMenuGroups(company.companyid);
-      // Both cases open the same dialog - it handles empty state internally
-      setMenuGroupsOpen(true);
+      navigate(`/edit-menu-groups?companyId=${company.companyid}`);
     } catch {
       toast.error("Unable to load menu groups. Please try again.");
     } finally {
