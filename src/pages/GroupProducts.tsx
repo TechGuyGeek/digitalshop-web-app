@@ -10,7 +10,7 @@ const OWNER_PRODUCTS_CACHE_PREFIX = "owner-group-products:";
 async function fetchGroupProducts(groupId: string): Promise<ProductCardItem[]> {
   const form = new URLSearchParams();
   form.append("GroupID", groupId);
-  const res = await fetch(SERVER_DOMAIN + "menu1/PHPread/CompanyMenu/PoppulateSubMenuDetailAll.php", {
+  const res = await fetch(SERVER_DOMAIN + "menu1/PHPread/CompanyMenu/PoppulateSubMenuDetail.php", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: form.toString(),
