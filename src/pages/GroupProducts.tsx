@@ -62,39 +62,7 @@ function writeCachedGroupProducts(groupId: string, products: ProductCardItem[]) 
   }
 }
 
-function mergeOwnerProducts(groupId: string, fetchedProducts: ProductCardItem[]): ProductCardItem[] {
-  const normalizedFetched = fetchedProducts.map(normalizeProduct);
-  const cachedProducts = readCachedGroupProducts(groupId);
-
-  if (cachedProducts.length === 0) {
-    return normalizedFetched;
-  }
-
-  const fetchedById = new Map(normalizedFetched.map((product) => [product.ID, product]));
-  const merged: ProductCardItem[] = [];
-
-  for (const cachedProduct of cachedProducts) {
-    const fetchedProduct = fetchedById.get(cachedProduct.ID);
-
-    if (fetchedProduct) {
-      merged.push(normalizeProduct({ ...cachedProduct, ...fetchedProduct }));
-      continue;
-    }
-
-    if ((cachedProduct.MenuEnable ?? cachedProduct.MenuItemEnable) === "0") {
-      merged.push(normalizeProduct(cachedProduct));
-    }
-  }
-
-  const mergedIds = new Set(merged.map((product) => product.ID));
-  for (const product of normalizedFetched) {
-    if (!mergedIds.has(product.ID)) {
-      merged.push(product);
-    }
-  }
-
-  return merged;
-}
+// No merge logic needed — PoppulateSubMenu1.php returns all items (enabled + disabled)
 
 const GroupProducts = () => {
   const navigate = useNavigate();
