@@ -21,7 +21,8 @@ export interface CompanyOrderItem {
   RandomeCode?: string;
   TotalItems?: string | number;
   TotalPrice?: string | number;
-  OrderPrice?: string;
+  OrderPrice?: string | number;
+  orderPrice?: string | number;
   CompanyName?: string;
   companyname?: string;
   companyphoto?: string;
@@ -109,10 +110,6 @@ export async function fetchCompanyOrdersByTab(
 
     const parsed = JSON.parse(text);
     if (!Array.isArray(parsed)) return [];
-    if (parsed.length > 0) {
-      console.log("[CompanyOrders] first row keys:", Object.keys(parsed[0]));
-      console.log("[CompanyOrders] first row:", JSON.stringify(parsed[0]));
-    }
     return parsed as CompanyOrderItem[];
   } catch (err) {
     console.error(`fetchCompanyOrdersByTab(${tab}) error:`, err);
@@ -121,38 +118,42 @@ export async function fetchCompanyOrdersByTab(
 }
 
 /**
- * Group raw order rows by DateandTime, take first item per group.
- * Sort descending by DateandTime.
+ * Group raw order rows by companyid + clientid + DateandTime.
+ * Sort descending by DateandTime and calculate totals locally.
  */
 export function groupCompanyOrders(orders: CompanyOrderItem[]): CompanyGroupedOrder[] {
-  // Sort descending by DateandTime
   const sorted = [...orders].sort((a, b) =>
     (b.DateandTime || "").localeCompare(a.DateandTime || "")
   );
 
-  // Group by companyid + clientid + DateandTime
   const map = new Map<string, CompanyOrderItem[]>();
-  for (const o of sorted) {
-    const cid = String(o.companyid || o.Companyid || "");
-    const clid = String(o.clientid || "");
-    const dt = o.DateandTime || "";
-    const key = `${cid}|${clid}|${dt}` || `unknown_${Math.random()}`;
+  for (const order of sorted) {
+    const companyId = String(order.companyid || order.Companyid || "");
+    const clientId = String(order.clientid || "");
+    const dateTime = order.DateandTime || "";
+    const hasKeyParts = Boolean(companyId || clientId || dateTime);
+    const key = hasKeyParts ? `${companyId}|${clientId}|${dateTime}` : `unknown_${Math.random()}`;
+
     if (!map.has(key)) map.set(key, []);
-    map.get(key)!.push(o);
+    map.get(key)!.push(order);
   }
 
   const grouped: CompanyGroupedOrder[] = [];
-  for (const [dateKey, items] of map) {
+  for (const [groupKey, items] of map) {
     const first = items[0];
-
     const totalItems = items.length;
 
-    // Calculate total price client-side from OrderPrice
     let totalPrice = 0;
     let hasPrice = false;
+
     for (const item of items) {
-      const price = parseFloat(String(item.OrderPrice || item.TotalPrice || "0"));
-      if (!isNaN(price) && price > 0) {
+      const rawPrice = item.OrderPrice ?? item.orderPrice;
+      if (rawPrice === undefined || rawPrice === null || String(rawPrice).trim() === "") {
+        continue;
+      }
+
+      const price = parseFloat(String(rawPrice));
+      if (!isNaN(price)) {
         totalPrice += price;
         hasPrice = true;
       }
@@ -172,7 +173,7 @@ export function groupCompanyOrders(orders: CompanyOrderItem[]): CompanyGroupedOr
     }
 
     grouped.push({
-      groupKey: dateKey,
+      groupKey,
       companyId: String(first.companyid || first.Companyid || ""),
       clientId: String(first.clientid || ""),
       customerName: name,
@@ -185,7 +186,7 @@ export function groupCompanyOrders(orders: CompanyOrderItem[]): CompanyGroupedOr
       hasDelivered: first.HasDelivered || "0",
       requestCancel: first.RequestCancel || "0",
       totalItems,
-      totalPrice: hasPrice ? totalPrice.toFixed(2) : "—",
+      totalPrice: hasPrice ? totalPrice.toFixed(2) : "",
       items,
     });
   }
