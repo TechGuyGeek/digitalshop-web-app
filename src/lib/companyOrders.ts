@@ -1,40 +1,42 @@
 const SERVER_DOMAIN = "https://app.techguygeek.co.uk/";
 
 export interface CompanyOrderItem {
-  clientid?: string;
+  GroupID?: number | string;
+  companyid?: number | string;
   Companyid?: string;
-  companyid?: string;
-  orderid?: string;
-  Orderid?: string;
+  clientid?: number | string;
+  orderid?: number | string;
+  Productid?: number | string;
+  PersonID?: number | string;
+  Name?: string;
+  Surname?: string;
+  Imagepath?: string;
+  DateandTime?: string;
+  TableNumber?: string;
+  HasPaid?: string;
+  HasDelivered?: string;
+  NeedDelivery?: string;
+  NeedTakeaway?: string;
+  RequestCancel?: string;
+  RandomeCode?: string;
+  TotalItems?: string | number;
+  TotalPrice?: string | number;
+  OrderPrice?: string;
   CompanyName?: string;
   companyname?: string;
   companyphoto?: string;
-  DateandTime?: string;
-  TotalItems?: string | number;
-  TotalPrice?: string | number;
-  TableNumber?: string;
-  NeedTakeaway?: string;
-  NeedDelivery?: string;
-  HasPaid?: string;
-  HasDelivered?: string;
-  PaymentStatus?: string;
-  DeliveryStatus?: string;
-  RequestCancel?: string;
-  RandomeCode?: string;
-  GroupID?: string;
-  productid?: string;
   OrderName?: string;
-  OrderPrice?: string;
   OrderDesription?: string;
   imagepath?: string;
   [key: string]: unknown;
 }
 
 export interface CompanyGroupedOrder {
-  randomCode: string;
+  groupKey: string;
   companyId: string;
-  companyName: string;
-  companyphoto: string;
+  clientId: string;
+  customerName: string;
+  customerPhoto: string;
   dateTime: string;
   tableNumber: string;
   needTakeaway: string;
@@ -92,6 +94,7 @@ export async function fetchCompanyOrders(
     });
 
     const text = await res.text();
+    console.log("[CompanyOrders] raw response:", text.substring(0, 500));
     if (!text || text.trim() === "" || text.trim() === "[]") return [];
 
     const parsed = JSON.parse(text);
@@ -103,12 +106,13 @@ export async function fetchCompanyOrders(
   }
 }
 
-/** Group raw order rows by RandomeCode */
+/** Group raw order rows by DateandTime + clientid (as checkout sessions) */
 export function groupCompanyOrders(orders: CompanyOrderItem[]): CompanyGroupedOrder[] {
   const map = new Map<string, CompanyOrderItem[]>();
 
   for (const o of orders) {
-    const key = o.RandomeCode || o.DateandTime || o.orderid || "";
+    // Group by RandomeCode if available, else by DateandTime+clientid
+    const key = o.RandomeCode || `${o.DateandTime || ""}_${o.clientid || ""}`;
     if (!map.has(key)) map.set(key, []);
     map.get(key)!.push(o);
   }
@@ -117,21 +121,41 @@ export function groupCompanyOrders(orders: CompanyOrderItem[]): CompanyGroupedOr
   for (const [code, items] of map) {
     const first = items[0];
 
-    // Sum total price from items
+    // Count items in this group
+    const totalItems = items.length;
+
+    // Sum price if available, otherwise show "—"
     let totalPrice = 0;
-    let totalItems = 0;
+    let hasPrice = false;
     for (const item of items) {
       const price = parseFloat(String(item.TotalPrice || item.OrderPrice || "0"));
-      if (!isNaN(price)) totalPrice += price;
-      const count = parseInt(String(item.TotalItems || "1"), 10);
-      totalItems += isNaN(count) ? 1 : count;
+      if (!isNaN(price) && price > 0) {
+        totalPrice += price;
+        hasPrice = true;
+      }
+    }
+
+    // Build customer name
+    const name = [first.Name || "", first.Surname || ""].filter(Boolean).join(" ") || "Customer";
+
+    // Customer photo
+    let customerPhoto = "";
+    const imgPath = first.Imagepath || first.imagepath || "";
+    if (imgPath) {
+      if (imgPath.startsWith("http")) {
+        customerPhoto = imgPath;
+      } else {
+        const cleaned = imgPath.startsWith("/") ? imgPath.slice(1) : imgPath;
+        customerPhoto = `${SERVER_DOMAIN}menu1/${cleaned}`;
+      }
     }
 
     grouped.push({
-      randomCode: code,
-      companyId: first.companyid || first.Companyid || "",
-      companyName: first.CompanyName || first.companyname || "Shop",
-      companyphoto: first.companyphoto || "",
+      groupKey: code,
+      companyId: String(first.companyid || first.Companyid || ""),
+      clientId: String(first.clientid || ""),
+      customerName: name,
+      customerPhoto,
       dateTime: first.DateandTime || "",
       tableNumber: first.TableNumber || "",
       needTakeaway: first.NeedTakeaway || "0",
@@ -140,7 +164,7 @@ export function groupCompanyOrders(orders: CompanyOrderItem[]): CompanyGroupedOr
       hasDelivered: first.HasDelivered || "0",
       requestCancel: first.RequestCancel || "0",
       totalItems,
-      totalPrice: totalPrice.toFixed(2),
+      totalPrice: hasPrice ? totalPrice.toFixed(2) : "—",
       items,
     });
   }
@@ -180,11 +204,4 @@ export function filterOrdersByTab(
     const d = new Date(o.dateTime);
     return d >= monthAgo;
   });
-}
-
-export function getCompanyOrderPhotoUrl(photo: string | undefined): string {
-  if (!photo) return "";
-  if (photo.startsWith("http")) return photo;
-  const cleaned = photo.startsWith("/") ? photo.slice(1) : photo;
-  return `${SERVER_DOMAIN}menu1/${cleaned}`;
 }
