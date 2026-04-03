@@ -10,9 +10,10 @@ import WebcamCapture from "@/components/WebcamCapture";
 import {
   loadCompanyProfile, saveCompanyProfile, toggleOrderEnable, toggleTakeawayEnable,
   toggleDeliveryEnable, toggleGlobalEnable, updateCompanyGPS,
-  liveOrderCountAll, getDeleteBlockers, deleteCompany, getCompanyImageUrl,
+  getDeleteBlockers, deleteCompany, getCompanyImageUrl,
   getMarkerForPublicNumber, type CompanyProfile as CompanyProfileType
 } from "@/lib/companyApi";
+import { fetchOrderCountCombined } from "@/lib/companyOrders";
 import type { DigitalPerson } from "@/lib/api";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
