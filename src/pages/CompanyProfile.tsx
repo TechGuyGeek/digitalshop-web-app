@@ -293,12 +293,7 @@ const CompanyProfile = () => {
       return;
     }
 
-    const counts = await fetchOrderCountCombined(String(company.companyid));
-    if (counts.today === 0 && counts.week === 0 && counts.month === 0) {
-      toast.info("You have no orders");
-    } else {
-      navigate("/company-orders");
-    }
+    navigate("/company-orders");
   };
 
   // Delete
