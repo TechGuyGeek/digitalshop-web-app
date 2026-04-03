@@ -7,15 +7,18 @@ import ProductCard, { type ProductCardItem } from "@/components/ProductCard";
 
 const OWNER_PRODUCTS_CACHE_PREFIX = "owner-group-products:";
 
+// Owner/admin endpoint — returns ALL items (enabled + disabled) for the group
 async function fetchGroupProducts(groupId: string): Promise<ProductCardItem[]> {
   const form = new URLSearchParams();
   form.append("GroupID", groupId);
-  const res = await fetch(SERVER_DOMAIN + "menu1/PHPread/CompanyMenu/PoppulateSubMenuDetail.php", {
+  console.log("[GroupProducts] Fetching ALL items for group:", groupId);
+  const res = await fetch(SERVER_DOMAIN + "menu1/PHPread/CompanyMenu/PoppulateSubMenu1.php", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: form.toString(),
   });
   const data = await res.json();
+  console.log("[GroupProducts] Received", Array.isArray(data) ? data.length : 0, "items (enabled + disabled)");
   return Array.isArray(data) ? data : [];
 }
 
