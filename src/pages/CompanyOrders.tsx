@@ -143,7 +143,16 @@ const CompanyOrders = () => {
           orders.map((order) => (
             <div
               key={order.groupKey}
-              className="rounded-xl border border-border bg-card p-4 shadow-sm"
+              className="rounded-xl border border-border bg-card p-4 shadow-sm cursor-pointer hover:border-primary/50 transition-colors"
+              onClick={() => {
+                const params = new URLSearchParams({
+                  companyid: order.companyId,
+                  clientid: order.clientId,
+                  datetime: order.dateTime,
+                  range: activeTab,
+                });
+                navigate(`/company-order-detail?${params.toString()}`);
+              }}
             >
               <div className="flex gap-3">
                 {/* Order details */}
