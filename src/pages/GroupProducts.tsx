@@ -7,15 +7,18 @@ import ProductCard, { type ProductCardItem } from "@/components/ProductCard";
 
 const OWNER_PRODUCTS_CACHE_PREFIX = "owner-group-products:";
 
+// Owner/admin endpoint — returns ALL items (enabled + disabled) for the group
 async function fetchGroupProducts(groupId: string): Promise<ProductCardItem[]> {
   const form = new URLSearchParams();
   form.append("GroupID", groupId);
-  const res = await fetch(SERVER_DOMAIN + "menu1/PHPread/CompanyMenu/PoppulateSubMenuDetail.php", {
+  console.log("[GroupProducts] Fetching ALL items for group:", groupId);
+  const res = await fetch(SERVER_DOMAIN + "menu1/PHPread/CompanyMenu/PoppulateSubMenu1.php", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: form.toString(),
   });
   const data = await res.json();
+  console.log("[GroupProducts] Received", Array.isArray(data) ? data.length : 0, "items (enabled + disabled)");
   return Array.isArray(data) ? data : [];
 }
 
@@ -59,39 +62,7 @@ function writeCachedGroupProducts(groupId: string, products: ProductCardItem[]) 
   }
 }
 
-function mergeOwnerProducts(groupId: string, fetchedProducts: ProductCardItem[]): ProductCardItem[] {
-  const normalizedFetched = fetchedProducts.map(normalizeProduct);
-  const cachedProducts = readCachedGroupProducts(groupId);
-
-  if (cachedProducts.length === 0) {
-    return normalizedFetched;
-  }
-
-  const fetchedById = new Map(normalizedFetched.map((product) => [product.ID, product]));
-  const merged: ProductCardItem[] = [];
-
-  for (const cachedProduct of cachedProducts) {
-    const fetchedProduct = fetchedById.get(cachedProduct.ID);
-
-    if (fetchedProduct) {
-      merged.push(normalizeProduct({ ...cachedProduct, ...fetchedProduct }));
-      continue;
-    }
-
-    if ((cachedProduct.MenuEnable ?? cachedProduct.MenuItemEnable) === "0") {
-      merged.push(normalizeProduct(cachedProduct));
-    }
-  }
-
-  const mergedIds = new Set(merged.map((product) => product.ID));
-  for (const product of normalizedFetched) {
-    if (!mergedIds.has(product.ID)) {
-      merged.push(product);
-    }
-  }
-
-  return merged;
-}
+// No merge logic needed — PoppulateSubMenu1.php returns all items (enabled + disabled)
 
 const GroupProducts = () => {
   const navigate = useNavigate();
@@ -117,9 +88,9 @@ const GroupProducts = () => {
 
     try {
       const data = await fetchGroupProducts(groupId);
-      const mergedProducts = mergeOwnerProducts(groupId, data);
-      setProducts(mergedProducts);
-      writeCachedGroupProducts(groupId, mergedProducts);
+      const normalizedProducts = data.map(normalizeProduct);
+      setProducts(normalizedProducts);
+      writeCachedGroupProducts(groupId, normalizedProducts);
     } catch {
       setError("Failed to load products. Please try again.");
     } finally {
