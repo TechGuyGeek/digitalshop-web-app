@@ -287,11 +287,17 @@ const CompanyProfile = () => {
   const handleViewOrders = async () => {
     await handleSave();
     if (!company) return;
-    const counts = await liveOrderCountAll(company.companyid);
+
+    if (company.companyid === 0) {
+      toast.info("Please create a company first");
+      return;
+    }
+
+    const counts = await fetchOrderCountCombined(String(company.companyid));
     if (counts.today === 0 && counts.week === 0 && counts.month === 0) {
       toast.info("You have no orders");
     } else {
-      navigate("/orders");
+      navigate("/company-orders");
     }
   };
 
