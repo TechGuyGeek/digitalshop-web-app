@@ -10,9 +10,10 @@ import WebcamCapture from "@/components/WebcamCapture";
 import {
   loadCompanyProfile, saveCompanyProfile, toggleOrderEnable, toggleTakeawayEnable,
   toggleDeliveryEnable, toggleGlobalEnable, updateCompanyGPS,
-  liveOrderCountAll, getDeleteBlockers, deleteCompany, getCompanyImageUrl,
+  getDeleteBlockers, deleteCompany, getCompanyImageUrl,
   getMarkerForPublicNumber, type CompanyProfile as CompanyProfileType
 } from "@/lib/companyApi";
+import { fetchOrderCountCombined } from "@/lib/companyOrders";
 import type { DigitalPerson } from "@/lib/api";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -286,11 +287,17 @@ const CompanyProfile = () => {
   const handleViewOrders = async () => {
     await handleSave();
     if (!company) return;
-    const counts = await liveOrderCountAll(company.companyid);
+
+    if (company.companyid === 0) {
+      toast.info("Please create a company first");
+      return;
+    }
+
+    const counts = await fetchOrderCountCombined(String(company.companyid));
     if (counts.today === 0 && counts.week === 0 && counts.month === 0) {
       toast.info("You have no orders");
     } else {
-      navigate("/orders");
+      navigate("/company-orders");
     }
   };
 
