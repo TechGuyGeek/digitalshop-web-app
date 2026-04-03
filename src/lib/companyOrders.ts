@@ -73,13 +73,20 @@ export async function fetchOrderCountCombined(companyId: string): Promise<{ toda
   }
 }
 
-/** Retrieve all company orders using the secure endpoint */
-export async function fetchCompanyOrders(
+/** Fetch company orders for a specific tab using the correct endpoint */
+export async function fetchCompanyOrdersByTab(
   personId: string,
   email: string,
   password: string,
-  companyId: string
+  companyId: string,
+  tab: "today" | "week" | "month"
 ): Promise<CompanyOrderItem[]> {
+  const endpoints: Record<string, string> = {
+    today: "RetriveLiveOrdersSecure.php",
+    week: "RetriveLiveOrdersSecureweek.php",
+    month: "RetriveLiveOrdersSecuremonth.php",
+  };
+
   try {
     const form = new URLSearchParams();
     form.append("UserID", personId);
@@ -87,44 +94,52 @@ export async function fetchCompanyOrders(
     form.append("UserPassword", password);
     form.append("companyID", companyId);
 
-    const res = await fetch(SERVER_DOMAIN + "menu1/PHPread/CompanyLiveOrders/RetriveLiveOrdersSecure.php", {
+    const url = SERVER_DOMAIN + "menu1/PHPread/CompanyLiveOrders/" + endpoints[tab];
+    console.log("[CompanyOrders] fetching", tab, "from", url);
+
+    const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: form.toString(),
     });
 
     const text = await res.text();
-    console.log("[CompanyOrders] raw response:", text.substring(0, 500));
+    console.log("[CompanyOrders]", tab, "raw response:", text.substring(0, 500));
     if (!text || text.trim() === "" || text.trim() === "[]") return [];
 
     const parsed = JSON.parse(text);
     if (!Array.isArray(parsed)) return [];
     return parsed as CompanyOrderItem[];
   } catch (err) {
-    console.error("fetchCompanyOrders error:", err);
-    return [];
+    console.error(`fetchCompanyOrdersByTab(${tab}) error:`, err);
+    throw err;
   }
 }
 
-/** Group raw order rows by DateandTime + clientid (as checkout sessions) */
+/**
+ * Group raw order rows by DateandTime, take first item per group.
+ * Sort descending by DateandTime.
+ */
 export function groupCompanyOrders(orders: CompanyOrderItem[]): CompanyGroupedOrder[] {
-  const map = new Map<string, CompanyOrderItem[]>();
+  // Sort descending by DateandTime
+  const sorted = [...orders].sort((a, b) =>
+    (b.DateandTime || "").localeCompare(a.DateandTime || "")
+  );
 
-  for (const o of orders) {
-    // Group by RandomeCode if available, else by DateandTime+clientid
-    const key = o.RandomeCode || `${o.DateandTime || ""}_${o.clientid || ""}`;
+  // Group by DateandTime, keep all items but show one row per group
+  const map = new Map<string, CompanyOrderItem[]>();
+  for (const o of sorted) {
+    const key = o.DateandTime || `unknown_${Math.random()}`;
     if (!map.has(key)) map.set(key, []);
     map.get(key)!.push(o);
   }
 
   const grouped: CompanyGroupedOrder[] = [];
-  for (const [code, items] of map) {
+  for (const [dateKey, items] of map) {
     const first = items[0];
 
-    // Count items in this group
     const totalItems = items.length;
 
-    // Sum price if available, otherwise show "—"
     let totalPrice = 0;
     let hasPrice = false;
     for (const item of items) {
@@ -135,10 +150,8 @@ export function groupCompanyOrders(orders: CompanyOrderItem[]): CompanyGroupedOr
       }
     }
 
-    // Build customer name
     const name = [first.Name || "", first.Surname || ""].filter(Boolean).join(" ") || "Customer";
 
-    // Customer photo
     let customerPhoto = "";
     const imgPath = first.Imagepath || first.imagepath || "";
     if (imgPath) {
@@ -151,7 +164,7 @@ export function groupCompanyOrders(orders: CompanyOrderItem[]): CompanyGroupedOr
     }
 
     grouped.push({
-      groupKey: code,
+      groupKey: dateKey,
       companyId: String(first.companyid || first.Companyid || ""),
       clientId: String(first.clientid || ""),
       customerName: name,
@@ -169,39 +182,5 @@ export function groupCompanyOrders(orders: CompanyOrderItem[]): CompanyGroupedOr
     });
   }
 
-  grouped.sort((a, b) => b.dateTime.localeCompare(a.dateTime));
   return grouped;
-}
-
-/** Filter orders by date range client-side */
-export function filterOrdersByTab(
-  orders: CompanyGroupedOrder[],
-  tab: "today" | "week" | "month"
-): CompanyGroupedOrder[] {
-  const now = new Date();
-  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-  if (tab === "today") {
-    return orders.filter((o) => {
-      const d = new Date(o.dateTime);
-      return d >= startOfToday;
-    });
-  }
-
-  if (tab === "week") {
-    const weekAgo = new Date(startOfToday);
-    weekAgo.setDate(weekAgo.getDate() - 7);
-    return orders.filter((o) => {
-      const d = new Date(o.dateTime);
-      return d >= weekAgo;
-    });
-  }
-
-  // month
-  const monthAgo = new Date(startOfToday);
-  monthAgo.setMonth(monthAgo.getMonth() - 1);
-  return orders.filter((o) => {
-    const d = new Date(o.dateTime);
-    return d >= monthAgo;
-  });
 }

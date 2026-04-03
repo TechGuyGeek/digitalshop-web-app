@@ -6,9 +6,8 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import type { DigitalPerson } from "@/lib/api";
 import {
-  fetchCompanyOrders,
+  fetchCompanyOrdersByTab,
   groupCompanyOrders,
-  filterOrdersByTab,
   type CompanyGroupedOrder,
 } from "@/lib/companyOrders";
 
@@ -24,7 +23,8 @@ const CompanyOrders = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabKey>("today");
   const [loading, setLoading] = useState(true);
-  const [allOrders, setAllOrders] = useState<CompanyGroupedOrder[]>([]);
+  const [error, setError] = useState(false);
+  const [orders, setOrders] = useState<CompanyGroupedOrder[]>([]);
 
   const getAuth = (): { personId: string; email: string; password: string; companyId: string } | null => {
     try {
@@ -42,34 +42,35 @@ const CompanyOrders = () => {
     }
   };
 
-  const loadOrders = useCallback(async () => {
+  const loadOrders = useCallback(async (tab: TabKey) => {
     const auth = getAuth();
     if (!auth) {
       setLoading(false);
+      setError(true);
       toast.error("Could not load user credentials");
       return;
     }
 
     setLoading(true);
+    setError(false);
     try {
-      const raw = await fetchCompanyOrders(auth.personId, auth.email, auth.password, auth.companyId);
-      console.log("[CompanyOrders] fetched", raw.length, "raw order rows");
+      const raw = await fetchCompanyOrdersByTab(auth.personId, auth.email, auth.password, auth.companyId, tab);
+      console.log("[CompanyOrders]", tab, "fetched", raw.length, "raw rows");
       const grouped = groupCompanyOrders(raw);
-      console.log("[CompanyOrders] grouped into", grouped.length, "sessions");
-      setAllOrders(grouped);
+      console.log("[CompanyOrders]", tab, "grouped into", grouped.length, "orders");
+      setOrders(grouped);
     } catch (err) {
       console.error("Failed to load company orders:", err);
-      toast.error("Failed to load orders");
+      setError(true);
+      setOrders([]);
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    loadOrders();
-  }, [loadOrders]);
-
-  const currentOrders = filterOrdersByTab(allOrders, activeTab);
+    loadOrders(activeTab);
+  }, [activeTab, loadOrders]);
 
   const getDeliveryType = (order: CompanyGroupedOrder) => {
     if (order.needDelivery === "1") return "Delivery";
@@ -125,13 +126,18 @@ const CompanyOrders = () => {
             <Loader2 className="animate-spin mb-4" size={32} />
             <p className="text-sm">Loading orders…</p>
           </div>
-        ) : currentOrders.length === 0 ? (
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+            <span className="text-4xl mb-4">⚠️</span>
+            <p className="text-sm">Unable to load orders</p>
+          </div>
+        ) : orders.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
             <span className="text-4xl mb-4">📦</span>
-            <p className="text-sm">No orders found</p>
+            <p className="text-sm">No orders</p>
           </div>
         ) : (
-          currentOrders.map((order) => (
+          orders.map((order) => (
             <div
               key={order.groupKey}
               className="rounded-xl border border-border bg-card p-4 shadow-sm"
