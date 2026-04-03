@@ -109,6 +109,10 @@ export async function fetchCompanyOrdersByTab(
 
     const parsed = JSON.parse(text);
     if (!Array.isArray(parsed)) return [];
+    if (parsed.length > 0) {
+      console.log("[CompanyOrders] first row keys:", Object.keys(parsed[0]));
+      console.log("[CompanyOrders] first row:", JSON.stringify(parsed[0]));
+    }
     return parsed as CompanyOrderItem[];
   } catch (err) {
     console.error(`fetchCompanyOrdersByTab(${tab}) error:`, err);
@@ -126,10 +130,13 @@ export function groupCompanyOrders(orders: CompanyOrderItem[]): CompanyGroupedOr
     (b.DateandTime || "").localeCompare(a.DateandTime || "")
   );
 
-  // Group by DateandTime, keep all items but show one row per group
+  // Group by companyid + clientid + DateandTime
   const map = new Map<string, CompanyOrderItem[]>();
   for (const o of sorted) {
-    const key = o.DateandTime || `unknown_${Math.random()}`;
+    const cid = String(o.companyid || o.Companyid || "");
+    const clid = String(o.clientid || "");
+    const dt = o.DateandTime || "";
+    const key = `${cid}|${clid}|${dt}` || `unknown_${Math.random()}`;
     if (!map.has(key)) map.set(key, []);
     map.get(key)!.push(o);
   }
@@ -140,10 +147,11 @@ export function groupCompanyOrders(orders: CompanyOrderItem[]): CompanyGroupedOr
 
     const totalItems = items.length;
 
+    // Calculate total price client-side from OrderPrice
     let totalPrice = 0;
     let hasPrice = false;
     for (const item of items) {
-      const price = parseFloat(String(item.TotalPrice || item.OrderPrice || "0"));
+      const price = parseFloat(String(item.OrderPrice || item.TotalPrice || "0"));
       if (!isNaN(price) && price > 0) {
         totalPrice += price;
         hasPrice = true;
