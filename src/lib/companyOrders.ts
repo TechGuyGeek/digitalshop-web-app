@@ -109,6 +109,10 @@ export async function fetchCompanyOrdersByTab(
 
     const parsed = JSON.parse(text);
     if (!Array.isArray(parsed)) return [];
+    if (parsed.length > 0) {
+      console.log("[CompanyOrders] first row keys:", Object.keys(parsed[0]));
+      console.log("[CompanyOrders] first row:", JSON.stringify(parsed[0]));
+    }
     return parsed as CompanyOrderItem[];
   } catch (err) {
     console.error(`fetchCompanyOrdersByTab(${tab}) error:`, err);
