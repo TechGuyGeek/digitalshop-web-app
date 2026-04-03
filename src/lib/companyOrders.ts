@@ -110,6 +110,10 @@ export async function fetchCompanyOrdersByTab(
 
     const parsed = JSON.parse(text);
     if (!Array.isArray(parsed)) return [];
+    if (parsed.length > 0) {
+      console.log("[CompanyOrders] first row ALL keys:", Object.keys(parsed[0]));
+      console.log("[CompanyOrders] first row data:", JSON.stringify(parsed[0]));
+    }
     return parsed as CompanyOrderItem[];
   } catch (err) {
     console.error(`fetchCompanyOrdersByTab(${tab}) error:`, err);
@@ -147,7 +151,7 @@ export function groupCompanyOrders(orders: CompanyOrderItem[]): CompanyGroupedOr
     let hasPrice = false;
 
     for (const item of items) {
-      const rawPrice = item.OrderPrice ?? item.orderPrice;
+      const rawPrice = item.OrderPrice ?? item.orderPrice ?? item.TotalPrice ?? item.totalPrice;
       if (rawPrice === undefined || rawPrice === null || String(rawPrice).trim() === "") {
         continue;
       }
@@ -156,6 +160,18 @@ export function groupCompanyOrders(orders: CompanyOrderItem[]): CompanyGroupedOr
       if (!isNaN(price)) {
         totalPrice += price;
         hasPrice = true;
+      }
+    }
+
+    // If no per-item price found, check if there's a group-level total on the first item
+    if (!hasPrice) {
+      const groupTotal = first.TotalPrice ?? first.totalPrice ?? (first as any).totalprice;
+      if (groupTotal !== undefined && groupTotal !== null && String(groupTotal).trim() !== "") {
+        const parsed = parseFloat(String(groupTotal));
+        if (!isNaN(parsed)) {
+          totalPrice = parsed;
+          hasPrice = true;
+        }
       }
     }
 
