@@ -293,7 +293,7 @@ const CompanyProfile = () => {
       return;
     }
 
-    navigate("/company-orders");
+    navigate("/company-orders", { state: { companyId: String(company.companyid) } });
   };
 
   // Delete

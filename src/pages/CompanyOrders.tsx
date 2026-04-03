@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Loader2, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -21,6 +21,8 @@ const TABS: { key: TabKey; label: string }[] = [
 
 const CompanyOrders = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const passedCompanyId = (location.state as any)?.companyId || "";
   const [activeTab, setActiveTab] = useState<TabKey>("today");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -34,7 +36,8 @@ const CompanyOrders = () => {
       const personId = String(u.PersonID || u.ID || "");
       const email = String(u.Email || u.email || "");
       const password = String(u.Password || u.password || "");
-      const companyId = String(u.CompanyID || u.companyID || u.companyid || "");
+      // Use companyId passed via navigation state first, fall back to user object
+      const companyId = passedCompanyId || String(u.CompanyID || (u as any).companyID || (u as any).companyid || "");
       if (!personId || !companyId || companyId === "0") return null;
       return { personId, email, password, companyId };
     } catch {
