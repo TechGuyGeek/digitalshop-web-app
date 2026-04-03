@@ -1,14 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Loader2, Store } from "lucide-react";
+import { ArrowLeft, Loader2, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import type { DigitalPerson } from "@/lib/api";
 import {
   fetchCompanyOrders,
   groupCompanyOrders,
   filterOrdersByTab,
-  getCompanyOrderPhotoUrl,
   type CompanyGroupedOrder,
 } from "@/lib/companyOrders";
 
@@ -46,6 +46,7 @@ const CompanyOrders = () => {
     const auth = getAuth();
     if (!auth) {
       setLoading(false);
+      toast.error("Could not load user credentials");
       return;
     }
 
@@ -53,7 +54,9 @@ const CompanyOrders = () => {
     try {
       const raw = await fetchCompanyOrders(auth.personId, auth.email, auth.password, auth.companyId);
       console.log("[CompanyOrders] fetched", raw.length, "raw order rows");
-      setAllOrders(groupCompanyOrders(raw));
+      const grouped = groupCompanyOrders(raw);
+      console.log("[CompanyOrders] grouped into", grouped.length, "sessions");
+      setAllOrders(grouped);
     } catch (err) {
       console.error("Failed to load company orders:", err);
       toast.error("Failed to load orders");
@@ -73,12 +76,6 @@ const CompanyOrders = () => {
     if (order.needTakeaway === "1") return "Takeaway";
     return "On Site";
   };
-
-  const getPaymentLabel = (order: CompanyGroupedOrder) =>
-    order.hasPaid === "1" ? "Paid" : "Not Paid";
-
-  const getDeliveryLabel = (order: CompanyGroupedOrder) =>
-    order.hasDelivered === "1" ? "Delivered" : "Not Delivered";
 
   return (
     <div className="h-screen bg-muted flex flex-col">
@@ -134,68 +131,74 @@ const CompanyOrders = () => {
             <p className="text-sm">No orders found</p>
           </div>
         ) : (
-          currentOrders.map((order) => {
-            const photoUrl = getCompanyOrderPhotoUrl(order.companyphoto);
-
-            return (
-              <div
-                key={order.randomCode}
-                className="rounded-xl border border-border bg-card p-4 shadow-sm"
-              >
-                <div className="flex gap-3">
-                  {/* Order details */}
-                  <div className="flex-1 space-y-1 text-sm">
-                    <div className="flex gap-2">
-                      <span className="font-semibold text-foreground">Total Items</span>
-                      <span className="text-foreground">{order.totalItems}</span>
-                    </div>
-                    <div className="flex gap-2">
-                      <span className="font-semibold text-foreground">Total Price</span>
-                      <span className="text-foreground">{order.totalPrice}</span>
-                    </div>
-                    <div className="flex gap-2">
-                      <span className="font-semibold text-foreground">Table Number</span>
-                      <span className="text-foreground">
-                        {order.tableNumber || "—"}
-                      </span>
-                    </div>
-                    <div className="flex gap-2">
-                      <span className="font-semibold text-foreground">Delivery Type</span>
-                      <span className="text-foreground">
-                        {getDeliveryType(order)}
-                      </span>
-                    </div>
-                    <div className="flex gap-2">
-                      <span className="font-semibold text-foreground">Payment Status</span>
-                      <span className="text-foreground">
-                        {getPaymentLabel(order)}
-                      </span>
-                    </div>
-                    <div className="flex gap-2">
-                      <span className="font-semibold text-foreground">Delivery Status</span>
-                      <span className="text-foreground">
-                        {getDeliveryLabel(order)}
-                      </span>
-                    </div>
-                    {order.requestCancel === "1" && (
-                      <div className="flex gap-2">
-                        <span className="font-semibold text-destructive">Cancel Requested</span>
-                      </div>
-                    )}
-                    <p className="font-bold text-foreground pt-1">
-                      {order.companyName}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {order.dateTime}
-                    </p>
+          currentOrders.map((order) => (
+            <div
+              key={order.groupKey}
+              className="rounded-xl border border-border bg-card p-4 shadow-sm"
+            >
+              <div className="flex gap-3">
+                {/* Order details */}
+                <div className="flex-1 space-y-1 text-sm">
+                  <div className="flex gap-2">
+                    <span className="font-semibold text-foreground">Total Items</span>
+                    <span className="text-foreground">{order.totalItems}</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="font-semibold text-foreground">Total Price</span>
+                    <span className="text-foreground">{order.totalPrice}</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="font-semibold text-foreground">Table Number</span>
+                    <span className="text-foreground">{order.tableNumber || "—"}</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="font-semibold text-foreground">Delivery Type</span>
+                    <span className="text-foreground">{getDeliveryType(order)}</span>
                   </div>
 
-                  {/* Shop image */}
-                  <div className="w-24 h-20 rounded-lg bg-muted overflow-hidden shrink-0">
-                    {photoUrl ? (
+                  {/* Payment toggle */}
+                  <div className="flex items-center gap-2 pt-1">
+                    <Switch
+                      checked={order.hasPaid === "1"}
+                      disabled
+                    />
+                    <span className="text-foreground">
+                      {order.hasPaid === "1" ? "Paid" : "Not Paid"}
+                    </span>
+                  </div>
+
+                  {/* Delivery toggle */}
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={order.hasDelivered === "1"}
+                      disabled
+                    />
+                    <span className="text-foreground">
+                      {order.hasDelivered === "1" ? "Delivered" : "Not Delivered"}
+                    </span>
+                  </div>
+
+                  {order.requestCancel === "1" && (
+                    <div className="flex gap-2">
+                      <span className="font-semibold text-destructive">Cancel Requested</span>
+                    </div>
+                  )}
+
+                  <p className="font-bold text-foreground pt-1">
+                    {order.customerName}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {order.dateTime}
+                  </p>
+                </div>
+
+                {/* Customer image + action buttons */}
+                <div className="flex flex-col items-end gap-2 shrink-0">
+                  <div className="w-24 h-20 rounded-lg bg-muted overflow-hidden">
+                    {order.customerPhoto ? (
                       <img
-                        src={photoUrl}
-                        alt={order.companyName}
+                        src={order.customerPhoto}
+                        alt={order.customerName}
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           (e.target as HTMLImageElement).style.display = "none";
@@ -203,36 +206,29 @@ const CompanyOrders = () => {
                       />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-accent/30 to-muted flex items-center justify-center">
-                        <Store className="text-muted-foreground" size={24} />
+                        <User className="text-muted-foreground" size={24} />
                       </div>
                     )}
                   </div>
-                </div>
 
-                {/* Action buttons */}
-                <div className="flex gap-3 mt-4">
                   <Button
                     variant="outline"
-                    className="flex-1 rounded-full text-sm"
-                    disabled={order.requestCancel === "1"}
+                    size="sm"
+                    className="rounded-md text-xs w-24"
                   >
-                    {order.requestCancel === "1" ? "Cancel Pending" : "Request Cancel"}
+                    Delete
                   </Button>
                   <Button
                     variant="outline"
-                    className="flex-1 rounded-full text-sm"
-                    onClick={() => {
-                      if (order.companyId) {
-                        navigate(`/shop-profile?companyid=${encodeURIComponent(order.companyId)}&from=company-orders`);
-                      }
-                    }}
+                    size="sm"
+                    className="rounded-md text-xs w-24"
                   >
-                    Company Profile
+                    User Profile
                   </Button>
                 </div>
               </div>
-            );
-          })
+            </div>
+          ))
         )}
       </div>
     </div>
