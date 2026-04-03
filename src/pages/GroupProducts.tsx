@@ -88,9 +88,9 @@ const GroupProducts = () => {
 
     try {
       const data = await fetchGroupProducts(groupId);
-      const mergedProducts = mergeOwnerProducts(groupId, data);
-      setProducts(mergedProducts);
-      writeCachedGroupProducts(groupId, mergedProducts);
+      const normalizedProducts = data.map(normalizeProduct);
+      setProducts(normalizedProducts);
+      writeCachedGroupProducts(groupId, normalizedProducts);
     } catch {
       setError("Failed to load products. Please try again.");
     } finally {
