@@ -27,6 +27,7 @@ import EditMenuGroupsPage from "./pages/EditMenuGroups.tsx";
 import EditProduct from "./pages/EditProduct.tsx";
 import AddProduct from "./pages/AddProduct.tsx";
 import CompanyOrders from "./pages/CompanyOrders.tsx";
+import CompanyOrderDetail from "./pages/CompanyOrderDetail.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -64,6 +65,7 @@ const App = () => (
                 <Route path="/edit-product" element={<EditProduct />} />
                 <Route path="/add-product" element={<AddProduct />} />
                 <Route path="/company-orders" element={<CompanyOrders />} />
+                <Route path="/company-order-detail" element={<CompanyOrderDetail />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
