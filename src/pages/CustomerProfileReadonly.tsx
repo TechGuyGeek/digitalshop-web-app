@@ -56,14 +56,38 @@ const CustomerProfileReadonly = () => {
   const mobile = person?.MobileNumber || "";
   const email = String(person?.Email || person?.email || "");
 
+  const isMobileDevice = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+  const normalizeForWhatsApp = (num: string): string => {
+    let cleaned = num.replace(/[\s\-()]/g, "");
+    if (cleaned.startsWith("0")) cleaned = "44" + cleaned.slice(1);
+    return cleaned;
+  };
+
   const handleSms = () => {
     if (!mobile) return;
-    window.open(`sms:${mobile}?body=${encodeURIComponent("Welcome to Digital shop")}`, "_self");
+    if (isMobileDevice) {
+      window.open(`sms:${mobile}?body=${encodeURIComponent("Welcome to Digital shop")}`, "_self");
+    } else {
+      navigator.clipboard.writeText(mobile);
+      toast.info("Phone number copied – SMS works best on mobile devices");
+    }
   };
 
   const handlePhone = () => {
     if (!mobile) return;
-    window.open(`tel:${mobile}`, "_self");
+    if (isMobileDevice) {
+      window.open(`tel:${mobile}`, "_self");
+    } else {
+      navigator.clipboard.writeText(mobile);
+      toast.info("Phone number copied – calling works best on mobile devices");
+    }
+  };
+
+  const handleWhatsApp = () => {
+    if (!mobile) return;
+    const num = normalizeForWhatsApp(mobile);
+    window.open(`https://wa.me/${num}?text=Welcome%20to%20Digital%20shop`, "_blank");
   };
 
   const handleEmail = () => {
