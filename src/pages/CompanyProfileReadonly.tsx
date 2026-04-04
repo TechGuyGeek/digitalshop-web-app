@@ -73,7 +73,7 @@ const CompanyProfileReadonly = () => {
           <ArrowLeft size={20} />
         </Button>
         <h1 className="text-lg font-bold text-primary-foreground font-heading">
-          {company?.CompanyName || "Company Profile"}
+          {companyName || "Company Profile"}
         </h1>
       </div>
 
