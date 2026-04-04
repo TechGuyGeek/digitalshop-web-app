@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Loader2, User, MessageSquare, Phone, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import type { DigitalPerson } from "@/lib/api";
 
 const SERVER_DOMAIN = "https://app.techguygeek.co.uk/";
