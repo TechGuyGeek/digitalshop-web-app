@@ -233,34 +233,41 @@ export async function toggleCompanyOrderFlag(
   const endpoints = flag === "HasPaid" ? paidEndpoints : deliveredEndpoints;
   const url = SERVER_DOMAIN + "menu1/PHPwrite/LiveOrders/" + endpoints[tab];
 
-  // Send one request per item in the group (each has its own orderid)
-  for (const item of order.items) {
-    const body: Record<string, string> = {
-      companyid: String(item.companyid || item.Companyid || order.companyId),
-      orderid: String(item.orderid || ""),
-      clientid: String(item.clientid || order.clientId),
-      [flag]: newValue,
-      Email: email,
-      Password: password,
-    };
+  const firstItem = order.items[0];
+  const body: Record<string, string> = {
+    companyid: String(firstItem?.companyid || firstItem?.Companyid || order.companyId),
+    orderid: String(firstItem?.orderid || ""),
+    clientid: String(firstItem?.clientid || order.clientId),
+    [flag]: newValue,
+    Email: email,
+    Password: password,
+  };
 
-    try {
-      const form = new URLSearchParams(body);
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: form.toString(),
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+    const text = await res.text();
+    if (!res.ok || text === "false" || !text.trim()) {
+      console.error("[toggleFlag] request failed", {
+        status: res.status,
+        body,
+        response: text,
       });
-      const text = await res.text();
-      if (text === "false" || !text.trim()) {
-        console.error("[toggleFlag] server returned false for orderid", body.orderid);
-        return null;
-      }
-    } catch (err) {
-      console.error("[toggleFlag] error:", err);
       return null;
     }
-  }
 
-  return []; // success – caller will reload
+    try {
+      const parsed = JSON.parse(text);
+      return Array.isArray(parsed) ? (parsed as CompanyOrderItem[]) : [];
+    } catch {
+      return [];
+    }
+  } catch (err) {
+    console.error("[toggleFlag] error:", err);
+    return null;
+  }
 }
