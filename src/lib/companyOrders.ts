@@ -245,10 +245,11 @@ export async function toggleCompanyOrderFlag(
     };
 
     try {
+      const form = new URLSearchParams(body);
       const res = await fetch(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: form.toString(),
       });
       const text = await res.text();
       if (text === "false" || !text.trim()) {
