@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Loader2, Store, MessageSquare, Phone, Mail } from "lucide-react";
+import { ArrowLeft, Loader2, Store, MessageSquare, Phone, Mail, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const SERVER_DOMAIN = "https://app.techguygeek.co.uk/";
 
