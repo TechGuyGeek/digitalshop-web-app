@@ -106,7 +106,7 @@ const CompanyProfileReadonly = () => {
           {/* Info Fields */}
           <div className="flex flex-col items-center px-6 py-4 space-y-1">
             {[
-              company.CompanyName,
+              companyName,
               company.LineOneAddress,
               company.LineTwoAddress,
               company.LineThreeAddress,
