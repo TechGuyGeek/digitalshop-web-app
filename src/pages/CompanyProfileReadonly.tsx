@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Loader2, Store, MessageSquare, Phone, Mail } from "lucide-react";
+import { ArrowLeft, Loader2, Store, MessageSquare, Phone, Mail, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const SERVER_DOMAIN = "https://app.techguygeek.co.uk/";
 
@@ -59,6 +60,46 @@ const CompanyProfileReadonly = () => {
   const imageUrl = company ? getCompanyImageUrl(company.companyphoto) : null;
   const mobile = company?.CompanyMobile || "";
   const email = company?.CompanyEmail || "";
+
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+  const normalizeForWhatsApp = (num: string): string => {
+    let cleaned = num.replace(/[\s\-()]/g, "");
+    if (cleaned.startsWith("0")) cleaned = "44" + cleaned.slice(1);
+    if (!cleaned.startsWith("+")) cleaned = cleaned;
+    return cleaned;
+  };
+
+  const handleSms = () => {
+    if (!mobile) return;
+    if (isMobile) {
+      window.open(`sms:${mobile}?body=Welcome to Digital shop`, "_blank");
+    } else {
+      navigator.clipboard.writeText(mobile);
+      toast.info("Phone number copied – SMS works best on mobile devices");
+    }
+  };
+
+  const handlePhone = () => {
+    if (!mobile) return;
+    if (isMobile) {
+      window.open(`tel:${mobile}`, "_blank");
+    } else {
+      navigator.clipboard.writeText(mobile);
+      toast.info("Phone number copied – calling works best on mobile devices");
+    }
+  };
+
+  const handleWhatsApp = () => {
+    if (!mobile) return;
+    const num = normalizeForWhatsApp(mobile);
+    window.open(`https://wa.me/${num}?text=Welcome%20to%20Digital%20shop`, "_blank");
+  };
+
+  const handleEmail = () => {
+    if (!email) return;
+    window.open(`mailto:${email}`, "_blank");
+  };
 
   return (
     <div className="h-screen bg-muted flex flex-col">
