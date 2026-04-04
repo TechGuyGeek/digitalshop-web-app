@@ -240,6 +240,10 @@ const CompanyOrders = () => {
                     variant="outline"
                     size="sm"
                     className="rounded-md text-xs w-24"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/customer-profile-readonly?userid=${encodeURIComponent(order.clientId)}`);
+                    }}
                   >
                     User Profile
                   </Button>
