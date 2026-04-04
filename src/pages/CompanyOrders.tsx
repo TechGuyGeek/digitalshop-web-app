@@ -108,16 +108,18 @@ const CompanyOrders = () => {
       flag,
       newValue ? "1" : "0",
       order,
+      auth.personId,
       auth.email,
       auth.password
     );
 
     if (result === null) {
-      // Revert on failure
       setOrders(prevOrders);
       toast.error(`Failed to update ${flag === "HasPaid" ? "payment" : "delivery"} status`);
+    } else if (result.length > 0) {
+      setOrders(groupCompanyOrders(result));
+      toast.success(`${flag === "HasPaid" ? "Payment" : "Delivery"} status updated`);
     } else {
-      // Reload to get fresh data
       await loadOrders(activeTab);
       toast.success(`${flag === "HasPaid" ? "Payment" : "Delivery"} status updated`);
     }

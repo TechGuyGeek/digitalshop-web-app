@@ -216,6 +216,7 @@ export async function toggleCompanyOrderFlag(
   flag: "HasPaid" | "HasDelivered",
   newValue: string,
   order: CompanyGroupedOrder,
+  userId: string,
   email: string,
   password: string
 ): Promise<CompanyOrderItem[] | null> {
@@ -232,35 +233,64 @@ export async function toggleCompanyOrderFlag(
 
   const endpoints = flag === "HasPaid" ? paidEndpoints : deliveredEndpoints;
   const url = SERVER_DOMAIN + "menu1/PHPwrite/LiveOrders/" + endpoints[tab];
+  const firstItem = order.items[0];
+  const companyId = String(firstItem?.companyid || firstItem?.Companyid || order.companyId || "");
+  const orderId = String(firstItem?.orderid || "");
+  const clientId = String(firstItem?.clientid || order.clientId || "");
+  const groupId = String(firstItem?.GroupID || "");
 
-  // Send one request per item in the group (each has its own orderid)
-  for (const item of order.items) {
-    const body: Record<string, string> = {
-      companyid: String(item.companyid || item.Companyid || order.companyId),
-      orderid: String(item.orderid || ""),
-      clientid: String(item.clientid || order.clientId),
-      [flag]: newValue,
-      Email: email,
-      Password: password,
-    };
+  const body: Record<string, string> = {
+    companyid: companyId,
+    companyID: companyId,
+    orderid: orderId,
+    OrderID: orderId,
+    clientid: clientId,
+    ClientID: clientId,
+    UserID: String(userId),
+    PersonID: String(userId),
+    UserEmail: email,
+    UserPassword: password,
+    [flag]: newValue,
+  };
 
-    try {
-      const form = new URLSearchParams(body);
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: form.toString(),
-      });
-      const text = await res.text();
-      if (text === "false" || !text.trim()) {
-        console.error("[toggleFlag] server returned false for orderid", body.orderid);
-        return null;
-      }
-    } catch (err) {
-      console.error("[toggleFlag] error:", err);
-      return null;
-    }
+  if (groupId) {
+    body.GroupID = groupId;
   }
 
-  return []; // success – caller will reload
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+    const text = await res.text();
+    if (!res.ok || text === "false" || !text.trim()) {
+      console.error("[toggleFlag] request failed", {
+        status: res.status,
+        body,
+        response: text,
+      });
+      return null;
+    }
+
+    if (text.trim().toLowerCase() === "true") {
+      return [];
+    }
+
+    try {
+      const parsed = JSON.parse(text);
+      if (Array.isArray(parsed)) {
+        return parsed as CompanyOrderItem[];
+      }
+      console.error("[toggleFlag] unexpected response shape", parsed);
+      return null;
+    } catch (err) {
+      console.error("[toggleFlag] invalid JSON response", text, err);
+      return null;
+    }
+  } catch (err) {
+    console.error("[toggleFlag] error:", err);
+    return null;
+  }
 }
