@@ -114,7 +114,7 @@ const Orders = () => {
 
   const handleCompanyProfile = (order: GroupedOrder) => {
     if (order.companyId) {
-      navigate(`/shop-profile?companyid=${encodeURIComponent(order.companyId)}&from=orders`);
+      navigate(`/company-profile-readonly?companyid=${encodeURIComponent(order.companyId)}`);
     }
   };
 
