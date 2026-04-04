@@ -18,13 +18,12 @@ async function fetchCustomerProfile(userId: string): Promise<DigitalPerson | nul
 }
 
 function getProfileImageUrl(person: DigitalPerson): string | null {
-  const path = person.Imagepath || person.imagename || "";
+  const path = String(person.Imagepath || person.imagename || "");
   if (!path) return null;
-  if (typeof path === "string" && path.startsWith("/")) {
-    return SERVER_DOMAIN2 + path.substring(1);
-  }
-  if (typeof path === "string" && path.startsWith("http")) return path;
-  return SERVER_DOMAIN2 + "menu1/" + path;
+  if (path.startsWith("http")) return path;
+  // Path like "/Images/UserProfile/xxx.jpeg" → prepend domain + "menu1"
+  const clean = path.startsWith("/") ? path : "/" + path;
+  return SERVER_DOMAIN + "menu1" + clean;
 }
 
 const CustomerProfileReadonly = () => {
