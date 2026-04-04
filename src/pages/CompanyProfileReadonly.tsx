@@ -92,7 +92,7 @@ const CompanyProfileReadonly = () => {
             {imageUrl ? (
               <img
                 src={imageUrl}
-                alt={company.CompanyName || "Company"}
+                alt={companyName || "Company"}
                 className="w-full h-full object-cover"
                 onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
               />
