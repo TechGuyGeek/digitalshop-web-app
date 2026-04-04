@@ -209,3 +209,57 @@ export function groupCompanyOrders(orders: CompanyOrderItem[]): CompanyGroupedOr
 
   return grouped;
 }
+
+/** Toggle Paid or Delivered for order items, using tab-specific endpoints */
+export async function toggleCompanyOrderFlag(
+  tab: "today" | "week" | "month",
+  flag: "HasPaid" | "HasDelivered",
+  newValue: string,
+  order: CompanyGroupedOrder,
+  email: string,
+  password: string
+): Promise<CompanyOrderItem[] | null> {
+  const paidEndpoints: Record<string, string> = {
+    today: "SavePayedorNotToggleSecure.php",
+    week: "SavePayedorNotToggleSecureweek.php",
+    month: "SavePayedorNotToggleSecuremonth.php",
+  };
+  const deliveredEndpoints: Record<string, string> = {
+    today: "SaveDELIVEREDORNOTToggleSecure.php",
+    week: "SaveDELIVEREDORNOTToggleSecureweek.php",
+    month: "SaveDELIVEREDORNOTToggleSecuremonth.php",
+  };
+
+  const endpoints = flag === "HasPaid" ? paidEndpoints : deliveredEndpoints;
+  const url = SERVER_DOMAIN + "menu1/PHPwrite/LiveOrders/" + endpoints[tab];
+
+  // Send one request per item in the group (each has its own orderid)
+  for (const item of order.items) {
+    const body: Record<string, string> = {
+      companyid: String(item.companyid || item.Companyid || order.companyId),
+      orderid: String(item.orderid || ""),
+      clientid: String(item.clientid || order.clientId),
+      [flag]: newValue,
+      Email: email,
+      Password: password,
+    };
+
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const text = await res.text();
+      if (text === "false" || !text.trim()) {
+        console.error("[toggleFlag] server returned false for orderid", body.orderid);
+        return null;
+      }
+    } catch (err) {
+      console.error("[toggleFlag] error:", err);
+      return null;
+    }
+  }
+
+  return []; // success – caller will reload
+}
