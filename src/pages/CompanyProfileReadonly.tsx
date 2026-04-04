@@ -54,6 +54,8 @@ const CompanyProfileReadonly = () => {
       .finally(() => setLoading(false));
   }, [companyId]);
 
+  // API returns lowercase "companyname" but interface has "CompanyName"
+  const companyName = company?.CompanyName || company?.companyname || "";
   const imageUrl = company ? getCompanyImageUrl(company.companyphoto) : null;
   const mobile = company?.CompanyMobile || "";
   const email = company?.CompanyEmail || "";
@@ -71,7 +73,7 @@ const CompanyProfileReadonly = () => {
           <ArrowLeft size={20} />
         </Button>
         <h1 className="text-lg font-bold text-primary-foreground font-heading">
-          {company?.CompanyName || "Company Profile"}
+          {companyName || "Company Profile"}
         </h1>
       </div>
 
@@ -90,7 +92,7 @@ const CompanyProfileReadonly = () => {
             {imageUrl ? (
               <img
                 src={imageUrl}
-                alt={company.CompanyName || "Company"}
+                alt={companyName || "Company"}
                 className="w-full h-full object-cover"
                 onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
               />
@@ -104,7 +106,7 @@ const CompanyProfileReadonly = () => {
           {/* Info Fields */}
           <div className="flex flex-col items-center px-6 py-4 space-y-1">
             {[
-              company.CompanyName,
+              companyName,
               company.LineOneAddress,
               company.LineTwoAddress,
               company.LineThreeAddress,
