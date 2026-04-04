@@ -23,6 +23,15 @@ const CompanyOrders = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const passedCompanyId = (location.state as any)?.companyId || "";
+
+  // Persist companyId so it survives navigating away and back
+  useEffect(() => {
+    if (passedCompanyId) {
+      localStorage.setItem("companyOrdersCompanyId", passedCompanyId);
+    }
+  }, [passedCompanyId]);
+
+  const savedCompanyId = passedCompanyId || localStorage.getItem("companyOrdersCompanyId") || "";
   const [activeTab, setActiveTab] = useState<TabKey>("today");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
