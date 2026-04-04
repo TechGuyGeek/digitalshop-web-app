@@ -108,6 +108,7 @@ const CompanyOrders = () => {
       flag,
       newValue ? "1" : "0",
       order,
+      auth.personId,
       auth.email,
       auth.password
     );

@@ -216,6 +216,7 @@ export async function toggleCompanyOrderFlag(
   flag: "HasPaid" | "HasDelivered",
   newValue: string,
   order: CompanyGroupedOrder,
+  userId: string,
   email: string,
   password: string
 ): Promise<CompanyOrderItem[] | null> {
@@ -232,16 +233,29 @@ export async function toggleCompanyOrderFlag(
 
   const endpoints = flag === "HasPaid" ? paidEndpoints : deliveredEndpoints;
   const url = SERVER_DOMAIN + "menu1/PHPwrite/LiveOrders/" + endpoints[tab];
-
   const firstItem = order.items[0];
+  const companyId = String(firstItem?.companyid || firstItem?.Companyid || order.companyId || "");
+  const orderId = String(firstItem?.orderid || "");
+  const clientId = String(firstItem?.clientid || order.clientId || "");
+  const groupId = String(firstItem?.GroupID || "");
+
   const body: Record<string, string> = {
-    companyid: String(firstItem?.companyid || firstItem?.Companyid || order.companyId),
-    orderid: String(firstItem?.orderid || ""),
-    clientid: String(firstItem?.clientid || order.clientId),
+    companyid: companyId,
+    companyID: companyId,
+    orderid: orderId,
+    OrderID: orderId,
+    clientid: clientId,
+    ClientID: clientId,
+    UserID: String(userId),
+    PersonID: String(userId),
+    UserEmail: email,
+    UserPassword: password,
     [flag]: newValue,
-    Email: email,
-    Password: password,
   };
+
+  if (groupId) {
+    body.GroupID = groupId;
+  }
 
   try {
     const res = await fetch(url, {
@@ -260,11 +274,20 @@ export async function toggleCompanyOrderFlag(
       return null;
     }
 
+    if (text.trim().toLowerCase() === "true") {
+      return [];
+    }
+
     try {
       const parsed = JSON.parse(text);
-      return Array.isArray(parsed) ? (parsed as CompanyOrderItem[]) : [];
-    } catch {
-      return [];
+      if (Array.isArray(parsed)) {
+        return parsed as CompanyOrderItem[];
+      }
+      console.error("[toggleFlag] unexpected response shape", parsed);
+      return null;
+    } catch (err) {
+      console.error("[toggleFlag] invalid JSON response", text, err);
+      return null;
     }
   } catch (err) {
     console.error("[toggleFlag] error:", err);
