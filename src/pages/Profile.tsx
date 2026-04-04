@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { LogOut, User, Camera, Image, Save, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -225,7 +226,18 @@ const Profile = () => {
         <div className="space-y-4 mb-8">
           <ProfileField label="Name" value={form.name} onChange={(v) => handleChange("name", v)} />
           <ProfileField label="Last Name" value={form.surname} onChange={(v) => handleChange("surname", v)} />
-          <ProfileField label="Gender" value={form.gender} onChange={(v) => handleChange("gender", v)} />
+          <div className="text-center">
+            <Select value={form.gender} onValueChange={(v) => handleChange("gender", v)}>
+              <SelectTrigger className="w-full border-0 border-b border-border rounded-none bg-transparent text-center text-base font-medium text-foreground shadow-none focus:ring-0">
+                <SelectValue placeholder="Gender" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Male">Male</SelectItem>
+                <SelectItem value="Female">Female</SelectItem>
+                <SelectItem value="Non-binary">Non-binary</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <ProfileField label="Mobile Number" value={form.mobileNumber} onChange={(v) => handleChange("mobileNumber", v)} />
           <ProfileField label="1st line Address" value={form.lineOne} onChange={(v) => handleChange("lineOne", v)} />
           <ProfileField label="2nd line Address" value={form.lineTwo} onChange={(v) => handleChange("lineTwo", v)} />
