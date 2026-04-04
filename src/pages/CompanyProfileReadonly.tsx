@@ -54,6 +54,8 @@ const CompanyProfileReadonly = () => {
       .finally(() => setLoading(false));
   }, [companyId]);
 
+  // API returns lowercase "companyname" but interface has "CompanyName"
+  const companyName = company?.CompanyName || company?.companyname || "";
   const imageUrl = company ? getCompanyImageUrl(company.companyphoto) : null;
   const mobile = company?.CompanyMobile || "";
   const email = company?.CompanyEmail || "";
