@@ -46,7 +46,7 @@ const CompanyOrders = () => {
       const email = String(u.Email || u.email || "");
       const password = String(u.Password || u.password || "");
       // Use companyId passed via navigation state first, fall back to user object
-      const companyId = passedCompanyId || String(u.CompanyID || (u as any).companyID || (u as any).companyid || "");
+      const companyId = savedCompanyId || String(u.CompanyID || (u as any).companyID || (u as any).companyid || "");
       if (!personId || !companyId || companyId === "0") return null;
       return { personId, email, password, companyId };
     } catch {

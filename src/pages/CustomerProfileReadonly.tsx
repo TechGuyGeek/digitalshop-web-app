@@ -95,7 +95,7 @@ const CustomerProfileReadonly = () => {
           variant="ghost"
           size="icon"
           className="text-primary-foreground hover:bg-primary/80"
-          onClick={() => navigate("/company-orders")}
+          onClick={() => navigate(-1)}
         >
           <ArrowLeft size={20} />
         </Button>
