@@ -29,6 +29,7 @@ import AddProduct from "./pages/AddProduct.tsx";
 import CompanyOrders from "./pages/CompanyOrders.tsx";
 import CompanyOrderDetail from "./pages/CompanyOrderDetail.tsx";
 import CustomerProfileReadonly from "./pages/CustomerProfileReadonly.tsx";
+import CompanyProfileReadonly from "./pages/CompanyProfileReadonly.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
