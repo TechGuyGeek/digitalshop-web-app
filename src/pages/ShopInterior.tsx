@@ -21,6 +21,11 @@ const ShopInterior = () => {
   const shopName = searchParams.get("name") || "Shop";
   const companyId = searchParams.get("companyid") || "";
 
+  // Persist companyId for basket fallback
+  useEffect(() => {
+    if (companyId) sessionStorage.setItem("basket_companyId", companyId);
+  }, [companyId]);
+
   const [groups, setGroups] = useState<MenuGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
