@@ -272,16 +272,13 @@ export async function toggleCompanyOrderFlag(
     const text = await res.text();
     console.log("[toggleFlag] HTTP status:", res.status);
     console.log("[toggleFlag] raw response:", text);
-    if (!res.ok || text === "false" || !text.trim()) {
-      console.error("[toggleFlag] request failed", {
-        status: res.status,
-        body,
-        response: text,
-      });
+    if (text === "false") {
+      console.error("[toggleFlag] server returned false", { status: res.status, body });
       return null;
     }
 
-    if (text.trim().toLowerCase() === "true") {
+    // Server may return empty body, "true", or updated array — all mean success
+    if (!text.trim() || text.trim().toLowerCase() === "true") {
       return [];
     }
 
