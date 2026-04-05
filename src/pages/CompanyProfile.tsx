@@ -425,7 +425,7 @@ const CompanyProfile = () => {
               <Switch checked={toggles.liveOrders} onCheckedChange={v => handleToggle("liveOrders", v)} />
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-foreground">Takeaways is Enabled</span>
+              <span className="text-sm text-foreground">{toggles.takeaways ? "Takeaways is Enabled" : "Enable to Allow Takeaways"}</span>
               <Switch checked={toggles.takeaways} onCheckedChange={v => handleToggle("takeaways", v)} />
             </div>
             <div className="flex items-center justify-between">
