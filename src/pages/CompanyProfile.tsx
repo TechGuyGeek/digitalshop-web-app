@@ -233,7 +233,7 @@ const CompanyProfile = () => {
       ok = await toggleDeliveryEnable(company.companyid, value ? "1" : "0", auth.userId, auth.email, auth.password);
     } else if (field === "allowGlobal") {
       const rawPaid = user?.PaidUser ?? user?.Paiduser ?? (user as Record<string, unknown>)?.paidUser;
-      const isPaid = rawPaid === 1 || rawPaid === "1" || rawPaid === true || rawPaid === "true";
+      const isPaid = rawPaid === 2 || rawPaid === "2" || rawPaid === 1 || rawPaid === "1" || rawPaid === true;
       console.log("[GlobalGuard] user object:", JSON.stringify(user));
       console.log("[GlobalGuard] rawPaid value:", rawPaid, "typeof:", typeof rawPaid);
       console.log("[GlobalGuard] isPaid:", isPaid);
