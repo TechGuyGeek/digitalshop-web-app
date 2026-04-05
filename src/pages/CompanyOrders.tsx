@@ -234,7 +234,7 @@ const CompanyOrders = () => {
                           handleToggle(order, "HasPaid", checked)
                         }
                       />
-                      <span className="text-foreground">Paid</span>
+                      <span className="text-foreground">{order.hasPaid === "1" ? "Paid" : "Not Paid"}</span>
                     </div>
 
                     {/* Delivered toggle */}
@@ -249,7 +249,7 @@ const CompanyOrders = () => {
                           handleToggle(order, "HasDelivered", checked)
                         }
                       />
-                      <span className="text-foreground">Delivered</span>
+                      <span className="text-foreground">{order.hasDelivered === "1" ? "Delivered" : "Not Delivered"}</span>
                     </div>
 
                     {order.requestCancel === "1" && (
