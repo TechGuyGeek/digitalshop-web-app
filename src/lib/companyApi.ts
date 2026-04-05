@@ -6,7 +6,7 @@ const ENDPOINTS = {
   saveCompany: "menu1/PHPwrite/Company/UpdateCompanyDetailsSecure.php",
   toggleOrder: "menu1/PHPwrite/Company/SaveCompanyOrdersTogglexSecure.php",
   toggleTakeaway: "menu1/PHPwrite/Company/SaveCompanyTakeawaysToggleSecure.php",
-  toggleDelivery: "menu1/PHPwrite/Company/SaveCompanyDeliveriesToggle.php",
+  toggleDelivery: "menu1/PHPwrite/Company/SaveCompanyDeliveriesToggleSecure.php",
   toggleGlobal: "menu1/PHPwrite/Company/SaveCompanyLocalGlobal.php",
   updateGPS: "menu1/PHPwrite/Company/UpdateGPS.php",
   countMenuGroup: "menu1/PHPread/CompanyMenu/CountMenuGroup.php",
@@ -183,8 +183,30 @@ export async function toggleTakeawayEnable(companyid: number, value: string, use
   }
 }
 
-export function toggleDeliveryEnable(companyid: number, value: string, userId: number, email: string, password: string) {
-  return postToggle(ENDPOINTS.toggleDelivery, { companyid, DeliveryEnable: value, UserID: userId, UserEmail: email, UserPassword: password });
+export async function toggleDeliveryEnable(companyid: number, value: string, userId: number, email: string, password: string) {
+  const url = SERVER_DOMAIN + ENDPOINTS.toggleDelivery;
+  const payload = { companyid, DeliveryEnable: value, UserID: userId, UserEmail: email, UserPassword: password };
+  console.log("[toggleDeliveryEnable] URL:", url);
+  console.log("[toggleDeliveryEnable] Payload:", JSON.stringify(payload));
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    console.log("[toggleDeliveryEnable] Status:", res.status);
+    const text = await res.text();
+    console.log("[toggleDeliveryEnable] Response:", text);
+    try {
+      const data = JSON.parse(text);
+      return data.ServerMessage === "true" || data.success === true || data.Success === true;
+    } catch {
+      return false;
+    }
+  } catch (err) {
+    console.error("[toggleDeliveryEnable] Error:", err);
+    return false;
+  }
 }
 
 export function toggleGlobalEnable(companyid: number, value: string, userId: number, email: string, password: string) {
