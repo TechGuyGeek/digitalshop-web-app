@@ -4,7 +4,7 @@ const SERVER_DOMAIN = "https://app.techguygeek.co.uk/";
 const ENDPOINTS = {
   loadCompany: "menu1/PHPread/Company/DoesCompanyExistorNotSecure.php",
   saveCompany: "menu1/PHPwrite/Company/UpdateCompanyDetailsSecure.php",
-  toggleOrder: "menu1/PHPwrite/Company/SaveCompanyOrdersToggle.php",
+  toggleOrder: "menu1/PHPwrite/Company/SaveCompanyOrdersTogglexSecure.php",
   toggleTakeaway: "menu1/PHPwrite/Company/SaveCompanyTakeawaysToggle.php",
   toggleDelivery: "menu1/PHPwrite/Company/SaveCompanyDeliveriesToggle.php",
   toggleGlobal: "menu1/PHPwrite/Company/SaveCompanyLocalGlobal.php",
