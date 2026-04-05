@@ -222,13 +222,13 @@ export async function toggleCompanyOrderFlag(
 ): Promise<CompanyOrderItem[] | null> {
   const paidEndpoints: Record<string, string> = {
     today: "SavePayedorNotToggleSecure_web.php",
-    week: "SavePayedorNotToggleSecureweek.php",
-    month: "SavePayedorNotToggleSecuremonth.php",
+    week: "SavePayedorNotToggleSecureweek_web.php",
+    month: "SavePayedorNotToggleSecuremonth_web.php",
   };
   const deliveredEndpoints: Record<string, string> = {
-    today: "SaveDELIVEREDORNOTToggleSecure.php",
-    week: "SaveDELIVEREDORNOTToggleSecureweek.php",
-    month: "SaveDELIVEREDORNOTToggleSecuremonth.php",
+    today: "SaveDELIVEREDORNOTToggleSecure_web.php",
+    week: "SaveDELIVEREDORNOTToggleSecureweek_web.php",
+    month: "SaveDELIVEREDORNOTToggleSecuremonth_web.php",
   };
 
   const endpoints = flag === "HasPaid" ? paidEndpoints : deliveredEndpoints;
