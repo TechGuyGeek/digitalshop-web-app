@@ -35,17 +35,43 @@ async function loadMenuGroups(companyId: number): Promise<MenuGroup[]> {
   }
 }
 
-async function addMenuGroup(companyId: number, groupName: string, userId: number, email: string, password: string): Promise<boolean> {
+async function addMenuGroup(companyId: number, groupName: string, userId: number, email: string, password: string): Promise<{ success: boolean; message?: string }> {
+  const url = SERVER_DOMAIN + "menu1/PHPwrite/CompanyMenu/AddGroupSecure.php";
+  const form = new URLSearchParams();
+  form.append("UserID", String(userId));
+  form.append("UserEmail", email);
+  form.append("UserPassword", password);
+  form.append("OrderGroup", groupName);
+  form.append("companyID", String(companyId));
+
+  console.log("[addMenuGroup] URL:", url);
+  console.log("[addMenuGroup] Content-Type: application/x-www-form-urlencoded");
+  console.log("[addMenuGroup] Fields:", { UserID: userId, UserEmail: email, OrderGroup: groupName, companyID: companyId });
+
   try {
-    const res = await fetch(SERVER_DOMAIN + "menu1/PHPwrite/CompanyMenu/AddmenuGroup.php", {
+    const res = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ companyid: companyId, OrderGroup: groupName, UserID: userId, UserEmail: email, UserPassword: password }),
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: form.toString(),
     });
-    const data = await res.json();
-    return data.success === true || data.Success === true;
-  } catch {
-    return false;
+    console.log("[addMenuGroup] HTTP status:", res.status);
+    const text = await res.text();
+    console.log("[addMenuGroup] Raw response:", text);
+
+    try {
+      const data = JSON.parse(text);
+      const msg = data.ServerMessage || data.serverMessage || "";
+      if (msg.toLowerCase().includes("added") || data.success === true || data.Success === true) {
+        return { success: true, message: msg };
+      }
+      return { success: false, message: msg || "Unknown error" };
+    } catch {
+      // Non-JSON response — treat as failure
+      return { success: false, message: text || "Invalid response" };
+    }
+  } catch (err) {
+    console.error("[addMenuGroup] FETCH FAILED (CORS or network):", err);
+    return { success: false, message: "Network error — the server may not allow this request" };
   }
 }
 

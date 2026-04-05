@@ -274,7 +274,7 @@ const CompanyProfile = () => {
     }, () => toast.error("Could not get location"));
   };
 
-  // Add Products
+  // Add Products — mirrors MAUI: save profile, check group count, branch
   const handleAddProducts = async () => {
     if (addProductsLoading) return;
     if (!company || !Number(company.companyid)) {
@@ -284,8 +284,20 @@ const CompanyProfile = () => {
     setAddProductsLoading(true);
     try {
       await handleSave();
-      navigate(`/edit-menu-groups?companyId=${company.companyid}`);
-    } catch {
+      console.log("[handleAddProducts] Checking menu group count for companyid:", company.companyid);
+      const countResult = await countMenuGroups(Number(company.companyid));
+      console.log("[handleAddProducts] countMenuGroups result:", countResult);
+      // MAUI logic: if "ZERO" or "0" or empty → first-time setup, else edit
+      const hasGroups = countResult !== "ZERO" && countResult !== "0" && countResult.trim() !== "";
+      if (hasGroups) {
+        console.log("[handleAddProducts] Groups exist, navigating to edit-menu-groups");
+        navigate(`/edit-menu-groups?companyId=${company.companyid}`);
+      } else {
+        console.log("[handleAddProducts] No groups, navigating to edit-menu-groups (add mode)");
+        navigate(`/edit-menu-groups?companyId=${company.companyid}`);
+      }
+    } catch (err) {
+      console.error("[handleAddProducts] Error:", err);
       toast.error("Unable to load menu groups. Please try again.");
     } finally {
       setAddProductsLoading(false);
