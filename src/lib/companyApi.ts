@@ -332,6 +332,35 @@ export function getCompanyImageUrl(companyphoto?: string): string {
   return encodeURI(SERVER_DOMAIN + "menu1/" + companyphoto);
 }
 
+// ─── Save map marker ────────────────────────────────────────────
+export async function saveMapMarker(
+  companyid: number, publicNumber: number, userId: number, email: string, password: string
+): Promise<boolean> {
+  const url = SERVER_DOMAIN + "menu1/PHPwrite/Company/SaveCompanyMapMarkerSecure.php";
+  const payload = { companyid, PublicNumber: publicNumber, PersonID: userId, UserEmail: email, UserPassword: password };
+  console.log("[saveMapMarker] URL:", url);
+  console.log("[saveMapMarker] Payload:", JSON.stringify(payload));
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    console.log("[saveMapMarker] Status:", res.status);
+    const text = await res.text();
+    console.log("[saveMapMarker] Response:", text);
+    try {
+      const data = JSON.parse(text);
+      return data.success === true || data.Success === true;
+    } catch {
+      return res.ok;
+    }
+  } catch (err) {
+    console.error("[saveMapMarker] Error:", err);
+    return false;
+  }
+}
+
 // ─── Map marker mapping ────────────────────────────────────────
 export const MAP_MARKER_EMOJIS: Record<string, { emoji: string; label: string }> = {
   "0": { emoji: "📍", label: "Google" },

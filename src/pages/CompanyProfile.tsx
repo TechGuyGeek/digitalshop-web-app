@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Camera, Image as ImageIcon, Save, Trash2, Loader2 } from "lucide-react";
-import MapMarkerPicker from "@/components/MapMarkerPicker";
+import MapMarkerPicker, { type MapMarkerOption } from "@/components/MapMarkerPicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -11,7 +11,7 @@ import {
   loadCompanyProfile, saveCompanyProfile, toggleOrderEnable, toggleTakeawayEnable,
   toggleDeliveryEnable, toggleGlobalEnable, updateCompanyGPS,
   getDeleteBlockers, deleteCompany, getCompanyImageUrl,
-  getMarkerForPublicNumber, type CompanyProfile as CompanyProfileType
+  getMarkerForPublicNumber, saveMapMarker, type CompanyProfile as CompanyProfileType
 } from "@/lib/companyApi";
 import { fetchOrderCountCombined } from "@/lib/companyOrders";
 import type { DigitalPerson } from "@/lib/api";
@@ -79,7 +79,7 @@ const CompanyProfile = () => {
     liveOrders: true, takeaways: true, deliveries: true, allowGlobal: false,
   });
 
-  const [publicNumber, setPublicNumber] = useState("0");
+  const [publicNumber, setPublicNumber] = useState(0);
   const [selectedMarker, setSelectedMarker] = useState({ emoji: "🧸", label: "TOYS ICON" });
 
   // Load user & company
@@ -116,7 +116,7 @@ const CompanyProfile = () => {
           deliveries: c.DeliveryEnable === "1",
           allowGlobal: c.PayOnPhoneEnable === "1",
         });
-        setPublicNumber(c.PublicNumber || "0");
+        setPublicNumber(Number(c.PublicNumber) || 0);
         const marker = getMarkerForPublicNumber(c.PublicNumber);
         setSelectedMarker({ emoji: marker.emoji, label: marker.label.toUpperCase() + " ICON" });
         const imgUrl = getCompanyImageUrl(c.companyphoto);
@@ -199,7 +199,7 @@ const CompanyProfile = () => {
       TakeawayEnable: toggles.takeaways ? "1" : "0",
       DeliveryEnable: toggles.deliveries ? "1" : "0",
       PayOnPhoneEnable: toggles.allowGlobal ? "1" : "0",
-      PublicNumber: publicNumber,
+      PublicNumber: String(publicNumber),
       PrivateNumber: company.PrivateNumber || "",
       LineOneAddress: form.lineOne,
       LineTwoAddress: form.lineTwo,
@@ -469,15 +469,30 @@ const CompanyProfile = () => {
           <MapMarkerPicker
             open={markerPickerOpen}
             onOpenChange={setMarkerPickerOpen}
-            selected={selectedMarker.emoji}
-            onSelect={(emoji, label) => {
-              setSelectedMarker({ emoji, label });
-              const emojiToNumber: Record<string, string> = {
-                "📍": "0", "🏪": "1", "🍻": "2", "☕": "3", "🍴": "4",
-                "🏠": "5", "🎪": "6", "🧸": "7", "🥪": "8", "🍳": "10",
-                "👔": "11", "👗": "12", "🔢": "13",
-              };
-              setPublicNumber(emojiToNumber[emoji] || "0");
+            selectedId={publicNumber}
+            onSelect={async (marker: MapMarkerOption) => {
+              console.log("[MapMarker] Selected:", marker);
+              setSelectedMarker({ emoji: marker.emoji, label: marker.label });
+              setPublicNumber(marker.id);
+              setMarkerPickerOpen(false);
+
+              const auth = getUserAuth();
+              if (!auth || !company) {
+                toast.error("Cannot save marker — missing auth or company data");
+                return;
+              }
+
+              const ok = await saveMapMarker(company.companyid, marker.id, auth.userId, auth.email, auth.password);
+              if (ok) {
+                toast.success("Map marker saved!");
+                // Refresh company data
+                const personId = String(user?.PersonID || user?.ID || "");
+                const email = (user?.Email || user?.email || "") as string;
+                const refreshed = await loadCompanyProfile(personId, email);
+                if (refreshed) setCompany(refreshed);
+              } else {
+                toast.error("Failed to save map marker");
+              }
             }}
           />
 
