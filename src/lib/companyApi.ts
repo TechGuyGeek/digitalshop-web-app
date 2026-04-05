@@ -5,7 +5,7 @@ const ENDPOINTS = {
   loadCompany: "menu1/PHPread/Company/DoesCompanyExistorNotSecure.php",
   saveCompany: "menu1/PHPwrite/Company/UpdateCompanyDetailsSecure.php",
   toggleOrder: "menu1/PHPwrite/Company/SaveCompanyOrdersTogglexSecure.php",
-  toggleTakeaway: "menu1/PHPwrite/Company/SaveCompanyTakeawaysToggle.php",
+  toggleTakeaway: "menu1/PHPwrite/Company/SaveCompanyTakeawaysToggleSecure.php",
   toggleDelivery: "menu1/PHPwrite/Company/SaveCompanyDeliveriesToggle.php",
   toggleGlobal: "menu1/PHPwrite/Company/SaveCompanyLocalGlobal.php",
   updateGPS: "menu1/PHPwrite/Company/UpdateGPS.php",
@@ -157,8 +157,30 @@ export async function toggleOrderEnable(companyid: number, value: string, userId
   }
 }
 
-export function toggleTakeawayEnable(companyid: number, value: string, userId: number, email: string, password: string) {
-  return postToggle(ENDPOINTS.toggleTakeaway, { companyid, TakeawayEnable: value, UserID: userId, UserEmail: email, UserPassword: password });
+export async function toggleTakeawayEnable(companyid: number, value: string, userId: number, email: string, password: string) {
+  const url = SERVER_DOMAIN + ENDPOINTS.toggleTakeaway;
+  const payload = { companyid, TakeawayEnable: value, UserID: userId, UserEmail: email, UserPassword: password };
+  console.log("[toggleTakeawayEnable] URL:", url);
+  console.log("[toggleTakeawayEnable] Payload:", JSON.stringify(payload));
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    console.log("[toggleTakeawayEnable] Status:", res.status);
+    const text = await res.text();
+    console.log("[toggleTakeawayEnable] Response:", text);
+    try {
+      const data = JSON.parse(text);
+      return data.success === true || data.Success === true;
+    } catch {
+      return false;
+    }
+  } catch (err) {
+    console.error("[toggleTakeawayEnable] Error:", err);
+    return false;
+  }
 }
 
 export function toggleDeliveryEnable(companyid: number, value: string, userId: number, email: string, password: string) {
