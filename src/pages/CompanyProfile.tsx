@@ -429,7 +429,7 @@ const CompanyProfile = () => {
               <Switch checked={toggles.takeaways} onCheckedChange={v => handleToggle("takeaways", v)} />
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-foreground">Deliveries are Enabled</span>
+              <span className="text-sm text-foreground">{toggles.deliveries ? "Deliveries are Enabled" : "Enable to Allow Deliveries"}</span>
               <Switch checked={toggles.deliveries} onCheckedChange={v => handleToggle("deliveries", v)} />
             </div>
             <div className="flex items-center justify-between">
