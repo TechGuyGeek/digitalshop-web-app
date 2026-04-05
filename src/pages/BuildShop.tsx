@@ -17,6 +17,7 @@ const BuildShop = () => {
   const [coords, setCoords] = useState<{ lat: number; lng: number }>({ lat: 53.3498, lng: -6.2603 });
   const [locating, setLocating] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [companyEmail, setCompanyEmail] = useState("");
 
   // Get user GPS
   useEffect(() => {
@@ -95,16 +96,85 @@ const BuildShop = () => {
       toast.error("Please enter a shop name");
       return;
     }
+    if (!companyEmail.trim()) {
+      toast.error("Please enter a company email");
+      return;
+    }
     setSaving(true);
 
-    // TODO: POST to PHP backend to register shop
-    // const user = JSON.parse(localStorage.getItem("digitalUser") || "{}");
-    // await fetch(SERVER_DOMAIN + "...", { method: "POST", body: ... });
+    const SERVER_DOMAIN = "https://app.techguygeek.co.uk/";
+    const user = JSON.parse(localStorage.getItem("digitalUser") || "{}");
+    const personId = user.PersonID || user.personID || user.ID || "";
+    const email = user.Email || user.email || "";
+    const password = user.Password || user.password || "";
 
-    localStorage.setItem("hasShop", "true");
-    toast.success("Shop registered successfully!");
-    setSaving(false);
-    navigate("/company-profile");
+    // Step 1: Save new company
+    const saveUrl = SERVER_DOMAIN + "menu1/PHPwrite/Company/SaveCompanyDetails2Secure.php";
+    const savePayload = {
+      PersonID: String(personId),
+      Email: email,
+      Password: password,
+      CompanyName: shopName.trim(),
+      CompanyEmail: companyEmail.trim(),
+      companylat: coords.lat,
+      companylong: coords.lng,
+    };
+
+    console.log("[BuildShop] Save endpoint:", saveUrl);
+    console.log("[BuildShop] Save payload:", savePayload);
+
+    try {
+      const saveRes = await fetch(saveUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(savePayload),
+      });
+      const saveText = await saveRes.text();
+      console.log("[BuildShop] Save response status:", saveRes.status);
+      console.log("[BuildShop] Save raw response:", saveText);
+
+      if (!saveRes.ok) {
+        toast.error("Failed to register shop. Server returned " + saveRes.status);
+        setSaving(false);
+        return;
+      }
+
+      // Step 2: Check company exists
+      const checkUrl = SERVER_DOMAIN + "menu1/PHPread/Company/DoesCompanyExistorNotSecure.php";
+      const checkPayload = {
+        PersonID: String(personId),
+        UserEmail: email,
+      };
+      console.log("[BuildShop] Check endpoint:", checkUrl);
+      console.log("[BuildShop] Check payload:", checkPayload);
+
+      const checkRes = await fetch(checkUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(checkPayload),
+      });
+      const checkText = await checkRes.text();
+      console.log("[BuildShop] Check raw response:", checkText);
+
+      let checkData: any;
+      try { checkData = JSON.parse(checkText); } catch { checkData = null; }
+
+      if (checkData?.success && checkData.companies?.length > 0) {
+        const company = checkData.companies[0];
+        console.log("[BuildShop] Company found:", company);
+        localStorage.setItem("hasShop", "true");
+        localStorage.setItem("currentCompany", JSON.stringify(company));
+        toast.success("Shop registered successfully!");
+        navigate("/company-profile");
+      } else {
+        toast.error("Shop was saved but could not be found. Please try again.");
+      }
+    } catch (err) {
+      console.error("[BuildShop] Error:", err);
+      toast.error("Connection error while registering shop");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -116,8 +186,20 @@ const BuildShop = () => {
         </button>
         <Store size={24} className="text-primary" />
         <h1 className="text-lg font-bold text-foreground font-heading">Build Your Shop</h1>
-      </div>
+        </div>
 
+        <div>
+          <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground font-heading mb-1 block">
+            Company Email
+          </label>
+          <Input
+            type="email"
+            value={companyEmail}
+            onChange={(e) => setCompanyEmail(e.target.value)}
+            placeholder="Enter company email address"
+            className="border-0 border-b border-border rounded-none bg-transparent px-0 focus-visible:ring-0 focus-visible:border-primary"
+          />
+        </div>
       {/* Map */}
       <div className="flex-1 relative min-h-[300px]">
         {locating ? (
@@ -157,7 +239,7 @@ const BuildShop = () => {
         <Button
           className="w-full rounded-full font-semibold"
           onClick={handleSave}
-          disabled={saving || !shopName.trim()}
+          disabled={saving || !shopName.trim() || !companyEmail.trim()}
         >
           <Save size={16} className="mr-2" />
           {saving ? "Saving..." : "Register Shop"}
