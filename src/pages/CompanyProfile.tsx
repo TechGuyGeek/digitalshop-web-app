@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Camera, Image as ImageIcon, Save, Trash2, Loader2 } from "lucide-react";
-import MapMarkerPicker from "@/components/MapMarkerPicker";
+import MapMarkerPicker, { type MapMarkerOption } from "@/components/MapMarkerPicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -11,7 +11,7 @@ import {
   loadCompanyProfile, saveCompanyProfile, toggleOrderEnable, toggleTakeawayEnable,
   toggleDeliveryEnable, toggleGlobalEnable, updateCompanyGPS,
   getDeleteBlockers, deleteCompany, getCompanyImageUrl,
-  getMarkerForPublicNumber, type CompanyProfile as CompanyProfileType
+  getMarkerForPublicNumber, saveMapMarker, type CompanyProfile as CompanyProfileType
 } from "@/lib/companyApi";
 import { fetchOrderCountCombined } from "@/lib/companyOrders";
 import type { DigitalPerson } from "@/lib/api";
@@ -79,7 +79,7 @@ const CompanyProfile = () => {
     liveOrders: true, takeaways: true, deliveries: true, allowGlobal: false,
   });
 
-  const [publicNumber, setPublicNumber] = useState("0");
+  const [publicNumber, setPublicNumber] = useState(0);
   const [selectedMarker, setSelectedMarker] = useState({ emoji: "🧸", label: "TOYS ICON" });
 
   // Load user & company
@@ -116,7 +116,7 @@ const CompanyProfile = () => {
           deliveries: c.DeliveryEnable === "1",
           allowGlobal: c.PayOnPhoneEnable === "1",
         });
-        setPublicNumber(c.PublicNumber || "0");
+        setPublicNumber(Number(c.PublicNumber) || 0);
         const marker = getMarkerForPublicNumber(c.PublicNumber);
         setSelectedMarker({ emoji: marker.emoji, label: marker.label.toUpperCase() + " ICON" });
         const imgUrl = getCompanyImageUrl(c.companyphoto);
