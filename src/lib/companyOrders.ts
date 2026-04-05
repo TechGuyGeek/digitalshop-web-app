@@ -248,6 +248,8 @@ export async function toggleCompanyOrderFlag(
     ClientID: clientId,
     UserID: String(userId),
     PersonID: String(userId),
+    Email: email,
+    Password: password,
     UserEmail: email,
     UserPassword: password,
     [flag]: newValue,
@@ -258,6 +260,9 @@ export async function toggleCompanyOrderFlag(
   }
 
   try {
+    console.log("[toggleFlag] endpoint:", url);
+    console.log("[toggleFlag] request body:", body);
+
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -265,6 +270,8 @@ export async function toggleCompanyOrderFlag(
     });
 
     const text = await res.text();
+    console.log("[toggleFlag] HTTP status:", res.status);
+    console.log("[toggleFlag] raw response:", text);
     if (!res.ok || text === "false" || !text.trim()) {
       console.error("[toggleFlag] request failed", {
         status: res.status,
