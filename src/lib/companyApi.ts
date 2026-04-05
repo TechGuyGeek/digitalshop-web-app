@@ -5,7 +5,7 @@ const ENDPOINTS = {
   loadCompany: "menu1/PHPread/Company/DoesCompanyExistorNotSecure.php",
   saveCompany: "menu1/PHPwrite/Company/UpdateCompanyDetailsSecure.php",
   toggleOrder: "menu1/PHPwrite/Company/SaveCompanyOrdersTogglexSecure.php",
-  toggleTakeaway: "menu1/PHPwrite/Company/SaveCompanyTakeawaysToggle.php",
+  toggleTakeaway: "menu1/PHPwrite/Company/SaveCompanyTakeawaysToggleSecure.php",
   toggleDelivery: "menu1/PHPwrite/Company/SaveCompanyDeliveriesToggle.php",
   toggleGlobal: "menu1/PHPwrite/Company/SaveCompanyLocalGlobal.php",
   updateGPS: "menu1/PHPwrite/Company/UpdateGPS.php",
