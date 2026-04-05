@@ -17,6 +17,7 @@ const BuildShop = () => {
   const [coords, setCoords] = useState<{ lat: number; lng: number }>({ lat: 53.3498, lng: -6.2603 });
   const [locating, setLocating] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [companyEmail, setCompanyEmail] = useState("");
 
   // Get user GPS
   useEffect(() => {
