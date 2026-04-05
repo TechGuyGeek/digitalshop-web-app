@@ -433,7 +433,7 @@ const CompanyProfile = () => {
               <Switch checked={toggles.deliveries} onCheckedChange={v => handleToggle("deliveries", v)} />
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-foreground">Enable to Allow Global</span>
+              <span className="text-sm text-foreground">{toggles.allowGlobal ? "Global Enabled" : "Enable To Allow Global"}</span>
               <Switch checked={toggles.allowGlobal} onCheckedChange={v => handleToggle("allowGlobal", v)} />
             </div>
           </div>
