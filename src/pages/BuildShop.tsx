@@ -120,15 +120,24 @@ const BuildShop = () => {
       companylong: coords.lng,
     };
 
+    console.log("[BuildShop] === STEP 1: Calling SaveCompanyDetails2Secure ===");
     console.log("[BuildShop] Save endpoint:", saveUrl);
-    console.log("[BuildShop] Save payload:", savePayload);
+    console.log("[BuildShop] Save payload:", JSON.stringify(savePayload));
 
     try {
-      const saveRes = await fetch(saveUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(savePayload),
-      });
+      let saveRes: Response;
+      try {
+        saveRes = await fetch(saveUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(savePayload),
+        });
+      } catch (fetchErr) {
+        console.error("[BuildShop] FETCH FAILED (CORS or network):", fetchErr);
+        toast.error("Network/CORS error calling save endpoint. Check console.");
+        setSaving(false);
+        return;
+      }
       const saveText = await saveRes.text();
       console.log("[BuildShop] Save response status:", saveRes.status);
       console.log("[BuildShop] Save raw response:", saveText);
@@ -138,6 +147,8 @@ const BuildShop = () => {
         setSaving(false);
         return;
       }
+
+      console.log("[BuildShop] === STEP 2: Checking company exists ===");
 
       // Step 2: Check company exists
       const checkUrl = SERVER_DOMAIN + "menu1/PHPread/Company/DoesCompanyExistorNotSecure.php";
