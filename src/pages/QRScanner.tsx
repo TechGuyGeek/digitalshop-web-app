@@ -10,6 +10,7 @@ const QRScanner = () => {
   const streamRef = useRef<MediaStream | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const scanIntervalRef = useRef<number | null>(null);
+  const processedRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
   const [scanning, setScanning] = useState(false);
   const [processed, setProcessed] = useState(false);
@@ -28,21 +29,33 @@ const QRScanner = () => {
 
   const handleResult = useCallback(
     (value: string) => {
-      if (processed) return;
+      // Use ref to guarantee duplicate scan prevention (no stale closure)
+      if (processedRef.current) return;
+
       const trimmed = value.trim();
-      const companyId = parseInt(trimmed, 10);
-      if (isNaN(companyId) || companyId <= 0) {
+      console.log("[QRScanner] Raw scanned value:", JSON.stringify(trimmed));
+
+      const scannedCompanyId = parseInt(trimmed, 10);
+      console.log("[QRScanner] Parsed companyId:", scannedCompanyId);
+
+      if (isNaN(scannedCompanyId) || scannedCompanyId <= 0) {
         toast.error("Invalid QR code — expected a numeric company ID", {
           description: `Scanned: "${trimmed}"`,
         });
         return;
       }
+
+      // Lock immediately via ref to prevent any duplicate navigation
+      processedRef.current = true;
       setProcessed(true);
       stopCamera();
-      toast.success(`Opening shop #${companyId}…`);
-      navigate(`/shop-profile?companyid=${companyId}`);
+
+      const navUrl = `/shop-profile?companyid=${scannedCompanyId}`;
+      console.log("[QRScanner] Navigating to:", navUrl, "companyId:", scannedCompanyId);
+      toast.success(`Opening shop #${scannedCompanyId}…`);
+      navigate(navUrl);
     },
-    [processed, stopCamera, navigate]
+    [stopCamera, navigate]
   );
 
   const startScanning = useCallback(
