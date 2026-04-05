@@ -116,9 +116,6 @@ const CompanyOrders = () => {
     if (result === null) {
       setOrders(prevOrders);
       toast.error(`Failed to update ${flag === "HasPaid" ? "payment" : "delivery"} status`);
-    } else if (result.length > 0) {
-      setOrders(groupCompanyOrders(result));
-      toast.success(`${flag === "HasPaid" ? "Payment" : "Delivery"} status updated`);
     } else {
       await loadOrders(activeTab);
       toast.success(`${flag === "HasPaid" ? "Payment" : "Delivery"} status updated`);
