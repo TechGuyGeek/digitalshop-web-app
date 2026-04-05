@@ -139,7 +139,7 @@ const ShopInterior = () => {
           <Button
             variant="default"
             className="rounded-full px-8 gap-2"
-            onClick={() => navigate(`/basket?shop=${encodeURIComponent(shopName)}`)}
+            onClick={() => navigate(`/basket?shop=${encodeURIComponent(shopName)}&companyid=${encodeURIComponent(companyId)}`)}
           >
             <ShoppingBasket size={18} />
             Basket {count}
