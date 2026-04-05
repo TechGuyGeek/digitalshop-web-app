@@ -239,7 +239,7 @@ const BuildShop = () => {
         <Button
           className="w-full rounded-full font-semibold"
           onClick={handleSave}
-          disabled={saving || !shopName.trim()}
+          disabled={saving || !shopName.trim() || !companyEmail.trim()}
         >
           <Save size={16} className="mr-2" />
           {saving ? "Saving..." : "Register Shop"}
