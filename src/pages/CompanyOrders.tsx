@@ -234,7 +234,7 @@ const CompanyOrders = () => {
                           handleToggle(order, "HasPaid", checked)
                         }
                       />
-                      <span className="text-foreground">Paid</span>
+                      <span className="text-foreground">{order.hasPaid === "1" ? "Paid" : "Not Paid"}</span>
                     </div>
 
                     {/* Delivered toggle */}
