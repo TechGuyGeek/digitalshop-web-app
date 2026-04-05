@@ -131,8 +131,30 @@ async function postToggle(endpoint: string, body: Record<string, unknown>): Prom
   }
 }
 
-export function toggleOrderEnable(companyid: number, value: string, userId: number, email: string, password: string) {
-  return postToggle(ENDPOINTS.toggleOrder, { companyid, OrderEnable: value, UserID: userId, UserEmail: email, UserPassword: password });
+export async function toggleOrderEnable(companyid: number, value: string, userId: number, email: string, password: string) {
+  const url = SERVER_DOMAIN + ENDPOINTS.toggleOrder;
+  const payload = { companyid, OrderEnable: value, UserID: userId, UserEmail: email, UserPassword: password };
+  console.log("[toggleOrderEnable] URL:", url);
+  console.log("[toggleOrderEnable] Payload:", JSON.stringify(payload));
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    console.log("[toggleOrderEnable] Status:", res.status);
+    const text = await res.text();
+    console.log("[toggleOrderEnable] Response:", text);
+    try {
+      const data = JSON.parse(text);
+      return data.success === true || data.Success === true;
+    } catch {
+      return false;
+    }
+  } catch (err) {
+    console.error("[toggleOrderEnable] Error:", err);
+    return false;
+  }
 }
 
 export function toggleTakeawayEnable(companyid: number, value: string, userId: number, email: string, password: string) {
