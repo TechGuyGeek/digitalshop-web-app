@@ -4,7 +4,7 @@ const SERVER_DOMAIN = "https://app.techguygeek.co.uk/";
 const ENDPOINTS = {
   loadCompany: "menu1/PHPread/Company/DoesCompanyExistorNotSecure.php",
   saveCompany: "menu1/PHPwrite/Company/UpdateCompanyDetailsSecure.php",
-  toggleOrder: "menu1/PHPwrite/Company/SaveCompanyOrdersToggle.php",
+  toggleOrder: "menu1/PHPwrite/Company/SaveCompanyOrdersTogglexSecure.php",
   toggleTakeaway: "menu1/PHPwrite/Company/SaveCompanyTakeawaysToggle.php",
   toggleDelivery: "menu1/PHPwrite/Company/SaveCompanyDeliveriesToggle.php",
   toggleGlobal: "menu1/PHPwrite/Company/SaveCompanyLocalGlobal.php",
@@ -131,8 +131,30 @@ async function postToggle(endpoint: string, body: Record<string, unknown>): Prom
   }
 }
 
-export function toggleOrderEnable(companyid: number, value: string, userId: number, email: string, password: string) {
-  return postToggle(ENDPOINTS.toggleOrder, { companyid, OrderEnable: value, UserID: userId, UserEmail: email, UserPassword: password });
+export async function toggleOrderEnable(companyid: number, value: string, userId: number, email: string, password: string) {
+  const url = SERVER_DOMAIN + ENDPOINTS.toggleOrder;
+  const payload = { companyid, OrderEnable: value, UserID: userId, UserEmail: email, UserPassword: password };
+  console.log("[toggleOrderEnable] URL:", url);
+  console.log("[toggleOrderEnable] Payload:", JSON.stringify(payload));
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    console.log("[toggleOrderEnable] Status:", res.status);
+    const text = await res.text();
+    console.log("[toggleOrderEnable] Response:", text);
+    try {
+      const data = JSON.parse(text);
+      return data.success === true || data.Success === true;
+    } catch {
+      return false;
+    }
+  } catch (err) {
+    console.error("[toggleOrderEnable] Error:", err);
+    return false;
+  }
 }
 
 export function toggleTakeawayEnable(companyid: number, value: string, userId: number, email: string, password: string) {
