@@ -19,6 +19,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import QRCodeGenerator from "@/components/QRCodeGenerator";
 
 
 const MAX_IMAGE_SIZE = 800;
@@ -63,6 +64,7 @@ const CompanyProfile = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteBlockerMsg, setDeleteBlockerMsg] = useState("");
   const [addProductsLoading, setAddProductsLoading] = useState(false);
+  const [qrOpen, setQrOpen] = useState(false);
 
   // Form state
   const [form, setForm] = useState({
@@ -447,7 +449,10 @@ const CompanyProfile = () => {
 
           {/* Action buttons */}
           <div className="space-y-3 pt-4">
-            <Button variant="secondary" className="w-full rounded-md" onClick={() => navigate("/qr-scanner")}>
+            <Button variant="secondary" className="w-full rounded-md" onClick={() => {
+              console.log("[QR] Opening QR generator for company:", company);
+              setQrOpen(true);
+            }}>
               QR Code Generator
             </Button>
             <Button variant="outline" className="w-full rounded-md" onClick={() => setMarkerPickerOpen(true)}>
@@ -522,6 +527,15 @@ const CompanyProfile = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {company && (
+        <QRCodeGenerator
+          open={qrOpen}
+          onOpenChange={setQrOpen}
+          companyId={company.companyid}
+          companyName={form.shopName || company.companyname || "Shop"}
+        />
+      )}
     </div>
   );
 };
