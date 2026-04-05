@@ -40,6 +40,10 @@ const Basket = () => {
 
   const placeOrder = async (mode: OrderMode) => {
     if (submitting) return;
+    if (!companyId) {
+      toast.error("Company ID is missing. Please go back and re-enter the shop.");
+      return;
+    }
     if (items.length === 0) {
       toast.error("Your basket is empty");
       return;
