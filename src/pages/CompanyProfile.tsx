@@ -232,11 +232,18 @@ const CompanyProfile = () => {
     } else if (field === "deliveries") {
       ok = await toggleDeliveryEnable(company.companyid, value ? "1" : "0", auth.userId, auth.email, auth.password);
     } else if (field === "allowGlobal") {
-      if (value && user?.PaidUser === "0") {
+      const rawPaid = user?.PaidUser ?? user?.Paiduser ?? (user as Record<string, unknown>)?.paidUser;
+      const isPaid = rawPaid === 1 || rawPaid === "1" || rawPaid === true || rawPaid === "true";
+      console.log("[GlobalGuard] user object:", JSON.stringify(user));
+      console.log("[GlobalGuard] rawPaid value:", rawPaid, "typeof:", typeof rawPaid);
+      console.log("[GlobalGuard] isPaid:", isPaid);
+      if (value && !isPaid) {
+        console.log("[GlobalGuard] BLOCKED - user is not paid");
         setToggles(prev => ({ ...prev, allowGlobal: false }));
-        toast.error("Only paid users can enable Global. Please upgrade.");
+        toast.error("You need the paid version to make your Digital Shop Global. Please upgrade.");
         return;
       }
+      console.log("[GlobalGuard] ALLOWED - proceeding with save");
       ok = await toggleGlobalEnable(company.companyid, value ? "1" : "0", auth.userId, auth.email, auth.password);
     }
     if (!ok) {
