@@ -234,6 +234,19 @@ const BuildShop = () => {
           />
         </div>
 
+        <div>
+          <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground font-heading mb-1 block">
+            Company Email
+          </label>
+          <Input
+            type="email"
+            value={companyEmail}
+            onChange={(e) => setCompanyEmail(e.target.value)}
+            placeholder="Enter company email address"
+            className="border-0 border-b border-border rounded-none bg-transparent px-0 focus-visible:ring-0 focus-visible:border-primary"
+          />
+        </div>
+
         <Button
           className="w-full rounded-full font-semibold"
           onClick={handleSave}
