@@ -24,7 +24,8 @@ const Basket = () => {
   const [tableNumber, setTableNumber] = useState<string>("");
   const [searchParams] = useSearchParams();
   const shopName = searchParams.get("shop") || "Shop";
-  const companyId = searchParams.get("companyid") || "";
+  // Get companyId from URL, fallback to sessionStorage
+  const companyId = searchParams.get("companyid") || sessionStorage.getItem("basket_companyId") || "";
   const { items, count, total, removeItem, clearItem, clearBasket } = useBasket();
   const [submitting, setSubmitting] = useState(false);
 
