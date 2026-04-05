@@ -198,19 +198,6 @@ const BuildShop = () => {
         <Store size={24} className="text-primary" />
         <h1 className="text-lg font-bold text-foreground font-heading">Build Your Shop</h1>
         </div>
-
-        <div>
-          <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground font-heading mb-1 block">
-            Company Email
-          </label>
-          <Input
-            type="email"
-            value={companyEmail}
-            onChange={(e) => setCompanyEmail(e.target.value)}
-            placeholder="Enter company email address"
-            className="border-0 border-b border-border rounded-none bg-transparent px-0 focus-visible:ring-0 focus-visible:border-primary"
-          />
-        </div>
       {/* Map */}
       <div className="flex-1 relative min-h-[300px]">
         {locating ? (
@@ -243,6 +230,19 @@ const BuildShop = () => {
             value={shopName}
             onChange={(e) => setShopName(e.target.value)}
             placeholder="Enter your shop name"
+            className="border-0 border-b border-border rounded-none bg-transparent px-0 focus-visible:ring-0 focus-visible:border-primary"
+          />
+        </div>
+
+        <div>
+          <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground font-heading mb-1 block">
+            Company Email
+          </label>
+          <Input
+            type="email"
+            value={companyEmail}
+            onChange={(e) => setCompanyEmail(e.target.value)}
+            placeholder="Enter company email address"
             className="border-0 border-b border-border rounded-none bg-transparent px-0 focus-visible:ring-0 focus-visible:border-primary"
           />
         </div>
