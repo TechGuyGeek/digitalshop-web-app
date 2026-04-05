@@ -142,16 +142,22 @@ const EditMenuGroupsPage = () => {
     const name = newGroupName.trim();
     if (!name) { toast.error("Please enter a group name"); return; }
     const auth = getAuth();
-    if (!auth) return;
+    if (!auth || !auth.userId) {
+      toast.error("User session not found. Please log in again.");
+      return;
+    }
+    console.log("[handleAddGroup] companyId:", companyId, "UserID:", auth.userId, "UserEmail:", auth.email, "OrderGroup:", name);
     setAddingGroup(true);
-    const ok = await addMenuGroup(companyId, name, auth.userId, auth.email, auth.password);
+    const result = await addMenuGroup(companyId, name, auth.userId, auth.email, auth.password);
     setAddingGroup(false);
-    if (ok) {
+    if (result.success) {
       toast.success(`"${name}" added`);
       setNewGroupName("");
-      fetchGroups();
+      console.log("[handleAddGroup] Save succeeded, reloading groups...");
+      await fetchGroups();
+      console.log("[handleAddGroup] Groups reloaded");
     } else {
-      toast.error("Failed to add group");
+      toast.error(result.message || "Failed to add group");
     }
   };
 
