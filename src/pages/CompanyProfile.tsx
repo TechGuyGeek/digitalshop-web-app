@@ -527,6 +527,15 @@ const CompanyProfile = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {company && (
+        <QRCodeGenerator
+          open={qrOpen}
+          onOpenChange={setQrOpen}
+          companyId={company.companyid}
+          companyName={form.shopName || company.companyname || "Shop"}
+        />
+      )}
     </div>
   );
 };
