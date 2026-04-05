@@ -221,7 +221,7 @@ export async function toggleCompanyOrderFlag(
   password: string
 ): Promise<CompanyOrderItem[] | null> {
   const paidEndpoints: Record<string, string> = {
-    today: "SavePayedorNotToggleSecure.php",
+    today: "SavePayedorNotToggleSecure_web.php",
     week: "SavePayedorNotToggleSecureweek.php",
     month: "SavePayedorNotToggleSecuremonth.php",
   };
