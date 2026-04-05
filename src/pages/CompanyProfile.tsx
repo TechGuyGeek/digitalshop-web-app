@@ -199,7 +199,7 @@ const CompanyProfile = () => {
       TakeawayEnable: toggles.takeaways ? "1" : "0",
       DeliveryEnable: toggles.deliveries ? "1" : "0",
       PayOnPhoneEnable: toggles.allowGlobal ? "1" : "0",
-      PublicNumber: publicNumber,
+      PublicNumber: String(publicNumber),
       PrivateNumber: company.PrivateNumber || "",
       LineOneAddress: form.lineOne,
       LineTwoAddress: form.lineTwo,
@@ -469,15 +469,30 @@ const CompanyProfile = () => {
           <MapMarkerPicker
             open={markerPickerOpen}
             onOpenChange={setMarkerPickerOpen}
-            selected={selectedMarker.emoji}
-            onSelect={(emoji, label) => {
-              setSelectedMarker({ emoji, label });
-              const emojiToNumber: Record<string, string> = {
-                "📍": "0", "🏪": "1", "🍻": "2", "☕": "3", "🍴": "4",
-                "🏠": "5", "🎪": "6", "🧸": "7", "🥪": "8", "🍳": "10",
-                "👔": "11", "👗": "12", "🔢": "13",
-              };
-              setPublicNumber(emojiToNumber[emoji] || "0");
+            selectedId={publicNumber}
+            onSelect={async (marker: MapMarkerOption) => {
+              console.log("[MapMarker] Selected:", marker);
+              setSelectedMarker({ emoji: marker.emoji, label: marker.label });
+              setPublicNumber(marker.id);
+              setMarkerPickerOpen(false);
+
+              const auth = getUserAuth();
+              if (!auth || !company) {
+                toast.error("Cannot save marker — missing auth or company data");
+                return;
+              }
+
+              const ok = await saveMapMarker(company.companyid, marker.id, auth.userId, auth.email, auth.password);
+              if (ok) {
+                toast.success("Map marker saved!");
+                // Refresh company data
+                const personId = String(user?.PersonID || user?.ID || "");
+                const email = (user?.Email || user?.email || "") as string;
+                const refreshed = await loadCompanyProfile(personId, email);
+                if (refreshed) setCompany(refreshed);
+              } else {
+                toast.error("Failed to save map marker");
+              }
             }}
           />
 
