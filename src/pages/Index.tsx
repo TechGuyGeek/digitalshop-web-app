@@ -7,9 +7,11 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { loginUser, registerUser, type DigitalPerson } from "@/lib/api";
 import { toast } from "sonner";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { t, language, setLanguage, availableLanguages } = useLanguage();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,11 +24,10 @@ const Index = () => {
   const [lastName, setLastName] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [mobileNumber, setMobileNumber] = useState("");
-  const [language, setLanguage] = useState("en-GB");
 
   const handleLogin = async () => {
     if (!email || !password) {
-      toast.error("Please enter email and password");
+      toast.error(t("Usernameorpasswordcannotbeempty"));
       return;
     }
     setLoading(true);
@@ -37,10 +38,10 @@ const Index = () => {
         localStorage.setItem("digitalUser", JSON.stringify(user));
         navigate("/profile");
       } else {
-        toast.error("Invalid email or password");
+        toast.error(t("MessageUsersEmailOrPassword"));
       }
     } catch (err) {
-      toast.error("Connection error. Please try again.");
+      toast.error(t("Pleasecheckyourinternetconnection"));
       console.error(err);
     } finally {
       setLoading(false);
@@ -48,8 +49,20 @@ const Index = () => {
   };
 
   const handleRegister = async () => {
-    if (!firstName || !lastName || !email || !password) {
-      toast.error("Please fill in all required fields");
+    if (!firstName) {
+      toast.error(t("RegistrationFailedFirstNamecannotbeempty"));
+      return;
+    }
+    if (!lastName) {
+      toast.error(t("RegistrationFailedLastNamecannotbeempty"));
+      return;
+    }
+    if (!email) {
+      toast.error(t("RegistrationFailedEmailaddesscannotbeempty"));
+      return;
+    }
+    if (!password) {
+      toast.error(t("RegistrationFailedPasswordcannotbeempty"));
       return;
     }
     setLoading(true);
@@ -64,7 +77,7 @@ const Index = () => {
         language,
       });
       if (result === "SUCCESS") {
-        toast.success("Account created! Please check your email to activate your account before signing in.");
+        toast.success(t("RegistrationLinkClicked"));
         setView("login");
         setFirstName("");
         setLastName("");
@@ -73,10 +86,10 @@ const Index = () => {
         setEmail("");
         setPassword("");
       } else {
-        toast.error(result || "Registration failed");
+        toast.error(result || t("RegistrationFailed"));
       }
     } catch (err) {
-      toast.error("Connection error. Please try again.");
+      toast.error(t("Pleasecheckyourinternetconnection"));
       console.error(err);
     } finally {
       setLoading(false);
@@ -99,15 +112,14 @@ const Index = () => {
             className="mb-4 flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft size={16} />
-            Back to Sign In
+            {t("Back")} {t("Signin")}
           </button>
         )}
 
         {/* Header */}
         {view === "register" && (
           <div className="mb-8 text-center">
-            <h1 className="text-2xl font-bold text-foreground font-heading">Create Account</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Register for a new account</p>
+            <h1 className="text-2xl font-bold text-foreground font-heading">{t("Register")}</h1>
           </div>
         )}
 
@@ -119,11 +131,11 @@ const Index = () => {
               <>
                 <div className="space-y-2">
                   <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground font-heading">
-                    First Name
+                    {t("FirstName")}
                   </label>
                   <Input
                     type="text"
-                    placeholder="First Name"
+                    placeholder={t("FirstName")}
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     className="h-11 bg-secondary border-0 text-foreground placeholder:text-muted-foreground focus-visible:ring-primary"
@@ -131,11 +143,11 @@ const Index = () => {
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground font-heading">
-                    Last Name
+                    {t("LastName")}
                   </label>
                   <Input
                     type="text"
-                    placeholder="Last Name"
+                    placeholder={t("LastName")}
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     className="h-11 bg-secondary border-0 text-foreground placeholder:text-muted-foreground focus-visible:ring-primary"
@@ -147,7 +159,7 @@ const Index = () => {
             {/* Email */}
             <div className="space-y-2">
               <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground font-heading">
-                Email Address
+                {t("EmailAddress")}
               </label>
               <Input
                 type="email"
@@ -161,7 +173,7 @@ const Index = () => {
             {/* Password */}
             <div className="space-y-2">
               <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground font-heading">
-                Password
+                {t("Password")}
               </label>
               <div className="relative">
                 <Input
@@ -182,7 +194,7 @@ const Index = () => {
               {view === "login" && (
                 <div className="text-right">
                   <button className="text-xs text-primary hover:text-primary/80 transition-colors font-medium">
-                    Reset Login Password
+                    {t("ResetLoginPassword")}
                   </button>
                 </div>
               )}
@@ -193,7 +205,7 @@ const Index = () => {
               <>
                 <div className="space-y-2">
                   <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground font-heading">
-                    Date of Birth
+                    {t("Age")}
                   </label>
                   <Input
                     type="date"
@@ -204,11 +216,11 @@ const Index = () => {
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground font-heading">
-                    Mobile Number
+                    {t("Mobile")}
                   </label>
                   <Input
                     type="tel"
-                    placeholder="Mobile Number"
+                    placeholder={t("Mobile")}
                     value={mobileNumber}
                     onChange={(e) => setMobileNumber(e.target.value)}
                     className="h-11 bg-secondary border-0 text-foreground placeholder:text-muted-foreground focus-visible:ring-primary"
@@ -222,7 +234,7 @@ const Index = () => {
               <Switch checked={helpEnabled} onCheckedChange={setHelpEnabled} />
               <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                 <HelpCircle size={14} />
-                <span>Help {helpEnabled ? "On" : "Off"}</span>
+                <span>{helpEnabled ? t("Helpison") : t("Helpisoff")}</span>
               </div>
             </div>
 
@@ -230,16 +242,16 @@ const Index = () => {
             <div className="space-y-2">
               <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground font-heading">
                 <Palette size={12} className="mr-1 inline" />
-                Theme
+                {t("SelectTheme")}
               </label>
               <Select defaultValue="dark">
                 <SelectTrigger className="h-11 bg-secondary border-0 text-foreground">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="dark">Dark</SelectItem>
-                  <SelectItem value="light">Light</SelectItem>
-                  <SelectItem value="midnight">Midnight</SelectItem>
+                  <SelectItem value="dark">{t("BlackBackGround")}</SelectItem>
+                  <SelectItem value="light">{t("WhiteBackGround")}</SelectItem>
+                  <SelectItem value="midnight">{t("BlueBackGround")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -248,17 +260,18 @@ const Index = () => {
             <div className="space-y-2">
               <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground font-heading">
                 <Globe size={12} className="mr-1 inline" />
-                Language
+                {t("SelectLanguage")}
               </label>
               <Select value={language} onValueChange={setLanguage}>
                 <SelectTrigger className="h-11 bg-secondary border-0 text-foreground">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="en-US">American – en-US</SelectItem>
-                  <SelectItem value="en-GB">British – en-GB</SelectItem>
-                  <SelectItem value="es">Spanish – es</SelectItem>
-                  <SelectItem value="fr">French – fr</SelectItem>
+                  {availableLanguages.map((lang) => (
+                    <SelectItem key={lang.code} value={lang.code}>
+                      {lang.name} – {lang.code}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -273,7 +286,7 @@ const Index = () => {
               disabled={loading}
               onClick={view === "login" ? handleLogin : handleRegister}
             >
-              {loading ? "Please wait..." : view === "login" ? "Sign In" : "Register"}
+              {loading ? t("Pleasewait") : view === "login" ? t("Signin") : t("Register")}
             </Button>
             <Button
               variant="outline"
@@ -281,7 +294,7 @@ const Index = () => {
               className="w-full"
               onClick={() => setView(view === "login" ? "register" : "login")}
             >
-              {view === "login" ? "Register" : "Back to Sign In"}
+              {view === "login" ? t("Register") : t("Back")}
             </Button>
           </div>
 
@@ -341,7 +354,7 @@ const Index = () => {
         {/* Upgrade CTA */}
         <div className="mt-4 text-center animate-fade-in" style={{ animationDelay: "0.3s" }}>
           <Button variant="ghost" className="text-primary hover:text-primary/80">
-            Upgrade
+            {t("GoPro")}
           </Button>
         </div>
       </div>
