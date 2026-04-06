@@ -56,9 +56,36 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 const STORAGE_KEY = "digitalShopLanguage";
 const TRANSLATIONS_PATH = "/DigitalShopTranslationsJson";
 
+const AVAILABLE_CODES = Object.keys(LANGUAGE_MAP);
+
+function detectBrowserLanguage(): string {
+  const browserLang = navigator.language; // e.g. "en-GB", "fr-FR", "pt"
+  // Exact match
+  if (AVAILABLE_CODES.includes(browserLang)) {
+    console.log(`[i18n] Browser language "${browserLang}" matched exactly`);
+    return browserLang;
+  }
+  // Base language match (e.g. "en" from "en-GB")
+  const base = browserLang.split("-")[0];
+  if (AVAILABLE_CODES.includes(base)) {
+    console.log(`[i18n] Browser base language "${base}" matched`);
+    return base;
+  }
+  // Find first code starting with base (e.g. "fr" -> "fr-FR")
+  const partial = AVAILABLE_CODES.find((c) => c.startsWith(base + "-"));
+  if (partial) {
+    console.log(`[i18n] Browser language "${browserLang}" partially matched to "${partial}"`);
+    return partial;
+  }
+  console.log(`[i18n] No match for browser language "${browserLang}", falling back to en`);
+  return "en";
+}
+
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguageState] = useState(() => {
-    return localStorage.getItem(STORAGE_KEY) || "en-GB";
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) return stored;
+    return detectBrowserLanguage();
   });
   const [translations, setTranslations] = useState<Translations>({});
   const [fallback, setFallback] = useState<Translations>({});
