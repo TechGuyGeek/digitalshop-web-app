@@ -8,8 +8,9 @@ import { type DigitalPerson, updateUserProfile } from "@/lib/api";
 import { loadCompanyProfile } from "@/lib/companyApi";
 import { toast } from "sonner";
 import WebcamCapture from "@/components/WebcamCapture";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-const MAX_IMAGE_SIZE = 800; // max width/height in pixels
+const MAX_IMAGE_SIZE = 800;
 
 function resizeAndConvertToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -28,7 +29,6 @@ function resizeAndConvertToBase64(file: File): Promise<string> {
         canvas.height = h;
         const ctx = canvas.getContext("2d")!;
         ctx.drawImage(img, 0, 0, w, h);
-        // Return base64 JPEG without the data:image/jpeg;base64, prefix
         const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
         const base64 = dataUrl.split(",")[1];
         resolve(base64);
@@ -43,18 +43,12 @@ function resizeAndConvertToBase64(file: File): Promise<string> {
 
 const Profile = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [user, setUser] = useState<DigitalPerson | null>(null);
   const [form, setForm] = useState({
-    name: "",
-    surname: "",
-    gender: "",
-    mobileNumber: "",
-    lineOne: "",
-    lineTwo: "",
-    lineThree: "",
-    lineFour: "",
-    country: "",
-    deliveryNotes: "",
+    name: "", surname: "", gender: "", mobileNumber: "",
+    lineOne: "", lineTwo: "", lineThree: "", lineFour: "",
+    country: "", deliveryNotes: "",
   });
   const [pendingImageBase64, setPendingImageBase64] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -93,9 +87,9 @@ const Profile = () => {
       const base64 = await resizeAndConvertToBase64(file);
       setPendingImageBase64(base64);
       setPreviewUrl(`data:image/jpeg;base64,${base64}`);
-      toast.success("Photo selected — tap Save to upload");
+      toast.success(t("SaveSuccessful"));
     } catch {
-      toast.error("Failed to process image");
+      toast.error(t("SaveFailed"));
     }
   };
 
@@ -108,11 +102,10 @@ const Profile = () => {
   const handleWebcamCapture = (base64: string) => {
     setPendingImageBase64(base64);
     setPreviewUrl(`data:image/jpeg;base64,${base64}`);
-    toast.success("Photo captured — tap Save to upload");
+    toast.success(t("SaveSuccessful"));
   };
 
   const handleCameraClick = () => {
-    // On mobile, use native camera. On desktop, use webcam modal.
     if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
       cameraInputRef.current?.click();
     } else {
@@ -128,18 +121,13 @@ const Profile = () => {
 
     const updatedUser: DigitalPerson = {
       ...user,
-      Name: form.name,
-      name: form.name,
-      Surname: form.surname,
-      surname: form.surname,
+      Name: form.name, name: form.name,
+      Surname: form.surname, surname: form.surname,
       MobileNumber: form.mobileNumber,
       Gender: form.gender,
-      LineOneAddress: form.lineOne,
-      LineTwoAddress: form.lineTwo,
-      LineThreeAddress: form.lineThree,
-      LineFourAddress: form.lineFour,
-      LineCountryAddress: form.country,
-      LineDeliveryNotesAddress: form.deliveryNotes,
+      LineOneAddress: form.lineOne, LineTwoAddress: form.lineTwo,
+      LineThreeAddress: form.lineThree, LineFourAddress: form.lineFour,
+      LineCountryAddress: form.country, LineDeliveryNotesAddress: form.deliveryNotes,
     } as any;
 
     const result = await updateUserProfile(updatedUser, pendingImageBase64 || undefined);
@@ -151,22 +139,22 @@ const Profile = () => {
       setUser(merged);
       setPendingImageBase64(null);
       setPreviewUrl(null);
-      toast.success("Profile saved successfully");
+      toast.success(t("SaveSuccessful"));
     } else {
-      toast.error(result.error || "Failed to save profile");
+      toast.error(result.error || t("SaveFailed"));
     }
   };
 
   const handleLogout = () => {
     localStorage.removeItem("digitalUser");
-    toast.success("Signed out successfully");
+    toast.success(t("Signin"));
     navigate("/");
   };
 
   const handleDeleteProfile = () => {
-    if (window.confirm("Are you sure you want to delete your profile? This cannot be undone.")) {
+    if (window.confirm(t("Areyousureyouwanttodeleteyouruserprofileandallitscontents"))) {
       localStorage.removeItem("digitalUser");
-      toast.success("Profile deleted");
+      toast.success(t("Delete"));
       navigate("/");
     }
   };
@@ -186,7 +174,6 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hidden file inputs */}
       <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={onFileChange} />
       <input ref={galleryInputRef} type="file" accept="image/*" className="hidden" onChange={onFileChange} />
       <WebcamCapture open={webcamOpen} onOpenChange={setWebcamOpen} onCapture={handleWebcamCapture} />
@@ -205,59 +192,55 @@ const Profile = () => {
         <div className="flex justify-center gap-3 mb-6">
           <Button size="sm" className="rounded-full px-5" onClick={handleCameraClick}>
             <Camera size={14} className="mr-1.5" />
-            Camera
+            {t("Camera")}
           </Button>
           <Button size="sm" className="rounded-full px-5" onClick={() => galleryInputRef.current?.click()}>
             <Image size={14} className="mr-1.5" />
-            Gallery
+            {t("Gallery")}
           </Button>
           <Button size="sm" className="rounded-full px-5" onClick={handleSave} disabled={saving}>
             <Save size={14} className="mr-1.5" />
-            {saving ? "Saving..." : "Save"}
+            {saving ? t("Pleasewait") : t("Save")}
           </Button>
         </div>
 
-        {/* Title */}
         <h1 className="text-lg font-bold text-foreground font-heading text-center mb-6">
-          Edit User Profile
+          {t("UserProfilePageTitle")}
         </h1>
 
-        {/* Editable fields */}
         <div className="space-y-4 mb-8">
-          <ProfileField label="Name" value={form.name} onChange={(v) => handleChange("name", v)} />
-          <ProfileField label="Last Name" value={form.surname} onChange={(v) => handleChange("surname", v)} />
+          <ProfileField label={t("Name")} value={form.name} onChange={(v) => handleChange("name", v)} />
+          <ProfileField label={t("LastName")} value={form.surname} onChange={(v) => handleChange("surname", v)} />
           <div className="text-center">
             <Select value={form.gender} onValueChange={(v) => handleChange("gender", v)}>
               <SelectTrigger className="w-full border-0 border-b border-border rounded-none bg-transparent text-center text-base font-medium text-foreground shadow-none focus:ring-0">
-                <SelectValue placeholder="Gender" />
+                <SelectValue placeholder={t("Gender")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Male">Male</SelectItem>
-                <SelectItem value="Female">Female</SelectItem>
+                <SelectItem value="Male">{t("Male")}</SelectItem>
+                <SelectItem value="Female">{t("Female")}</SelectItem>
                 <SelectItem value="Non-binary">Non-binary</SelectItem>
               </SelectContent>
             </Select>
           </div>
-          <ProfileField label="Mobile Number" value={form.mobileNumber} onChange={(v) => handleChange("mobileNumber", v)} />
-          <ProfileField label="1st line Address" value={form.lineOne} onChange={(v) => handleChange("lineOne", v)} />
-          <ProfileField label="2nd line Address" value={form.lineTwo} onChange={(v) => handleChange("lineTwo", v)} />
-          <ProfileField label="3rd line Address" value={form.lineThree} onChange={(v) => handleChange("lineThree", v)} />
-          <ProfileField label="4th line Address" value={form.lineFour} onChange={(v) => handleChange("lineFour", v)} />
-          <ProfileField label="Country" value={form.country} onChange={(v) => handleChange("country", v)} />
-          <ProfileField label="Delivery Notes" value={form.deliveryNotes} onChange={(v) => handleChange("deliveryNotes", v)} />
+          <ProfileField label={t("Mobile")} value={form.mobileNumber} onChange={(v) => handleChange("mobileNumber", v)} />
+          <ProfileField label={t("1stlineAddress")} value={form.lineOne} onChange={(v) => handleChange("lineOne", v)} />
+          <ProfileField label={t("2ndlineAddress")} value={form.lineTwo} onChange={(v) => handleChange("lineTwo", v)} />
+          <ProfileField label={t("3rdlineAddress")} value={form.lineThree} onChange={(v) => handleChange("lineThree", v)} />
+          <ProfileField label={t("4thLineAddress")} value={form.lineFour} onChange={(v) => handleChange("lineFour", v)} />
+          <ProfileField label={t("Country")} value={form.country} onChange={(v) => handleChange("country", v)} />
+          <ProfileField label={t("DeliveryNotes")} value={form.deliveryNotes} onChange={(v) => handleChange("deliveryNotes", v)} />
         </div>
 
-        {/* Delete profile */}
         <Button
           variant="destructive"
           className="w-full mb-4 rounded-full font-semibold"
           onClick={handleDeleteProfile}
         >
           <Trash2 size={16} className="mr-2" />
-          DELETE YOUR PROFILE
+          {t("DELETEYOURPROFILE")}
         </Button>
 
-        {/* Bottom action buttons */}
         <div className="flex gap-2 mb-6">
           <Button
             variant="secondary"
@@ -268,7 +251,7 @@ const Profile = () => {
               if (btn.dataset.loading === "true") return;
               btn.dataset.loading = "true";
               if (!user) return;
-              toast.loading("Checking shop...", { id: "shop-check" });
+              toast.loading(t("Pleasewait"), { id: "shop-check" });
               try {
                 const personId = String(user.PersonID || user.ID || "");
                 const email = (user.Email || user.email || "") as string;
@@ -281,26 +264,25 @@ const Profile = () => {
                 }
               } catch {
                 toast.dismiss("shop-check");
-                toast.error("Could not check shop status. Please try again.");
+                toast.error(t("Pleasecheckyourinternetconnection"));
               } finally {
                 btn.dataset.loading = "false";
               }
             }}
           >
-            Build Shop
+            {t("Build")}
           </Button>
           <Button variant="secondary" className="flex-1 rounded-full text-sm" onClick={() => navigate("/view-shops")}>
-            View Shops
+            {t("ViewShops")}
           </Button>
           <Button variant="secondary" className="flex-1 rounded-full text-sm" onClick={() => navigate("/orders")}>
-            Orders
+            {t("Orders")}
           </Button>
         </div>
 
-        {/* Sign out */}
         <Button variant="outline" className="w-full mb-8 rounded-full" onClick={handleLogout}>
           <LogOut size={16} className="mr-2" />
-          Sign Out
+          {t("Signin")}
         </Button>
       </div>
     </div>
@@ -308,13 +290,9 @@ const Profile = () => {
 };
 
 const ProfileField = ({
-  label,
-  value,
-  onChange,
+  label, value, onChange,
 }: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
+  label: string; value: string; onChange: (v: string) => void;
 }) => (
   <div>
     <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground font-heading mb-1 block">

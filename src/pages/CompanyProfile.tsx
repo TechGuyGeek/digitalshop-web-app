@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Camera, Image as ImageIcon, Save, Trash2, Loader2 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 import MapMarkerPicker, { type MapMarkerOption } from "@/components/MapMarkerPicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,6 +51,7 @@ function resizeAndConvertToBase64(file: File): Promise<string> {
 
 const CompanyProfile = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
 
@@ -364,12 +366,12 @@ const CompanyProfile = () => {
       <div className="min-h-screen bg-background flex flex-col">
         <div className="flex items-center gap-3 p-4 bg-primary">
           <button onClick={() => navigate("/profile")} className="text-primary-foreground"><ArrowLeft size={24} /></button>
-          <h1 className="text-lg font-bold text-primary-foreground font-heading">Company Profile</h1>
+          <h1 className="text-lg font-bold text-primary-foreground font-heading">{t("CompanyProfile")}</h1>
         </div>
         <div className="flex-1 flex items-center justify-center p-8">
           <div className="text-center">
-            <p className="text-muted-foreground text-lg mb-4">No company found for your account.</p>
-            <Button onClick={() => navigate("/build-shop")}>Create a Shop</Button>
+            <p className="text-muted-foreground text-lg mb-4">{t("Pleasecreateacompanyfirst")}</p>
+            <Button onClick={() => navigate("/build-shop")}>{t("Build")}</Button>
           </div>
         </div>
       </div>
@@ -388,7 +390,7 @@ const CompanyProfile = () => {
         <button onClick={() => navigate("/profile")} className="text-primary-foreground">
           <ArrowLeft size={24} />
         </button>
-        <h1 className="text-lg font-bold text-primary-foreground font-heading">Company Profile</h1>
+        <h1 className="text-lg font-bold text-primary-foreground font-heading">{t("CompanyProfile")}</h1>
       </div>
 
       {/* Scrollable content */}
