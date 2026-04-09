@@ -205,14 +205,18 @@ const Index = () => {
               <>
                 <div className="space-y-2">
                   <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground font-heading">
-                    {t("Age")}
+                    {t("Gender")}
                   </label>
-                  <Input
-                    type="date"
-                    value={dateOfBirth}
-                    onChange={(e) => setDateOfBirth(e.target.value)}
-                    className="h-11 bg-secondary border-0 text-foreground placeholder:text-muted-foreground focus-visible:ring-primary"
-                  />
+                  <Select value={dateOfBirth} onValueChange={(v) => setDateOfBirth(v)}>
+                    <SelectTrigger className="h-11 bg-secondary border-0 text-foreground focus:ring-primary">
+                      <SelectValue placeholder={t("Gender")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Male">{t("Male")}</SelectItem>
+                      <SelectItem value="Female">{t("Female")}</SelectItem>
+                      <SelectItem value="Non-binary">Non-binary</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground font-heading">
