@@ -64,7 +64,7 @@ const Profile = () => {
       setForm({
         name: (parsed.name || parsed.Name || "") as string,
         surname: (parsed.surname || parsed.Surname || "") as string,
-        gender: ((parsed as any).Gender || "") as string,
+        gender: ((parsed as any).DateofBirth || (parsed as any).Gender || "") as string,
         mobileNumber: (parsed.MobileNumber || "") as string,
         lineOne: ((parsed as any).LineOneAddress || "") as string,
         lineTwo: ((parsed as any).LineTwoAddress || "") as string,
@@ -124,7 +124,7 @@ const Profile = () => {
       Name: form.name, name: form.name,
       Surname: form.surname, surname: form.surname,
       MobileNumber: form.mobileNumber,
-      Gender: form.gender,
+      DateofBirth: form.gender,
       LineOneAddress: form.lineOne, LineTwoAddress: form.lineTwo,
       LineThreeAddress: form.lineThree, LineFourAddress: form.lineFour,
       LineCountryAddress: form.country, LineDeliveryNotesAddress: form.deliveryNotes,
