@@ -71,7 +71,7 @@ const Profile = () => {
         lineThree: ((parsed as any).LineThreeAddress || "") as string,
         lineFour: ((parsed as any).LineFourAddress || "") as string,
         country: ((parsed as any).LineCountryAddress || "") as string,
-        deliveryNotes: ((parsed as any).DeliveryNotes || "") as string,
+        deliveryNotes: ((parsed as any).LineDeliveryNotesAddress || (parsed as any).DeliveryNotes || "") as string,
       });
     } else {
       navigate("/");
