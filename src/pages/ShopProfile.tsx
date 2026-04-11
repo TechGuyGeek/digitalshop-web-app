@@ -96,13 +96,15 @@ const ShopProfile = () => {
         console.log("[Share] Native file share unavailable, using download fallback");
       }
 
+      // Fallback: download QR + open WhatsApp with text
       const link = document.createElement("a");
       link.download = filename;
       link.href = URL.createObjectURL(blob);
       link.click();
       URL.revokeObjectURL(link.href);
 
-      toast.success("QR code downloaded. WhatsApp web links can only prefill text, so attach the QR image manually.");
+      window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank");
+      toast.success("QR code downloaded — attach it in WhatsApp");
     };
 
     const filename = `${shopName.replace(/[^a-zA-Z0-9]/g, "_")}_QRCode.png`;
