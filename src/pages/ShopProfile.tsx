@@ -68,12 +68,41 @@ const ShopProfile = () => {
     navigate(`/shop-interior?companyid=${company.companyid}&name=${encodeURIComponent(shopName)}`);
   };
 
-  const handleShare = async () => {
-    const description = company?.CompanyDescription || "";
-    const shareText = `${shopName}\n\n${description}`;
-    if (navigator.share) { try { await navigator.share({ title: shopName, text: shareText }); } catch {} }
-    else { await navigator.clipboard.writeText(shareText); toast.success(t("SaveSuccessful")); }
-  };
+  const handleShare = useCallback(async () => {
+    const shopUrl = `${window.location.origin}/shop-profile?companyid=${companyIdParam}`;
+    const shareText = `${shopName}\n\n${company?.CompanyDescription || ""}\n\n${shopUrl}`;
+
+    // Generate QR code blob from hidden canvas
+    const canvas = qrRef.current?.querySelector("canvas");
+    let file: File | undefined;
+    if (canvas) {
+      try {
+        const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
+        if (blob) {
+          file = new File([blob], `${shopName.replace(/[^a-zA-Z0-9]/g, "_")}_QRCode.png`, { type: "image/png" });
+        }
+      } catch (e) {
+        console.log("[Share] Could not generate QR blob", e);
+      }
+    }
+
+    console.log("[Share]", { shopUrl, hasFile: !!file });
+
+    if (navigator.share) {
+      try {
+        const shareData: ShareData = { title: shopName, text: shareText };
+        if (file && navigator.canShare?.({ files: [file] })) {
+          shareData.files = [file];
+        }
+        await navigator.share(shareData);
+      } catch (e) {
+        if ((e as Error).name !== "AbortError") console.log("[Share] error", e);
+      }
+    } else {
+      await navigator.clipboard.writeText(shareText);
+      toast.success(t("SaveSuccessful"));
+    }
+  }, [company, companyIdParam, shopName, t]);
 
   const handleBack = () => navigate("/view-shops");
 
