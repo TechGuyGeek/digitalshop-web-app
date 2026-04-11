@@ -1,10 +1,11 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Share2, Clock, Activity, Store, AlertTriangle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { fetchCompanyById, CompanyDetails } from "@/lib/api";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { QRCodeCanvas } from "qrcode.react";
 
 const SERVER_DOMAIN = "https://app.techguygeek.co.uk/";
 
