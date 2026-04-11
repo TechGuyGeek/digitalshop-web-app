@@ -31,6 +31,7 @@ const Basket = () => {
   const [orderEnable, setOrderEnable] = useState(false);
   const [takeawayEnable, setTakeawayEnable] = useState(false);
   const [deliveryEnable, setDeliveryEnable] = useState(false);
+  const [totalTables, setTotalTables] = useState(0);
   const [settingsLoaded, setSettingsLoaded] = useState(false);
 
   useEffect(() => {
@@ -46,10 +47,12 @@ const Basket = () => {
         const oe = isEnabled(company?.OrderEnable);
         const te = isEnabled(company?.TakeawayEnable);
         const de = isEnabled(company?.DeliveryEnable);
+        const tables = parseInt(String(company?.TotalTables || "0"), 10) || 0;
         setOrderEnable(oe);
         setTakeawayEnable(te);
         setDeliveryEnable(de);
-        console.log(`[Basket] Company ${companyId} order settings — OrderEnable:${oe}, TakeawayEnable:${te}, DeliveryEnable:${de}`);
+        setTotalTables(tables);
+        console.log(`[Basket] Company ${companyId} — OrderEnable:${oe}, TakeawayEnable:${te}, DeliveryEnable:${de}, TotalTables:${tables}`);
       } catch (err) {
         console.error("[Basket] Failed to fetch company settings:", err);
       } finally {
@@ -148,15 +151,17 @@ const Basket = () => {
           ))
         )}
       </div>
-      <div className="bg-card border-t border-border px-4 py-3 shrink-0 flex items-center justify-between">
-        <p className="text-muted-foreground text-sm font-medium">{t("TableNumber")}</p>
-        <Select value={tableNumber} onValueChange={setTableNumber}>
-          <SelectTrigger className="w-28 h-9 rounded-full"><SelectValue placeholder={t("TableNumber")} /></SelectTrigger>
-          <SelectContent className="max-h-60">
-            {Array.from({ length: 501 }, (_, i) => (<SelectItem key={i} value={String(i)}>{i}</SelectItem>))}
-          </SelectContent>
-        </Select>
-      </div>
+      {totalTables > 0 && (
+        <div className="bg-card border-t border-border px-4 py-3 shrink-0 flex items-center justify-between">
+          <p className="text-muted-foreground text-sm font-medium">{t("TableNumber")}</p>
+          <Select value={tableNumber} onValueChange={setTableNumber}>
+            <SelectTrigger className="w-28 h-9 rounded-full"><SelectValue placeholder={t("TableNumber")} /></SelectTrigger>
+            <SelectContent className="max-h-60">
+              {Array.from({ length: totalTables + 1 }, (_, i) => (<SelectItem key={i} value={String(i)}>{i}</SelectItem>))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
       <div className="bg-card border-t border-border px-4 py-4 flex items-center justify-between gap-3 shrink-0">
         {!settingsLoaded ? (
           <div className="flex-1 flex justify-center"><Loader2 className="animate-spin text-muted-foreground" size={18} /></div>
