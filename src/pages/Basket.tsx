@@ -31,6 +31,7 @@ const Basket = () => {
   const [orderEnable, setOrderEnable] = useState(false);
   const [takeawayEnable, setTakeawayEnable] = useState(false);
   const [deliveryEnable, setDeliveryEnable] = useState(false);
+  const [totalTables, setTotalTables] = useState(0);
   const [settingsLoaded, setSettingsLoaded] = useState(false);
 
   useEffect(() => {
