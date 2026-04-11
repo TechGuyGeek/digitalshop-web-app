@@ -70,59 +70,29 @@ const ShopProfile = () => {
 
   const handleShare = useCallback(async () => {
     const shopUrl = `${window.location.origin}/shop-profile?companyid=${companyIdParam}`;
-    const shareText = `${shopName}\n\n${company?.CompanyDescription || ""}\n\n${shopUrl}`;
+    const shareText = `${shopName}\n${company?.CompanyDescription || ""}\n${shopUrl}`;
 
-    // Generate QR code blob from hidden canvas
+    // Download QR code
     const canvas = qrRef.current?.querySelector("canvas");
-    let file: File | undefined;
     if (canvas) {
       try {
         const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
         if (blob) {
-          file = new File([blob], `${shopName.replace(/[^a-zA-Z0-9]/g, "_")}_QRCode.png`, { type: "image/png" });
+          const link = document.createElement("a");
+          link.download = `${shopName.replace(/[^a-zA-Z0-9]/g, "_")}_QRCode.png`;
+          link.href = URL.createObjectURL(blob);
+          link.click();
+          URL.revokeObjectURL(link.href);
         }
       } catch (e) {
-        console.log("[Share] Could not generate QR blob", e);
+        console.log("[Share] QR download failed", e);
       }
     }
 
-    console.log("[Share]", { shopUrl, hasFile: !!file });
-
-    const doFallback = async () => {
-      // Download QR code
-      if (file) {
-        const link = document.createElement("a");
-        link.download = file.name;
-        link.href = URL.createObjectURL(file);
-        link.click();
-        URL.revokeObjectURL(link.href);
-      }
-      // Copy link to clipboard
-      try {
-        await navigator.clipboard.writeText(shareText);
-        toast.success(t("SaveSuccessful"));
-      } catch {
-        toast.success(t("SaveSuccessful"));
-      }
-    };
-
-    if (navigator.share) {
-      try {
-        const shareData: ShareData = { title: shopName, text: shareText };
-        if (file && navigator.canShare?.({ files: [file] })) {
-          shareData.files = [file];
-        }
-        await navigator.share(shareData);
-      } catch (e) {
-        if ((e as Error).name !== "AbortError") {
-          console.log("[Share] Web Share failed, using fallback", e);
-          await doFallback();
-        }
-      }
-    } else {
-      await doFallback();
-    }
-  }, [company, companyIdParam, shopName, t]);
+    // Open WhatsApp with the share text
+    const waUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+    window.open(waUrl, "_blank");
+  }, [company, companyIdParam, shopName]);
 
   const handleBack = () => navigate("/view-shops");
 
