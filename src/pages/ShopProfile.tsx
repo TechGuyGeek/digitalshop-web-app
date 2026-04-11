@@ -131,6 +131,9 @@ const ShopProfile = () => {
       <div className="w-full h-48 bg-card flex items-center justify-center overflow-hidden">
         {imageUrl && !imgError ? (<img src={imageUrl} alt={shopName} className="w-full h-full object-cover" onError={() => setImgError(true)} />) : (<span className="text-5xl">{fallbackIcon}</span>)}
       </div>
+      <div ref={qrRef} className="hidden">
+        <QRCodeCanvas value={String(companyIdParam || "")} size={300} level="M" includeMargin />
+      </div>
       <div className="flex-1 flex flex-col items-center px-6 pt-6 pb-28 text-center">
         {activityDays !== null && (
           <div className="flex items-center gap-2 text-muted-foreground text-sm mb-2">
