@@ -81,21 +81,28 @@ const ShopProfile = () => {
     // Helper to share/download a blob
     const shareBlob = async (blob: Blob, filename: string) => {
       const file = new File([blob], filename, { type: "image/png" });
+      console.log("[Share] Prepared QR image", { filename, size: file.size });
+
       if (navigator.share && navigator.canShare?.({ files: [file] })) {
         try {
+          console.log("[Share] Trying native file share");
           await navigator.share({ title: shopName, text: shareText, files: [file] });
           return;
         } catch (e) {
           if ((e as Error).name === "AbortError") return;
+          console.log("[Share] Native file share failed, using download fallback", e);
         }
+      } else {
+        console.log("[Share] Native file share unavailable, using download fallback");
       }
-      // Fallback: download + WhatsApp
+
       const link = document.createElement("a");
       link.download = filename;
       link.href = URL.createObjectURL(blob);
       link.click();
       URL.revokeObjectURL(link.href);
-      window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank");
+
+      toast.success("QR code downloaded. WhatsApp web links can only prefill text, so attach the QR image manually.");
     };
 
     const filename = `${shopName.replace(/[^a-zA-Z0-9]/g, "_")}_QRCode.png`;
