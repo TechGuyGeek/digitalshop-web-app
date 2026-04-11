@@ -1,10 +1,11 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Share2, Clock, Activity, Store, AlertTriangle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { fetchCompanyById, CompanyDetails } from "@/lib/api";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { QRCodeCanvas } from "qrcode.react";
 
 const SERVER_DOMAIN = "https://app.techguygeek.co.uk/";
 
@@ -46,6 +47,7 @@ const ShopProfile = () => {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const qrRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const id = companyIdParam ? parseInt(companyIdParam, 10) : NaN;
@@ -66,12 +68,41 @@ const ShopProfile = () => {
     navigate(`/shop-interior?companyid=${company.companyid}&name=${encodeURIComponent(shopName)}`);
   };
 
-  const handleShare = async () => {
-    const description = company?.CompanyDescription || "";
-    const shareText = `${shopName}\n\n${description}`;
-    if (navigator.share) { try { await navigator.share({ title: shopName, text: shareText }); } catch {} }
-    else { await navigator.clipboard.writeText(shareText); toast.success(t("SaveSuccessful")); }
-  };
+  const handleShare = useCallback(async () => {
+    const shopUrl = `${window.location.origin}/shop-profile?companyid=${companyIdParam}`;
+    const shareText = `${shopName}\n\n${company?.CompanyDescription || ""}\n\n${shopUrl}`;
+
+    // Generate QR code blob from hidden canvas
+    const canvas = qrRef.current?.querySelector("canvas");
+    let file: File | undefined;
+    if (canvas) {
+      try {
+        const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
+        if (blob) {
+          file = new File([blob], `${shopName.replace(/[^a-zA-Z0-9]/g, "_")}_QRCode.png`, { type: "image/png" });
+        }
+      } catch (e) {
+        console.log("[Share] Could not generate QR blob", e);
+      }
+    }
+
+    console.log("[Share]", { shopUrl, hasFile: !!file });
+
+    if (navigator.share) {
+      try {
+        const shareData: ShareData = { title: shopName, text: shareText };
+        if (file && navigator.canShare?.({ files: [file] })) {
+          shareData.files = [file];
+        }
+        await navigator.share(shareData);
+      } catch (e) {
+        if ((e as Error).name !== "AbortError") console.log("[Share] error", e);
+      }
+    } else {
+      await navigator.clipboard.writeText(shareText);
+      toast.success(t("SaveSuccessful"));
+    }
+  }, [company, companyIdParam, shopName, t]);
 
   const handleBack = () => navigate("/view-shops");
 
@@ -99,6 +130,9 @@ const ShopProfile = () => {
       </div>
       <div className="w-full h-48 bg-card flex items-center justify-center overflow-hidden">
         {imageUrl && !imgError ? (<img src={imageUrl} alt={shopName} className="w-full h-full object-cover" onError={() => setImgError(true)} />) : (<span className="text-5xl">{fallbackIcon}</span>)}
+      </div>
+      <div ref={qrRef} className="hidden">
+        <QRCodeCanvas value={String(companyIdParam || "")} size={300} level="M" includeMargin />
       </div>
       <div className="flex-1 flex flex-col items-center px-6 pt-6 pb-28 text-center">
         {activityDays !== null && (
