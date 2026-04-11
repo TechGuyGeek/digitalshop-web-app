@@ -69,30 +69,125 @@ const ShopProfile = () => {
   };
 
   const handleShare = useCallback(async () => {
-    const shopUrl = `${window.location.origin}/shop-profile?companyid=${companyIdParam}&name=${encodeURIComponent(shopName)}&icon=${encodeURIComponent(fallbackIcon)}`;
-    const shareText = `${shopName}\n${company?.CompanyDescription || ""}\n${shopUrl}`;
+    const description = company?.CompanyDescription || "";
+    const shareText = `${shopName}\n${description}`;
 
-    // Download QR code
+    // Generate combined image: shop photo + QR code
     const canvas = qrRef.current?.querySelector("canvas");
-    if (canvas) {
-      try {
-        const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
-        if (blob) {
-          const link = document.createElement("a");
-          link.download = `${shopName.replace(/[^a-zA-Z0-9]/g, "_")}_QRCode.png`;
-          link.href = URL.createObjectURL(blob);
-          link.click();
-          URL.revokeObjectURL(link.href);
-        }
-      } catch (e) {
-        console.log("[Share] QR download failed", e);
-      }
+    if (!canvas) {
+      toast.error("Could not generate QR code");
+      return;
     }
 
-    // Open WhatsApp with the share text
-    const waUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
-    window.open(waUrl, "_blank");
-  }, [company, companyIdParam, shopName]);
+    try {
+      // Create a combined canvas with shop image, name, description, and QR code
+      const combinedCanvas = document.createElement("canvas");
+      const ctx = combinedCanvas.getContext("2d");
+      if (!ctx) return;
+
+      const qrSize = 300;
+      const padding = 30;
+      const width = 400;
+      let yOffset = padding;
+
+      // Pre-load shop image if available
+      let shopImg: HTMLImageElement | null = null;
+      if (imageUrl) {
+        shopImg = await new Promise<HTMLImageElement | null>((resolve) => {
+          const img = new Image();
+          img.crossOrigin = "anonymous";
+          img.onload = () => resolve(img);
+          img.onerror = () => resolve(null);
+          img.src = imageUrl;
+        });
+      }
+
+      // Calculate total height
+      const imgHeight = shopImg ? 200 : 0;
+      const nameHeight = 40;
+      const descHeight = description ? Math.ceil(description.length / 35) * 20 + 10 : 0;
+      const totalHeight = padding + imgHeight + (imgHeight ? 15 : 0) + nameHeight + descHeight + 15 + qrSize + padding;
+
+      combinedCanvas.width = width;
+      combinedCanvas.height = totalHeight;
+
+      // White background
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, width, totalHeight);
+
+      // Draw shop image
+      if (shopImg) {
+        const aspectRatio = shopImg.width / shopImg.height;
+        const drawWidth = width - padding * 2;
+        const drawHeight = drawWidth / aspectRatio;
+        ctx.drawImage(shopImg, padding, yOffset, drawWidth, Math.min(drawHeight, 200));
+        yOffset += Math.min(drawHeight, 200) + 15;
+      }
+
+      // Draw shop name
+      ctx.fillStyle = "#000000";
+      ctx.font = "bold 22px Arial, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(shopName, width / 2, yOffset + 22);
+      yOffset += nameHeight;
+
+      // Draw description
+      if (description) {
+        ctx.fillStyle = "#555555";
+        ctx.font = "14px Arial, sans-serif";
+        const words = description.split(" ");
+        let line = "";
+        const maxWidth = width - padding * 2;
+        for (const word of words) {
+          const testLine = line + (line ? " " : "") + word;
+          if (ctx.measureText(testLine).width > maxWidth && line) {
+            ctx.fillText(line, width / 2, yOffset + 16);
+            yOffset += 18;
+            line = word;
+          } else {
+            line = testLine;
+          }
+        }
+        if (line) {
+          ctx.fillText(line, width / 2, yOffset + 16);
+          yOffset += 28;
+        }
+      }
+
+      // Draw QR code centered
+      const qrX = (width - qrSize) / 2;
+      ctx.drawImage(canvas, qrX, yOffset, qrSize, qrSize);
+
+      // Convert to blob and share via WhatsApp
+      const blob = await new Promise<Blob | null>((resolve) => combinedCanvas.toBlob(resolve, "image/png"));
+      if (blob) {
+        const file = new File([blob], `${shopName.replace(/[^a-zA-Z0-9]/g, "_")}_Share.png`, { type: "image/png" });
+
+        // Try native share with image
+        if (navigator.share && navigator.canShare?.({ files: [file] })) {
+          try {
+            await navigator.share({ title: shopName, text: shareText, files: [file] });
+            return;
+          } catch (e) {
+            if ((e as Error).name === "AbortError") return;
+          }
+        }
+
+        // Fallback: download the image and open WhatsApp with text only
+        const link = document.createElement("a");
+        link.download = file.name;
+        link.href = URL.createObjectURL(blob);
+        link.click();
+        URL.revokeObjectURL(link.href);
+
+        const waUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+        window.open(waUrl, "_blank");
+      }
+    } catch (e) {
+      console.log("[Share] error", e);
+      toast.error("Share failed");
+    }
+  }, [company, companyIdParam, shopName, imageUrl, fallbackIcon]);
 
   const handleBack = () => navigate("/view-shops");
 
