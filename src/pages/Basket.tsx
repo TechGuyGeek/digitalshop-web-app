@@ -28,7 +28,36 @@ const Basket = () => {
   const companyId = searchParams.get("companyid") || sessionStorage.getItem("basket_companyId") || "";
   const { items, count, total, removeItem, clearItem, clearBasket } = useBasket();
   const [submitting, setSubmitting] = useState(false);
+  const [orderEnable, setOrderEnable] = useState(false);
+  const [takeawayEnable, setTakeawayEnable] = useState(false);
+  const [deliveryEnable, setDeliveryEnable] = useState(false);
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
 
+  useEffect(() => {
+    if (!companyId) return;
+    const fetchSettings = async () => {
+      try {
+        const url = SERVER_DOMAIN + "menu1/PHPread/ClientMenu/DoesCompanyExistCompanyIDnewUpgraded.php";
+        const formData = new URLSearchParams();
+        formData.append("companyID", companyId);
+        const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: formData.toString() });
+        const data = await res.json();
+        const company = Array.isArray(data) ? data[0] : data;
+        const oe = isEnabled(company?.OrderEnable);
+        const te = isEnabled(company?.TakeawayEnable);
+        const de = isEnabled(company?.DeliveryEnable);
+        setOrderEnable(oe);
+        setTakeawayEnable(te);
+        setDeliveryEnable(de);
+        console.log(`[Basket] Company ${companyId} order settings — OrderEnable:${oe}, TakeawayEnable:${te}, DeliveryEnable:${de}`);
+      } catch (err) {
+        console.error("[Basket] Failed to fetch company settings:", err);
+      } finally {
+        setSettingsLoaded(true);
+      }
+    };
+    fetchSettings();
+  }, [companyId]);
   const getLoggedInUser = () => {
     try { const stored = localStorage.getItem("digitalUser"); if (stored) return JSON.parse(stored); } catch {} return null;
   };
