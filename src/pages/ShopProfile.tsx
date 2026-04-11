@@ -88,6 +88,24 @@ const ShopProfile = () => {
 
     console.log("[Share]", { shopUrl, hasFile: !!file });
 
+    const doFallback = async () => {
+      // Download QR code
+      if (file) {
+        const link = document.createElement("a");
+        link.download = file.name;
+        link.href = URL.createObjectURL(file);
+        link.click();
+        URL.revokeObjectURL(link.href);
+      }
+      // Copy link to clipboard
+      try {
+        await navigator.clipboard.writeText(shareText);
+        toast.success(t("SaveSuccessful"));
+      } catch {
+        toast.success(t("SaveSuccessful"));
+      }
+    };
+
     if (navigator.share) {
       try {
         const shareData: ShareData = { title: shopName, text: shareText };
@@ -96,11 +114,13 @@ const ShopProfile = () => {
         }
         await navigator.share(shareData);
       } catch (e) {
-        if ((e as Error).name !== "AbortError") console.log("[Share] error", e);
+        if ((e as Error).name !== "AbortError") {
+          console.log("[Share] Web Share failed, using fallback", e);
+          await doFallback();
+        }
       }
     } else {
-      await navigator.clipboard.writeText(shareText);
-      toast.success(t("SaveSuccessful"));
+      await doFallback();
     }
   }, [company, companyIdParam, shopName, t]);
 
