@@ -158,15 +158,29 @@ const Basket = () => {
         </Select>
       </div>
       <div className="bg-card border-t border-border px-4 py-4 flex items-center justify-between gap-3 shrink-0">
-        <Button variant="outline" className="flex-1 rounded-full" onClick={() => placeOrder("takeaway")} disabled={submitting || items.length === 0}>
-          {submitting ? <Loader2 className="animate-spin mr-1" size={14} /> : null}{t("TakeAway")}
-        </Button>
-        <Button variant="outline" className="flex-1 rounded-full" onClick={() => placeOrder("onsite")} disabled={submitting || items.length === 0}>
-          {submitting ? <Loader2 className="animate-spin mr-1" size={14} /> : null}{t("OnSite")}
-        </Button>
-        <Button variant="outline" className="flex-1 rounded-full" onClick={() => placeOrder("delivery")} disabled={submitting || items.length === 0}>
-          {submitting ? <Loader2 className="animate-spin mr-1" size={14} /> : null}{t("Deliver")}
-        </Button>
+        {!settingsLoaded ? (
+          <div className="flex-1 flex justify-center"><Loader2 className="animate-spin text-muted-foreground" size={18} /></div>
+        ) : !orderEnable && !takeawayEnable && !deliveryEnable ? (
+          <p className="flex-1 text-center text-muted-foreground text-sm">{t("Noitemsforsale")}</p>
+        ) : (
+          <>
+            {takeawayEnable && (
+              <Button variant="outline" className="flex-1 rounded-full" onClick={() => placeOrder("takeaway")} disabled={submitting || items.length === 0}>
+                {submitting ? <Loader2 className="animate-spin mr-1" size={14} /> : null}{t("TakeAway")}
+              </Button>
+            )}
+            {orderEnable && (
+              <Button variant="outline" className="flex-1 rounded-full" onClick={() => placeOrder("onsite")} disabled={submitting || items.length === 0}>
+                {submitting ? <Loader2 className="animate-spin mr-1" size={14} /> : null}{t("OnSite")}
+              </Button>
+            )}
+            {deliveryEnable && (
+              <Button variant="outline" className="flex-1 rounded-full" onClick={() => placeOrder("delivery")} disabled={submitting || items.length === 0}>
+                {submitting ? <Loader2 className="animate-spin mr-1" size={14} /> : null}{t("Deliver")}
+              </Button>
+            )}
+          </>
+        )}
       </div>
     </div>
   );
