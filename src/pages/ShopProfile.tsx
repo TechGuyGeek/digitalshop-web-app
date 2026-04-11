@@ -47,6 +47,7 @@ const ShopProfile = () => {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const qrRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const id = companyIdParam ? parseInt(companyIdParam, 10) : NaN;
