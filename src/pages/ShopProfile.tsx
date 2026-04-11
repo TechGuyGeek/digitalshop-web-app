@@ -72,25 +72,46 @@ const ShopProfile = () => {
     const description = company?.CompanyDescription || "";
     const shareText = `${shopName}\n${description}`;
 
-    // Generate combined image: shop photo + QR code
-    const canvas = qrRef.current?.querySelector("canvas");
-    if (!canvas) {
+    const qrCanvas = qrRef.current?.querySelector("canvas");
+    if (!qrCanvas) {
       toast.error("Could not generate QR code");
       return;
     }
 
+    // Helper to share/download a blob
+    const shareBlob = async (blob: Blob, filename: string) => {
+      const file = new File([blob], filename, { type: "image/png" });
+      if (navigator.share && navigator.canShare?.({ files: [file] })) {
+        try {
+          await navigator.share({ title: shopName, text: shareText, files: [file] });
+          return;
+        } catch (e) {
+          if ((e as Error).name === "AbortError") return;
+        }
+      }
+      // Fallback: download + WhatsApp
+      const link = document.createElement("a");
+      link.download = filename;
+      link.href = URL.createObjectURL(blob);
+      link.click();
+      URL.revokeObjectURL(link.href);
+      window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, "_blank");
+    };
+
+    const filename = `${shopName.replace(/[^a-zA-Z0-9]/g, "_")}_QRCode.png`;
+
     try {
-      // Create a combined canvas with shop image, name, description, and QR code
-      const combinedCanvas = document.createElement("canvas");
-      const ctx = combinedCanvas.getContext("2d");
-      if (!ctx) return;
+      // Try building a combined image (shop photo + name + desc + QR)
+      const combined = document.createElement("canvas");
+      const ctx = combined.getContext("2d");
+      if (!ctx) throw new Error("no ctx");
 
       const qrSize = 300;
-      const padding = 30;
-      const width = 400;
-      let yOffset = padding;
+      const pad = 30;
+      const w = 400;
+      let y = pad;
 
-      // Pre-load shop image if available
+      // Try loading shop image (may fail due to CORS — that's ok)
       let shopImg: HTMLImageElement | null = null;
       if (imageUrl) {
         shopImg = await new Promise<HTMLImageElement | null>((resolve) => {
@@ -102,90 +123,72 @@ const ShopProfile = () => {
         });
       }
 
-      // Calculate total height
-      const imgHeight = shopImg ? 200 : 0;
-      const nameHeight = 40;
-      const descHeight = description ? Math.ceil(description.length / 35) * 20 + 10 : 0;
-      const totalHeight = padding + imgHeight + (imgHeight ? 15 : 0) + nameHeight + descHeight + 15 + qrSize + padding;
-
-      combinedCanvas.width = width;
-      combinedCanvas.height = totalHeight;
-
-      // White background
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0, 0, width, totalHeight);
-
-      // Draw shop image
-      if (shopImg) {
-        const aspectRatio = shopImg.width / shopImg.height;
-        const drawWidth = width - padding * 2;
-        const drawHeight = drawWidth / aspectRatio;
-        ctx.drawImage(shopImg, padding, yOffset, drawWidth, Math.min(drawHeight, 200));
-        yOffset += Math.min(drawHeight, 200) + 15;
-      }
-
-      // Draw shop name
-      ctx.fillStyle = "#000000";
-      ctx.font = "bold 22px Arial, sans-serif";
-      ctx.textAlign = "center";
-      ctx.fillText(shopName, width / 2, yOffset + 22);
-      yOffset += nameHeight;
-
-      // Draw description
+      const imgH = shopImg ? 200 : 0;
+      const nameH = 40;
+      const descLines: string[] = [];
       if (description) {
-        ctx.fillStyle = "#555555";
+        // Pre-calculate wrapped lines
         ctx.font = "14px Arial, sans-serif";
         const words = description.split(" ");
         let line = "";
-        const maxWidth = width - padding * 2;
         for (const word of words) {
-          const testLine = line + (line ? " " : "") + word;
-          if (ctx.measureText(testLine).width > maxWidth && line) {
-            ctx.fillText(line, width / 2, yOffset + 16);
-            yOffset += 18;
+          const test = line + (line ? " " : "") + word;
+          if (ctx.measureText(test).width > w - pad * 2 && line) {
+            descLines.push(line);
             line = word;
           } else {
-            line = testLine;
+            line = test;
           }
         }
-        if (line) {
-          ctx.fillText(line, width / 2, yOffset + 16);
-          yOffset += 28;
-        }
+        if (line) descLines.push(line);
+      }
+      const descH = descLines.length * 20 + (descLines.length ? 10 : 0);
+      const totalH = pad + imgH + (imgH ? 15 : 0) + nameH + descH + 15 + qrSize + pad;
+
+      combined.width = w;
+      combined.height = totalH;
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, w, totalH);
+
+      if (shopImg) {
+        const ratio = shopImg.width / shopImg.height;
+        const dw = w - pad * 2;
+        const dh = Math.min(dw / ratio, 200);
+        ctx.drawImage(shopImg, pad, y, dw, dh);
+        y += dh + 15;
       }
 
-      // Draw QR code centered
-      const qrX = (width - qrSize) / 2;
-      ctx.drawImage(canvas, qrX, yOffset, qrSize, qrSize);
+      ctx.fillStyle = "#000000";
+      ctx.font = "bold 22px Arial, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(shopName, w / 2, y + 22);
+      y += nameH;
 
-      // Convert to blob and share via WhatsApp
-      const blob = await new Promise<Blob | null>((resolve) => combinedCanvas.toBlob(resolve, "image/png"));
-      if (blob) {
-        const file = new File([blob], `${shopName.replace(/[^a-zA-Z0-9]/g, "_")}_Share.png`, { type: "image/png" });
-
-        // Try native share with image
-        if (navigator.share && navigator.canShare?.({ files: [file] })) {
-          try {
-            await navigator.share({ title: shopName, text: shareText, files: [file] });
-            return;
-          } catch (e) {
-            if ((e as Error).name === "AbortError") return;
-          }
+      if (descLines.length) {
+        ctx.fillStyle = "#555555";
+        ctx.font = "14px Arial, sans-serif";
+        for (const l of descLines) {
+          ctx.fillText(l, w / 2, y + 16);
+          y += 20;
         }
-
-        // Fallback: download the image and open WhatsApp with text only
-        const link = document.createElement("a");
-        link.download = file.name;
-        link.href = URL.createObjectURL(blob);
-        link.click();
-        URL.revokeObjectURL(link.href);
-
-        const waUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
-        window.open(waUrl, "_blank");
+        y += 10;
       }
+
+      ctx.drawImage(qrCanvas, (w - qrSize) / 2, y, qrSize, qrSize);
+
+      const blob = await new Promise<Blob | null>((resolve) => combined.toBlob(resolve, "image/png"));
+      if (!blob) throw new Error("toBlob returned null (canvas tainted?)");
+
+      await shareBlob(blob, filename);
     } catch (e) {
-      console.log("[Share] error", e);
-      toast.error("Share failed");
+      console.log("[Share] Combined image failed, falling back to QR only:", e);
+      // Fallback: just share the raw QR code
+      const blob = await new Promise<Blob | null>((resolve) => qrCanvas.toBlob(resolve, "image/png"));
+      if (blob) {
+        await shareBlob(blob, filename);
+      } else {
+        toast.error("Share failed");
+      }
     }
   }, [company, companyIdParam, shopName, imageUrl, fallbackIcon]);
 
