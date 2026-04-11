@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Trash2, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 
 const SERVER_DOMAIN = "https://app.techguygeek.co.uk/";
 
+const isEnabled = (value: unknown): boolean => String(value) === "1";
 const generateRandomCode = (length: number) => {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   let result = "";
@@ -27,7 +28,36 @@ const Basket = () => {
   const companyId = searchParams.get("companyid") || sessionStorage.getItem("basket_companyId") || "";
   const { items, count, total, removeItem, clearItem, clearBasket } = useBasket();
   const [submitting, setSubmitting] = useState(false);
+  const [orderEnable, setOrderEnable] = useState(false);
+  const [takeawayEnable, setTakeawayEnable] = useState(false);
+  const [deliveryEnable, setDeliveryEnable] = useState(false);
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
 
+  useEffect(() => {
+    if (!companyId) return;
+    const fetchSettings = async () => {
+      try {
+        const url = SERVER_DOMAIN + "menu1/PHPread/ClientMenu/DoesCompanyExistCompanyIDnewUpgraded.php";
+        const formData = new URLSearchParams();
+        formData.append("companyID", companyId);
+        const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: formData.toString() });
+        const data = await res.json();
+        const company = Array.isArray(data) ? data[0] : data;
+        const oe = isEnabled(company?.OrderEnable);
+        const te = isEnabled(company?.TakeawayEnable);
+        const de = isEnabled(company?.DeliveryEnable);
+        setOrderEnable(oe);
+        setTakeawayEnable(te);
+        setDeliveryEnable(de);
+        console.log(`[Basket] Company ${companyId} order settings — OrderEnable:${oe}, TakeawayEnable:${te}, DeliveryEnable:${de}`);
+      } catch (err) {
+        console.error("[Basket] Failed to fetch company settings:", err);
+      } finally {
+        setSettingsLoaded(true);
+      }
+    };
+    fetchSettings();
+  }, [companyId]);
   const getLoggedInUser = () => {
     try { const stored = localStorage.getItem("digitalUser"); if (stored) return JSON.parse(stored); } catch {} return null;
   };
@@ -128,15 +158,29 @@ const Basket = () => {
         </Select>
       </div>
       <div className="bg-card border-t border-border px-4 py-4 flex items-center justify-between gap-3 shrink-0">
-        <Button variant="outline" className="flex-1 rounded-full" onClick={() => placeOrder("takeaway")} disabled={submitting || items.length === 0}>
-          {submitting ? <Loader2 className="animate-spin mr-1" size={14} /> : null}{t("TakeAway")}
-        </Button>
-        <Button variant="outline" className="flex-1 rounded-full" onClick={() => placeOrder("onsite")} disabled={submitting || items.length === 0}>
-          {submitting ? <Loader2 className="animate-spin mr-1" size={14} /> : null}{t("OnSite")}
-        </Button>
-        <Button variant="outline" className="flex-1 rounded-full" onClick={() => placeOrder("delivery")} disabled={submitting || items.length === 0}>
-          {submitting ? <Loader2 className="animate-spin mr-1" size={14} /> : null}{t("Deliver")}
-        </Button>
+        {!settingsLoaded ? (
+          <div className="flex-1 flex justify-center"><Loader2 className="animate-spin text-muted-foreground" size={18} /></div>
+        ) : !orderEnable && !takeawayEnable && !deliveryEnable ? (
+          <p className="flex-1 text-center text-muted-foreground text-sm">{t("Noitemsforsale")}</p>
+        ) : (
+          <>
+            {takeawayEnable && (
+              <Button variant="outline" className="flex-1 rounded-full" onClick={() => placeOrder("takeaway")} disabled={submitting || items.length === 0}>
+                {submitting ? <Loader2 className="animate-spin mr-1" size={14} /> : null}{t("TakeAway")}
+              </Button>
+            )}
+            {orderEnable && (
+              <Button variant="outline" className="flex-1 rounded-full" onClick={() => placeOrder("onsite")} disabled={submitting || items.length === 0}>
+                {submitting ? <Loader2 className="animate-spin mr-1" size={14} /> : null}{t("OnSite")}
+              </Button>
+            )}
+            {deliveryEnable && (
+              <Button variant="outline" className="flex-1 rounded-full" onClick={() => placeOrder("delivery")} disabled={submitting || items.length === 0}>
+                {submitting ? <Loader2 className="animate-spin mr-1" size={14} /> : null}{t("Deliver")}
+              </Button>
+            )}
+          </>
+        )}
       </div>
     </div>
   );
