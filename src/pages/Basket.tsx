@@ -47,10 +47,12 @@ const Basket = () => {
         const oe = isEnabled(company?.OrderEnable);
         const te = isEnabled(company?.TakeawayEnable);
         const de = isEnabled(company?.DeliveryEnable);
+        const tables = parseInt(String(company?.TotalTables || "0"), 10) || 0;
         setOrderEnable(oe);
         setTakeawayEnable(te);
         setDeliveryEnable(de);
-        console.log(`[Basket] Company ${companyId} order settings — OrderEnable:${oe}, TakeawayEnable:${te}, DeliveryEnable:${de}`);
+        setTotalTables(tables);
+        console.log(`[Basket] Company ${companyId} — OrderEnable:${oe}, TakeawayEnable:${te}, DeliveryEnable:${de}, TotalTables:${tables}`);
       } catch (err) {
         console.error("[Basket] Failed to fetch company settings:", err);
       } finally {
