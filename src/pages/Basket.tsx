@@ -47,7 +47,7 @@ const Basket = () => {
         const oe = isEnabled(company?.OrderEnable);
         const te = isEnabled(company?.TakeawayEnable);
         const de = isEnabled(company?.DeliveryEnable);
-        const tables = parseInt(String(company?.TotalTables || "0"), 10) || 0;
+        const tables = parseInt(String(company?.TableNumbers || "0"), 10) || 0;
         setOrderEnable(oe);
         setTakeawayEnable(te);
         setDeliveryEnable(de);
