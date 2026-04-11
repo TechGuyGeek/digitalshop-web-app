@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Trash2, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 
 const SERVER_DOMAIN = "https://app.techguygeek.co.uk/";
 
+const isEnabled = (value: unknown): boolean => String(value) === "1";
 const generateRandomCode = (length: number) => {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   let result = "";
