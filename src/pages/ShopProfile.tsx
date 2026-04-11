@@ -69,7 +69,7 @@ const ShopProfile = () => {
   };
 
   const handleShare = useCallback(async () => {
-    const shopUrl = `${window.location.origin}/shop-profile?companyid=${companyIdParam}`;
+    const shopUrl = `${window.location.origin}/shop-profile?companyid=${companyIdParam}&name=${encodeURIComponent(shopName)}&icon=${encodeURIComponent(fallbackIcon)}`;
     const shareText = `${shopName}\n${company?.CompanyDescription || ""}\n${shopUrl}`;
 
     // Download QR code
