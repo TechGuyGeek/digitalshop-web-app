@@ -96,6 +96,26 @@ const Index = () => {
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast.error("Please enter your email address");
+      return;
+    }
+    setLoading(true);
+    try {
+      const message = await requestPasswordReset(email);
+      if (message.toLowerCase().includes("doesn't exist") || message.toLowerCase().includes("does not exist")) {
+        toast.error(message);
+      } else {
+        toast.success(message);
+      }
+    } catch {
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       {/* Background decorations */}
