@@ -164,7 +164,7 @@ export async function fetchCompanyById(companyId: number): Promise<CompanyDetail
 }
 
 export async function requestPasswordReset(email: string): Promise<string> {
-  const url = "https://app.techguygeek.co.uk/PHPread/User/forgotpassword2.php";
+  const url = SERVER_DOMAIN + "menu1/PHPread/User/forgotpassword2.php";
   const formData = new URLSearchParams();
   formData.append("Email", email);
 
