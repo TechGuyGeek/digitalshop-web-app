@@ -163,6 +163,29 @@ export async function fetchCompanyById(companyId: number): Promise<CompanyDetail
   }
 }
 
+export async function requestPasswordReset(email: string): Promise<string> {
+  const url = "https://app.techguygeek.co.uk/PHPread/User/forgotpassword2.php";
+  const formData = new URLSearchParams();
+  formData.append("Email", email);
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formData.toString(),
+    });
+    const text = await response.text();
+    if (!text) return "No response from server. Please try again.";
+    try {
+      return JSON.parse(text);
+    } catch {
+      return text;
+    }
+  } catch {
+    return "Network error. Please check your connection and try again.";
+  }
+}
+
 export async function updateUserProfile(user: DigitalPerson, newImageBase64?: string): Promise<{ success: boolean; data?: DigitalPerson; error?: string }> {
   const url = SERVER_DOMAIN + "menu1/PHPwrite/User/UpdateUsersDetailsSecure.php";
 
