@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { loginUser, registerUser, type DigitalPerson } from "@/lib/api";
+import { loginUser, registerUser, requestPasswordReset, type DigitalPerson } from "@/lib/api";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 
