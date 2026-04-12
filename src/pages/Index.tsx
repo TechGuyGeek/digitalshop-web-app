@@ -16,7 +16,7 @@ const Index = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [helpEnabled, setHelpEnabled] = useState(false);
-  const [view, setView] = useState<"login" | "register">("login");
+  const [view, setView] = useState<"login" | "register" | "forgot">("login");
   const [loading, setLoading] = useState(false);
 
   // Register fields
