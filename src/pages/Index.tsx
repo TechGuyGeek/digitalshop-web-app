@@ -125,8 +125,8 @@ const Index = () => {
       </div>
 
       <div className="relative w-full max-w-md animate-fade-in" style={{ animationDelay: "0.1s" }}>
-        {/* Back arrow for register */}
-        {view === "register" && (
+        {/* Back arrow for register or forgot */}
+        {(view === "register" || view === "forgot") && (
           <button
             onClick={() => setView("login")}
             className="mb-4 flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
