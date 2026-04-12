@@ -137,9 +137,11 @@ const Index = () => {
         )}
 
         {/* Header */}
-        {view === "register" && (
+        {(view === "register" || view === "forgot") && (
           <div className="mb-8 text-center">
-            <h1 className="text-2xl font-bold text-foreground font-heading">{t("Register")}</h1>
+            <h1 className="text-2xl font-bold text-foreground font-heading">
+              {view === "forgot" ? t("ResetLoginPassword") : t("Register")}
+            </h1>
           </div>
         )}
 
@@ -213,7 +215,11 @@ const Index = () => {
               </div>
               {view === "login" && (
                 <div className="text-right">
-                  <button className="text-xs text-primary hover:text-primary/80 transition-colors font-medium">
+                  <button
+                    type="button"
+                    onClick={() => setView("forgot")}
+                    className="text-xs text-primary hover:text-primary/80 transition-colors font-medium"
+                  >
                     {t("ResetLoginPassword")}
                   </button>
                 </div>
