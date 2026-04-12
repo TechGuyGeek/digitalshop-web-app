@@ -192,7 +192,8 @@ const Index = () => {
               />
             </div>
 
-            {/* Password */}
+            {/* Password - hidden in forgot view */}
+            {view !== "forgot" && (
             <div className="space-y-2">
               <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground font-heading">
                 {t("Password")}
@@ -225,6 +226,7 @@ const Index = () => {
                 </div>
               )}
             </div>
+            )}
 
             {/* Register-only: DOB & Mobile */}
             {view === "register" && (
@@ -309,23 +311,47 @@ const Index = () => {
 
           {/* Buttons */}
           <div className="mt-6 space-y-3">
-            <Button
-              variant="glow"
-              size="lg"
-              className="w-full"
-              disabled={loading}
-              onClick={view === "login" ? handleLogin : handleRegister}
-            >
-              {loading ? t("Pleasewait") : view === "login" ? t("Signin") : t("Register")}
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
-              className="w-full"
-              onClick={() => setView(view === "login" ? "register" : "login")}
-            >
-              {view === "login" ? t("Register") : t("Back")}
-            </Button>
+            {view === "forgot" ? (
+              <>
+                <Button
+                  variant="glow"
+                  size="lg"
+                  className="w-full"
+                  disabled={loading}
+                  onClick={handleForgotPassword}
+                >
+                  {loading ? t("Pleasewait") : t("ResetLoginPassword")}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full"
+                  onClick={() => setView("login")}
+                >
+                  {t("Back")}
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="glow"
+                  size="lg"
+                  className="w-full"
+                  disabled={loading}
+                  onClick={view === "login" ? handleLogin : handleRegister}
+                >
+                  {loading ? t("Pleasewait") : view === "login" ? t("Signin") : t("Register")}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="w-full"
+                  onClick={() => setView(view === "login" ? "register" : "login")}
+                >
+                  {view === "login" ? t("Register") : t("Back")}
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Social Login Divider */}
