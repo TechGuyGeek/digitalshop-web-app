@@ -261,52 +261,56 @@ const Index = () => {
               </>
             )}
 
-            {/* Help Toggle */}
-            <div className="flex items-center gap-3 py-1">
-              <Switch checked={helpEnabled} onCheckedChange={setHelpEnabled} />
-              <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                <HelpCircle size={14} />
-                <span>{helpEnabled ? t("Helpison") : t("Helpisoff")}</span>
-              </div>
-            </div>
+            {view !== "forgot" && (
+              <>
+                {/* Help Toggle */}
+                <div className="flex items-center gap-3 py-1">
+                  <Switch checked={helpEnabled} onCheckedChange={setHelpEnabled} />
+                  <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                    <HelpCircle size={14} />
+                    <span>{helpEnabled ? t("Helpison") : t("Helpisoff")}</span>
+                  </div>
+                </div>
 
-            {/* Theme Select */}
-            <div className="space-y-2">
-              <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground font-heading">
-                <Palette size={12} className="mr-1 inline" />
-                {t("SelectTheme")}
-              </label>
-              <Select defaultValue="dark">
-                <SelectTrigger className="h-11 bg-secondary border-0 text-foreground">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="dark">{t("BlackBackGround")}</SelectItem>
-                  <SelectItem value="light">{t("WhiteBackGround")}</SelectItem>
-                  <SelectItem value="midnight">{t("BlueBackGround")}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+                {/* Theme Select */}
+                <div className="space-y-2">
+                  <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground font-heading">
+                    <Palette size={12} className="mr-1 inline" />
+                    {t("SelectTheme")}
+                  </label>
+                  <Select defaultValue="dark">
+                    <SelectTrigger className="h-11 bg-secondary border-0 text-foreground">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="dark">{t("BlackBackGround")}</SelectItem>
+                      <SelectItem value="light">{t("WhiteBackGround")}</SelectItem>
+                      <SelectItem value="midnight">{t("BlueBackGround")}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
-            {/* Language Select */}
-            <div className="space-y-2">
-              <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground font-heading">
-                <Globe size={12} className="mr-1 inline" />
-                {t("SelectLanguage")}
-              </label>
-              <Select value={language} onValueChange={setLanguage}>
-                <SelectTrigger className="h-11 bg-secondary border-0 text-foreground">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableLanguages.map((lang) => (
-                    <SelectItem key={lang.code} value={lang.code}>
-                      {lang.name} – {lang.code}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                {/* Language Select */}
+                <div className="space-y-2">
+                  <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground font-heading">
+                    <Globe size={12} className="mr-1 inline" />
+                    {t("SelectLanguage")}
+                  </label>
+                  <Select value={language} onValueChange={setLanguage}>
+                    <SelectTrigger className="h-11 bg-secondary border-0 text-foreground">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableLanguages.map((lang) => (
+                        <SelectItem key={lang.code} value={lang.code}>
+                          {lang.name} – {lang.code}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Buttons */}
