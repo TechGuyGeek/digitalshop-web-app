@@ -6,13 +6,15 @@ interface GoogleMapProps {
   shops?: { name: string; icon: string; lat?: number; lng?: number; companyid?: number }[];
   onShopClick?: (shop: { name: string; icon: string; companyid?: number }) => void;
   defaultZoom?: number;
+  rangeCircleMetres?: number;
 }
 
 const MAPS_KEY = "AIzaSyAN76Tb-dL_5pvp-w1iFhxWqI52sDnoz5c";
 
-const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14 }: GoogleMapProps) => {
+const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, rangeCircleMetres }: GoogleMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
+  const circleRef = useRef<google.maps.Circle | null>(null);
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null);
   const [locating, setLocating] = useState(true);
 
@@ -70,6 +72,21 @@ const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14 }
             strokeWeight: 2,
           },
         });
+
+        // Range circle overlay
+        if (rangeCircleMetres && rangeCircleMetres > 0) {
+          if (circleRef.current) circleRef.current.setMap(null);
+          circleRef.current = new google.maps.Circle({
+            center: userPos,
+            radius: rangeCircleMetres,
+            map,
+            fillColor: "#4285F4",
+            fillOpacity: 0.06,
+            strokeColor: "#4285F4",
+            strokeOpacity: 0.3,
+            strokeWeight: 1.5,
+          });
+        }
       }
 
       // Shop markers – emoji only, no red pin
