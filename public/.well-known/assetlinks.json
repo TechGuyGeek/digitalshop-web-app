@@ -1,1 +1,12 @@
-
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.TechGuyGeek.DigitalShop",
+      "sha256_cert_fingerprints": [
+        "18:BB:12:13:CC:CB:FB:56:48:33:30:32:27:87:21:86:26:35:55:E4:16:DF:AC:85:1B:C8:24:E5:13:44:7E:1F"
+      ]
+    }
+  }
+]
