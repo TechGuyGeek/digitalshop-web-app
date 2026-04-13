@@ -11,8 +11,10 @@ interface GoogleMapProps {
 
 const MAPS_KEY = "AIzaSyAN76Tb-dL_5pvp-w1iFhxWqI52sDnoz5c";
 
-const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14 }: GoogleMapProps) => {
+const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, rangeCircleMetres }: GoogleMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<google.maps.Map | null>(null);
+  const circleRef = useRef<google.maps.Circle | null>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null);
   const [locating, setLocating] = useState(true);
