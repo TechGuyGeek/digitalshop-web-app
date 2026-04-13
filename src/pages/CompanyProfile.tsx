@@ -407,56 +407,58 @@ const CompanyProfile = () => {
         {/* Camera / Gallery / Save buttons */}
         <div className="flex justify-center gap-3 py-4">
           <Button variant="secondary" className="rounded-full px-5 gap-2" size="sm" onClick={handleCameraClick}>
-            <Camera size={14} /> Camera
+            <Camera size={14} /> {t("Camera")}
           </Button>
           <Button variant="secondary" className="rounded-full px-5 gap-2" size="sm" onClick={() => galleryInputRef.current?.click()}>
-            <ImageIcon size={14} /> Gallery
+            <ImageIcon size={14} /> {t("Gallery")}
           </Button>
           <Button variant="secondary" className="rounded-full px-5 gap-2" size="sm" onClick={handleSave} disabled={saving}>
             {saving ? <Loader2 className="animate-spin" size={14} /> : <Save size={14} />}
-            Save
+            {t("Save")}
           </Button>
         </div>
 
         <h2 className="text-lg font-bold text-foreground text-center mb-4 font-heading">
-          Edit Company Profile
+          {t("CompanyProfilePageTitle")}
         </h2>
 
         {/* Form fields */}
         <div className="px-6 space-y-5">
-          <Input value={form.shopName} onChange={e => handleChange("shopName", e.target.value)} placeholder="Shop Name" className={inputClass} />
-          <Input value={form.mobileNumber} onChange={e => handleChange("mobileNumber", e.target.value)} placeholder="Mobile Number" className={inputClass} />
-          <Input type="email" value={form.companyEmail} onChange={e => handleChange("companyEmail", e.target.value)} placeholder="Company Email" className={inputClass} />
-          <Input value={form.lineOne} onChange={e => handleChange("lineOne", e.target.value)} placeholder="1st line Address" className={inputClass} />
-          <Input value={form.lineTwo} onChange={e => handleChange("lineTwo", e.target.value)} placeholder="2nd line Address" className={inputClass} />
-          <Input value={form.lineThree} onChange={e => handleChange("lineThree", e.target.value)} placeholder="3rd line Address" className={inputClass} />
-          <Input value={form.lineFour} onChange={e => handleChange("lineFour", e.target.value)} placeholder="4th line Address" className={inputClass} />
-          <Input value={form.country} onChange={e => handleChange("country", e.target.value)} placeholder="Country" className={inputClass} />
+          <Input value={form.shopName} onChange={e => handleChange("shopName", e.target.value)} placeholder={t("CompanyName")} className={inputClass} />
+          <Input value={form.mobileNumber} onChange={e => handleChange("mobileNumber", e.target.value)} placeholder={t("Mobile")} className={inputClass} />
+          <Input type="email" value={form.companyEmail} onChange={e => handleChange("companyEmail", e.target.value)} placeholder={t("CompanyEmail")} className={inputClass} />
+          <Input value={form.lineOne} onChange={e => handleChange("lineOne", e.target.value)} placeholder={t("1stlineAddress")} className={inputClass} />
+          <Input value={form.lineTwo} onChange={e => handleChange("lineTwo", e.target.value)} placeholder={t("2ndlineAddress")} className={inputClass} />
+          <Input value={form.lineThree} onChange={e => handleChange("lineThree", e.target.value)} placeholder={t("3rdlineAddress")} className={inputClass} />
+          <Input value={form.lineFour} onChange={e => handleChange("lineFour", e.target.value)} placeholder={t("4thLineAddress")} className={inputClass} />
+          <Input value={form.country} onChange={e => handleChange("country", e.target.value)} placeholder={t("Country")} className={inputClass} />
 
           {/* Opening / Closing times */}
+          <label className="text-xs text-muted-foreground">{t("OpeningTimes")}</label>
           <Input type="time" value={form.openTime} onChange={e => handleChange("openTime", e.target.value)} className={inputClass} />
+          <label className="text-xs text-muted-foreground">{t("ClosingTimes")}</label>
           <Input type="time" value={form.closeTime} onChange={e => handleChange("closeTime", e.target.value)} className={inputClass} />
 
           {/* Notification count & notifications */}
           <Input type="number" value={form.notificationCount} onChange={e => handleChange("notificationCount", e.target.value)} className={inputClass} />
-          <Input value={form.notifications} onChange={e => handleChange("notifications", e.target.value)} placeholder="Notifications" className={inputClass} />
+          <Input value={form.notifications} onChange={e => handleChange("notifications", e.target.value)} placeholder={t("EnableNotifications")} className={inputClass} />
 
           {/* Toggles */}
           <div className="space-y-4 pt-2">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-foreground">{toggles.liveOrders ? "Your Live to receive Orders" : "Enable to Receive Orders"}</span>
+              <span className="text-sm text-foreground">{toggles.liveOrders ? t("LiveOrdersPageTitle") : t("EnabletoRecieveOrders")}</span>
               <Switch checked={toggles.liveOrders} onCheckedChange={v => handleToggle("liveOrders", v)} />
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-foreground">{toggles.takeaways ? "Takeaways is Enabled" : "Enable to Allow Takeaways"}</span>
+              <span className="text-sm text-foreground">{toggles.takeaways ? t("TakeawaysisEnabled") : t("EnabletoAllowTakeaways")}</span>
               <Switch checked={toggles.takeaways} onCheckedChange={v => handleToggle("takeaways", v)} />
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-foreground">{toggles.deliveries ? "Deliveries are Enabled" : "Enable to Allow Deliveries"}</span>
+              <span className="text-sm text-foreground">{toggles.deliveries ? t("DeliveriesareEnabled") : t("EnabletoAllowDeliveries")}</span>
               <Switch checked={toggles.deliveries} onCheckedChange={v => handleToggle("deliveries", v)} />
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-foreground">{toggles.allowGlobal ? "Global Enabled" : "Enable To Allow Global"}</span>
+              <span className="text-sm text-foreground">{toggles.allowGlobal ? t("GlobalEnabled") : t("EnableToAllowGlobal")}</span>
               <Switch checked={toggles.allowGlobal} onCheckedChange={v => handleToggle("allowGlobal", v)} />
             </div>
           </div>
@@ -467,10 +469,10 @@ const CompanyProfile = () => {
               console.log("[QR] Opening QR generator for company:", company);
               setQrOpen(true);
             }}>
-              QR Code Generator
+              {t("BarcodeGenerator")}
             </Button>
             <Button variant="outline" className="w-full rounded-md" onClick={() => setMarkerPickerOpen(true)}>
-              Choose a Map Marker
+              {t("ChooseaMapMarker")}
             </Button>
           </div>
 
@@ -498,39 +500,39 @@ const CompanyProfile = () => {
 
               const ok = await saveMapMarker(company.companyid, marker.id, auth.userId, auth.email, auth.password);
               if (ok) {
-                toast.success("Map marker saved!");
+                toast.success(t("DetailswereSaved"));
                 // Refresh company data
                 const personId = String(user?.PersonID || user?.ID || "");
                 const email = (user?.Email || user?.email || "") as string;
                 const refreshed = await loadCompanyProfile(personId, email);
                 if (refreshed) setCompany(refreshed);
               } else {
-                toast.error("Failed to save map marker");
+                toast.error(t("DetaileswerenotSaved"));
               }
             }}
           />
 
           {/* Update GPS */}
           <Button variant="secondary" className="w-full rounded-md" onClick={handleUpdateGPS}>
-            Update GPS
+            {t("UpdateGPS")}
           </Button>
 
           {/* Description */}
-          <Input value={form.description} onChange={e => handleChange("description", e.target.value)} placeholder="Shop description" className={inputClass} />
+          <Input value={form.description} onChange={e => handleChange("description", e.target.value)} placeholder={t("CompanyDescription")} className={inputClass} />
 
           {/* Delete */}
           <Button variant="destructive" className="w-full rounded-md font-bold uppercase" onClick={handleDeleteClick}>
-            <Trash2 size={16} className="mr-2" /> Delete Your Shop
+            <Trash2 size={16} className="mr-2" /> {t("DELETEYOURSHOP")}
           </Button>
 
           {/* Bottom actions */}
           <div className="flex gap-3 pb-4">
             <Button variant="outline" className="flex-1 rounded-md" onClick={handleAddProducts} disabled={addProductsLoading}>
               {addProductsLoading ? <Loader2 className="animate-spin mr-2" size={14} /> : null}
-              Add Products
+              {t("AddProducts")}
             </Button>
             <Button variant="outline" className="flex-1 rounded-md" onClick={handleViewOrders}>
-              View Orders
+              {t("Orders")}
             </Button>
           </div>
         </div>
@@ -541,16 +543,16 @@ const CompanyProfile = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{deleteBlockerMsg ? "Cannot Delete Shop" : "Delete Shop?"}</AlertDialogTitle>
+            <AlertDialogTitle>{deleteBlockerMsg ? t("DELETEYOURSHOP") : t("Areyousureyouwanttodeleteyourshopandallitscontents")}</AlertDialogTitle>
             <AlertDialogDescription className="whitespace-pre-line">
-              {deleteBlockerMsg || "This action cannot be undone. Your shop and all its data will be permanently deleted."}
+              {deleteBlockerMsg || t("Areyousureyouwanttodeleteyourshopandallitscontents")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("Cancel")}</AlertDialogCancel>
             {!deleteBlockerMsg && (
               <AlertDialogAction onClick={handleConfirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                Delete
+                {t("Delete")}
               </AlertDialogAction>
             )}
           </AlertDialogFooter>
