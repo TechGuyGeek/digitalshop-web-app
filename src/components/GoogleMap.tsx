@@ -15,7 +15,6 @@ const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, 
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<google.maps.Map | null>(null);
   const circleRef = useRef<google.maps.Circle | null>(null);
-  const mapInstanceRef = useRef<google.maps.Map | null>(null);
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null);
   const [locating, setLocating] = useState(true);
 
