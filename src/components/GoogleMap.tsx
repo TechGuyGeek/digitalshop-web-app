@@ -72,6 +72,21 @@ const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, 
             strokeWeight: 2,
           },
         });
+
+        // Range circle overlay
+        if (rangeCircleMetres && rangeCircleMetres > 0) {
+          if (circleRef.current) circleRef.current.setMap(null);
+          circleRef.current = new google.maps.Circle({
+            center: userPos,
+            radius: rangeCircleMetres,
+            map,
+            fillColor: "#4285F4",
+            fillOpacity: 0.06,
+            strokeColor: "#4285F4",
+            strokeOpacity: 0.3,
+            strokeWeight: 1.5,
+          });
+        }
       }
 
       // Shop markers – emoji only, no red pin
