@@ -108,7 +108,7 @@ const ProductCard = ({ product, groupId, companyId, groupName, onToggleUpdate }:
     }
   };
 
-  const statusText = enabled ? (t("TheItemisenabled") !== "TheItemisenabled" ? t("TheItemisenabled") : "The Item is Enabled") : (t("Enabletodisplay") !== "Enabletodisplay" ? t("Enabletodisplay") : "Enable to display");
+  const statusText = enabled ? t("TheItemisEnabled") : t("Enabletodisplay");
 
   return (
     <div className="rounded-xl overflow-hidden bg-card border border-border shadow-lg">
