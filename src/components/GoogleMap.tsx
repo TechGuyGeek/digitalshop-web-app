@@ -92,25 +92,38 @@ const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, 
       // Shop markers – emoji only, no red pin
       shops.forEach((shop) => {
         if (shop.lat && shop.lng) {
-          const canvas = document.createElement("canvas");
-          canvas.width = 48;
-          canvas.height = 48;
-          const ctx = canvas.getContext("2d");
-          if (ctx) {
-            ctx.font = "36px serif";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText(shop.icon, 24, 24);
+          const isDemo = shop.name?.toLowerCase().trim() === "demo";
+          let iconConfig: google.maps.Icon;
+
+          if (isDemo) {
+            iconConfig = {
+              url: `${import.meta.env.BASE_URL}demo-shop-icon.png`,
+              scaledSize: new google.maps.Size(44, 44),
+              anchor: new google.maps.Point(22, 22),
+            };
+          } else {
+            const canvas = document.createElement("canvas");
+            canvas.width = 48;
+            canvas.height = 48;
+            const ctx = canvas.getContext("2d");
+            if (ctx) {
+              ctx.font = "36px serif";
+              ctx.textAlign = "center";
+              ctx.textBaseline = "middle";
+              ctx.fillText(shop.icon, 24, 24);
+            }
+            iconConfig = {
+              url: canvas.toDataURL(),
+              scaledSize: new google.maps.Size(40, 40),
+              anchor: new google.maps.Point(20, 20),
+            };
           }
+
           const marker = new google.maps.Marker({
             position: { lat: shop.lat, lng: shop.lng },
             map,
             title: shop.name,
-            icon: {
-              url: canvas.toDataURL(),
-              scaledSize: new google.maps.Size(40, 40),
-              anchor: new google.maps.Point(20, 20),
-            },
+            icon: iconConfig,
           });
           if (onShopClick) {
             marker.addListener("click", () => onShopClick(shop));
