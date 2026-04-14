@@ -5,6 +5,7 @@ import { Switch } from "@/components/ui/switch";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { SERVER_DOMAIN } from "@/lib/companyApi";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export interface ProductCardItem {
   ID: string;
@@ -44,6 +45,7 @@ async function saveToggle(payload: Record<string, string>): Promise<{ Result: bo
 
 const ProductCard = ({ product, groupId, companyId, groupName, onToggleUpdate }: ProductCardProps) => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [enabled, setEnabled] = useState((product.MenuEnable ?? product.MenuItemEnable) === "1");
   const [toggling, setToggling] = useState(false);
   const toggleRef = useRef(false);
@@ -106,7 +108,7 @@ const ProductCard = ({ product, groupId, companyId, groupName, onToggleUpdate }:
     }
   };
 
-  const statusText = enabled ? "The Item is Enabled" : "Enable to display";
+  const statusText = enabled ? (t("TheItemisenabled") !== "TheItemisenabled" ? t("TheItemisenabled") : "The Item is Enabled") : (t("Enabletodisplay") !== "Enabletodisplay" ? t("Enabletodisplay") : "Enable to display");
 
   return (
     <div className="rounded-xl overflow-hidden bg-card border border-border shadow-lg">
@@ -177,7 +179,7 @@ const ProductCard = ({ product, groupId, companyId, groupName, onToggleUpdate }:
             className="font-semibold"
             onClick={() => navigate(`/add-product?groupId=${groupId}&companyId=${companyId}&groupName=${encodeURIComponent(groupName)}`)}
           >
-            Add
+            {t("Add")}
           </Button>
           <Button
             variant="secondary"
@@ -185,15 +187,15 @@ const ProductCard = ({ product, groupId, companyId, groupName, onToggleUpdate }:
             className="font-semibold"
             onClick={openEdit}
           >
-            Edit
+            {t("Edit")}
           </Button>
           <Button
             variant="secondary"
             size="sm"
             className="font-semibold"
-            onClick={() => toast.info("Delete coming soon")}
+            onClick={() => toast.info(t("Deletecomingsoon") !== "Deletecomingsoon" ? t("Deletecomingsoon") : "Delete coming soon")}
           >
-            Delete
+            {t("Delete")}
           </Button>
         </div>
       </div>
