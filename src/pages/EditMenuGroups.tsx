@@ -258,13 +258,19 @@ const EditMenuGroupsPage = () => {
   const handleDelete = async (group: MenuGroup) => {
     const auth = getAuth();
     if (!auth) return;
-    const ok = await deleteMenuGroup(group.ID, companyId, auth.userId, auth.email, auth.password);
+    const result = await deleteMenuGroup(group.ID, companyId, auth.userId, auth.email, auth.password);
     setDeleteConfirm(null);
-    if (ok) {
+    console.log("[DeleteGroup] Result:", result);
+    if (result.success) {
       toast.success(t("Delete"));
-      fetchGroups();
+      const updated = groups.filter((g) => g.ID !== group.ID);
+      if (updated.length === 0) {
+        navigate("/company-profile");
+      } else {
+        fetchGroups();
+      }
     } else {
-      toast.error(t("Wasnotdeleted"));
+      toast.error(result.message || t("Wasnotdeleted"));
     }
   };
 
