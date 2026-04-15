@@ -68,7 +68,7 @@ const AddProduct = () => {
     try { const base64 = await resizeAndConvertToBase64(file); setImageBase64(base64); setImagePreview(`data:image/jpeg;base64,${base64}`); } catch { toast.error(t("SaveFailed")); }
   };
 
-  const handleSave = async () => {
+  const actuallySave = async () => {
     const priceStr = price.trim() || "0.00"; const priceNum = parseFloat(priceStr);
     if (isNaN(priceNum) || priceNum < 0) { toast.error(t("ErrorwithPrice")); return; }
     const finalName = name.trim() || "-"; const finalDesc = description.trim() || "-";
@@ -82,6 +82,20 @@ const AddProduct = () => {
       if (data?.Result === true) { toast.success(data.Message || t("SaveSuccessful")); navigate(backUrl); }
       else { toast.error(data?.Message || t("SaveFailed")); }
     } catch { toast.error(t("Pleasecheckyourinternetconnection")); } finally { setSaving(false); }
+  };
+
+  const handleSave = async () => {
+    if (isPaidUser()) { await actuallySave(); return; }
+    const advertId = VIDEO_TRIGGERS.afterFirstGroup;
+    const advert = advertId ? ADVERT_LIBRARY[advertId] : null;
+    const needsAdvert = existingProductCount > 0 && ADVERT_SETTINGS.enabled && ADVERT_SETTINGS.videoAdsEnabled;
+    if (needsAdvert && advert?.type === "video") { setShowVideoAd(true); return; }
+    await actuallySave();
+  };
+
+  const handleVideoComplete = async () => {
+    setShowVideoAd(false);
+    await actuallySave();
   };
 
   return (
