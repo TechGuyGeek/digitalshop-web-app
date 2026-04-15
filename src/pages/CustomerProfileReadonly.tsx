@@ -4,6 +4,7 @@ import { ArrowLeft, Loader2, User, MessageSquare, Phone, Mail } from "lucide-rea
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import AdvertSlot from "@/components/adverts/AdvertSlot";
 import type { DigitalPerson } from "@/lib/api";
 
 const SERVER_DOMAIN = "https://app.techguygeek.co.uk/";
@@ -62,10 +63,10 @@ const CustomerProfileReadonly = () => {
 
   return (
     <div className="h-screen bg-muted flex flex-col">
-      <div className="bg-primary px-4 py-4 flex items-center gap-3 shrink-0">
+      <div className="bg-primary px-4 py-3 flex items-center gap-3 shrink-0">
         <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary/80" onClick={() => navigate(-1)}><ArrowLeft size={20} /></Button>
-        <h1 className="text-lg font-bold text-primary-foreground font-heading">{t("CustomerReadonlyDetails")}</h1>
       </div>
+      <AdvertSlot position="topBanner" className="px-4 py-2" />
       <div className="flex-1 overflow-y-auto">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16 text-muted-foreground"><Loader2 className="animate-spin mb-4" size={32} /><p className="text-sm">{t("Pleasewait")}</p></div>

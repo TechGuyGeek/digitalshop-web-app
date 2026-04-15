@@ -127,6 +127,9 @@ export const PAGE_ADVERT_MAP: Record<string, Partial<Record<AdvertSlotPosition, 
   "global-shops": {
     bottomBanner: "test-banner-2",
   },
+  "customer-profile-readonly": {
+    topBanner: "test-banner-2",
+  },
   "view-shops": {
     bottomBanner: "test-banner-2",
   },
