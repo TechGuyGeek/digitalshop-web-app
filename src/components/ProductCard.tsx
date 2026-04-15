@@ -72,13 +72,21 @@ async function saveToggle(payload: Record<string, string>): Promise<{ Result: bo
 
 async function deleteProduct(payload: Record<string, string>): Promise<{ Result: boolean; Message?: string }> {
   const endpoint = SERVER_DOMAIN + "menu1/PHPwrite/CompanyMenu/DeleteOrder2Secure.php";
+  const formData = new URLSearchParams();
+
+  Object.entries(payload).forEach(([key, value]) => {
+    formData.append(key, value ?? "");
+  });
+
+  const requestBody = formData.toString();
   console.log("[DeleteProduct] endpoint:", endpoint);
   console.log("[DeleteProduct] payload:", payload);
+  console.log("[DeleteProduct] form body:", requestBody);
 
   const res = await fetch(endpoint, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: requestBody,
   });
 
   console.log("[DeleteProduct] HTTP status:", res.status);
@@ -159,6 +167,7 @@ const ProductCard = ({ product, groupId, companyId, groupName, onToggleUpdate, o
     try {
       const auth = getUserAuth();
       const result = await deleteProduct({
+        companyID: companyId,
         companyid: companyId,
         MenuID: product.ID,
         OrderName: product.OrderName || "",
