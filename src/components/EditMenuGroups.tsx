@@ -70,23 +70,51 @@ async function addMenuGroup(companyId: number, groupName: string, userId: number
   }
 }
 
-async function deleteMenuGroup(groupId: number, companyId: number, userId: number, email: string, password: string): Promise<boolean> {
+async function countGroupProducts(companyId: number, groupId: number): Promise<number> {
   try {
-    const res = await fetch(SERVER_DOMAIN + "menu1/PHPwrite/CompanyMenu/DeletemenuGroup.php", {
+    const form = new URLSearchParams();
+    form.append("companyid", String(companyId));
+    form.append("GroupID", String(groupId));
+    const res = await fetch(SERVER_DOMAIN + "menu1/PHPread/CompanyMenu/CountMenuDetails.php", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ID: groupId,
-        companyid: companyId,
-        UserID: userId,
-        UserEmail: email,
-        UserPassword: password,
-      }),
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: form.toString(),
     });
     const data = await res.json();
-    return data.success === true || data.Success === true;
-  } catch {
-    return false;
+    console.log("[DeleteGroup] Count response:", data);
+    const count = Number(data?.Count ?? data?.count ?? data?.total ?? -1);
+    return count;
+  } catch (e) {
+    console.error("[DeleteGroup] Count check failed:", e);
+    return -1;
+  }
+}
+
+async function deleteMenuGroup(groupId: number, companyId: number, userId: number, email: string, password: string): Promise<{ success: boolean; message: string }> {
+  try {
+    const form = new URLSearchParams();
+    form.append("ID", String(groupId));
+    form.append("companyid", String(companyId));
+    form.append("UserID", String(userId));
+    form.append("UserEmail", email);
+    form.append("UserPassword", password);
+    const res = await fetch(SERVER_DOMAIN + "menu1/PHPwrite/CompanyMenu/DeletemenuGroup.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: form.toString(),
+    });
+    const raw = await res.text();
+    console.log("[DeleteGroup] Delete raw response:", raw);
+    try {
+      const data = JSON.parse(raw);
+      const ok = data.CanDelete === "1" || data.success === true || data.Success === true;
+      return { success: ok, message: data.ServerMessage || data.Message || (ok ? "Deleted" : "Failed") };
+    } catch {
+      return { success: false, message: "Unexpected response: " + raw.substring(0, 100) };
+    }
+  } catch (e) {
+    console.error("[DeleteGroup] Delete request failed:", e);
+    return { success: false, message: "Network error" };
   }
 }
 
@@ -197,13 +225,32 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, user
   };
 
   const handleDelete = async (group: MenuGroup) => {
-    const ok = await deleteMenuGroup(group.ID, companyId, userId, userEmail, userPassword);
+    console.log("[DeleteGroup] Starting delete for group:", group.ID, group.OrderGroup, "companyId:", companyId);
+
+    // Step 1: Count products in this group
+    const count = await countGroupProducts(companyId, group.ID);
+    console.log("[DeleteGroup] Product count:", count);
+
+    if (count !== 0) {
+      setDeleteConfirm(null);
+      if (count < 0) {
+        toast.error("Could not verify group contents. Please try again.");
+      } else {
+        toast.error("Please delete all products in this group before deleting the group.");
+      }
+      return;
+    }
+
+    // Step 2: Count is 0, proceed with delete
+    const result = await deleteMenuGroup(group.ID, companyId, userId, userEmail, userPassword);
+    console.log("[DeleteGroup] Delete result:", result);
     setDeleteConfirm(null);
-    if (ok) {
-      toast.success(`"${group.OrderGroup}" deleted`);
+
+    if (result.success) {
+      toast.success(result.message || `"${group.OrderGroup}" deleted`);
       fetchGroups();
     } else {
-      toast.error("Failed to delete group");
+      toast.error(result.message || "Failed to delete group");
     }
   };
 
@@ -287,7 +334,7 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, user
           <AlertDialogHeader>
             <AlertDialogTitle>Delete "{deleteConfirm?.OrderGroup}"?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently remove this menu group and all its items.
+              This will permanently remove this menu group. The group must be empty (no products) before it can be deleted.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
