@@ -60,14 +60,20 @@ const EditProduct = () => {
     if (!name.trim()) { toast.error(t("ItemName")); return; }
     const priceNum = parseFloat(price);
     if (isNaN(priceNum) || priceNum < 0) { toast.error(t("ErrorwithPrice")); return; }
+    const stored = localStorage.getItem("digitalUser"); let userId = "", userEmail = "", userPassword = "";
+    if (stored) { try { const user = JSON.parse(stored); userId = user.PersonID || user.ID || ""; userEmail = user.Email || user.email || ""; userPassword = user.Password || user.password || ""; } catch {} }
     setSaving(true);
     try {
-      const payload: Record<string, string> = { ID: productId, GroupID: groupId, companyid: companyId, OrderName: name.trim(), OrderDesription: description.trim(), OrderPrice: priceNum.toFixed(2), SelectImage: newImageBase64 || "0" };
+      const payload: Record<string, string> = { ID: productId, GroupID: groupId, companyid: companyId, OrderName: name.trim().replace(/'/g, "\\'"), OrderDesription: description.trim().replace(/'/g, "\\'"), OrderPrice: priceNum.toFixed(2), SelectImage: newImageBase64 || "0", UserID: userId, UserEmail: userEmail, UserPassword: userPassword };
+      console.log("[EditProduct] Saving payload to UpdateMenuDetail.php", { ...payload, SelectImage: payload.SelectImage === "0" ? "0" : "(base64)" });
       const res = await fetch(SERVER_DOMAIN + "menu1/PHPwrite/CompanyMenu/UpdateMenuDetail.php", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-      const data = await res.json();
-      if (data?.ServerMessage === "Success" || res.ok) { toast.success(t("SaveSuccessful")); navigate(backUrl); }
-      else { toast.error(data?.ServerMessage || t("SaveFailed")); }
-    } catch { toast.error(t("Pleasecheckyourinternetconnection")); } finally { setSaving(false); }
+      const text = await res.text();
+      console.log("[EditProduct] Response status:", res.status, "body:", text);
+      let data: any;
+      try { data = JSON.parse(text); } catch { toast.error(t("SaveFailed")); setSaving(false); return; }
+      if (data?.ServerMessage === "Success" || data?.Result === true || res.ok) { toast.success(t("SaveSuccessful")); navigate(backUrl); }
+      else { toast.error(data?.ServerMessage || data?.Message || t("SaveFailed")); }
+    } catch (err) { console.error("[EditProduct] Save error:", err); toast.error(t("Pleasecheckyourinternetconnection")); } finally { setSaving(false); }
   };
 
   return (
