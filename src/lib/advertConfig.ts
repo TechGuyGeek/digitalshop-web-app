@@ -151,6 +151,8 @@ export const VIDEO_TRIGGERS: Record<string, string> = {
   beforeCheckout: "test-video-1",
   /** Shown after login */
   afterLogin: "test-video-1",
+  /** Shown after adding first menu group (non-paid users) */
+  afterFirstGroup: "test-video-1",
   /**
    * ADD MORE TRIGGERS HERE:
    * "afterPurchase": "my-video-ad-id",
