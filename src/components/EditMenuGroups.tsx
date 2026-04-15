@@ -146,9 +146,7 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, user
     }
   }, [open, companyId]);
 
-  const handleAddGroup = async () => {
-    const name = newGroupName.trim();
-    if (!name) { toast.error("Please enter a group name"); return; }
+  const actuallyAddGroup = async (name: string) => {
     setAddingGroup(true);
     const ok = await addMenuGroup(companyId, name, userId, userEmail, userPassword);
     setAddingGroup(false);
@@ -158,6 +156,46 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, user
       fetchGroups();
     } else {
       toast.error("Failed to add group");
+    }
+  };
+
+  const handleAddGroup = async () => {
+    const name = newGroupName.trim();
+    if (!name) { toast.error("Please enter a group name"); return; }
+
+    // First group is always free
+    if (!hasAddedFirstGroup.current) {
+      hasAddedFirstGroup.current = true;
+      await actuallyAddGroup(name);
+      return;
+    }
+
+    // Paid users skip the ad
+    if (isPaidUser()) {
+      await actuallyAddGroup(name);
+      return;
+    }
+
+    // Non-paid users must watch a video ad before adding subsequent groups
+    if (ADVERT_SETTINGS.enabled && ADVERT_SETTINGS.videoAdsEnabled) {
+      const advertId = VIDEO_TRIGGERS["afterFirstGroup"];
+      const ad = advertId ? ADVERT_LIBRARY[advertId] : null;
+      if (ad) {
+        setPendingGroupName(name);
+        setShowVideoAd(true);
+        return;
+      }
+    }
+
+    // Fallback if no ad configured
+    await actuallyAddGroup(name);
+  };
+
+  const handleVideoDismissed = () => {
+    setShowVideoAd(false);
+    if (pendingGroupName) {
+      actuallyAddGroup(pendingGroupName);
+      setPendingGroupName("");
     }
   };
 
