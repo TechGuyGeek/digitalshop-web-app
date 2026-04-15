@@ -10,6 +10,8 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import VideoAdvert from "@/components/adverts/VideoAdvert";
+import { ADVERT_LIBRARY, ADVERT_SETTINGS, VIDEO_TRIGGERS } from "@/lib/advertConfig";
 import { SERVER_DOMAIN } from "@/lib/companyApi";
 
 interface MenuGroup { ID: number; OrderGroup: string; companyid: number; menuGroupEnabled?: string; MenuEnable?: string; }

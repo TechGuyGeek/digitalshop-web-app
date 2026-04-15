@@ -22,9 +22,11 @@ interface VideoAdvertProps {
   advert: AdvertDefinition | null;
   visible: boolean;
   onDismiss: () => void;
+  onComplete?: () => void;
+  dismissible?: boolean;
 }
 
-const VideoAdvert = ({ advert, visible, onDismiss }: VideoAdvertProps) => {
+const VideoAdvert = ({ advert, visible, onDismiss, onComplete, dismissible = true }: VideoAdvertProps) => {
   const adsenseRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
