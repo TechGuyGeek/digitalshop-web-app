@@ -4,6 +4,7 @@ import { ArrowLeft, QrCode, Camera, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import AdvertSlot from "@/components/adverts/AdvertSlot";
 
 const QRScanner = () => {
   const navigate = useNavigate();
@@ -99,6 +100,7 @@ const QRScanner = () => {
             <Button onClick={handleManualGo} size="sm">{t("OK")}</Button>
           </div>
         </div>
+        <AdvertSlot position="bottomBanner" className="w-full max-w-sm pt-4" />
       </div>
     </div>
   );
