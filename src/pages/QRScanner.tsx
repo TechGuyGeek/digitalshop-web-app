@@ -100,8 +100,7 @@ const QRScanner = () => {
             <Button onClick={handleManualGo} size="sm">{t("OK")}</Button>
           </div>
         </div>
-      </div>
-      <AdvertSlot position="bottomBanner" className="w-full max-w-sm mx-auto px-4 pb-4" />
+        <AdvertSlot position="bottomBanner" className="w-full max-w-sm pt-4" />
       </div>
     </div>
   );
