@@ -54,6 +54,17 @@ const GroupProducts = () => {
     setProducts((prev) => { const next = prev.map((p) => p.ID === productId ? { ...p, MenuEnable: newValue, MenuItemEnable: newValue } : p); writeCachedGroupProducts(groupId, next); return next; });
   };
 
+  const handleDelete = (productId: string) => {
+    setProducts((prev) => {
+      const next = prev.filter((p) => p.ID !== productId);
+      writeCachedGroupProducts(groupId, next);
+      if (next.length === 0) {
+        navigate(`/edit-menu-groups?companyId=${companyId}`);
+      }
+      return next;
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <div className="flex items-center gap-3 p-4 border-b border-border bg-card">
@@ -74,7 +85,7 @@ const GroupProducts = () => {
           </div>
         )}
         {!loading && !error && products.map((product) => (
-          <ProductCard key={product.ID} product={product} groupId={groupId} companyId={companyId} groupName={groupName} onToggleUpdate={handleToggleUpdate} />
+          <ProductCard key={product.ID} product={product} groupId={groupId} companyId={companyId} groupName={groupName} onToggleUpdate={handleToggleUpdate} onDelete={handleDelete} />
         ))}
       </div>
     </div>
