@@ -118,6 +118,21 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, user
   const [newGroupName, setNewGroupName] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState<MenuGroup | null>(null);
 
+  // Video ad state for non-paid users after first group
+  const [showVideoAd, setShowVideoAd] = useState(false);
+  const [pendingGroupName, setPendingGroupName] = useState("");
+  const hasAddedFirstGroup = useRef(false);
+
+  const isPaidUser = useCallback((): boolean => {
+    try {
+      const stored = localStorage.getItem("digitalUser");
+      if (!stored) return false;
+      const user = JSON.parse(stored);
+      return String(user?.PaidUser) === "2";
+    } catch {
+      return false;
+    }
+  }, []);
   const fetchGroups = async () => {
     setLoading(true);
     const data = await loadMenuGroups(companyId);
