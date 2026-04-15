@@ -85,7 +85,7 @@ const GroupProducts = () => {
           </div>
         )}
         {!loading && !error && products.map((product) => (
-          <ProductCard key={product.ID} product={product} groupId={groupId} companyId={companyId} groupName={groupName} onToggleUpdate={handleToggleUpdate} />
+          <ProductCard key={product.ID} product={product} groupId={groupId} companyId={companyId} groupName={groupName} onToggleUpdate={handleToggleUpdate} onDelete={handleDelete} />
         ))}
       </div>
     </div>
