@@ -88,23 +88,38 @@ async function deleteMenuGroup(
   userId: number,
   email: string,
   password: string
-): Promise<boolean> {
+): Promise<{ success: boolean; message?: string }> {
   try {
+    const form = new URLSearchParams();
+    form.append("ID", String(groupId));
+    form.append("companyid", String(companyId));
+    form.append("UserID", String(userId));
+    form.append("UserEmail", email);
+    form.append("UserPassword", password);
+
+    console.log("[DeleteGroup] Sending form body:", form.toString());
+
     const res = await fetch(SERVER_DOMAIN + "menu1/PHPwrite/CompanyMenu/DeletemenuGroup.php", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ID: groupId,
-        companyid: companyId,
-        UserID: userId,
-        UserEmail: email,
-        UserPassword: password,
-      }),
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: form.toString(),
     });
-    const data = await res.json();
-    return data.success === true || data.Success === true;
-  } catch {
-    return false;
+    const text = await res.text();
+    console.log("[DeleteGroup] Raw response:", text);
+
+    try {
+      const data = JSON.parse(text);
+      const canDelete = data.CanDelete === "1" || data.CanDelete === 1;
+      const success = canDelete || data.success === true || data.Success === true || data.Result === true;
+      return { success, message: data.ServerMessage || data.Message || "" };
+    } catch {
+      const lower = text.toLowerCase();
+      if (lower.includes("deleted") || lower === "true") return { success: true };
+      return { success: false, message: text };
+    }
+  } catch (err) {
+    console.error("[DeleteGroup] Network error:", err);
+    return { success: false, message: "Network error" };
   }
 }
 
