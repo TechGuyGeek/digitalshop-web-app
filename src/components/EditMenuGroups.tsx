@@ -164,21 +164,16 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, user
     const name = newGroupName.trim();
     if (!name) { toast.error("Please enter a group name"); return; }
 
-    // First group is always free
-    if (!hasAddedFirstGroup.current) {
-      hasAddedFirstGroup.current = true;
-      await actuallyAddGroup(name);
-      return;
-    }
-
-    // Paid users skip the ad
+    // Paid users always skip the ad
     if (isPaidUser()) {
       await actuallyAddGroup(name);
       return;
     }
 
-    // Non-paid users must watch a video ad before adding subsequent groups
-    if (ADVERT_SETTINGS.enabled && ADVERT_SETTINGS.videoAdsEnabled) {
+    // If there are already groups (or one was added this session), show video ad
+    const alreadyHasGroups = groups.length > 0 || hasAddedFirstGroup.current;
+
+    if (alreadyHasGroups && ADVERT_SETTINGS.enabled && ADVERT_SETTINGS.videoAdsEnabled) {
       const advertId = VIDEO_TRIGGERS["afterFirstGroup"];
       const ad = advertId ? ADVERT_LIBRARY[advertId] : null;
       if (ad) {
@@ -188,7 +183,8 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, user
       }
     }
 
-    // Fallback if no ad configured
+    // First group (no existing groups) — add free
+    hasAddedFirstGroup.current = true;
     await actuallyAddGroup(name);
   };
 
