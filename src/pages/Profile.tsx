@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { LogOut, User, Camera, Image, Save, Trash2, Loader2 } from "lucide-react";
+import { LogOut, User, Camera, Image, Save, Trash2, Loader2, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { type DigitalPerson, updateUserProfile } from "@/lib/api";
@@ -9,6 +9,9 @@ import { loadCompanyProfile } from "@/lib/companyApi";
 import { toast } from "sonner";
 import WebcamCapture from "@/components/WebcamCapture";
 import { useLanguage } from "@/contexts/LanguageContext";
+import AdvertSlot from "@/components/adverts/AdvertSlot";
+import VideoAdvert from "@/components/adverts/VideoAdvert";
+import { useAdverts } from "@/hooks/useAdverts";
 
 const MAX_IMAGE_SIZE = 800;
 
@@ -44,6 +47,7 @@ function resizeAndConvertToBase64(file: File): Promise<string> {
 const Profile = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const { showVideoAd, dismissVideoAd, videoAdvert, videoVisible } = useAdverts();
   const [user, setUser] = useState<DigitalPerson | null>(null);
   const [form, setForm] = useState({
     name: "", surname: "", gender: "", mobileNumber: "",
@@ -174,9 +178,15 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Video advert overlay */}
+      <VideoAdvert advert={videoAdvert} visible={videoVisible} onDismiss={dismissVideoAd} />
+
       <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={onFileChange} />
       <input ref={galleryInputRef} type="file" accept="image/*" className="hidden" onChange={onFileChange} />
       <WebcamCapture open={webcamOpen} onOpenChange={setWebcamOpen} onCapture={handleWebcamCapture} />
+
+      {/* Top banner advert slot */}
+      <AdvertSlot position="topBanner" className="px-4 pt-4" />
 
       <div className="relative w-full max-w-lg mx-auto pt-6 px-4">
         <div className="w-full aspect-[4/3] rounded-xl overflow-hidden bg-card border border-border mb-4">
@@ -283,6 +293,16 @@ const Profile = () => {
         <Button variant="outline" className="w-full mb-8 rounded-full" onClick={handleLogout}>
           <LogOut size={16} className="mr-2" />
           {t("Signin")}
+        </Button>
+
+        {/* Demo: video advert trigger button */}
+        <Button
+          variant="outline"
+          className="w-full rounded-full gap-2"
+          onClick={() => showVideoAd("pageEnter")}
+        >
+          <Play size={14} />
+          Demo Video Ad
         </Button>
       </div>
     </div>
