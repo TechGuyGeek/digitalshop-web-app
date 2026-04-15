@@ -128,6 +128,14 @@ const AddProduct = () => {
           </Button>
         </div>
       </div>
+
+      <VideoAdvert
+        advert={showVideoAd ? (ADVERT_LIBRARY[VIDEO_TRIGGERS.afterFirstGroup] ?? null) : null}
+        visible={showVideoAd}
+        dismissible={false}
+        onDismiss={() => setShowVideoAd(false)}
+        onComplete={handleVideoComplete}
+      />
     </div>
   );
 };
