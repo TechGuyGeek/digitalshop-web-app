@@ -115,6 +115,9 @@ export const PAGE_ADVERT_MAP: Record<string, Partial<Record<AdvertSlotPosition, 
   basket: {
     bottomBanner: "test-banner-2",
   },
+  "qr-scanner": {
+    bottomBanner: "test-banner-2",
+  },
   /**
    * ADD MORE PAGE MAPPINGS HERE:
    *
