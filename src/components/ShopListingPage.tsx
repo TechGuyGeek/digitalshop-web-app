@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import GoogleMap from "@/components/GoogleMap";
 import { fetchNearbyShops, fetchGlobalShops, NearbyShop } from "@/lib/nearbyShops";
 import { useLanguage } from "@/contexts/LanguageContext";
+import AdvertSlot from "@/components/adverts/AdvertSlot";
 
 interface ShopListingPageProps { title: string; variant?: "free" | "paid" | "global"; }
 
@@ -59,6 +60,7 @@ const ShopListingPage = ({ title, variant = "free" }: ShopListingPageProps) => {
         {activeTab === "map" && (<><GoogleMap className="flex-1 min-h-[400px] w-full" shops={mapShops} onShopClick={handleShopMapClick} defaultZoom={isGlobal ? 3 : 14} rangeCircleMetres={variant === "free" ? 804.67 : variant === "paid" ? 1609.34 : undefined} />{(variant === "free" || variant === "paid") && <p className="text-[11px] text-muted-foreground text-center py-1">{variant === "free" ? (t("Showingshopswithin") !== "Showingshopswithin" ? t("Showingshopswithin") : "Showing shops within 0.5 miles") : "Showing shops within 1 mile"}</p>}{loading && (<div className="p-4 text-center text-sm text-muted-foreground">{t("Pleasewait")}</div>)}</>)}
         {activeTab === "list" && (<ShopContent shops={shops} loading={loading} error={error} isGlobal={isGlobal} onRetry={() => isGlobal ? loadShops() : userPos && loadShops(userPos.lat, userPos.lng)} />)}
       </div>
+      <AdvertSlot position="bottomBanner" className="px-4 pb-3" />
     </div>
   );
 };

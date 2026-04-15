@@ -118,6 +118,15 @@ export const PAGE_ADVERT_MAP: Record<string, Partial<Record<AdvertSlotPosition, 
   "qr-scanner": {
     bottomBanner: "test-banner-2",
   },
+  "free-shops": {
+    bottomBanner: "test-banner-2",
+  },
+  "paid-shops": {
+    bottomBanner: "test-banner-2",
+  },
+  "global-shops": {
+    bottomBanner: "test-banner-2",
+  },
   "view-shops": {
     bottomBanner: "test-banner-2",
   },
