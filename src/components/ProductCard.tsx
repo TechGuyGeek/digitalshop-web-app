@@ -159,7 +159,7 @@ const ProductCard = ({ product, groupId, companyId, groupName, onToggleUpdate, o
     try {
       const auth = getUserAuth();
       const result = await deleteProduct({
-        companyID: companyId,
+        companyid: companyId,
         MenuID: product.ID,
         OrderName: product.OrderName || "",
         ImagePath: product.imagepath || "",
