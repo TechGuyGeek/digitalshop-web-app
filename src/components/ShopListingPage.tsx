@@ -77,7 +77,7 @@ const ShopList = ({ shops, isGlobal = false }: { shops: NearbyShop[]; isGlobal?:
     <div className="divide-y divide-border">
       {shops.map((shop) => (
         <button key={shop.companyid} className="w-full flex items-center gap-4 px-6 py-4 text-left hover:bg-accent/50 transition-colors" onClick={() => navigate(`/shop-profile?companyid=${shop.companyid}&name=${encodeURIComponent(shop.name)}&icon=${encodeURIComponent(shop.icon)}`)}>
-          {(shop.name?.toLowerCase().includes("demo") || shop.name?.toLowerCase().includes("démo") || shop.name?.toLowerCase().includes("демо"))
+          {shop.categoryLabel === "Digits"
             ? <img src={`${import.meta.env.BASE_URL}demo-shop-icon.png`} alt="Demo" className="w-8 h-8" />
             : <span className="text-2xl">{shop.icon}</span>}
           <div className="flex-1 min-w-0">
