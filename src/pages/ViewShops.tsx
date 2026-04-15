@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Store, Globe, CreditCard, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
+import AdvertSlot from "@/components/adverts/AdvertSlot";
 
 const ViewShops = () => {
   const navigate = useNavigate();
@@ -38,6 +39,7 @@ const ViewShops = () => {
             </button>
           ))}
         </div>
+        <AdvertSlot position="bottomBanner" className="pt-4" />
       </div>
     </div>
   );
