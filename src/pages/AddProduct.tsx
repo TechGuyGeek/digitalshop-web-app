@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Camera, Image as ImageIcon, Save, Loader2, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { SERVER_DOMAIN } from "@/lib/companyApi";
 import { useLanguage } from "@/contexts/LanguageContext";
+import VideoAdvert from "@/components/adverts/VideoAdvert";
+import { ADVERT_LIBRARY, ADVERT_SETTINGS, VIDEO_TRIGGERS } from "@/lib/advertConfig";
 
 function resizeAndConvertToBase64(file: File, maxSize = 800): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -39,14 +41,34 @@ const AddProduct = () => {
   const [name, setName] = useState(""); const [description, setDescription] = useState(""); const [price, setPrice] = useState("");
   const [imagePreview, setImagePreview] = useState<string | null>(null); const [imageBase64, setImageBase64] = useState<string>("");
   const [saving, setSaving] = useState(false);
+  const [showVideoAd, setShowVideoAd] = useState(false);
+  const [existingProductCount, setExistingProductCount] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null); const cameraInputRef = useRef<HTMLInputElement>(null);
   const backUrl = `/group-products?groupId=${groupId}&companyId=${companyId}&groupName=${encodeURIComponent(groupName)}`;
+
+  const isPaidUser = () => {
+    try {
+      const stored = localStorage.getItem("digitalUser");
+      if (!stored) return false;
+      const u = JSON.parse(stored);
+      return String(u?.PaidUser) === "2";
+    } catch { return false; }
+  };
+
+  useEffect(() => {
+    if (!groupId) return;
+    const form = new URLSearchParams(); form.append("GroupID", groupId);
+    fetch(SERVER_DOMAIN + "menu1/PHPread/CompanyMenu/PoppulateSubMenu1.php", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: form.toString() })
+      .then(r => r.json())
+      .then(data => { if (Array.isArray(data)) setExistingProductCount(data.length); })
+      .catch(() => {});
+  }, [groupId]);
 
   const handleFileSelect = async (file: File) => {
     try { const base64 = await resizeAndConvertToBase64(file); setImageBase64(base64); setImagePreview(`data:image/jpeg;base64,${base64}`); } catch { toast.error(t("SaveFailed")); }
   };
 
-  const handleSave = async () => {
+  const actuallySave = async () => {
     const priceStr = price.trim() || "0.00"; const priceNum = parseFloat(priceStr);
     if (isNaN(priceNum) || priceNum < 0) { toast.error(t("ErrorwithPrice")); return; }
     const finalName = name.trim() || "-"; const finalDesc = description.trim() || "-";
@@ -60,6 +82,20 @@ const AddProduct = () => {
       if (data?.Result === true) { toast.success(data.Message || t("SaveSuccessful")); navigate(backUrl); }
       else { toast.error(data?.Message || t("SaveFailed")); }
     } catch { toast.error(t("Pleasecheckyourinternetconnection")); } finally { setSaving(false); }
+  };
+
+  const handleSave = async () => {
+    if (isPaidUser()) { await actuallySave(); return; }
+    const advertId = VIDEO_TRIGGERS.afterFirstGroup;
+    const advert = advertId ? ADVERT_LIBRARY[advertId] : null;
+    const needsAdvert = existingProductCount > 0 && ADVERT_SETTINGS.enabled && ADVERT_SETTINGS.videoAdsEnabled;
+    if (needsAdvert && advert?.type === "video") { setShowVideoAd(true); return; }
+    await actuallySave();
+  };
+
+  const handleVideoComplete = async () => {
+    setShowVideoAd(false);
+    await actuallySave();
   };
 
   return (
@@ -92,6 +128,14 @@ const AddProduct = () => {
           </Button>
         </div>
       </div>
+
+      <VideoAdvert
+        advert={showVideoAd ? (ADVERT_LIBRARY[VIDEO_TRIGGERS.afterFirstGroup] ?? null) : null}
+        visible={showVideoAd}
+        dismissible={false}
+        onDismiss={() => setShowVideoAd(false)}
+        onComplete={handleVideoComplete}
+      />
     </div>
   );
 };
