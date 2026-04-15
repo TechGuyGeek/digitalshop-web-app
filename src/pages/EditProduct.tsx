@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Camera, Image as ImageIcon, Save, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -34,6 +34,10 @@ function resizeAndConvertToBase64(file: File, maxSize = 800): Promise<string> {
   });
 }
 
+function escapeApostrophes(str: string) {
+  return str.replace(/'/g, "\\'");
+}
+
 const EditProduct = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -46,11 +50,32 @@ const EditProduct = () => {
   const initialDesc = searchParams.get("desc") || "";
   const initialPrice = searchParams.get("price") || "";
   const initialImage = searchParams.get("image") || "";
+  const initialMenuEnable = searchParams.get("menuEnable") || "";
   const [name, setName] = useState(initialName); const [description, setDescription] = useState(initialDesc);
   const [price, setPrice] = useState(initialPrice); const [imagePreview, setImagePreview] = useState(getImageUrl(initialImage));
   const [newImageBase64, setNewImageBase64] = useState<string | null>(null); const [saving, setSaving] = useState(false);
+  const [menuEnable, setMenuEnable] = useState(initialMenuEnable || "1");
   const fileInputRef = useRef<HTMLInputElement>(null); const cameraInputRef = useRef<HTMLInputElement>(null);
   const backUrl = `/group-products?groupId=${groupId}&companyId=${companyId}&groupName=${encodeURIComponent(groupName)}`;
+
+  useEffect(() => {
+    if (!groupId || !productId || initialMenuEnable) return;
+    const form = new URLSearchParams();
+    form.append("GroupID", groupId);
+    fetch(SERVER_DOMAIN + "menu1/PHPread/CompanyMenu/PoppulateSubMenu1.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: form.toString(),
+    })
+      .then((res) => res.json())
+      .then((data: Array<{ ID?: string; MenuEnable?: string; MenuItemEnable?: string }>) => {
+        if (!Array.isArray(data)) return;
+        const current = data.find((item) => String(item.ID || "") === productId);
+        const currentEnable = String(current?.MenuEnable ?? current?.MenuItemEnable ?? "").trim();
+        if (currentEnable === "0" || currentEnable === "1") setMenuEnable(currentEnable);
+      })
+      .catch(() => {});
+  }, [groupId, productId, initialMenuEnable]);
 
   const handleFileSelect = async (file: File) => {
     try { const base64 = await resizeAndConvertToBase64(file); setNewImageBase64(base64); setImagePreview(`data:image/jpeg;base64,${base64}`); } catch { toast.error(t("SaveFailed")); }
@@ -61,19 +86,31 @@ const EditProduct = () => {
     const priceNum = parseFloat(price);
     if (isNaN(priceNum) || priceNum < 0) { toast.error(t("ErrorwithPrice")); return; }
     const stored = localStorage.getItem("digitalUser"); let userId = "", userEmail = "", userPassword = "";
-    if (stored) { try { const user = JSON.parse(stored); userId = user.PersonID || user.ID || ""; userEmail = user.Email || user.email || ""; userPassword = user.Password || user.password || ""; } catch {} }
+    if (stored) { try { const user = JSON.parse(stored); userId = String(user.PersonID || user.ID || ""); userEmail = user.Email || user.email || ""; userPassword = user.Password || user.password || ""; } catch {} }
     setSaving(true);
     try {
-      const payload: Record<string, string> = { ID: productId, GroupID: groupId, companyid: companyId, OrderName: name.trim().replace(/'/g, "\\'"), OrderDesription: description.trim().replace(/'/g, "\\'"), OrderPrice: priceNum.toFixed(2), SelectImage: newImageBase64 || "0", UserID: userId, UserEmail: userEmail, UserPassword: userPassword };
-      console.log("[EditProduct] Saving payload to UpdateMenuDetail.php", { ...payload, SelectImage: payload.SelectImage === "0" ? "0" : "(base64)" });
-      const res = await fetch(SERVER_DOMAIN + "menu1/PHPwrite/CompanyMenu/UpdateMenuDetail.php", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-      const text = await res.text();
-      console.log("[EditProduct] Response status:", res.status, "body:", text);
-      let data: any;
-      try { data = JSON.parse(text); } catch { toast.error(t("SaveFailed")); setSaving(false); return; }
-      if (data?.ServerMessage === "Success" || data?.Result === true || res.ok) { toast.success(t("SaveSuccessful")); navigate(backUrl); }
-      else { toast.error(data?.ServerMessage || data?.Message || t("SaveFailed")); }
-    } catch (err) { console.error("[EditProduct] Save error:", err); toast.error(t("Pleasecheckyourinternetconnection")); } finally { setSaving(false); }
+      const payload: Record<string, string> = {
+        ID: productId,
+        GroupID: groupId,
+        companyid: companyId,
+        OrderName: escapeApostrophes(name.trim()),
+        OrderDesription: escapeApostrophes(description.trim()),
+        OrderPrice: priceNum.toFixed(2),
+        SelectImage: newImageBase64 || "0",
+        MenuEnable: menuEnable === "0" ? "0" : "1",
+        UserID: userId,
+        UserEmail: userEmail,
+        UserPassword: userPassword,
+      };
+      const res = await fetch(SERVER_DOMAIN + "menu1/PHPwrite/CompanyMenu/SaveMenuGroupDetailsTogglexSecure.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (data?.Result === true || data?.Message === "Menu item updated") { toast.success(t("SaveSuccessful")); navigate(backUrl); }
+      else { toast.error(data?.Message || data?.ServerMessage || t("SaveFailed")); }
+    } catch { toast.error(t("Pleasecheckyourinternetconnection")); } finally { setSaving(false); }
   };
 
   return (

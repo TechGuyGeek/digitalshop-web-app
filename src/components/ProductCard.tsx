@@ -62,6 +62,7 @@ const ProductCard = ({ product, groupId, companyId, groupName, onToggleUpdate }:
       desc: product.OrderDesription || "",
       price: product.OrderPrice || "",
       image: product.imagepath || "",
+      menuEnable: product.MenuEnable ?? product.MenuItemEnable ?? "1",
     });
     navigate(`/edit-product?${params.toString()}`);
   };
