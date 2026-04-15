@@ -294,6 +294,16 @@ const Profile = () => {
           <LogOut size={16} className="mr-2" />
           {t("Signin")}
         </Button>
+
+        {/* Demo: video advert trigger button */}
+        <Button
+          variant="outline"
+          className="w-full rounded-full gap-2"
+          onClick={() => showVideoAd("pageEnter")}
+        >
+          <Play size={14} />
+          Demo Video Ad
+        </Button>
       </div>
     </div>
   );
