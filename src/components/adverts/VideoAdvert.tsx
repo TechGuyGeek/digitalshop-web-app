@@ -22,9 +22,11 @@ interface VideoAdvertProps {
   advert: AdvertDefinition | null;
   visible: boolean;
   onDismiss: () => void;
+  onComplete?: () => void;
+  dismissible?: boolean;
 }
 
-const VideoAdvert = ({ advert, visible, onDismiss }: VideoAdvertProps) => {
+const VideoAdvert = ({ advert, visible, onDismiss, onComplete, dismissible = true }: VideoAdvertProps) => {
   const adsenseRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -46,36 +48,40 @@ const VideoAdvert = ({ advert, visible, onDismiss }: VideoAdvertProps) => {
   return (
     <div className="fixed inset-0 z-[9999] bg-black/90 flex items-center justify-center">
       <div className="relative w-full max-w-md mx-4">
-        {/* Close button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute -top-10 right-0 text-white hover:bg-white/20"
-          onClick={onDismiss}
-        >
-          <X size={24} />
-        </Button>
+        {dismissible ? (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute -top-10 right-0 text-white hover:bg-white/20"
+            onClick={onDismiss}
+          >
+            <X size={24} />
+          </Button>
+        ) : null}
 
-        {/* Label */}
         <span className="absolute top-2 left-2 bg-muted/80 text-muted-foreground text-[10px] px-1.5 py-0.5 rounded z-10">
           Test Video Advert
         </span>
 
-        {/* ── AdSense video ────────────────────────────── */}
         {advert.type === "adsense" && advert.adsenseCode ? (
           <div
             ref={adsenseRef}
-            // Replace with Google AdSense video code in advertConfig.ts
             dangerouslySetInnerHTML={{ __html: advert.adsenseCode }}
           />
         ) : (
-          /* ── Test video ────────────────────────────── */
           <video
+            key={advert.id}
             src={advert.videoUrl}
             controls
             autoPlay
             className="w-full rounded-lg"
-            onEnded={onDismiss}
+            onEnded={() => {
+              if (onComplete) {
+                onComplete();
+                return;
+              }
+              onDismiss();
+            }}
           />
         )}
       </div>
