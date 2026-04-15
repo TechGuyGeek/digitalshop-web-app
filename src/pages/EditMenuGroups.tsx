@@ -91,15 +91,15 @@ async function deleteMenuGroup(
 ): Promise<{ success: boolean; message?: string }> {
   try {
     const form = new URLSearchParams();
-    form.append("ID", String(groupId));
-    form.append("companyid", String(companyId));
+    form.append("MenuId", String(groupId));
+    form.append("companyID", String(companyId));
     form.append("UserID", String(userId));
     form.append("UserEmail", email);
     form.append("UserPassword", password);
 
     console.log("[DeleteGroup] Sending form body:", form.toString());
 
-    const res = await fetch(SERVER_DOMAIN + "menu1/PHPwrite/CompanyMenu/DeletemenuGroup.php", {
+    const res = await fetch(SERVER_DOMAIN + "menu1/PHPwrite/CompanyMenu/DeleteGroupSecure.php", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: form.toString(),
@@ -109,12 +109,18 @@ async function deleteMenuGroup(
 
     try {
       const data = JSON.parse(text);
-      const canDelete = data.CanDelete === "1" || data.CanDelete === 1;
-      const success = canDelete || data.success === true || data.Success === true || data.Result === true;
-      return { success, message: data.ServerMessage || data.Message || "" };
+      const message = data.ServerMessage || data.Message || "";
+      const lower = String(message).toLowerCase();
+      const success =
+        data.Result === true ||
+        data.success === true ||
+        data.Success === true ||
+        data.CanDelete === "1" ||
+        lower.includes("deleted");
+      return { success, message };
     } catch {
       const lower = text.toLowerCase();
-      if (lower.includes("deleted") || lower === "true") return { success: true };
+      if (lower.includes("deleted") || lower === "true") return { success: true, message: text };
       return { success: false, message: text };
     }
   } catch (err) {
