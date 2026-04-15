@@ -142,6 +142,7 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, user
 
   useEffect(() => {
     if (open && companyId > 0) {
+      hasAddedFirstGroup.current = false;
       fetchGroups();
     }
   }, [open, companyId]);
@@ -304,6 +305,13 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, user
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Video ad overlay for non-paid users */}
+      <VideoAdvert
+        advert={showVideoAd ? (ADVERT_LIBRARY[VIDEO_TRIGGERS["afterFirstGroup"]] ?? null) : null}
+        visible={showVideoAd}
+        onDismiss={handleVideoDismissed}
+      />
     </>
   );
 };
