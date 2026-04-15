@@ -9,6 +9,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 
 export interface ProductCardItem {
   ID: string;
+  ImageSize?: string;
   OrderName: string;
   OrderPrice?: string;
   OrderDesription?: string;
@@ -62,6 +63,7 @@ const ProductCard = ({ product, groupId, companyId, groupName, onToggleUpdate }:
       desc: product.OrderDesription || "",
       price: product.OrderPrice || "",
       image: product.imagepath || "",
+      imageSize: product.ImageSize || "",
       menuEnable: product.MenuEnable ?? product.MenuItemEnable ?? "1",
     });
     navigate(`/edit-product?${params.toString()}`);

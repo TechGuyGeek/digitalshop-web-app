@@ -38,6 +38,47 @@ function escapeApostrophes(str: string) {
   return str.replace(/'/g, "\\'");
 }
 
+interface ProductLookupItem {
+  ID?: string;
+  ImageSize?: string;
+  MenuEnable?: string;
+  MenuItemEnable?: string;
+  imagepath?: string;
+}
+
+interface EditProductResponse {
+  Error?: string;
+  Message?: string;
+  Result?: boolean;
+  ServerMessage?: string;
+  [key: string]: unknown;
+}
+
+function getStoredUserCredentials() {
+  const stored = localStorage.getItem("digitalUser");
+  let userId = "", userEmail = "", userPassword = "";
+
+  if (stored) {
+    try {
+      const user = JSON.parse(stored);
+      userId = String(user.PersonID || user.ID || "");
+      userEmail = user.Email || user.email || "";
+      userPassword = user.Password || user.password || "";
+    } catch {}
+  }
+
+  return { userId, userEmail, userPassword };
+}
+
+function getServerMessage(data: EditProductResponse | null) {
+  return data?.ServerMessage || data?.Message || data?.Error || "";
+}
+
+const EDIT_PRODUCT_ENDPOINTS = {
+  withImage: `${SERVER_DOMAIN}menu1/PHPwrite/CompanyMenu/UpdateMenuOrderSecure.php`,
+  withoutImage: `${SERVER_DOMAIN}menu1/PHPwrite/CompanyMenu/UpdateMenuOrder2Secure.php`,
+};
+
 const EditProduct = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -50,16 +91,17 @@ const EditProduct = () => {
   const initialDesc = searchParams.get("desc") || "";
   const initialPrice = searchParams.get("price") || "";
   const initialImage = searchParams.get("image") || "";
-  const initialMenuEnable = searchParams.get("menuEnable") || "";
   const [name, setName] = useState(initialName); const [description, setDescription] = useState(initialDesc);
   const [price, setPrice] = useState(initialPrice); const [imagePreview, setImagePreview] = useState(getImageUrl(initialImage));
   const [newImageBase64, setNewImageBase64] = useState<string | null>(null); const [saving, setSaving] = useState(false);
-  const [menuEnable, setMenuEnable] = useState(initialMenuEnable || "1");
+  const initialImageSize = searchParams.get("imageSize") || "";
+  const [currentImagePath, setCurrentImagePath] = useState(initialImage);
+  const [currentImageSize, setCurrentImageSize] = useState(initialImageSize);
   const fileInputRef = useRef<HTMLInputElement>(null); const cameraInputRef = useRef<HTMLInputElement>(null);
   const backUrl = `/group-products?groupId=${groupId}&companyId=${companyId}&groupName=${encodeURIComponent(groupName)}`;
 
   useEffect(() => {
-    if (!groupId || !productId || initialMenuEnable) return;
+    if (!groupId || !productId || (initialImage && initialImageSize)) return;
     const form = new URLSearchParams();
     form.append("GroupID", groupId);
     fetch(SERVER_DOMAIN + "menu1/PHPread/CompanyMenu/PoppulateSubMenu1.php", {
@@ -68,14 +110,23 @@ const EditProduct = () => {
       body: form.toString(),
     })
       .then((res) => res.json())
-      .then((data: Array<{ ID?: string; MenuEnable?: string; MenuItemEnable?: string }>) => {
+      .then((data: ProductLookupItem[]) => {
         if (!Array.isArray(data)) return;
         const current = data.find((item) => String(item.ID || "") === productId);
-        const currentEnable = String(current?.MenuEnable ?? current?.MenuItemEnable ?? "").trim();
-        if (currentEnable === "0" || currentEnable === "1") setMenuEnable(currentEnable);
+        if (!current) return;
+
+        const nextImagePath = String(current.imagepath || "").trim();
+        const nextImageSize = String(current.ImageSize || "").trim();
+
+        if (nextImagePath) {
+          setCurrentImagePath(nextImagePath);
+          if (!initialImage) setImagePreview(getImageUrl(nextImagePath));
+        }
+
+        if (nextImageSize) setCurrentImageSize(nextImageSize);
       })
       .catch(() => {});
-  }, [groupId, productId, initialMenuEnable]);
+  }, [groupId, productId, initialImage, initialImageSize]);
 
   const handleFileSelect = async (file: File) => {
     try { const base64 = await resizeAndConvertToBase64(file); setNewImageBase64(base64); setImagePreview(`data:image/jpeg;base64,${base64}`); } catch { toast.error(t("SaveFailed")); }
@@ -85,32 +136,81 @@ const EditProduct = () => {
     if (!name.trim()) { toast.error(t("ItemName")); return; }
     const priceNum = parseFloat(price);
     if (isNaN(priceNum) || priceNum < 0) { toast.error(t("ErrorwithPrice")); return; }
-    const stored = localStorage.getItem("digitalUser"); let userId = "", userEmail = "", userPassword = "";
-    if (stored) { try { const user = JSON.parse(stored); userId = String(user.PersonID || user.ID || ""); userEmail = user.Email || user.email || ""; userPassword = user.Password || user.password || ""; } catch {} }
+
+    const { userId, userEmail, userPassword } = getStoredUserCredentials();
+    const hasNewImage = Boolean(newImageBase64);
+    const endpoint = hasNewImage ? EDIT_PRODUCT_ENDPOINTS.withImage : EDIT_PRODUCT_ENDPOINTS.withoutImage;
+    const payload: Record<string, string> = {
+      oldID: productId,
+      oldGroupID: groupId,
+      newOrderName: escapeApostrophes(name.trim()),
+      newOrderDesription: escapeApostrophes(description.trim()),
+      newOrderPrice: priceNum.toFixed(2),
+      oldcompanyid: companyId,
+      oldimagepath: currentImagePath,
+      UserID: userId,
+      UserEmail: userEmail,
+      UserPassword: userPassword,
+    };
+
+    if (hasNewImage) payload.newimageobject = newImageBase64!;
+    else payload.oldImageSize = currentImageSize || "0";
+
+    const requestBody = JSON.stringify(payload);
+    console.log("[EditProduct] endpoint:", endpoint);
+    console.log("[EditProduct] payload:", requestBody);
+
     setSaving(true);
     try {
-      const payload: Record<string, string> = {
-        ID: productId,
-        GroupID: groupId,
-        companyid: companyId,
-        OrderName: escapeApostrophes(name.trim()),
-        OrderDesription: escapeApostrophes(description.trim()),
-        OrderPrice: priceNum.toFixed(2),
-        SelectImage: newImageBase64 || "0",
-        MenuEnable: menuEnable === "0" ? "0" : "1",
-        UserID: userId,
-        UserEmail: userEmail,
-        UserPassword: userPassword,
-      };
-      const res = await fetch(SERVER_DOMAIN + "menu1/PHPwrite/CompanyMenu/SaveMenuGroupDetailsTogglexSecure.php", {
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: requestBody,
       });
-      const data = await res.json();
-      if (data?.Result === true || data?.Message === "Menu item updated") { toast.success(t("SaveSuccessful")); navigate(backUrl); }
-      else { toast.error(data?.Message || data?.ServerMessage || t("SaveFailed")); }
-    } catch { toast.error(t("Pleasecheckyourinternetconnection")); } finally { setSaving(false); }
+
+      console.log("[EditProduct] status:", res.status);
+      const rawResponseText = await res.text();
+      console.log("[EditProduct] raw response:", rawResponseText);
+
+      let parsedResponse: EditProductResponse | null = null;
+
+      try {
+        parsedResponse = rawResponseText ? JSON.parse(rawResponseText) as EditProductResponse : null;
+        console.log("[EditProduct] parsed response:", parsedResponse);
+      } catch (error) {
+        console.error("[EditProduct] parse error:", error);
+        toast.error(res.status === 404 ? "Edit product endpoint not found (404)." : "Server returned malformed JSON while saving this product.");
+        return;
+      }
+
+      const serverMessage = getServerMessage(parsedResponse);
+
+      if (res.status === 404) {
+        toast.error(serverMessage || "Edit product endpoint not found (404).");
+        return;
+      }
+
+      if (!res.ok) {
+        toast.error(serverMessage || `Server error (${res.status}) while saving this product.`);
+        return;
+      }
+
+      if (parsedResponse?.Result === true) {
+        toast.success(serverMessage || t("SaveSuccessful"));
+        navigate(backUrl);
+        return;
+      }
+
+      if (parsedResponse?.Result === false) {
+        toast.error(serverMessage || t("SaveFailed"));
+        return;
+      }
+
+      toast.error(serverMessage || "Unexpected server response while saving this product.");
+    } catch (error) {
+      console.error("[EditProduct] network error:", error);
+      toast.error(error instanceof TypeError ? "Network error while saving this product." : "Unexpected error while saving this product.");
+    } finally { setSaving(false); }
   };
 
   return (
