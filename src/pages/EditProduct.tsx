@@ -93,6 +93,7 @@ const EditProduct = () => {
   const initialImage = searchParams.get("image") || "";
   const [name, setName] = useState(initialName); const [description, setDescription] = useState(initialDesc);
   const [price, setPrice] = useState(initialPrice); const [imagePreview, setImagePreview] = useState(getImageUrl(initialImage));
+  const [imageLoadFailed, setImageLoadFailed] = useState(false);
   const [newImageBase64, setNewImageBase64] = useState<string | null>(null); const [saving, setSaving] = useState(false);
   const initialImageSize = searchParams.get("imageSize") || "";
   const [currentImagePath, setCurrentImagePath] = useState(initialImage);
@@ -120,7 +121,10 @@ const EditProduct = () => {
 
         if (nextImagePath) {
           setCurrentImagePath(nextImagePath);
-          if (!initialImage) setImagePreview(getImageUrl(nextImagePath));
+          if (!initialImage) {
+            setImagePreview(getImageUrl(nextImagePath));
+            setImageLoadFailed(false);
+          }
         }
 
         if (nextImageSize) setCurrentImageSize(nextImageSize);
@@ -129,7 +133,12 @@ const EditProduct = () => {
   }, [groupId, productId, initialImage, initialImageSize]);
 
   const handleFileSelect = async (file: File) => {
-    try { const base64 = await resizeAndConvertToBase64(file); setNewImageBase64(base64); setImagePreview(`data:image/jpeg;base64,${base64}`); } catch { toast.error(t("SaveFailed")); }
+    try {
+      const base64 = await resizeAndConvertToBase64(file);
+      setNewImageBase64(base64);
+      setImagePreview(`data:image/jpeg;base64,${base64}`);
+      setImageLoadFailed(false);
+    } catch { toast.error(t("SaveFailed")); }
   };
 
   const handleSave = async () => {
@@ -221,7 +230,7 @@ const EditProduct = () => {
       </div>
       <div className="flex-1 overflow-y-auto">
         <div className="w-full h-56 bg-muted flex items-center justify-center overflow-hidden">
-          {imagePreview ? (<img src={imagePreview} alt={name} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />) : (
+          {imagePreview && !imageLoadFailed ? (<img key={imagePreview} src={imagePreview} alt={name || "Product image"} className="w-full h-full object-cover" onError={() => setImageLoadFailed(true)} />) : (
             <div className="flex flex-col items-center gap-2 text-muted-foreground"><ImageIcon size={48} /></div>
           )}
         </div>
