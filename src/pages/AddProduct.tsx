@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Camera, Image as ImageIcon, Save, Loader2, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { SERVER_DOMAIN } from "@/lib/companyApi";
 import { useLanguage } from "@/contexts/LanguageContext";
+import VideoAdvert from "@/components/adverts/VideoAdvert";
+import { ADVERT_LIBRARY, ADVERT_SETTINGS, VIDEO_TRIGGERS } from "@/lib/advertConfig";
 
 function resizeAndConvertToBase64(file: File, maxSize = 800): Promise<string> {
   return new Promise((resolve, reject) => {
