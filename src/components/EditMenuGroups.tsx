@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -12,6 +12,8 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { SERVER_DOMAIN } from "@/lib/companyApi";
+import VideoAdvert from "@/components/adverts/VideoAdvert";
+import { ADVERT_LIBRARY, VIDEO_TRIGGERS, ADVERT_SETTINGS } from "@/lib/advertConfig";
 
 interface MenuGroup {
   ID: number;
@@ -116,6 +118,21 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, user
   const [newGroupName, setNewGroupName] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState<MenuGroup | null>(null);
 
+  // Video ad state for non-paid users after first group
+  const [showVideoAd, setShowVideoAd] = useState(false);
+  const [pendingGroupName, setPendingGroupName] = useState("");
+  const hasAddedFirstGroup = useRef(false);
+
+  const isPaidUser = useCallback((): boolean => {
+    try {
+      const stored = localStorage.getItem("digitalUser");
+      if (!stored) return false;
+      const user = JSON.parse(stored);
+      return String(user?.PaidUser) === "2";
+    } catch {
+      return false;
+    }
+  }, []);
   const fetchGroups = async () => {
     setLoading(true);
     const data = await loadMenuGroups(companyId);
@@ -125,13 +142,12 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, user
 
   useEffect(() => {
     if (open && companyId > 0) {
+      hasAddedFirstGroup.current = false;
       fetchGroups();
     }
   }, [open, companyId]);
 
-  const handleAddGroup = async () => {
-    const name = newGroupName.trim();
-    if (!name) { toast.error("Please enter a group name"); return; }
+  const actuallyAddGroup = async (name: string) => {
     setAddingGroup(true);
     const ok = await addMenuGroup(companyId, name, userId, userEmail, userPassword);
     setAddingGroup(false);
@@ -141,6 +157,46 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, user
       fetchGroups();
     } else {
       toast.error("Failed to add group");
+    }
+  };
+
+  const handleAddGroup = async () => {
+    const name = newGroupName.trim();
+    if (!name) { toast.error("Please enter a group name"); return; }
+
+    // First group is always free
+    if (!hasAddedFirstGroup.current) {
+      hasAddedFirstGroup.current = true;
+      await actuallyAddGroup(name);
+      return;
+    }
+
+    // Paid users skip the ad
+    if (isPaidUser()) {
+      await actuallyAddGroup(name);
+      return;
+    }
+
+    // Non-paid users must watch a video ad before adding subsequent groups
+    if (ADVERT_SETTINGS.enabled && ADVERT_SETTINGS.videoAdsEnabled) {
+      const advertId = VIDEO_TRIGGERS["afterFirstGroup"];
+      const ad = advertId ? ADVERT_LIBRARY[advertId] : null;
+      if (ad) {
+        setPendingGroupName(name);
+        setShowVideoAd(true);
+        return;
+      }
+    }
+
+    // Fallback if no ad configured
+    await actuallyAddGroup(name);
+  };
+
+  const handleVideoDismissed = () => {
+    setShowVideoAd(false);
+    if (pendingGroupName) {
+      actuallyAddGroup(pendingGroupName);
+      setPendingGroupName("");
     }
   };
 
@@ -249,6 +305,13 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, user
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Video ad overlay for non-paid users */}
+      <VideoAdvert
+        advert={showVideoAd ? (ADVERT_LIBRARY[VIDEO_TRIGGERS["afterFirstGroup"]] ?? null) : null}
+        visible={showVideoAd}
+        onDismiss={handleVideoDismissed}
+      />
     </>
   );
 };
