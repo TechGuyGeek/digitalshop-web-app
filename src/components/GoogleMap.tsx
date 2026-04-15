@@ -92,7 +92,7 @@ const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, 
       // Shop markers – emoji only, no red pin
       shops.forEach((shop) => {
         if (shop.lat && shop.lng) {
-          const isDemo = shop.name?.toLowerCase().trim() === "demo";
+          const isDemo = shop.name?.toLowerCase().includes("demo") || shop.name?.toLowerCase().includes("démo") || shop.name?.toLowerCase().includes("демо");
           let iconConfig: google.maps.Icon;
 
           if (isDemo) {
