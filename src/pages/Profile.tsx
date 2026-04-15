@@ -47,6 +47,7 @@ function resizeAndConvertToBase64(file: File): Promise<string> {
 const Profile = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const { showVideoAd, dismissVideoAd, videoAdvert, videoVisible } = useAdverts();
   const [user, setUser] = useState<DigitalPerson | null>(null);
   const [form, setForm] = useState({
     name: "", surname: "", gender: "", mobileNumber: "",
