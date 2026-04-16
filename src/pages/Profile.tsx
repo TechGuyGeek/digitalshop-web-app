@@ -155,11 +155,125 @@ const Profile = () => {
     navigate("/");
   };
 
-  const handleDeleteProfile = () => {
-    if (window.confirm(t("Areyousureyouwanttodeleteyouruserprofileandallitscontents"))) {
-      localStorage.removeItem("digitalUser");
-      toast.success(t("Delete"));
-      navigate("/");
+  const handleDeleteProfile = async () => {
+    if (!user) return;
+
+    const personId = String((user as any).PersonID || (user as any).ID || "");
+    const userEmail = String((user as any).Email || (user as any).email || "");
+    const userPassword = String((user as any).Password || (user as any).password || (user as any).hash || "");
+
+    toast.loading(t("Pleasewait"), { id: "delete-profile" });
+
+    try {
+      // 1) Check whether user has a company
+      const companyUrl = "https://app.techguygeek.co.uk/menu1/PHPread/Company/DoesCompanyExistorNotSecure.php";
+      const companyPayload = { PersonID: personId, UserEmail: userEmail };
+      console.log("[deleteProfile] company check URL:", companyUrl);
+      console.log("[deleteProfile] company check payload:", companyPayload);
+
+      const companyRes = await fetch(companyUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(companyPayload),
+      });
+      const companyText = await companyRes.text();
+      console.log("[deleteProfile] raw company response:", companyText);
+
+      let hasCompany = false;
+      try {
+        const parsed = JSON.parse(companyText);
+        console.log("[deleteProfile] parsed company response:", parsed);
+        if (parsed?.success === true && Array.isArray(parsed?.companies) && parsed.companies.length > 0) {
+          const first = parsed.companies[0];
+          if (Number(first?.companyid) > 0) hasCompany = true;
+        }
+      } catch (e) {
+        console.error("[deleteProfile] company JSON parse failed:", e);
+      }
+
+      if (hasCompany) {
+        toast.dismiss("delete-profile");
+        toast.error("You must delete your shop before deleting your profile.");
+        return;
+      }
+
+      // 2) Check orders paid status
+      const ordersUrl = "https://app.techguygeek.co.uk/menu1/PHPread/User/CheckUserOrdersPaidStatusSecure.php";
+      const ordersForm = new URLSearchParams();
+      ordersForm.append("UserID", personId);
+      ordersForm.append("UserEmail", userEmail);
+      console.log("[deleteProfile] orders check URL:", ordersUrl);
+      console.log("[deleteProfile] orders check payload:", Object.fromEntries(ordersForm.entries()));
+
+      const ordersRes = await fetch(ordersUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: ordersForm.toString(),
+      });
+      const ordersText = await ordersRes.text();
+      console.log("[deleteProfile] raw orders response:", ordersText);
+
+      let ordersOk = false;
+      let hasOrders = false;
+      let allOrdersPaid = true;
+      let serverMessage = "";
+      try {
+        const parsedOrders = JSON.parse(ordersText);
+        console.log("[deleteProfile] parsed orders response:", parsedOrders);
+        ordersOk = parsedOrders?.success === true;
+        hasOrders = parsedOrders?.HasOrders === true;
+        allOrdersPaid = parsedOrders?.AllOrdersPaid === true;
+        serverMessage = String(parsedOrders?.ServerMessage || "");
+      } catch (e) {
+        console.error("[deleteProfile] orders JSON parse failed:", e);
+      }
+
+      if (!ordersOk) {
+        toast.dismiss("delete-profile");
+        toast.error(serverMessage || t("Pleasecheckyourinternetconnection"));
+        return;
+      }
+
+      if (hasOrders && !allOrdersPaid) {
+        toast.dismiss("delete-profile");
+        toast.error("You still have unpaid orders. Please settle them before deleting your profile.");
+        return;
+      }
+
+      toast.dismiss("delete-profile");
+
+      // 3) Confirm + delete
+      if (!window.confirm(t("Areyousureyouwanttodeleteyouruserprofileandallitscontents"))) {
+        return;
+      }
+
+      const deleteUrl = "https://app.techguygeek.co.uk/menu1/PHPwrite/User/DeleteUserSecure.php";
+      const deleteForm = new URLSearchParams();
+      deleteForm.append("UserID", personId);
+      deleteForm.append("UserEmail", userEmail);
+      deleteForm.append("UserPassword", userPassword);
+      console.log("[deleteProfile] delete URL:", deleteUrl);
+      console.log("[deleteProfile] delete payload:", Object.fromEntries(deleteForm.entries()));
+
+      const deleteRes = await fetch(deleteUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: deleteForm.toString(),
+      });
+      const deleteText = await deleteRes.text();
+      console.log("[deleteProfile] raw delete response:", deleteText);
+
+      if (deleteText.toUpperCase().includes("TRUE")) {
+        localStorage.removeItem("digitalUser");
+        toast.success(t("Delete"));
+        navigate("/");
+      } else {
+        toast.error(t("SaveFailed"));
+      }
+    } catch (err) {
+      console.error("[deleteProfile] exception:", err);
+      toast.dismiss("delete-profile");
+      toast.error(t("Pleasecheckyourinternetconnection"));
     }
   };
 
