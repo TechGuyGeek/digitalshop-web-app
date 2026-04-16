@@ -50,6 +50,14 @@ export interface CompanyGroupedOrder {
   items: CompanyOrderItem[];
 }
 
+const COMPANY_ORDER_DELETE_ENDPOINTS: Record<"today" | "week" | "month", string> = {
+  today: "DeleteusersOrder2Secure.php",
+  week: "DeleteusersOrder2Secureweek.php",
+  month: "DeleteusersOrder2Securemonth.php",
+};
+
+const COMPANY_ORDER_DELETE_BASE = SERVER_DOMAIN + "menu1/PHPwrite/ClientMenu/";
+
 /** Check order counts using the combined endpoint */
 export async function fetchOrderCountCombined(companyId: string): Promise<{ today: number; week: number; month: number }> {
   try {
@@ -307,13 +315,7 @@ export async function deleteCompanyOrder(
   email: string,
   password: string
 ): Promise<{ success: boolean; message?: string }> {
-  const endpoints: Record<string, string> = {
-    today: "DeleteusersOrder2Secure.php",
-    week: "DeleteusersOrder2Secureweek.php",
-    month: "DeleteusersOrder2Securemonth.php",
-  };
-
-  const url = SERVER_DOMAIN + "menu1/PHPwrite/ClientMenu/" + endpoints[tab];
+  const url = COMPANY_ORDER_DELETE_BASE + COMPANY_ORDER_DELETE_ENDPOINTS[tab];
   const firstItem = order.items[0];
 
   const form = new URLSearchParams();
@@ -325,7 +327,7 @@ export async function deleteCompanyOrder(
   form.append("orderid", String(firstItem?.orderid || ""));
   form.append("Date", order.dateTime);
 
-  console.log("[deleteOrder] tab:", tab, "endpoint:", url);
+  console.log("[deleteOrder] using exact MAUI ClientMenu endpoint for tab:", tab, url);
   console.log("[deleteOrder] payload:", Object.fromEntries(form.entries()));
 
   try {
