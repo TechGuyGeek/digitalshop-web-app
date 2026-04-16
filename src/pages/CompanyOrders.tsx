@@ -6,7 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { DigitalPerson } from "@/lib/api";
-import { fetchCompanyOrdersByTab, groupCompanyOrders, toggleCompanyOrderFlag, type CompanyGroupedOrder } from "@/lib/companyOrders";
+import { fetchCompanyOrdersByTab, groupCompanyOrders, toggleCompanyOrderFlag, deleteCompanyOrder, type CompanyGroupedOrder } from "@/lib/companyOrders";
 
 type TabKey = "today" | "week" | "month";
 
@@ -24,6 +24,8 @@ const CompanyOrders = () => {
   const [error, setError] = useState(false);
   const [orders, setOrders] = useState<CompanyGroupedOrder[]>([]);
   const [togglingKey, setTogglingKey] = useState<string | null>(null);
+  const [deletingKey, setDeletingKey] = useState<string | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<CompanyGroupedOrder | null>(null);
 
   const TABS: { key: TabKey; label: string }[] = [
     { key: "today", label: t("Today") },
@@ -62,6 +64,21 @@ const CompanyOrders = () => {
     if (result === null) { setOrders(prevOrders); toast.error(t("SaveFailed")); }
     else { await loadOrders(activeTab); toast.success(t("SaveSuccessful")); }
     setTogglingKey(null);
+  };
+
+  const handleDeleteOrder = async (order: CompanyGroupedOrder) => {
+    const auth = getAuth(); if (!auth) return;
+    setDeleteConfirm(null);
+    setDeletingKey(order.groupKey);
+    console.log("[deleteOrder] clicked, groupKey:", order.groupKey, "companyId:", order.companyId, "clientId:", order.clientId);
+    const result = await deleteCompanyOrder(activeTab, order, auth.personId, auth.email, auth.password);
+    if (result.success) {
+      toast.success(result.message || t("DetailswereSaved"));
+      await loadOrders(activeTab);
+    } else {
+      toast.error(result.message || t("SaveFailed"));
+    }
+    setDeletingKey(null);
   };
 
   const getDeliveryType = (order: CompanyGroupedOrder) => {
@@ -126,7 +143,10 @@ const CompanyOrders = () => {
                         <div className="w-full h-full bg-gradient-to-br from-accent/30 to-muted flex items-center justify-center"><User className="text-muted-foreground" size={24} /></div>
                       )}
                     </div>
-                    <Button variant="outline" size="sm" className="rounded-md text-xs w-24">{t("Delete")}</Button>
+                    <Button variant="outline" size="sm" className="rounded-md text-xs w-24" disabled={deletingKey === order.groupKey}
+                      onClick={(e) => { e.stopPropagation(); setDeleteConfirm(order); }}>
+                      {deletingKey === order.groupKey ? <Loader2 className="animate-spin" size={14} /> : t("Delete")}
+                    </Button>
                     <Button variant="outline" size="sm" className="rounded-md text-xs w-24" onClick={(e) => { e.stopPropagation(); navigate(`/customer-profile-readonly?userid=${encodeURIComponent(order.clientId)}`); }}>
                       {t("UserProfile")}
                     </Button>
@@ -137,6 +157,18 @@ const CompanyOrders = () => {
           })
         )}
       </div>
+      {deleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4" onClick={() => setDeleteConfirm(null)}>
+          <div className="bg-card rounded-xl p-6 max-w-sm w-full shadow-lg" onClick={(e) => e.stopPropagation()}>
+            <p className="text-foreground font-semibold mb-2">{t("Areyousureyouwanttodelete")}</p>
+            <p className="text-sm text-muted-foreground mb-4">{deleteConfirm.customerName} — {deleteConfirm.dateTime}</p>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setDeleteConfirm(null)}>{t("Cancel")}</Button>
+              <Button variant="destructive" className="flex-1" onClick={() => handleDeleteOrder(deleteConfirm)}>{t("Delete")}</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -298,3 +298,61 @@ export async function toggleCompanyOrderFlag(
     return null;
   }
 }
+
+/** Delete a company order using tab-specific endpoints */
+export async function deleteCompanyOrder(
+  tab: "today" | "week" | "month",
+  order: CompanyGroupedOrder,
+  userId: string,
+  email: string,
+  password: string
+): Promise<{ success: boolean; message?: string }> {
+  const endpoints: Record<string, string> = {
+    today: "DeleteusersOrder2Secure.php",
+    week: "DeleteusersOrder2Secureweek.php",
+    month: "DeleteusersOrder2Securemonth.php",
+  };
+
+  const url = SERVER_DOMAIN + "menu1/PHPwrite/LiveOrders/" + endpoints[tab];
+  const firstItem = order.items[0];
+
+  const form = new URLSearchParams();
+  form.append("UserID", userId);
+  form.append("UserEmail", email);
+  form.append("UserPassword", password);
+  form.append("companyID", order.companyId);
+  form.append("clientid", order.clientId);
+  form.append("orderid", String(firstItem?.orderid || ""));
+  form.append("Date", order.dateTime);
+
+  console.log("[deleteOrder] tab:", tab, "endpoint:", url);
+  console.log("[deleteOrder] payload:", Object.fromEntries(form.entries()));
+
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: form.toString(),
+    });
+
+    const text = await res.text();
+    console.log("[deleteOrder] raw response:", text);
+
+    let parsed: any = null;
+    try { parsed = JSON.parse(text); } catch {}
+    console.log("[deleteOrder] parsed response:", parsed);
+
+    if (parsed?.Success === true || parsed?.success === true || parsed?.CanDelete === "1" || parsed?.ServerMessage?.toLowerCase().includes("deleted")) {
+      return { success: true, message: parsed?.ServerMessage };
+    }
+
+    if (!parsed && text.trim().toLowerCase().includes("deleted")) {
+      return { success: true };
+    }
+
+    return { success: false, message: parsed?.ServerMessage || text.trim() };
+  } catch (err) {
+    console.error("[deleteOrder] error:", err);
+    return { success: false, message: "Network error" };
+  }
+}
