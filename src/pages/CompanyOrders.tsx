@@ -6,7 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { DigitalPerson } from "@/lib/api";
-import { fetchCompanyOrdersByTab, groupCompanyOrders, toggleCompanyOrderFlag, type CompanyGroupedOrder } from "@/lib/companyOrders";
+import { fetchCompanyOrdersByTab, groupCompanyOrders, toggleCompanyOrderFlag, deleteCompanyOrder, type CompanyGroupedOrder } from "@/lib/companyOrders";
 
 type TabKey = "today" | "week" | "month";
 
