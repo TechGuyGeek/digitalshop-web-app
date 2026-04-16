@@ -274,35 +274,48 @@ export async function liveOrderCountAll(companyid: number): Promise<{ today: num
 }
 
 // ─── Delete blockers ────────────────────────────────────────────
-async function fetchCount(endpoint: string, companyid: number): Promise<number> {
+const DELETE_COUNT_URLS = {
+  menuGroups: "https://app.techguygeek.co.uk/menu1/PHPread/CompanyMenu/DeleteCountMenuGroup.php",
+  dayOrders: "https://app.techguygeek.co.uk/menu1/PHPread/CompanyLiveOrders/DeleteLiveOrderCount.php",
+  weekOrders: "https://app.techguygeek.co.uk/menu1/PHPread/CompanyLiveOrders/DeleteLiveOrderCountweek.php",
+  monthOrders: "https://app.techguygeek.co.uk/menu1/PHPread/CompanyLiveOrders/DeleteLiveOrderCountmonth.php",
+};
+
+async function fetchDeleteCount(url: string, companyid: number): Promise<number> {
   try {
     const form = new URLSearchParams();
-    form.append("companyID", String(companyid));
-    const res = await fetch(SERVER_DOMAIN + endpoint, {
+    form.append("companyid", String(companyid));
+    console.log("[deleteBlocker] POST", url, "companyid:", companyid);
+    const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: form.toString(),
     });
     const text = (await res.text()).trim();
+    console.log("[deleteBlocker] raw response from", url, ":", text);
     const n = parseInt(text, 10);
     return isNaN(n) ? 0 : n;
-  } catch {
+  } catch (err) {
+    console.error("[deleteBlocker] fetch error:", url, err);
     return 0;
   }
 }
 
 export async function getDeleteBlockers(companyid: number) {
   const [menuGroups, dayOrders, weekOrders, monthOrders] = await Promise.all([
-    fetchCount(ENDPOINTS.deleteCountMenuGroup, companyid),
-    fetchCount(ENDPOINTS.liveOrderCount, companyid),
-    fetchCount(ENDPOINTS.liveOrderCountWeek, companyid),
-    fetchCount(ENDPOINTS.liveOrderCountMonth, companyid),
+    fetchDeleteCount(DELETE_COUNT_URLS.menuGroups, companyid),
+    fetchDeleteCount(DELETE_COUNT_URLS.dayOrders, companyid),
+    fetchDeleteCount(DELETE_COUNT_URLS.weekOrders, companyid),
+    fetchDeleteCount(DELETE_COUNT_URLS.monthOrders, companyid),
   ]);
-  return { menuGroups, dayOrders, weekOrders, monthOrders, total: menuGroups + dayOrders + weekOrders + monthOrders };
+  const total = menuGroups + dayOrders + weekOrders + monthOrders;
+  console.log("[deleteBlocker] counts:", { menuGroups, dayOrders, weekOrders, monthOrders, total });
+  return { menuGroups, dayOrders, weekOrders, monthOrders, total };
 }
 
 // ─── Delete company (form POST) ────────────────────────────────
 export async function deleteCompany(companyid: number, userId: number, email: string, password: string): Promise<{ success: boolean; message?: string }> {
+  const url = SERVER_DOMAIN + ENDPOINTS.deleteCompany;
   try {
     const form = new URLSearchParams();
     form.append("UserID", String(userId));
@@ -310,14 +323,27 @@ export async function deleteCompany(companyid: number, userId: number, email: st
     form.append("UserPassword", password);
     form.append("companyID", String(companyid));
     form.append("companyid", String(companyid));
-    const res = await fetch(SERVER_DOMAIN + ENDPOINTS.deleteCompany, {
+    console.log("[deleteCompany] POST", url);
+    console.log("[deleteCompany] body fields:", Object.fromEntries(form.entries()));
+    const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: form.toString(),
     });
-    const data = await res.json();
-    return { success: data.success === true, message: data.ServerMessage };
-  } catch {
+    console.log("[deleteCompany] status:", res.status);
+    const text = await res.text();
+    console.log("[deleteCompany] raw response:", text);
+    try {
+      const data = JSON.parse(text);
+      if (data.success === true) {
+        return { success: true, message: data.ServerMessage };
+      }
+      return { success: false, message: data.ServerMessage || "Delete failed" };
+    } catch {
+      return { success: false, message: "Invalid server response" };
+    }
+  } catch (err) {
+    console.error("[deleteCompany] fetch error:", err);
     return { success: false, message: "Network error" };
   }
 }
