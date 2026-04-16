@@ -327,23 +327,45 @@ export async function deleteCompanyOrder(
   form.append("orderid", String(firstItem?.orderid || ""));
   form.append("Date", order.dateTime);
 
-  console.log("[deleteOrder] using exact MAUI ClientMenu endpoint for tab:", tab, url);
-  console.log("[deleteOrder] payload:", Object.fromEntries(form.entries()));
+   const requestBody = form.toString();
+   const requestFields = Object.fromEntries(form.entries());
+   const requestHeaders = { "Content-Type": "application/x-www-form-urlencoded" };
+
+  console.log("[deleteOrder][ClientMenuDebug] tab:", tab);
+  console.log("[deleteOrder][ClientMenuDebug] exact endpoint file:", COMPANY_ORDER_DELETE_ENDPOINTS[tab]);
+  console.log("[deleteOrder][ClientMenuDebug] request URL:", url);
+  console.log("[deleteOrder][ClientMenuDebug] request headers:", requestHeaders);
+  console.log("[deleteOrder][ClientMenuDebug] POST body fields:", requestFields);
+  console.log("[deleteOrder][ClientMenuDebug] encoded POST body:", requestBody);
 
   try {
     const res = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: form.toString(),
+      headers: requestHeaders,
+      body: requestBody,
     });
 
+    console.log("[deleteOrder][ClientMenuDebug] response.url:", res.url);
+    console.log("[deleteOrder][ClientMenuDebug] response.status:", res.status);
+    console.log("[deleteOrder][ClientMenuDebug] response.ok:", res.ok);
+
     const text = await res.text();
-    console.log("[deleteOrder] HTTP status:", res.status);
-    console.log("[deleteOrder] raw response:", text);
+    console.log("[deleteOrder][ClientMenuDebug] raw response text:", text);
 
     let parsed: any = null;
-    try { parsed = JSON.parse(text); } catch {}
-    console.log("[deleteOrder] parsed response:", parsed);
+    try {
+      parsed = JSON.parse(text);
+      console.log("[deleteOrder][ClientMenuDebug] parsed response:", parsed);
+    } catch (parseError) {
+      console.log(
+        "[deleteOrder][ClientMenuDebug] JSON parse skipped:",
+        parseError instanceof Error ? parseError.message : String(parseError)
+      );
+    }
+
+    if (!res.ok) {
+      return { success: false, message: parsed?.ServerMessage || text.trim() || `HTTP ${res.status}` };
+    }
 
     if (parsed?.Success === true || parsed?.success === true || parsed?.CanDelete === "1" || parsed?.ServerMessage?.toLowerCase().includes("deleted")) {
       return { success: true, message: parsed?.ServerMessage };
@@ -355,7 +377,9 @@ export async function deleteCompanyOrder(
 
     return { success: false, message: parsed?.ServerMessage || text.trim() };
   } catch (err) {
-    console.error("[deleteOrder] error:", err);
-    return { success: false, message: "Network error" };
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    console.error("[deleteOrder][ClientMenuDebug] fetch exception message:", errorMessage);
+    console.error("[deleteOrder][ClientMenuDebug] fetch exception object:", err);
+    return { success: false, message: errorMessage || "Network error" };
   }
 }
