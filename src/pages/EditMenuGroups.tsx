@@ -28,6 +28,8 @@ interface MenuGroup {
   MenuEnable?: string;
 }
 
+const DELETE_PRODUCTS_FIRST_MESSAGE = "Please delete all products first";
+
 async function loadMenuGroups(companyId: number): Promise<MenuGroup[]> {
   try {
     const form = new URLSearchParams();
@@ -82,9 +84,37 @@ async function addMenuGroup(
   }
 }
 
+async function countMenuDetails(companyId: number, groupId: number): Promise<string> {
+  try {
+    const form = new URLSearchParams();
+    form.append("companyid", String(companyId));
+    form.append("GroupID", String(groupId));
+
+    console.log("[DeleteGroup] Count request payload:", form.toString());
+
+    const res = await fetch(SERVER_DOMAIN + "menu1/PHPread/CompanyMenu/CountMenuDetails.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: form.toString(),
+    });
+
+    const text = await res.text();
+    const trimmed = text.trim();
+
+    console.log("[DeleteGroup] Raw count response:", text);
+    console.log("[DeleteGroup] Trimmed count response:", trimmed);
+
+    return trimmed;
+  } catch (error) {
+    console.error("[DeleteGroup] Count request failed:", error);
+    return "";
+  }
+}
+
 async function deleteMenuGroup(
   groupId: number,
   companyId: number,
+  orderGroup: string,
   userId: number,
   email: string,
   password: string
@@ -93,35 +123,42 @@ async function deleteMenuGroup(
     const form = new URLSearchParams();
     form.append("MenuId", String(groupId));
     form.append("companyID", String(companyId));
+    form.append("OrderGroup", orderGroup);
     form.append("UserID", String(userId));
     form.append("UserEmail", email);
     form.append("UserPassword", password);
 
-    console.log("[DeleteGroup] Sending form body:", form.toString());
+    console.log("[DeleteGroup] Delete request payload:", form.toString());
 
     const res = await fetch(SERVER_DOMAIN + "menu1/PHPwrite/CompanyMenu/DeleteGroupSecure.php", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: form.toString(),
     });
+
     const text = await res.text();
-    console.log("[DeleteGroup] Raw response:", text);
+    const trimmed = text.trim();
+
+    console.log("[DeleteGroup] Raw delete response:", text);
 
     try {
-      const data = JSON.parse(text);
+      const data = JSON.parse(trimmed);
       const message = data.ServerMessage || data.Message || "";
       const lower = String(message).toLowerCase();
       const success =
+        data.CanDelete === "1" ||
         data.Result === true ||
         data.success === true ||
         data.Success === true ||
-        data.CanDelete === "1" ||
         lower.includes("deleted");
-      return { success, message };
+      return { success, message: message || trimmed };
     } catch {
-      const lower = text.toLowerCase();
-      if (lower.includes("deleted") || lower === "true") return { success: true, message: text };
-      return { success: false, message: text };
+      const lower = trimmed.toLowerCase();
+      if (lower.includes("deleted") || lower === "true") {
+        return { success: true, message: trimmed };
+      }
+
+      return { success: false, message: trimmed };
     }
   } catch (err) {
     console.error("[DeleteGroup] Network error:", err);
@@ -264,16 +301,34 @@ const EditMenuGroupsPage = () => {
   const handleDelete = async (group: MenuGroup) => {
     const auth = getAuth();
     if (!auth) return;
-    const result = await deleteMenuGroup(group.ID, companyId, auth.userId, auth.email, auth.password);
+
+    console.log("[DeleteGroup] Delete button clicked");
+    console.log("[DeleteGroup] Group ID:", group.ID);
+    console.log("[DeleteGroup] Company ID:", companyId);
+
+    const countResponse = await countMenuDetails(companyId, group.ID);
+    const canDelete = countResponse === "0";
+
+    console.log("[DeleteGroup] Delete decision:", canDelete ? "allowed" : "blocked");
+
+    if (!canDelete) {
+      setDeleteConfirm(null);
+      toast.error(DELETE_PRODUCTS_FIRST_MESSAGE);
+      return;
+    }
+
+    const result = await deleteMenuGroup(group.ID, companyId, group.OrderGroup, auth.userId, auth.email, auth.password);
     setDeleteConfirm(null);
     console.log("[DeleteGroup] Result:", result);
+
     if (result.success) {
       toast.success(t("Delete"));
       const updated = groups.filter((g) => g.ID !== group.ID);
+      console.log("[DeleteGroup] UI refresh:", updated.length === 0 ? "navigate:/company-profile" : "refresh:groups");
       if (updated.length === 0) {
         navigate("/company-profile");
       } else {
-        fetchGroups();
+        await fetchGroups();
       }
     } else {
       toast.error(result.message || t("Wasnotdeleted"));
