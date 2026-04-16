@@ -24,6 +24,8 @@ const CompanyOrders = () => {
   const [error, setError] = useState(false);
   const [orders, setOrders] = useState<CompanyGroupedOrder[]>([]);
   const [togglingKey, setTogglingKey] = useState<string | null>(null);
+  const [deletingKey, setDeletingKey] = useState<string | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<CompanyGroupedOrder | null>(null);
 
   const TABS: { key: TabKey; label: string }[] = [
     { key: "today", label: t("Today") },
@@ -126,7 +128,10 @@ const CompanyOrders = () => {
                         <div className="w-full h-full bg-gradient-to-br from-accent/30 to-muted flex items-center justify-center"><User className="text-muted-foreground" size={24} /></div>
                       )}
                     </div>
-                    <Button variant="outline" size="sm" className="rounded-md text-xs w-24">{t("Delete")}</Button>
+                    <Button variant="outline" size="sm" className="rounded-md text-xs w-24" disabled={deletingKey === order.groupKey}
+                      onClick={(e) => { e.stopPropagation(); setDeleteConfirm(order); }}>
+                      {deletingKey === order.groupKey ? <Loader2 className="animate-spin" size={14} /> : t("Delete")}
+                    </Button>
                     <Button variant="outline" size="sm" className="rounded-md text-xs w-24" onClick={(e) => { e.stopPropagation(); navigate(`/customer-profile-readonly?userid=${encodeURIComponent(order.clientId)}`); }}>
                       {t("UserProfile")}
                     </Button>
