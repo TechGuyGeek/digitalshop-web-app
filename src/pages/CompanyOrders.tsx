@@ -66,6 +66,21 @@ const CompanyOrders = () => {
     setTogglingKey(null);
   };
 
+  const handleDeleteOrder = async (order: CompanyGroupedOrder) => {
+    const auth = getAuth(); if (!auth) return;
+    setDeleteConfirm(null);
+    setDeletingKey(order.groupKey);
+    console.log("[deleteOrder] clicked, groupKey:", order.groupKey, "companyId:", order.companyId, "clientId:", order.clientId);
+    const result = await deleteCompanyOrder(activeTab, order, auth.personId, auth.email, auth.password);
+    if (result.success) {
+      toast.success(result.message || t("DetailswereSaved"));
+      await loadOrders(activeTab);
+    } else {
+      toast.error(result.message || t("SaveFailed"));
+    }
+    setDeletingKey(null);
+  };
+
   const getDeliveryType = (order: CompanyGroupedOrder) => {
     if (order.needDelivery === "1") return t("Deliver");
     if (order.needTakeaway === "1") return t("TakeAway");
