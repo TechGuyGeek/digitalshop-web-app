@@ -364,18 +364,14 @@ export async function deleteCompanyOrder(
     }
 
     if (!res.ok) {
-      return { success: false, message: parsed?.ServerMessage || text.trim() || `HTTP ${res.status}` };
+      return { success: false, message: parsed?.Message || text.trim() || `HTTP ${res.status}` };
     }
 
-    if (parsed?.Success === true || parsed?.success === true || parsed?.CanDelete === "1" || parsed?.ServerMessage?.toLowerCase().includes("deleted")) {
-      return { success: true, message: parsed?.ServerMessage };
+    if (parsed?.Result === true) {
+      return { success: true, message: parsed?.Message };
     }
 
-    if (!parsed && text.trim().toLowerCase().includes("deleted")) {
-      return { success: true };
-    }
-
-    return { success: false, message: parsed?.ServerMessage || text.trim() };
+    return { success: false, message: parsed?.Message || text.trim() };
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : String(err);
     console.error("[deleteOrder][ClientMenuDebug] fetch exception message:", errorMessage);
