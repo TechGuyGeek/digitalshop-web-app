@@ -149,6 +149,8 @@ export const VIDEO_TRIGGERS: Record<string, string> = {
   pageEnter: "test-video-1",
   /** Shown before checkout */
   beforeCheckout: "test-video-1",
+  /** Shown after a customer places an order */
+  afterOrderPlaced: "test-video-1",
   /** Shown after login */
   afterLogin: "test-video-1",
   /** Shown after adding first menu group (non-paid users) */

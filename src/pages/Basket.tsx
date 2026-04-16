@@ -6,6 +6,8 @@ import { useBasket } from "@/contexts/BasketContext";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAdverts } from "@/hooks/useAdverts";
+import VideoAdvert from "@/components/adverts/VideoAdvert";
 
 const SERVER_DOMAIN = "https://app.techguygeek.co.uk/";
 
@@ -27,6 +29,7 @@ const Basket = () => {
   const shopName = searchParams.get("shop") || "Shop";
   const companyId = searchParams.get("companyid") || sessionStorage.getItem("basket_companyId") || "";
   const { items, count, total, removeItem, clearItem, clearBasket } = useBasket();
+  const { canShowVideo, showVideoAd, dismissVideoAd, videoAdvert, videoVisible } = useAdverts();
   const [submitting, setSubmitting] = useState(false);
   const [orderEnable, setOrderEnable] = useState(false);
   const [takeawayEnable, setTakeawayEnable] = useState(false);
@@ -96,9 +99,18 @@ const Basket = () => {
       }
       clearBasket();
       toast.success(t("SaveSuccessful"));
-      navigate("/orders");
+      if (canShowVideo) {
+        showVideoAd("afterOrderPlaced");
+      } else {
+        navigate("/orders");
+      }
     } catch (err) { console.error("Order submission failed:", err); toast.error(t("SaveFailed")); }
     finally { setSubmitting(false); }
+  };
+
+  const handleVideoFinished = () => {
+    dismissVideoAd();
+    navigate("/orders");
   };
 
   return (
@@ -187,6 +199,13 @@ const Basket = () => {
           </>
         )}
       </div>
+      <VideoAdvert
+        advert={videoAdvert}
+        visible={videoVisible}
+        onDismiss={handleVideoFinished}
+        onComplete={handleVideoFinished}
+        dismissible={true}
+      />
     </div>
   );
 };
