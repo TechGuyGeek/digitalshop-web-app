@@ -313,7 +313,7 @@ export async function deleteCompanyOrder(
     month: "DeleteusersOrder2Securemonth.php",
   };
 
-  const url = SERVER_DOMAIN + "menu1/PHPwrite/CompanyLiveOrders/" + endpoints[tab];
+  const url = SERVER_DOMAIN + "menu1/PHPwrite/ClientMenu/" + endpoints[tab];
   const firstItem = order.items[0];
 
   const form = new URLSearchParams();
@@ -336,6 +336,7 @@ export async function deleteCompanyOrder(
     });
 
     const text = await res.text();
+    console.log("[deleteOrder] HTTP status:", res.status);
     console.log("[deleteOrder] raw response:", text);
 
     let parsed: any = null;
