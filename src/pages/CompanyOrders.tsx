@@ -157,6 +157,18 @@ const CompanyOrders = () => {
           })
         )}
       </div>
+      {deleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4" onClick={() => setDeleteConfirm(null)}>
+          <div className="bg-card rounded-xl p-6 max-w-sm w-full shadow-lg" onClick={(e) => e.stopPropagation()}>
+            <p className="text-foreground font-semibold mb-2">{t("Areyousureyouwanttodelete")}</p>
+            <p className="text-sm text-muted-foreground mb-4">{deleteConfirm.customerName} — {deleteConfirm.dateTime}</p>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setDeleteConfirm(null)}>{t("Cancel")}</Button>
+              <Button variant="destructive" className="flex-1" onClick={() => handleDeleteOrder(deleteConfirm)}>{t("Delete")}</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
