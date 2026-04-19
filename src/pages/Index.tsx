@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Eye, EyeOff, Globe, Palette, HelpCircle, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, Globe, Palette, HelpCircle, ArrowLeft, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { loginUser, registerUser, requestPasswordReset, type DigitalPerson } from "@/lib/api";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+
+type ThemeMode = "dark" | "light" | "midnight";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -18,6 +20,25 @@ const Index = () => {
   const [helpEnabled, setHelpEnabled] = useState(false);
   const [view, setView] = useState<"login" | "register" | "forgot">("login");
   const [loading, setLoading] = useState(false);
+  const [theme, setTheme] = useState<ThemeMode>(() => {
+    return (localStorage.getItem("loginTheme") as ThemeMode) || "dark";
+  });
+
+  // Apply theme to <html> while on the login page; restore on unmount
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === "dark") {
+      root.removeAttribute("data-theme");
+    } else {
+      root.setAttribute("data-theme", theme);
+    }
+    localStorage.setItem("loginTheme", theme);
+    return () => {
+      root.removeAttribute("data-theme");
+    };
+  }, [theme]);
+
+  const isLight = theme === "light";
 
   // Register fields
   const [firstName, setFirstName] = useState("");
@@ -117,14 +138,43 @@ const Index = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+    <div
+      className={
+        isLight
+          ? "flex min-h-screen items-center justify-center p-4 bg-gradient-to-br from-[hsl(210_40%_98%)] via-white to-[hsl(217_91%_96%)]"
+          : "flex min-h-screen items-center justify-center bg-background p-4"
+      }
+    >
       {/* Background decorations */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-primary/5 blur-3xl" />
+        {isLight ? (
+          <>
+            <div className="absolute -top-40 -right-40 h-96 w-96 rounded-full bg-[hsl(217_91%_60%)]/15 blur-3xl" />
+            <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-[hsl(199_95%_70%)]/20 blur-3xl" />
+            <div className="absolute top-1/3 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-[hsl(280_80%_85%)]/20 blur-3xl" />
+          </>
+        ) : (
+          <>
+            <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
+            <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-primary/5 blur-3xl" />
+          </>
+        )}
       </div>
 
       <div className="relative w-full max-w-md animate-fade-in" style={{ animationDelay: "0.1s" }}>
+        {/* Premium brand mark (light theme only, login view) */}
+        {isLight && view === "login" && (
+          <div className="mb-6 flex flex-col items-center gap-2 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[hsl(217_91%_55%)] to-[hsl(199_95%_58%)] shadow-lg shadow-[hsl(217_91%_55%)]/30">
+              <Sparkles className="h-6 w-6 text-white" strokeWidth={2.5} />
+            </div>
+            <h1 className="font-heading text-2xl font-semibold tracking-tight text-foreground">
+              Digital Shop
+            </h1>
+            <p className="text-sm text-muted-foreground">Sign in to continue to your account</p>
+          </div>
+        )}
+
         {/* Back arrow for register or forgot */}
         {(view === "register" || view === "forgot") && (
           <button
@@ -146,8 +196,20 @@ const Index = () => {
         )}
 
         {/* Card */}
-        <div className="rounded-2xl border border-border bg-card p-6 shadow-xl shadow-primary/5">
+        <div
+          className={
+            isLight
+              ? "rounded-3xl border border-border/60 bg-card p-7 shadow-[0_20px_60px_-20px_hsl(217_30%_25%/0.18),0_4px_12px_-4px_hsl(217_30%_25%/0.06)] backdrop-blur-sm"
+              : "rounded-2xl border border-border bg-card p-6 shadow-xl shadow-primary/5"
+          }
+        >
+          {(() => null)()}
+          {/* Reusable class strings */}
+          {/* eslint-disable-next-line */}
+          {null}
+
           <div className="space-y-4">
+            {(() => { return null; })()}
             {/* Register-only fields */}
             {view === "register" && (
               <>
@@ -160,7 +222,9 @@ const Index = () => {
                     placeholder={t("FirstName")}
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
-                    className="h-11 bg-secondary border-0 text-foreground placeholder:text-muted-foreground focus-visible:ring-primary"
+                    className={isLight
+                      ? "h-11 bg-white border border-border text-foreground placeholder:text-muted-foreground rounded-xl shadow-sm focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:border-primary transition-all"
+                      : "h-11 bg-secondary border-0 text-foreground placeholder:text-muted-foreground focus-visible:ring-primary"}
                   />
                 </div>
                 <div className="space-y-2">
@@ -172,7 +236,9 @@ const Index = () => {
                     placeholder={t("LastName")}
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
-                    className="h-11 bg-secondary border-0 text-foreground placeholder:text-muted-foreground focus-visible:ring-primary"
+                    className={isLight
+                      ? "h-11 bg-white border border-border text-foreground placeholder:text-muted-foreground rounded-xl shadow-sm focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:border-primary transition-all"
+                      : "h-11 bg-secondary border-0 text-foreground placeholder:text-muted-foreground focus-visible:ring-primary"}
                   />
                 </div>
               </>
@@ -188,7 +254,9 @@ const Index = () => {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="h-11 bg-secondary border-0 text-foreground placeholder:text-muted-foreground focus-visible:ring-primary"
+                className={isLight
+                  ? "h-11 bg-white border border-border text-foreground placeholder:text-muted-foreground rounded-xl shadow-sm focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:border-primary transition-all"
+                  : "h-11 bg-secondary border-0 text-foreground placeholder:text-muted-foreground focus-visible:ring-primary"}
               />
             </div>
 
@@ -204,7 +272,9 @@ const Index = () => {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="h-11 bg-secondary border-0 pr-10 text-foreground placeholder:text-muted-foreground focus-visible:ring-primary"
+                  className={isLight
+                    ? "h-11 bg-white border border-border text-foreground placeholder:text-muted-foreground rounded-xl shadow-sm pr-10 focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:border-primary transition-all"
+                    : "h-11 bg-secondary border-0 pr-10 text-foreground placeholder:text-muted-foreground focus-visible:ring-primary"}
                 />
                 <button
                   type="button"
@@ -236,7 +306,9 @@ const Index = () => {
                     {t("Gender")}
                   </label>
                   <Select value={dateOfBirth} onValueChange={(v) => setDateOfBirth(v)}>
-                    <SelectTrigger className="h-11 bg-secondary border-0 text-foreground focus:ring-primary">
+                    <SelectTrigger className={isLight
+                      ? "h-11 bg-white border border-border text-foreground rounded-xl shadow-sm focus:ring-2 focus:ring-primary/40"
+                      : "h-11 bg-secondary border-0 text-foreground focus:ring-primary"}>
                       <SelectValue placeholder={t("Gender")} />
                     </SelectTrigger>
                     <SelectContent>
@@ -255,7 +327,9 @@ const Index = () => {
                     placeholder={t("Mobile")}
                     value={mobileNumber}
                     onChange={(e) => setMobileNumber(e.target.value)}
-                    className="h-11 bg-secondary border-0 text-foreground placeholder:text-muted-foreground focus-visible:ring-primary"
+                    className={isLight
+                      ? "h-11 bg-white border border-border text-foreground placeholder:text-muted-foreground rounded-xl shadow-sm focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:border-primary transition-all"
+                      : "h-11 bg-secondary border-0 text-foreground placeholder:text-muted-foreground focus-visible:ring-primary"}
                   />
                 </div>
               </>
@@ -278,8 +352,10 @@ const Index = () => {
                     <Palette size={12} className="mr-1 inline" />
                     {t("SelectTheme")}
                   </label>
-                  <Select defaultValue="dark">
-                    <SelectTrigger className="h-11 bg-secondary border-0 text-foreground">
+                  <Select value={theme} onValueChange={(v) => setTheme(v as ThemeMode)}>
+                    <SelectTrigger className={isLight
+                      ? "h-11 bg-white border border-border text-foreground rounded-xl shadow-sm"
+                      : "h-11 bg-secondary border-0 text-foreground"}>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -297,7 +373,9 @@ const Index = () => {
                     {t("SelectLanguage")}
                   </label>
                   <Select value={language} onValueChange={setLanguage}>
-                    <SelectTrigger className="h-11 bg-secondary border-0 text-foreground">
+                    <SelectTrigger className={isLight
+                      ? "h-11 bg-white border border-border text-foreground rounded-xl shadow-sm"
+                      : "h-11 bg-secondary border-0 text-foreground"}>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
