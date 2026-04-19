@@ -39,9 +39,8 @@ const queryClient = new QueryClient();
 const AppShell = () => {
   const { theme } = useTheme();
   const isLight = theme === "light";
-  const outerClass = isLight
-    ? "w-full min-h-screen bg-gradient-to-br from-[hsl(210_40%_98%)] via-white to-[hsl(217_91%_96%)] md:bg-fixed flex justify-center"
-    : "w-full min-h-screen bg-black md:bg-[url('/images/bg-desktop.png')] md:bg-cover md:bg-center md:bg-fixed flex justify-center";
+  const outerClass =
+    "w-full min-h-screen bg-black md:bg-[url('/images/bg-desktop.png')] md:bg-cover md:bg-center md:bg-fixed flex justify-center";
   return (
     <div className={outerClass}>
       <div className={`w-full max-w-[430px] min-h-screen relative ${isLight ? "shadow-[0_0_60px_-15px_hsl(220_40%_25%/0.15)] bg-background" : "shadow-2xl"}`}>
