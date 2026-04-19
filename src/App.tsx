@@ -81,7 +81,19 @@ const AppShell = () => {
           </BrowserRouter>
         </div>
       </div>
-    </TooltipProvider>
+  );
+};
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <LanguageProvider>
+      <ThemeProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <AppShell />
+        </TooltipProvider>
+      </ThemeProvider>
     </LanguageProvider>
   </QueryClientProvider>
 );
