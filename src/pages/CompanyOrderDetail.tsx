@@ -48,7 +48,7 @@ const CompanyOrderDetail = () => {
     <div className="h-screen bg-muted flex flex-col">
       <div className="bg-primary px-4 py-4 flex items-center gap-3 shrink-0">
         <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary/80" onClick={() => navigate(-1)}><ArrowLeft size={20} /></Button>
-        <h1 className="text-lg font-bold text-primary-foreground font-heading">{t("UserOrderDetails")}</h1>
+        <h1 className="text-lg font-bold text-primary-foreground font-heading">{t("OrderDetails")}</h1>
       </div>
       {!loading && !error && items.length > 0 && (
         <div className="bg-card px-4 py-3 flex justify-between border-b border-border shrink-0">
