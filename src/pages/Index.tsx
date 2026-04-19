@@ -145,18 +145,6 @@ const Index = () => {
       </div>
 
       <div className="relative w-full max-w-md animate-fade-in" style={{ animationDelay: "0.1s" }}>
-        {/* Premium brand mark (light theme only, login view) */}
-        {isLight && view === "login" && (
-          <div className="mb-6 flex flex-col items-center gap-2 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[hsl(217_91%_55%)] to-[hsl(199_95%_58%)] shadow-lg shadow-[hsl(217_91%_55%)]/30">
-              <Sparkles className="h-6 w-6 text-white" strokeWidth={2.5} />
-            </div>
-            <h1 className="font-heading text-2xl font-semibold tracking-tight text-foreground">
-              Digital Shop
-            </h1>
-            <p className="text-sm text-muted-foreground">Sign in to continue to your account</p>
-          </div>
-        )}
 
         {/* Back arrow for register or forgot */}
         {(view === "register" || view === "forgot") && (
