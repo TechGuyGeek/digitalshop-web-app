@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Eye, EyeOff, Globe, Palette, HelpCircle, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, Globe, Palette, HelpCircle, ArrowLeft, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { loginUser, registerUser, requestPasswordReset, type DigitalPerson } from "@/lib/api";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+
+type ThemeMode = "dark" | "light" | "midnight";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -18,6 +20,25 @@ const Index = () => {
   const [helpEnabled, setHelpEnabled] = useState(false);
   const [view, setView] = useState<"login" | "register" | "forgot">("login");
   const [loading, setLoading] = useState(false);
+  const [theme, setTheme] = useState<ThemeMode>(() => {
+    return (localStorage.getItem("loginTheme") as ThemeMode) || "dark";
+  });
+
+  // Apply theme to <html> while on the login page; restore on unmount
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === "dark") {
+      root.removeAttribute("data-theme");
+    } else {
+      root.setAttribute("data-theme", theme);
+    }
+    localStorage.setItem("loginTheme", theme);
+    return () => {
+      root.removeAttribute("data-theme");
+    };
+  }, [theme]);
+
+  const isLight = theme === "light";
 
   // Register fields
   const [firstName, setFirstName] = useState("");
