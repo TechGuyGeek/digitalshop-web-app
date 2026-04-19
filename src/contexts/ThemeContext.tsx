@@ -1,0 +1,39 @@
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+
+export type ThemeMode = "dark" | "light" | "midnight";
+
+interface ThemeContextValue {
+  theme: ThemeMode;
+  setTheme: (theme: ThemeMode) => void;
+}
+
+const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
+
+export const ThemeProvider = ({ children }: { children: ReactNode }) => {
+  const [theme, setThemeState] = useState<ThemeMode>(() => {
+    const stored = localStorage.getItem("appTheme") as ThemeMode | null;
+    return stored === "light" || stored === "midnight" || stored === "dark" ? stored : "dark";
+  });
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === "dark") {
+      root.removeAttribute("data-theme");
+    } else {
+      root.setAttribute("data-theme", theme);
+    }
+    localStorage.setItem("appTheme", theme);
+  }, [theme]);
+
+  return (
+    <ThemeContext.Provider value={{ theme, setTheme: setThemeState }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+};
+
+export const useTheme = () => {
+  const ctx = useContext(ThemeContext);
+  if (!ctx) throw new Error("useTheme must be used within ThemeProvider");
+  return ctx;
+};
