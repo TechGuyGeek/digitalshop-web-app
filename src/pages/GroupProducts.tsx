@@ -34,7 +34,8 @@ const GroupProducts = () => {
   const [searchParams] = useSearchParams();
   const { t } = useLanguage();
   const groupId = searchParams.get("groupId") || "";
-  const groupName = searchParams.get("groupName") || "";
+  const groupName = "";
+  const groupNameParam = searchParams.get("groupName") || "";
   const companyId = searchParams.get("companyId") || "";
   const [products, setProducts] = useState<ProductCardItem[]>([]);
   const [loading, setLoading] = useState(true);
