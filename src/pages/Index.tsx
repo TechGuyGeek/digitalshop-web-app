@@ -333,6 +333,7 @@ const Index = () => {
                       <SelectItem value="dark">{t("BlackBackGround")}</SelectItem>
                       <SelectItem value="light">{t("WhiteBackGround")}</SelectItem>
                       <SelectItem value="midnight">{t("BlueBackGround")}</SelectItem>
+                      <SelectItem value="safari">{t("SafariBackGround")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

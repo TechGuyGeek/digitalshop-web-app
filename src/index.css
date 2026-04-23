@@ -133,6 +133,50 @@
     --gradient-surface: linear-gradient(180deg, hsl(270 45% 22%), hsl(270 50% 14%));
     --shadow-glow: 0 0 30px -5px hsl(285 80% 70% / 0.4);
   }
+
+  /* Safari Sunset Theme — scoped via data-theme="safari" */
+  [data-theme="safari"] {
+    --background: 25 45% 14%;
+    --foreground: 40 60% 94%;
+
+    --card: 25 40% 20%;
+    --card-foreground: 40 60% 94%;
+
+    --popover: 25 40% 18%;
+    --popover-foreground: 40 60% 94%;
+
+    --primary: 35 95% 58%;
+    --primary-foreground: 25 50% 12%;
+
+    --secondary: 25 35% 26%;
+    --secondary-foreground: 40 50% 90%;
+
+    --muted: 25 30% 28%;
+    --muted-foreground: 38 25% 72%;
+
+    --accent: 30 100% 62%;
+    --accent-foreground: 25 50% 12%;
+
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 28 35% 32%;
+    --input: 28 35% 30%;
+    --ring: 35 95% 58%;
+
+    --sidebar-background: 25 50% 12%;
+    --sidebar-foreground: 40 60% 94%;
+    --sidebar-primary: 35 95% 58%;
+    --sidebar-primary-foreground: 25 50% 12%;
+    --sidebar-accent: 25 40% 22%;
+    --sidebar-accent-foreground: 40 60% 94%;
+    --sidebar-border: 28 35% 28%;
+    --sidebar-ring: 35 95% 58%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(20 90% 55%), hsl(40 100% 62%));
+    --gradient-surface: linear-gradient(180deg, hsl(25 45% 18%), hsl(25 50% 10%));
+    --shadow-glow: 0 0 30px -5px hsl(35 95% 58% / 0.45);
+  }
 }
 
 @layer base {
