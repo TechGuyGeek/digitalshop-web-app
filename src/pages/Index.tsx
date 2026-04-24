@@ -466,9 +466,24 @@ const Index = () => {
 
         {/* Upgrade CTA */}
         <div className="mt-4 text-center animate-fade-in" style={{ animationDelay: "0.3s" }}>
-          <Button variant="ghost" className="text-primary hover:text-primary/80">
-            {t("GoPro")}
-          </Button>
+          <AlertDialog open={upgradeOpen} onOpenChange={setUpgradeOpen}>
+            <AlertDialogTrigger asChild>
+              <Button variant="ghost" className="text-primary hover:text-primary/80">
+                {t("GoPro")}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Coming Soon</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This feature is not yet implemented. Please check back later.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogAction onClick={() => setUpgradeOpen(false)}>OK</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
     </div>
