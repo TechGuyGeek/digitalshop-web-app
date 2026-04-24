@@ -49,6 +49,27 @@ function resizeAndConvertToBase64(file: File): Promise<string> {
   });
 }
 
+interface LabeledInputProps {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  inputClass: string;
+  type?: string;
+}
+
+const LabeledInput = ({ label, value, onChange, inputClass, type = "text" }: LabeledInputProps) => (
+  <div className="space-y-1">
+    <label className="text-xs text-muted-foreground block">{label}</label>
+    <Input
+      type={type}
+      value={value}
+      onChange={e => onChange(e.target.value)}
+      placeholder={label}
+      className={inputClass}
+    />
+  </div>
+);
+
 const CompanyProfile = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
@@ -423,25 +444,23 @@ const CompanyProfile = () => {
         </h2>
 
         {/* Form fields */}
-        <div className="px-6 space-y-5">
-          <Input value={form.shopName} onChange={e => handleChange("shopName", e.target.value)} placeholder={t("CompanyName")} className={inputClass} />
-          <Input value={form.mobileNumber} onChange={e => handleChange("mobileNumber", e.target.value)} placeholder={t("Mobile")} className={inputClass} />
-          <Input type="email" value={form.companyEmail} onChange={e => handleChange("companyEmail", e.target.value)} placeholder={t("CompanyEmail")} className={inputClass} />
-          <Input value={form.lineOne} onChange={e => handleChange("lineOne", e.target.value)} placeholder={t("1stlineAddress")} className={inputClass} />
-          <Input value={form.lineTwo} onChange={e => handleChange("lineTwo", e.target.value)} placeholder={t("2ndlineAddress")} className={inputClass} />
-          <Input value={form.lineThree} onChange={e => handleChange("lineThree", e.target.value)} placeholder={t("3rdlineAddress")} className={inputClass} />
-          <Input value={form.lineFour} onChange={e => handleChange("lineFour", e.target.value)} placeholder={t("4thLineAddress")} className={inputClass} />
-          <Input value={form.country} onChange={e => handleChange("country", e.target.value)} placeholder={t("Country")} className={inputClass} />
+        <div className="px-6 space-y-3">
+          <LabeledInput label={t("CompanyName")} value={form.shopName} onChange={v => handleChange("shopName", v)} inputClass={inputClass} />
+          <LabeledInput label={t("Mobile")} value={form.mobileNumber} onChange={v => handleChange("mobileNumber", v)} inputClass={inputClass} />
+          <LabeledInput label={t("CompanyEmail")} type="email" value={form.companyEmail} onChange={v => handleChange("companyEmail", v)} inputClass={inputClass} />
+          <LabeledInput label={t("1stlineAddress")} value={form.lineOne} onChange={v => handleChange("lineOne", v)} inputClass={inputClass} />
+          <LabeledInput label={t("2ndlineAddress")} value={form.lineTwo} onChange={v => handleChange("lineTwo", v)} inputClass={inputClass} />
+          <LabeledInput label={t("3rdlineAddress")} value={form.lineThree} onChange={v => handleChange("lineThree", v)} inputClass={inputClass} />
+          <LabeledInput label={t("4thLineAddress")} value={form.lineFour} onChange={v => handleChange("lineFour", v)} inputClass={inputClass} />
+          <LabeledInput label={t("Country")} value={form.country} onChange={v => handleChange("country", v)} inputClass={inputClass} />
 
           {/* Opening / Closing times */}
-          <label className="text-xs text-muted-foreground">{t("OpeningTimes")}</label>
-          <Input type="time" value={form.openTime} onChange={e => handleChange("openTime", e.target.value)} className={inputClass} />
-          <label className="text-xs text-muted-foreground">{t("ClosingTimes")}</label>
-          <Input type="time" value={form.closeTime} onChange={e => handleChange("closeTime", e.target.value)} className={inputClass} />
+          <LabeledInput label={t("OpeningTimes")} type="time" value={form.openTime} onChange={v => handleChange("openTime", v)} inputClass={inputClass} />
+          <LabeledInput label={t("ClosingTimes")} type="time" value={form.closeTime} onChange={v => handleChange("closeTime", v)} inputClass={inputClass} />
 
           {/* Notification count & notifications */}
-          <Input type="number" value={form.notificationCount} onChange={e => handleChange("notificationCount", e.target.value)} className={inputClass} />
-          <Input value={form.notifications} onChange={e => handleChange("notifications", e.target.value)} placeholder={t("EnableNotifications")} className={inputClass} />
+          <LabeledInput label={t("TableNumber")} type="number" value={form.notificationCount} onChange={v => handleChange("notificationCount", v)} inputClass={inputClass} />
+          <LabeledInput label={t("EnableNotifications")} value={form.notifications} onChange={v => handleChange("notifications", v)} inputClass={inputClass} />
 
           {/* Toggles */}
           <div className="space-y-4 pt-2">
