@@ -93,12 +93,27 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const availableLanguages = Object.entries(LANGUAGE_MAP).map(([code, name]) => ({ code, name }));
 
-  // Load fallback (en.json) once
+  // Load fallback English strings once.
+  // `en.json` still contains placeholder values for many keys, so merge it with
+  // the more complete `en-GB.json` and prefer real strings over "Need review".
   useEffect(() => {
-    fetch(`${TRANSLATIONS_PATH}/en.json`)
-      .then((r) => r.json())
-      .then((data) => setFallback(data))
-      .catch((err) => console.error("[i18n] Failed to load en.json fallback:", err));
+    Promise.all([
+      fetch(`${TRANSLATIONS_PATH}/en.json`).then((r) => r.json()),
+      fetch(`${TRANSLATIONS_PATH}/en-GB.json`).then((r) => r.json()),
+    ])
+      .then(([enData, enGbData]) => {
+        const mergedFallback = Object.fromEntries(
+          Array.from(new Set([...Object.keys(enGbData), ...Object.keys(enData)])).map((key) => {
+            const enValue = enData[key];
+            const enGbValue = enGbData[key];
+            const value = enValue && enValue !== "Need review" ? enValue : enGbValue;
+            return [key, value];
+          })
+        );
+
+        setFallback(mergedFallback);
+      })
+      .catch((err) => console.error("[i18n] Failed to load English fallback files:", err));
   }, []);
 
   // Load selected language
