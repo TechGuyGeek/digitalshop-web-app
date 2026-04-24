@@ -49,6 +49,27 @@ function resizeAndConvertToBase64(file: File): Promise<string> {
   });
 }
 
+interface LabeledInputProps {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  inputClass: string;
+  type?: string;
+}
+
+const LabeledInput = ({ label, value, onChange, inputClass, type = "text" }: LabeledInputProps) => (
+  <div className="space-y-1">
+    <label className="text-xs text-muted-foreground block">{label}</label>
+    <Input
+      type={type}
+      value={value}
+      onChange={e => onChange(e.target.value)}
+      placeholder={label}
+      className={inputClass}
+    />
+  </div>
+);
+
 const CompanyProfile = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
