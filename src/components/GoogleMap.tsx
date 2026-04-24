@@ -9,7 +9,7 @@ interface GoogleMapProps {
   rangeCircleMetres?: number;
 }
 
-const MAPS_KEY = "AIzaSyAN76Tb-dL_5pvp-w1iFhxWqI52sDnoz5c";
+const MAPS_KEY = "AIzaSyC2FqDdFRLWpEeGLijR2zN8b2Ue-AeWgbo";
 
 const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, rangeCircleMetres }: GoogleMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
