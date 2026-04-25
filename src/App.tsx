@@ -40,8 +40,8 @@ const AppShell = () => {
   const { theme } = useTheme();
   const isLight = theme === "light";
   const desktopBg =
-    theme === "safari"
-      ? "md:bg-[url('/bg-safari.png')]"
+    theme === "midnight"
+      ? "md:bg-[url('/bg-midnight.png')]"
       : "md:bg-[url('/images/bg-desktop.png')]";
   const outerClass = `w-full min-h-screen bg-black ${desktopBg} md:bg-cover md:bg-center md:bg-fixed flex justify-center`;
   return (
