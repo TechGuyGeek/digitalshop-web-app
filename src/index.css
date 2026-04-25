@@ -53,41 +53,48 @@
     --shadow-glow: 0 0 30px -5px hsl(250 60% 60% / 0.3);
   }
 
-  /* Premium Light Theme — scoped via data-theme="light" */
-  [data-theme="light"] {
-    --background: 210 40% 98%;
-    --foreground: 222 35% 12%;
+  /* Camo Theme — scoped via data-theme="camo" */
+  [data-theme="camo"] {
+    --background: 80 18% 14%;
+    --foreground: 50 35% 90%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222 35% 12%;
+    --card: 80 20% 19%;
+    --card-foreground: 50 35% 90%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 35% 12%;
+    --popover: 80 20% 18%;
+    --popover-foreground: 50 35% 90%;
 
-    --primary: 217 91% 55%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 75 40% 40%;
+    --primary-foreground: 50 40% 96%;
 
-    --secondary: 215 25% 96%;
-    --secondary-foreground: 222 30% 20%;
+    --secondary: 80 18% 25%;
+    --secondary-foreground: 50 30% 88%;
 
-    --muted: 215 25% 95%;
-    --muted-foreground: 220 12% 45%;
+    --muted: 80 14% 28%;
+    --muted-foreground: 50 18% 70%;
 
-    --accent: 217 91% 55%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 28 85% 58%;
+    --accent-foreground: 25 50% 12%;
 
-    --destructive: 0 72% 51%;
+    --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 20% 90%;
-    --input: 220 20% 88%;
-    --ring: 217 91% 55%;
+    --border: 80 18% 30%;
+    --input: 80 18% 28%;
+    --ring: 75 40% 45%;
 
-    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%), hsl(199 95% 58%));
-    --gradient-surface: linear-gradient(180deg, hsl(0 0% 100%), hsl(210 40% 98%));
-    --shadow-glow: 0 20px 50px -20px hsl(217 91% 55% / 0.25);
-    --shadow-card: 0 10px 40px -12px hsl(220 40% 25% / 0.12), 0 2px 6px -2px hsl(220 40% 25% / 0.06);
-    --shadow-input: 0 1px 2px 0 hsl(220 40% 25% / 0.05);
+    --sidebar-background: 80 22% 12%;
+    --sidebar-foreground: 50 35% 90%;
+    --sidebar-primary: 75 40% 40%;
+    --sidebar-primary-foreground: 50 40% 96%;
+    --sidebar-accent: 80 20% 22%;
+    --sidebar-accent-foreground: 50 35% 90%;
+    --sidebar-border: 80 18% 26%;
+    --sidebar-ring: 75 40% 45%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(75 40% 38%), hsl(28 85% 58%));
+    --gradient-surface: linear-gradient(180deg, hsl(80 20% 18%), hsl(80 22% 11%));
+    --shadow-glow: 0 0 30px -5px hsl(28 85% 58% / 0.4);
   }
 
   /* Purple Theme — scoped via data-theme="midnight" (legacy key) */

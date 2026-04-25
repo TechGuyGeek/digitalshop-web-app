@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 
-export type ThemeMode = "dark" | "light" | "midnight" | "safari";
+export type ThemeMode = "dark" | "camo" | "midnight" | "safari";
 
 interface ThemeContextValue {
   theme: ThemeMode;
@@ -12,7 +12,7 @@ const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const [theme, setThemeState] = useState<ThemeMode>(() => {
     const stored = localStorage.getItem("appTheme") as ThemeMode | null;
-    return stored === "light" || stored === "midnight" || stored === "safari" || stored === "dark" ? stored : "safari";
+    return stored === "camo" || stored === "midnight" || stored === "safari" || stored === "dark" ? stored : "safari";
   });
 
   useEffect(() => {

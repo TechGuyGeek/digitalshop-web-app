@@ -32,7 +32,7 @@ const Index = () => {
   const [loading, setLoading] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
 
-  const isLight = theme === "light";
+  const isLight = false;
 
   // Register fields
   const [firstName, setFirstName] = useState("");
