@@ -38,12 +38,14 @@ const queryClient = new QueryClient();
 
 const AppShell = () => {
   const { theme } = useTheme();
-  const isLight = theme === "light";
+  const isLight = false;
   const desktopBg =
     theme === "midnight"
       ? "md:bg-[url('/bg-midnight.png')]"
       : theme === "safari"
       ? "md:bg-[url('/bg-safari.png')]"
+      : theme === "camo"
+      ? "md:bg-[url('/bg-camo.png')]"
       : "md:bg-[url('/images/bg-desktop.png')]";
   const outerClass = `w-full min-h-screen bg-black ${desktopBg} md:bg-cover md:bg-center md:bg-fixed flex justify-center`;
   return (
