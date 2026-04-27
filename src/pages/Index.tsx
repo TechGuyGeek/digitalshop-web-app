@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Eye, EyeOff, Globe, Palette, HelpCircle, ArrowLeft, Sparkles } from "lucide-react";
+import { Eye, EyeOff, Globe, Palette, HelpCircle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -20,7 +20,6 @@ const Index = () => {
   const [helpEnabled, setHelpEnabled] = useState(false);
   const [view, setView] = useState<"login" | "register" | "forgot">("login");
   const [loading, setLoading] = useState(false);
-  const [upgradeLoading, setUpgradeLoading] = useState(false);
 
   const isLight = false;
 
@@ -29,52 +28,6 @@ const Index = () => {
   const [lastName, setLastName] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [mobileNumber, setMobileNumber] = useState("");
-
-  const handleUpgradeToPro = async () => {
-    const stored = localStorage.getItem("digitalUser");
-    if (!stored) {
-      toast.error("Please log in first to upgrade to Pro.");
-      return;
-    }
-    let user: Record<string, unknown> = {};
-    try {
-      user = JSON.parse(stored);
-    } catch {
-      toast.error("Please log in first to upgrade to Pro.");
-      return;
-    }
-    const personId = user?.PersonID ?? user?.personID ?? user?.personid ?? user?.PersonId;
-    const userEmail = user?.Email ?? user?.email;
-    if (!personId || !userEmail) {
-      toast.error("Please log in first to upgrade to Pro.");
-      return;
-    }
-    setUpgradeLoading(true);
-    try {
-      const body = new URLSearchParams();
-      body.append("PersonID", String(personId));
-      body.append("Email", String(userEmail));
-      const res = await fetch(
-        "https://techguygeek.co.uk/menu1/PHPwrite/User/CreateStripeCheckoutSession.php",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: body.toString(),
-        }
-      );
-      const data = await res.json();
-      if (data?.url) {
-        window.location.href = data.url;
-      } else {
-        toast.error(data?.ServerMessage || "Could not start checkout. Please try again.");
-        setUpgradeLoading(false);
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error(t("Pleasecheckyourinternetconnection"));
-      setUpgradeLoading(false);
-    }
-  };
 
   const handleLogin = async () => {
     if (!email || !password) {
