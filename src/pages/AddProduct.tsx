@@ -51,7 +51,7 @@ const AddProduct = () => {
       const stored = localStorage.getItem("digitalUser");
       if (!stored) return false;
       const u = JSON.parse(stored);
-      return String(u?.PaidUser) === "2";
+      return String(u?.PaidUser ?? u?.Paiduser) === "2";
     } catch { return false; }
   };
 
