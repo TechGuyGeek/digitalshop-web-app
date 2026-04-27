@@ -524,6 +524,33 @@ const EditMenuGroupsPage = () => {
         }}
         onComplete={handleVideoComplete}
       />
+
+      <Dialog open={!!editGroup} onOpenChange={(o) => { if (!o && !savingEdit) setEditGroup(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-center text-lg font-bold">{t("Edit")}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              placeholder={t("GroupName")}
+              className="text-center"
+              disabled={savingEdit}
+              autoFocus
+            />
+            <div className="grid grid-cols-2 gap-2">
+              <Button variant="secondary" onClick={() => setEditGroup(null)} disabled={savingEdit}>
+                {t("Cancel")}
+              </Button>
+              <Button onClick={handleSaveEdit} disabled={savingEdit}>
+                {savingEdit ? <Loader2 className="animate-spin mr-2" size={14} /> : null}
+                {t("Save")}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
