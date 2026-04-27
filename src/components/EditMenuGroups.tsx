@@ -358,7 +358,7 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, user
                     <Button variant="secondary" size="sm" onClick={() => onNavigateToGroup?.(group.ID, group.OrderGroup)}>
                       Add
                     </Button>
-                    <Button variant="secondary" size="sm" onClick={() => toast.info("Edit group coming soon")}>
+                    <Button variant="secondary" size="sm" onClick={() => openEdit(group)}>
                       Edit
                     </Button>
                     <Button variant="secondary" size="sm" onClick={() => setDeleteConfirm(group)}>
