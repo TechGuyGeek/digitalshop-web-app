@@ -31,7 +31,9 @@ const isPaidUser = (): boolean => {
     const stored = localStorage.getItem("digitalUser");
     if (!stored) return false;
     const user = JSON.parse(stored);
-    return String(user?.PaidUser) === "2";
+    // Backend returns either "PaidUser" or "Paiduser" depending on endpoint
+    const paid = user?.PaidUser ?? user?.Paiduser;
+    return String(paid) === "2";
   } catch {
     return false;
   }
