@@ -118,6 +118,43 @@ async function deleteMenuGroup(groupId: number, companyId: number, userId: numbe
   }
 }
 
+async function updateMenuGroup(
+  companyId: number,
+  oldName: string,
+  newName: string,
+  userId: number,
+  email: string,
+  password: string,
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const form = new URLSearchParams();
+    form.append("UserID", String(userId));
+    form.append("UserEmail", email);
+    form.append("UserPassword", password);
+    form.append("companyid", String(companyId));
+    form.append("OrderResult", oldName);
+    form.append("OrderGroupNew", newName);
+    const res = await fetch(SERVER_DOMAIN + "menu1/PHPwrite/CompanyMenu/UpdateGroupSecure.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: form.toString(),
+    });
+    const raw = await res.text();
+    console.log("[UpdateGroup] raw response:", raw);
+    try {
+      const data = JSON.parse(raw);
+      if (data.success) return { success: true, message: String(data.success) };
+      if (data.error) return { success: false, message: String(data.error) };
+      return { success: false, message: "Unexpected response" };
+    } catch {
+      return { success: false, message: "Unexpected response: " + raw.substring(0, 100) };
+    }
+  } catch (e) {
+    console.error("[UpdateGroup] request failed:", e);
+    return { success: false, message: "Network error" };
+  }
+}
+
 async function toggleMenuGroupEnabled(groupId: number, enabled: string, companyId: number, userId: number, email: string, password: string): Promise<boolean> {
   try {
     const res = await fetch(SERVER_DOMAIN + "menu1/PHPwrite/CompanyMenu/ToggleMenuGroupEnabled.php", {
