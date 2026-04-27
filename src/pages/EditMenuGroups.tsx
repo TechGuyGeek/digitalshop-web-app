@@ -19,6 +19,12 @@ import {
 import VideoAdvert from "@/components/adverts/VideoAdvert";
 import { ADVERT_LIBRARY, ADVERT_SETTINGS, VIDEO_TRIGGERS } from "@/lib/advertConfig";
 import { SERVER_DOMAIN } from "@/lib/companyApi";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface MenuGroup {
   ID: number;
