@@ -304,6 +304,28 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, user
     }
   };
 
+  const openEdit = (group: MenuGroup) => {
+    setEditGroup(group);
+    setEditName(group.OrderGroup);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editGroup) return;
+    const newName = editName.trim();
+    if (!newName) { toast.error("Please enter a group name"); return; }
+    if (newName === editGroup.OrderGroup) { setEditGroup(null); return; }
+    setSavingEdit(true);
+    const result = await updateMenuGroup(companyId, editGroup.OrderGroup, newName, userId, userEmail, userPassword);
+    setSavingEdit(false);
+    if (result.success) {
+      toast.success(result.message || "Group updated");
+      setEditGroup(null);
+      fetchGroups();
+    } else {
+      toast.error(result.message || "Failed to update group");
+    }
+  };
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
