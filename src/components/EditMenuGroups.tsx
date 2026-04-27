@@ -196,7 +196,7 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, user
       const stored = localStorage.getItem("digitalUser");
       if (!stored) return false;
       const user = JSON.parse(stored);
-      return String(user?.PaidUser) === "2";
+      return String(user?.PaidUser ?? user?.Paiduser) === "2";
     } catch {
       return false;
     }
