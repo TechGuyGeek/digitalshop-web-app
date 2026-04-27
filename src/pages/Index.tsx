@@ -5,16 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { loginUser, registerUser, requestPasswordReset, type DigitalPerson } from "@/lib/api";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -30,7 +20,7 @@ const Index = () => {
   const [helpEnabled, setHelpEnabled] = useState(false);
   const [view, setView] = useState<"login" | "register" | "forgot">("login");
   const [loading, setLoading] = useState(false);
-  const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [upgradeLoading, setUpgradeLoading] = useState(false);
 
   const isLight = false;
 
@@ -39,6 +29,52 @@ const Index = () => {
   const [lastName, setLastName] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [mobileNumber, setMobileNumber] = useState("");
+
+  const handleUpgradeToPro = async () => {
+    const stored = localStorage.getItem("digitalUser");
+    if (!stored) {
+      toast.error("Please log in first to upgrade to Pro.");
+      return;
+    }
+    let user: Record<string, unknown> = {};
+    try {
+      user = JSON.parse(stored);
+    } catch {
+      toast.error("Please log in first to upgrade to Pro.");
+      return;
+    }
+    const personId = user?.PersonID ?? user?.personID ?? user?.personid ?? user?.PersonId;
+    const userEmail = user?.Email ?? user?.email;
+    if (!personId || !userEmail) {
+      toast.error("Please log in first to upgrade to Pro.");
+      return;
+    }
+    setUpgradeLoading(true);
+    try {
+      const body = new URLSearchParams();
+      body.append("PersonID", String(personId));
+      body.append("Email", String(userEmail));
+      const res = await fetch(
+        "https://techguygeek.co.uk/menu1/PHPwrite/User/CreateStripeCheckoutSession.php",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: body.toString(),
+        }
+      );
+      const data = await res.json();
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        toast.error(data?.ServerMessage || "Could not start checkout. Please try again.");
+        setUpgradeLoading(false);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(t("Pleasecheckyourinternetconnection"));
+      setUpgradeLoading(false);
+    }
+  };
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -466,24 +502,14 @@ const Index = () => {
 
         {/* Upgrade CTA */}
         <div className="mt-4 text-center animate-fade-in" style={{ animationDelay: "0.3s" }}>
-          <AlertDialog open={upgradeOpen} onOpenChange={setUpgradeOpen}>
-            <AlertDialogTrigger asChild>
-              <Button variant="ghost" className="text-primary hover:text-primary/80">
-                {t("GoPro")}
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Coming Soon</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This feature is not yet implemented. Please check back later.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogAction onClick={() => setUpgradeOpen(false)}>OK</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <Button
+            variant="ghost"
+            className="text-primary hover:text-primary/80"
+            disabled={upgradeLoading}
+            onClick={handleUpgradeToPro}
+          >
+            {upgradeLoading ? "..." : t("GoPro")}
+          </Button>
         </div>
       </div>
     </div>
