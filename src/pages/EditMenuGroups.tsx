@@ -276,7 +276,7 @@ const EditMenuGroupsPage = () => {
 
   const isPaidUser = () => {
     const u = getStoredUser();
-    return String(u?.PaidUser) === "2";
+    return String(u?.PaidUser ?? u?.Paiduser) === "2";
   };
 
   const fetchGroups = async () => {

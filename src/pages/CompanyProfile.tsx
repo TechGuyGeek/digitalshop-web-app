@@ -279,7 +279,7 @@ const CompanyProfile = () => {
 
   // Update GPS
   const handleUpdateGPS = async () => {
-    if (user?.PaidUser !== "2") {
+    if (String(user?.PaidUser ?? user?.Paiduser) !== "2") {
       toast.error("Only pro members can update GPS");
       return;
     }
