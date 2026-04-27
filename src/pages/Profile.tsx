@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { LogOut, User, Camera, Image, Save, Trash2, Loader2, Play } from "lucide-react";
+import { LogOut, User, Camera, Image, Save, Trash2, Loader2, Play, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { type DigitalPerson, updateUserProfile } from "@/lib/api";
