@@ -172,6 +172,44 @@ async function deleteMenuGroup(
   }
 }
 
+async function updateMenuGroup(
+  companyId: number,
+  oldName: string,
+  newName: string,
+  userId: number,
+  email: string,
+  password: string,
+): Promise<{ success: boolean; message?: string }> {
+  try {
+    const form = new URLSearchParams();
+    form.append("UserID", String(userId));
+    form.append("UserEmail", email);
+    form.append("UserPassword", password);
+    form.append("companyid", String(companyId));
+    form.append("OrderResult", oldName);
+    form.append("OrderGroupNew", newName);
+
+    const res = await fetch(SERVER_DOMAIN + "menu1/PHPwrite/CompanyMenu/UpdateGroupSecure.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: form.toString(),
+    });
+    const text = await res.text();
+    console.log("[UpdateGroup] raw response:", text);
+    try {
+      const data = JSON.parse(text);
+      if (data.success) return { success: true, message: String(data.success) };
+      if (data.error) return { success: false, message: String(data.error) };
+      return { success: false, message: text || "Unknown error" };
+    } catch {
+      return { success: false, message: text || "Invalid response" };
+    }
+  } catch (err) {
+    console.error("[UpdateGroup] Network error:", err);
+    return { success: false, message: "Network error" };
+  }
+}
+
 async function toggleMenuGroupEnabled(
   groupId: number,
   enabled: string,
