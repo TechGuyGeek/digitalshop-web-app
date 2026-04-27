@@ -118,6 +118,43 @@ async function deleteMenuGroup(groupId: number, companyId: number, userId: numbe
   }
 }
 
+async function updateMenuGroup(
+  companyId: number,
+  oldName: string,
+  newName: string,
+  userId: number,
+  email: string,
+  password: string,
+): Promise<{ success: boolean; message: string }> {
+  try {
+    const form = new URLSearchParams();
+    form.append("UserID", String(userId));
+    form.append("UserEmail", email);
+    form.append("UserPassword", password);
+    form.append("companyid", String(companyId));
+    form.append("OrderResult", oldName);
+    form.append("OrderGroupNew", newName);
+    const res = await fetch(SERVER_DOMAIN + "menu1/PHPwrite/CompanyMenu/UpdateGroupSecure.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: form.toString(),
+    });
+    const raw = await res.text();
+    console.log("[UpdateGroup] raw response:", raw);
+    try {
+      const data = JSON.parse(raw);
+      if (data.success) return { success: true, message: String(data.success) };
+      if (data.error) return { success: false, message: String(data.error) };
+      return { success: false, message: "Unexpected response" };
+    } catch {
+      return { success: false, message: "Unexpected response: " + raw.substring(0, 100) };
+    }
+  } catch (e) {
+    console.error("[UpdateGroup] request failed:", e);
+    return { success: false, message: "Network error" };
+  }
+}
+
 async function toggleMenuGroupEnabled(groupId: number, enabled: string, companyId: number, userId: number, email: string, password: string): Promise<boolean> {
   try {
     const res = await fetch(SERVER_DOMAIN + "menu1/PHPwrite/CompanyMenu/ToggleMenuGroupEnabled.php", {
@@ -145,6 +182,9 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, user
   const [addingGroup, setAddingGroup] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState<MenuGroup | null>(null);
+  const [editGroup, setEditGroup] = useState<MenuGroup | null>(null);
+  const [editName, setEditName] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
 
   // Video ad state for non-paid users after first group
   const [showVideoAd, setShowVideoAd] = useState(false);
@@ -264,6 +304,28 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, user
     }
   };
 
+  const openEdit = (group: MenuGroup) => {
+    setEditGroup(group);
+    setEditName(group.OrderGroup);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editGroup) return;
+    const newName = editName.trim();
+    if (!newName) { toast.error("Please enter a group name"); return; }
+    if (newName === editGroup.OrderGroup) { setEditGroup(null); return; }
+    setSavingEdit(true);
+    const result = await updateMenuGroup(companyId, editGroup.OrderGroup, newName, userId, userEmail, userPassword);
+    setSavingEdit(false);
+    if (result.success) {
+      toast.success(result.message || "Group updated");
+      setEditGroup(null);
+      fetchGroups();
+    } else {
+      toast.error(result.message || "Failed to update group");
+    }
+  };
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -296,7 +358,7 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, user
                     <Button variant="secondary" size="sm" onClick={() => onNavigateToGroup?.(group.ID, group.OrderGroup)}>
                       Add
                     </Button>
-                    <Button variant="secondary" size="sm" onClick={() => toast.info("Edit group coming soon")}>
+                    <Button variant="secondary" size="sm" onClick={() => openEdit(group)}>
                       Edit
                     </Button>
                     <Button variant="secondary" size="sm" onClick={() => setDeleteConfirm(group)}>
@@ -355,6 +417,34 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, user
         visible={showVideoAd}
         onDismiss={handleVideoDismissed}
       />
+
+      {/* Edit group dialog */}
+      <Dialog open={!!editGroup} onOpenChange={(o) => { if (!o && !savingEdit) setEditGroup(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-center text-lg font-bold">Edit Menu Group</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              placeholder="Group name"
+              className="text-center"
+              disabled={savingEdit}
+              autoFocus
+            />
+            <div className="grid grid-cols-2 gap-2">
+              <Button variant="secondary" onClick={() => setEditGroup(null)} disabled={savingEdit}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveEdit} disabled={savingEdit}>
+                {savingEdit ? <Loader2 className="animate-spin mr-2" size={14} /> : null}
+                Save
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };

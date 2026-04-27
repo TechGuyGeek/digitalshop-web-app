@@ -19,6 +19,12 @@ import {
 import VideoAdvert from "@/components/adverts/VideoAdvert";
 import { ADVERT_LIBRARY, ADVERT_SETTINGS, VIDEO_TRIGGERS } from "@/lib/advertConfig";
 import { SERVER_DOMAIN } from "@/lib/companyApi";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface MenuGroup {
   ID: number;
@@ -166,6 +172,44 @@ async function deleteMenuGroup(
   }
 }
 
+async function updateMenuGroup(
+  companyId: number,
+  oldName: string,
+  newName: string,
+  userId: number,
+  email: string,
+  password: string,
+): Promise<{ success: boolean; message?: string }> {
+  try {
+    const form = new URLSearchParams();
+    form.append("UserID", String(userId));
+    form.append("UserEmail", email);
+    form.append("UserPassword", password);
+    form.append("companyid", String(companyId));
+    form.append("OrderResult", oldName);
+    form.append("OrderGroupNew", newName);
+
+    const res = await fetch(SERVER_DOMAIN + "menu1/PHPwrite/CompanyMenu/UpdateGroupSecure.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: form.toString(),
+    });
+    const text = await res.text();
+    console.log("[UpdateGroup] raw response:", text);
+    try {
+      const data = JSON.parse(text);
+      if (data.success) return { success: true, message: String(data.success) };
+      if (data.error) return { success: false, message: String(data.error) };
+      return { success: false, message: text || "Unknown error" };
+    } catch {
+      return { success: false, message: text || "Invalid response" };
+    }
+  } catch (err) {
+    console.error("[UpdateGroup] Network error:", err);
+    return { success: false, message: "Network error" };
+  }
+}
+
 async function toggleMenuGroupEnabled(
   groupId: number,
   enabled: string,
@@ -207,6 +251,9 @@ const EditMenuGroupsPage = () => {
   const [deleteConfirm, setDeleteConfirm] = useState<MenuGroup | null>(null);
   const [showVideoAd, setShowVideoAd] = useState(false);
   const [pendingGroupName, setPendingGroupName] = useState("");
+  const [editGroup, setEditGroup] = useState<MenuGroup | null>(null);
+  const [editName, setEditName] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
 
   const getStoredUser = () => {
     try {
@@ -357,6 +404,39 @@ const EditMenuGroupsPage = () => {
     navigate(`/group-products?groupId=${groupId}&companyId=${companyId}&groupName=${encodeURIComponent(groupName)}`);
   };
 
+  const openEdit = (group: MenuGroup) => {
+    setEditGroup(group);
+    setEditName(group.OrderGroup);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editGroup) return;
+    const newName = editName.trim();
+    if (!newName) {
+      toast.error(t("GroupName"));
+      return;
+    }
+    if (newName === editGroup.OrderGroup) {
+      setEditGroup(null);
+      return;
+    }
+    const auth = getAuth();
+    if (!auth || !auth.userId) {
+      toast.error(t("Therewasanerror"));
+      return;
+    }
+    setSavingEdit(true);
+    const result = await updateMenuGroup(companyId, editGroup.OrderGroup, newName, auth.userId, auth.email, auth.password);
+    setSavingEdit(false);
+    if (result.success) {
+      toast.success(t("SaveSuccessful"));
+      setEditGroup(null);
+      await fetchGroups();
+    } else {
+      toast.error(result.message || t("SaveFailed"));
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <div className="flex items-center gap-3 p-4 border-b border-border bg-card">
@@ -388,7 +468,7 @@ const EditMenuGroupsPage = () => {
                   <Button variant="secondary" size="sm" onClick={() => navigateToGroup(group.ID, group.OrderGroup)}>
                     {t("Add")}
                   </Button>
-                  <Button variant="secondary" size="sm" onClick={() => toast.info(t("ComingSoon"))}>
+                  <Button variant="secondary" size="sm" onClick={() => openEdit(group)}>
                     {t("Edit")}
                   </Button>
                   <Button variant="secondary" size="sm" onClick={() => setDeleteConfirm(group)}>
@@ -444,6 +524,33 @@ const EditMenuGroupsPage = () => {
         }}
         onComplete={handleVideoComplete}
       />
+
+      <Dialog open={!!editGroup} onOpenChange={(o) => { if (!o && !savingEdit) setEditGroup(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-center text-lg font-bold">{t("Edit")}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              placeholder={t("GroupName")}
+              className="text-center"
+              disabled={savingEdit}
+              autoFocus
+            />
+            <div className="grid grid-cols-2 gap-2">
+              <Button variant="secondary" onClick={() => setEditGroup(null)} disabled={savingEdit}>
+                {t("Cancel")}
+              </Button>
+              <Button onClick={handleSaveEdit} disabled={savingEdit}>
+                {savingEdit ? <Loader2 className="animate-spin mr-2" size={14} /> : null}
+                {t("Save")}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
