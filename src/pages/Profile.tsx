@@ -118,6 +118,48 @@ const Profile = () => {
   };
 
   const [saving, setSaving] = useState(false);
+  const [upgradeLoading, setUpgradeLoading] = useState(false);
+
+  const isPaidUser = (() => {
+    const u = user as Record<string, unknown> | null;
+    if (!u) return false;
+    return String(u.PaidUser ?? u.Paiduser) === "2";
+  })();
+
+  const handleUpgradeToPro = async () => {
+    const u = user as Record<string, unknown> | null;
+    const personId = u?.PersonID ?? u?.personID ?? u?.personid ?? u?.PersonId;
+    const userEmail = u?.Email ?? u?.email;
+    if (!personId || !userEmail) {
+      toast.error("Please log in first to upgrade to Pro.");
+      return;
+    }
+    setUpgradeLoading(true);
+    try {
+      const body = new URLSearchParams();
+      body.append("PersonID", String(personId));
+      body.append("Email", String(userEmail));
+      const res = await fetch(
+        "https://techguygeek.co.uk/menu1/PHPwrite/User/CreateStripeCheckoutSession.php",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: body.toString(),
+        }
+      );
+      const data = await res.json();
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        toast.error(data?.ServerMessage || "Could not start checkout. Please try again.");
+        setUpgradeLoading(false);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(t("Pleasecheckyourinternetconnection"));
+      setUpgradeLoading(false);
+    }
+  };
 
   const handleSave = async () => {
     if (!user) return;
