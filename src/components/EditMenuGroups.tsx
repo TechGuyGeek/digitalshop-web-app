@@ -182,6 +182,9 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, user
   const [addingGroup, setAddingGroup] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState<MenuGroup | null>(null);
+  const [editGroup, setEditGroup] = useState<MenuGroup | null>(null);
+  const [editName, setEditName] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
 
   // Video ad state for non-paid users after first group
   const [showVideoAd, setShowVideoAd] = useState(false);
