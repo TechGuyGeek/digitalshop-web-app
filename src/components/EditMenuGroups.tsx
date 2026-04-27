@@ -417,6 +417,34 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, user
         visible={showVideoAd}
         onDismiss={handleVideoDismissed}
       />
+
+      {/* Edit group dialog */}
+      <Dialog open={!!editGroup} onOpenChange={(o) => { if (!o && !savingEdit) setEditGroup(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-center text-lg font-bold">Edit Menu Group</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              placeholder="Group name"
+              className="text-center"
+              disabled={savingEdit}
+              autoFocus
+            />
+            <div className="grid grid-cols-2 gap-2">
+              <Button variant="secondary" onClick={() => setEditGroup(null)} disabled={savingEdit}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveEdit} disabled={savingEdit}>
+                {savingEdit ? <Loader2 className="animate-spin mr-2" size={14} /> : null}
+                Save
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
