@@ -251,6 +251,9 @@ const EditMenuGroupsPage = () => {
   const [deleteConfirm, setDeleteConfirm] = useState<MenuGroup | null>(null);
   const [showVideoAd, setShowVideoAd] = useState(false);
   const [pendingGroupName, setPendingGroupName] = useState("");
+  const [editGroup, setEditGroup] = useState<MenuGroup | null>(null);
+  const [editName, setEditName] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
 
   const getStoredUser = () => {
     try {
@@ -401,6 +404,39 @@ const EditMenuGroupsPage = () => {
     navigate(`/group-products?groupId=${groupId}&companyId=${companyId}&groupName=${encodeURIComponent(groupName)}`);
   };
 
+  const openEdit = (group: MenuGroup) => {
+    setEditGroup(group);
+    setEditName(group.OrderGroup);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editGroup) return;
+    const newName = editName.trim();
+    if (!newName) {
+      toast.error(t("GroupName"));
+      return;
+    }
+    if (newName === editGroup.OrderGroup) {
+      setEditGroup(null);
+      return;
+    }
+    const auth = getAuth();
+    if (!auth || !auth.userId) {
+      toast.error(t("Therewasanerror"));
+      return;
+    }
+    setSavingEdit(true);
+    const result = await updateMenuGroup(companyId, editGroup.OrderGroup, newName, auth.userId, auth.email, auth.password);
+    setSavingEdit(false);
+    if (result.success) {
+      toast.success(t("SaveSuccessful"));
+      setEditGroup(null);
+      await fetchGroups();
+    } else {
+      toast.error(result.message || t("SaveFailed"));
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <div className="flex items-center gap-3 p-4 border-b border-border bg-card">
@@ -432,7 +468,7 @@ const EditMenuGroupsPage = () => {
                   <Button variant="secondary" size="sm" onClick={() => navigateToGroup(group.ID, group.OrderGroup)}>
                     {t("Add")}
                   </Button>
-                  <Button variant="secondary" size="sm" onClick={() => toast.info(t("ComingSoon"))}>
+                  <Button variant="secondary" size="sm" onClick={() => openEdit(group)}>
                     {t("Edit")}
                   </Button>
                   <Button variant="secondary" size="sm" onClick={() => setDeleteConfirm(group)}>
