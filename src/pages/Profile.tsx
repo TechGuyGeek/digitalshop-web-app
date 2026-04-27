@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { LogOut, User, Camera, Image, Save, Trash2, Loader2, Play } from "lucide-react";
+import { LogOut, User, Camera, Image, Save, Trash2, Loader2, Play, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { type DigitalPerson, updateUserProfile } from "@/lib/api";
@@ -118,6 +118,48 @@ const Profile = () => {
   };
 
   const [saving, setSaving] = useState(false);
+  const [upgradeLoading, setUpgradeLoading] = useState(false);
+
+  const isPaidUser = (() => {
+    const u = user as Record<string, unknown> | null;
+    if (!u) return false;
+    return String(u.PaidUser ?? u.Paiduser) === "2";
+  })();
+
+  const handleUpgradeToPro = async () => {
+    const u = user as Record<string, unknown> | null;
+    const personId = u?.PersonID ?? u?.personID ?? u?.personid ?? u?.PersonId;
+    const userEmail = u?.Email ?? u?.email;
+    if (!personId || !userEmail) {
+      toast.error("Please log in first to upgrade to Pro.");
+      return;
+    }
+    setUpgradeLoading(true);
+    try {
+      const body = new URLSearchParams();
+      body.append("PersonID", String(personId));
+      body.append("Email", String(userEmail));
+      const res = await fetch(
+        "https://techguygeek.co.uk/menu1/PHPwrite/User/CreateStripeCheckoutSession.php",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: body.toString(),
+        }
+      );
+      const data = await res.json();
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        toast.error(data?.ServerMessage || "Could not start checkout. Please try again.");
+        setUpgradeLoading(false);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(t("Pleasecheckyourinternetconnection"));
+      setUpgradeLoading(false);
+    }
+  };
 
   const handleSave = async () => {
     if (!user) return;
@@ -403,6 +445,17 @@ const Profile = () => {
             {t("Orders")}
           </Button>
         </div>
+
+        {!isPaidUser && (
+          <Button
+            className="w-full mb-3 rounded-full bg-primary hover:bg-primary/90"
+            onClick={handleUpgradeToPro}
+            disabled={upgradeLoading}
+          >
+            <Sparkles size={16} className="mr-2" />
+            {upgradeLoading ? t("Pleasewait") : t("GoPro")}
+          </Button>
+        )}
 
         <Button variant="outline" className="w-full mb-8 rounded-full" onClick={handleLogout}>
           <LogOut size={16} className="mr-2" />
