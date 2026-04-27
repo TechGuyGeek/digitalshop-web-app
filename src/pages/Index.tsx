@@ -5,16 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { loginUser, registerUser, requestPasswordReset, type DigitalPerson } from "@/lib/api";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -30,7 +20,7 @@ const Index = () => {
   const [helpEnabled, setHelpEnabled] = useState(false);
   const [view, setView] = useState<"login" | "register" | "forgot">("login");
   const [loading, setLoading] = useState(false);
-  const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [upgradeLoading, setUpgradeLoading] = useState(false);
 
   const isLight = false;
 
@@ -466,24 +456,14 @@ const Index = () => {
 
         {/* Upgrade CTA */}
         <div className="mt-4 text-center animate-fade-in" style={{ animationDelay: "0.3s" }}>
-          <AlertDialog open={upgradeOpen} onOpenChange={setUpgradeOpen}>
-            <AlertDialogTrigger asChild>
-              <Button variant="ghost" className="text-primary hover:text-primary/80">
-                {t("GoPro")}
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Coming Soon</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This feature is not yet implemented. Please check back later.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogAction onClick={() => setUpgradeOpen(false)}>OK</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <Button
+            variant="ghost"
+            className="text-primary hover:text-primary/80"
+            disabled={upgradeLoading}
+            onClick={handleUpgradeToPro}
+          >
+            {upgradeLoading ? "..." : t("GoPro")}
+          </Button>
         </div>
       </div>
     </div>
