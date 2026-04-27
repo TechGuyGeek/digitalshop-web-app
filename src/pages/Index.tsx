@@ -499,18 +499,6 @@ const Index = () => {
             </>
           )}
         </div>
-
-        {/* Upgrade CTA */}
-        <div className="mt-4 text-center animate-fade-in" style={{ animationDelay: "0.3s" }}>
-          <Button
-            variant="ghost"
-            className="text-primary hover:text-primary/80"
-            disabled={upgradeLoading}
-            onClick={handleUpgradeToPro}
-          >
-            {upgradeLoading ? "..." : t("GoPro")}
-          </Button>
-        </div>
       </div>
     </div>
   );
