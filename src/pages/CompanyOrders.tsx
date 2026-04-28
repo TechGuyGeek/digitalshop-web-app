@@ -70,7 +70,14 @@ const CompanyOrders = () => {
     const auth = getAuth(); if (!auth) return;
     setDeleteConfirm(null);
     setDeletingKey(order.groupKey);
-    console.log("[deleteOrder] clicked, groupKey:", order.groupKey, "companyId:", order.companyId, "clientId:", order.clientId);
+    console.log(
+      "[deleteOrder] clicked",
+      "groupKey:", order.groupKey,
+      "orderId:", order.orderId,
+      "companyId:", order.companyId,
+      "clientId:", order.clientId,
+      "dateTime:", order.dateTime,
+    );
     const result = await deleteCompanyOrder(activeTab, order, auth.personId, auth.email, auth.password);
     if (result.success) {
       toast.success(result.message || t("DetailswereSaved"));
