@@ -70,6 +70,7 @@ const CompanyOrders = () => {
     const auth = getAuth(); if (!auth) return;
     setDeleteConfirm(null);
     setDeletingKey(order.groupKey);
+    console.log("Deleting selected order:", order);
     console.log(
       "[deleteOrder] clicked",
       "groupKey:", order.groupKey,
@@ -151,7 +152,7 @@ const CompanyOrders = () => {
                       )}
                     </div>
                     <Button variant="outline" size="sm" className="rounded-md text-xs w-24" disabled={deletingKey === order.groupKey}
-                      onClick={(e) => { e.stopPropagation(); setDeleteConfirm(order); }}>
+                      onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ ...order }); }}>
                       {deletingKey === order.groupKey ? <Loader2 className="animate-spin" size={14} /> : t("Delete")}
                     </Button>
                     <Button variant="outline" size="sm" className="rounded-md text-xs w-24" onClick={(e) => { e.stopPropagation(); navigate(`/customer-profile-readonly?userid=${encodeURIComponent(order.clientId)}`); }}>
@@ -171,7 +172,7 @@ const CompanyOrders = () => {
             <p className="text-sm text-muted-foreground mb-4">{deleteConfirm.customerName} — {deleteConfirm.dateTime}</p>
             <div className="flex gap-3">
               <Button variant="outline" className="flex-1" onClick={() => setDeleteConfirm(null)}>{t("Cancel")}</Button>
-              <Button variant="destructive" className="flex-1" onClick={() => handleDeleteOrder(deleteConfirm)}>{t("Delete")}</Button>
+              <Button variant="destructive" className="flex-1" onClick={() => deleteConfirm && handleDeleteOrder({ ...deleteConfirm })}>{t("Delete")}</Button>
             </div>
           </div>
         </div>
