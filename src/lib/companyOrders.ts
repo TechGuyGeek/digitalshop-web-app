@@ -37,6 +37,9 @@ export interface CompanyGroupedOrder {
   companyId: string;
   clientId: string;
   orderId: string;
+  orderid?: string;
+  OrderID?: string;
+  OrderId?: string;
   customerName: string;
   customerPhoto: string;
   dateTime: string;
@@ -202,6 +205,9 @@ export function groupCompanyOrders(orders: CompanyOrderItem[]): CompanyGroupedOr
       companyId: String(first.companyid || first.Companyid || ""),
       clientId: String(first.clientid || ""),
       orderId: String(first.orderid || ""),
+      orderid: String(first.orderid || ""),
+      OrderID: String(first.orderid || ""),
+      OrderId: String(first.orderid || ""),
       customerName: name,
       customerPhoto,
       dateTime: first.DateandTime || "",
@@ -318,10 +324,15 @@ export async function deleteCompanyOrder(
   password: string
 ): Promise<{ success: boolean; message?: string }> {
   const url = COMPANY_ORDER_DELETE_BASE + COMPANY_ORDER_DELETE_ENDPOINTS[tab];
-  // Always read the orderid directly off the selected order row passed in,
-  // not from any cached/previous state. Prefer the explicit orderId on the
-  // grouped object, fall back to the first item's orderid.
-  const selectedOrderId = String(order.orderId || order.items?.[0]?.orderid || "");
+  const selectedOrder = order as CompanyGroupedOrder & { orderid?: string; OrderID?: string; OrderId?: string };
+  const selectedOrderId = String(
+    selectedOrder.orderid ||
+    selectedOrder.OrderID ||
+    selectedOrder.OrderId ||
+    selectedOrder.orderId ||
+    selectedOrder.items?.[0]?.orderid ||
+    ""
+  );
 
   const form = new URLSearchParams();
   form.append("UserID", userId);
