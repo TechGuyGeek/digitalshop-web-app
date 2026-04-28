@@ -146,9 +146,10 @@ export function groupCompanyOrders(orders: CompanyOrderItem[]): CompanyGroupedOr
   for (const order of sorted) {
     const companyId = String(order.companyid || order.Companyid || "");
     const clientId = String(order.clientid || "");
-    const dateTime = order.DateandTime || "";
-    const hasKeyParts = Boolean(companyId || clientId || dateTime);
-    const key = hasKeyParts ? `${companyId}|${clientId}|${dateTime}` : `unknown_${Math.random()}`;
+    const dateTime = String(order.DateandTime || "");
+    const orderId = String(order.orderid || (order as CompanyOrderItem & { OrderID?: string | number; OrderId?: string | number }).OrderID || (order as CompanyOrderItem & { OrderID?: string | number; OrderId?: string | number }).OrderId || "");
+    const hasKeyParts = Boolean(companyId || clientId || dateTime || orderId);
+    const key = hasKeyParts ? `${companyId}|${clientId}|${dateTime}|${orderId}` : `unknown_${Math.random()}`;
 
     if (!map.has(key)) map.set(key, []);
     map.get(key)!.push(order);
@@ -204,10 +205,10 @@ export function groupCompanyOrders(orders: CompanyOrderItem[]): CompanyGroupedOr
       groupKey,
       companyId: String(first.companyid || first.Companyid || ""),
       clientId: String(first.clientid || ""),
-      orderId: String(first.orderid || ""),
-      orderid: String(first.orderid || ""),
-      OrderID: String(first.orderid || ""),
-      OrderId: String(first.orderid || ""),
+      orderId: String(first.orderid || (first as CompanyOrderItem & { OrderID?: string | number; OrderId?: string | number }).OrderID || (first as CompanyOrderItem & { OrderID?: string | number; OrderId?: string | number }).OrderId || ""),
+      orderid: String(first.orderid || (first as CompanyOrderItem & { OrderID?: string | number; OrderId?: string | number }).OrderID || (first as CompanyOrderItem & { OrderID?: string | number; OrderId?: string | number }).OrderId || ""),
+      OrderID: String(first.orderid || (first as CompanyOrderItem & { OrderID?: string | number; OrderId?: string | number }).OrderID || (first as CompanyOrderItem & { OrderID?: string | number; OrderId?: string | number }).OrderId || ""),
+      OrderId: String(first.orderid || (first as CompanyOrderItem & { OrderID?: string | number; OrderId?: string | number }).OrderID || (first as CompanyOrderItem & { OrderID?: string | number; OrderId?: string | number }).OrderId || ""),
       customerName: name,
       customerPhoto,
       dateTime: first.DateandTime || "",
