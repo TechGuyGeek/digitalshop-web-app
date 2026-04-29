@@ -140,7 +140,7 @@ const Profile = () => {
       body.append("PersonID", String(personId));
       body.append("Email", String(userEmail));
       const res = await fetch(
-        "https://techguygeek.co.uk/menu1/PHPwrite/User/CreateStripeCheckoutSession.php",
+        "https://app.techguygeek.co.uk/menu1/PHPwrite/User/CreateStripeCheckoutSession.php",
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
