@@ -376,13 +376,19 @@ const CompanyProfile = () => {
     "company-delete-shop",
     [
       {
+        id: "payment-methods",
+        label: t("MyPaymentMethods") || "My Payment Methods",
+        onClick: () => navigate("/payment-methods"),
+      },
+      {
         id: "delete-shop",
         label: t("DELETEYOURSHOP") || "DELETE YOUR SHOP",
         variant: "destructive",
         onClick: handleDeleteClick,
+        order: 100,
       },
     ],
-    [t, company?.companyid],
+    [t, navigate, company?.companyid],
   );
 
   const inputClass =
