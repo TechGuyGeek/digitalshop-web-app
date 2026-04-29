@@ -321,6 +321,7 @@ const Profile = () => {
   };
 
   useRegisterNavActions(
+    "profile-delete",
     [
       {
         id: "delete-profile",
@@ -449,17 +450,6 @@ const Profile = () => {
             {t("Orders")}
           </Button>
         </div>
-
-        {!isPaidUser && (
-          <Button
-            className="w-full mb-3 rounded-full bg-primary hover:bg-primary/90"
-            onClick={handleUpgradeToPro}
-            disabled={upgradeLoading}
-          >
-            <Sparkles size={16} className="mr-2" />
-            {upgradeLoading ? t("Pleasewait") : t("GoPro")}
-          </Button>
-        )}
 
         <Button variant="outline" className="w-full mb-8 rounded-full" onClick={handleLogout}>
           <LogOut size={16} className="mr-2" />

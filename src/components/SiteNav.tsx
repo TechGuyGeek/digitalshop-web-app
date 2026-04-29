@@ -81,12 +81,13 @@ const SiteNav = ({ items, className }: SiteNavProps) => {
                   <li key={a.id}>
                     <button
                       type="button"
+                      disabled={a.disabled}
                       onClick={() => {
                         setOpen(false);
                         a.onClick();
                       }}
                       className={cn(
-                        "w-full text-left block px-6 py-3 text-base font-heading tracking-wide transition-colors",
+                        "w-full text-left block px-6 py-3 text-base font-heading tracking-wide transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
                         a.variant === "destructive"
                           ? "text-destructive hover:bg-destructive/10"
                           : "text-foreground hover:bg-secondary",
