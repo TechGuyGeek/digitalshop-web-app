@@ -5,15 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
-const GOOGLE_MAPS_KEY = "AIzaSyAN76Tb-dL_5pvp-w1iFhxWqI52sDnoz5c";
+const TILE_URL = "https://maps.techguygeek.co.uk/tiles/osm/webmercator/{z}/{x}/{y}.png";
+const TILE_ATTRIBUTION = "© OpenStreetMap contributors";
 
 const BuildShop = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<google.maps.Map | null>(null);
-  const markerRef = useRef<google.maps.Marker | null>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+  const markerRef = useRef<L.Marker | null>(null);
 
   const [shopName, setShopName] = useState("");
   const [coords, setCoords] = useState<{ lat: number; lng: number }>({ lat: 53.3498, lng: -6.2603 });
@@ -32,18 +35,23 @@ const BuildShop = () => {
   }, []);
 
   useEffect(() => {
-    if (locating || !mapRef.current) return;
-    const initMap = () => {
-      if (!(window as any).google?.maps) { setTimeout(initMap, 200); return; }
-      const map = new google.maps.Map(mapRef.current!, { center: coords, zoom: 16, disableDefaultUI: true, zoomControl: true });
-      const marker = new google.maps.Marker({ position: coords, map, draggable: true, title: t("ClickPintoaddCompany") });
-      marker.addListener("dragend", () => { const pos = marker.getPosition(); if (pos) setCoords({ lat: pos.lat(), lng: pos.lng() }); });
-      map.addListener("click", (e: google.maps.MapMouseEvent) => { if (e.latLng) { marker.setPosition(e.latLng); setCoords({ lat: e.latLng.lat(), lng: e.latLng.lng() }); } });
-      mapInstanceRef.current = map; markerRef.current = marker;
-    };
-    if ((window as any).google?.maps) { initMap(); }
-    else { const script = document.createElement("script"); script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_KEY}&callback=Function.prototype`; script.async = true; script.onload = () => initMap(); document.head.appendChild(script); }
-  }, [locating, coords]);
+    if (locating || !mapRef.current || mapInstanceRef.current) return;
+    const map = L.map(mapRef.current, { center: [coords.lat, coords.lng], zoom: 16, zoomControl: true });
+    L.tileLayer(TILE_URL, { maxZoom: 19, attribution: TILE_ATTRIBUTION }).addTo(map);
+    const marker = L.marker([coords.lat, coords.lng], { draggable: true, title: t("ClickPintoaddCompany") }).addTo(map);
+    marker.on("dragend", () => {
+      const pos = marker.getLatLng();
+      setCoords({ lat: pos.lat, lng: pos.lng });
+    });
+    map.on("click", (e: L.LeafletMouseEvent) => {
+      marker.setLatLng(e.latlng);
+      setCoords({ lat: e.latlng.lat, lng: e.latlng.lng });
+    });
+    mapInstanceRef.current = map;
+    markerRef.current = marker;
+    setTimeout(() => map.invalidateSize(), 50);
+    return () => { map.remove(); mapInstanceRef.current = null; markerRef.current = null; };
+  }, [locating]);
 
   const handleSave = async () => {
     if (!shopName.trim()) { toast.error(t("RegistrationFailedCompanyNamecannotbeempty")); return; }
