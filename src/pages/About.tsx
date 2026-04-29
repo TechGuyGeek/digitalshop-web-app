@@ -110,6 +110,47 @@ const About = () => {
           </p>
         </section>
 
+        <section className="space-y-4 mb-8">
+          <h2 className="font-heading text-2xl text-foreground">Founder Vision</h2>
+          <p className="text-muted-foreground leading-relaxed">
+            Shop-a-Verse began as an idea to bridge the gap between physical
+            shops and the digital world.
+          </p>
+          <p className="text-muted-foreground leading-relaxed">
+            Long before modern AI tools and rapid app builders, the vision was
+            simple:
+          </p>
+          <p className="text-muted-foreground leading-relaxed italic">
+            Make it possible for any business, anywhere, to create a digital
+            shop that customers could discover instantly through location and
+            mobile technology.
+          </p>
+          <p className="text-muted-foreground leading-relaxed">
+            This original founder video shares the early concept behind what is
+            now Shop-a-Verse.
+          </p>
+          <p className="text-muted-foreground leading-relaxed">
+            While the platform has evolved significantly since then, the
+            mission remains the same:
+          </p>
+          <p className="text-foreground font-heading text-lg">
+            Your shop — anywhere.
+          </p>
+          <p className="text-muted-foreground leading-relaxed">
+            Watch the original concept video below.
+          </p>
+          <div className="relative w-full overflow-hidden rounded-lg border border-border bg-muted" style={{ paddingBottom: "56.25%" }}>
+            <iframe
+              className="absolute inset-0 h-full w-full"
+              src="https://www.youtube.com/embed/fT_XSVrbfqM?start=4"
+              title="Shop-a-Verse founder concept video"
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            />
+          </div>
+        </section>
+
         <section className="space-y-4">
           <h2 className="font-heading text-2xl text-foreground">Get In Touch</h2>
           <p className="text-muted-foreground leading-relaxed">
