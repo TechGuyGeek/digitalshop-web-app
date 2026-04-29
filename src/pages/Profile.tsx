@@ -12,6 +12,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import AdvertSlot from "@/components/adverts/AdvertSlot";
 import VideoAdvert from "@/components/adverts/VideoAdvert";
 import { useAdverts } from "@/hooks/useAdverts";
+import { useRegisterNavActions } from "@/contexts/SiteNavExtras";
 
 const MAX_IMAGE_SIZE = 800;
 
