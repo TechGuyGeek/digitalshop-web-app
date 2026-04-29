@@ -14,6 +14,7 @@ import SiteNav from "./components/SiteNav";
 import GlobalUpgradeNavAction from "./components/GlobalUpgradeNavAction";
 import GlobalSignOutNavAction from "./components/GlobalSignOutNavAction";
 import Profile from "./pages/Profile.tsx";
+import PaymentMethods from "./pages/PaymentMethods.tsx";
 import OAuthCallback from "./pages/OAuthCallback.tsx";
 import ViewShops from "./pages/ViewShops.tsx";
 import FreeShops from "./pages/FreeShops.tsx";
@@ -69,6 +70,7 @@ const AppShell = () => {
                 <Route path="/about" element={<About />} />
                 <Route path="/legal" element={<Legal />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/payment-methods" element={<PaymentMethods />} />
                 <Route path="/oauth-callback" element={<OAuthCallback />} />
                 <Route path="/view-shops" element={<ViewShops />} />
                 <Route path="/free-shops" element={<FreeShops />} />
