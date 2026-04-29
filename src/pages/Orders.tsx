@@ -155,13 +155,15 @@ const Orders = () => {
                     {t("CompanyProfile")}
                   </Button>
                 </div>
-                {order.hasPaid !== "1" && (
-                  <div className="mt-3" onClick={(e) => e.stopPropagation()}>
-                    <Button className="w-full rounded-full text-sm" onClick={() => handlePay(order)}>
-                      {t("Pay") || "Pay"}
-                    </Button>
-                  </div>
-                )}
+                <div className="mt-3" onClick={(e) => e.stopPropagation()}>
+                  <Button
+                    className="w-full rounded-full text-sm"
+                    disabled={order.hasPaid === "1"}
+                    onClick={() => handlePay(order)}
+                  >
+                    {order.hasPaid === "1" ? (t("Paid") || "Paid") : (t("Pay") || "Pay")}
+                  </Button>
+                </div>
               </div>
             );
           })
