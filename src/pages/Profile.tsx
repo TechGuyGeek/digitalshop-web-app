@@ -12,6 +12,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import AdvertSlot from "@/components/adverts/AdvertSlot";
 import VideoAdvert from "@/components/adverts/VideoAdvert";
 import { useAdverts } from "@/hooks/useAdverts";
+import { useRegisterNavActions } from "@/contexts/SiteNavExtras";
 
 const MAX_IMAGE_SIZE = 800;
 
@@ -319,6 +320,18 @@ const Profile = () => {
     }
   };
 
+  useRegisterNavActions(
+    [
+      {
+        id: "delete-profile",
+        label: t("DELETEYOURPROFILE") || "DELETE YOUR PROFILE",
+        variant: "destructive",
+        onClick: handleDeleteProfile,
+      },
+    ],
+    [t],
+  );
+
   if (!user) return null;
 
   const imagePath = (() => {
@@ -397,15 +410,6 @@ const Profile = () => {
           <ProfileField label={t("Country")} value={form.country} onChange={(v) => handleChange("country", v)} />
           <ProfileField label={t("DeliveryNotes")} value={form.deliveryNotes} onChange={(v) => handleChange("deliveryNotes", v)} />
         </div>
-
-        <Button
-          variant="destructive"
-          className="w-full mb-4 rounded-full font-semibold"
-          onClick={handleDeleteProfile}
-        >
-          <Trash2 size={16} className="mr-2" />
-          {t("DELETEYOURPROFILE")}
-        </Button>
 
         <div className="flex gap-2 mb-6">
           <Button
