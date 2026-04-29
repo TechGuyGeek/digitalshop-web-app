@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAdverts } from "@/hooks/useAdverts";
 import VideoAdvert from "@/components/adverts/VideoAdvert";
+import { useRegisterNavActions } from "@/contexts/SiteNavExtras";
 
 const SERVER_DOMAIN = "https://app.techguygeek.co.uk/";
 
@@ -25,6 +26,18 @@ const Basket = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [tableNumber, setTableNumber] = useState<string>("");
+
+  useRegisterNavActions(
+    "basket-payment",
+    [
+      {
+        id: "payment-methods",
+        label: t("MyPaymentMethods") || "My Payment Methods",
+        onClick: () => navigate("/payment-methods"),
+      },
+    ],
+    [t, navigate],
+  );
   const [searchParams] = useSearchParams();
   const shopName = searchParams.get("shop") || "Shop";
   const companyId = searchParams.get("companyid") || sessionStorage.getItem("basket_companyId") || "";
