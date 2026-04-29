@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Camera, Image as ImageIcon, Save, Trash2, Loader2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useRegisterNavActions } from "@/contexts/SiteNavExtras";
 import MapMarkerPicker, { type MapMarkerOption } from "@/components/MapMarkerPicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
