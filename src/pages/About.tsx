@@ -26,41 +26,103 @@ const About = () => {
         </h1>
         <p className="text-muted-foreground mb-6 leading-relaxed">
           Shop-a-Verse is a global, location-aware marketplace that connects
-          people with the shops, services and experiences around them — wherever
+          people with the shops, services, and experiences around them — wherever
           they are in the world.
+        </p>
+        <p className="text-muted-foreground mb-8 leading-relaxed">
+          We combine the power of local discovery with the convenience of online
+          shopping, helping businesses create beautiful digital storefronts that
+          customers can find instantly through map-based search and global
+          discovery.
         </p>
 
         <section className="space-y-4 mb-8">
-          <h2 className="font-heading text-xl text-foreground">Our mission</h2>
+          <h2 className="font-heading text-2xl text-foreground">Our Mission</h2>
           <p className="text-muted-foreground leading-relaxed">
             We believe local commerce should feel as effortless as scrolling a
-            feed. Shop-a-Verse gives every shop — from a single market stall to a
-            growing chain — a beautiful digital storefront that customers can
-            discover, browse and order from in seconds.
+            feed.
+          </p>
+          <p className="text-muted-foreground leading-relaxed">
+            From a single market stall to a growing retail chain, every business
+            deserves the ability to be discovered, browsed, and supported online
+            without needing expensive websites, complex systems, or large
+            marketing budgets.
+          </p>
+          <p className="text-muted-foreground leading-relaxed">
+            Shop-a-Verse makes that possible.
           </p>
         </section>
 
+        <section className="space-y-6 mb-8">
+          <h2 className="font-heading text-2xl text-foreground">What You Can Do</h2>
+
+          <div className="space-y-2">
+            <h3 className="font-heading text-lg text-foreground">Discover Nearby Shops</h3>
+            <p className="text-muted-foreground leading-relaxed">
+              Use the interactive map to explore shops, services, and local
+              businesses near your current location.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <h3 className="font-heading text-lg text-foreground">Browse and Order</h3>
+            <p className="text-muted-foreground leading-relaxed">
+              View menus, products, and services, build your basket, and place
+              orders quickly from your phone.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <h3 className="font-heading text-lg text-foreground">Open Your Own Shop</h3>
+            <p className="text-muted-foreground leading-relaxed">
+              Create and manage your own digital storefront with a powerful
+              mobile-first dashboard designed for speed and simplicity.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <h3 className="font-heading text-lg text-foreground">Go Global</h3>
+            <p className="text-muted-foreground leading-relaxed">
+              Upgrade to Pro Mode to unlock Global Shop visibility, custom GPS
+              location settings, reduced adverts, and premium features.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <h3 className="font-heading text-lg text-foreground">Multi-Language and Multi-Theme</h3>
+            <p className="text-muted-foreground leading-relaxed">
+              Use the platform in your preferred language and theme for a fully
+              personalised experience.
+            </p>
+          </div>
+        </section>
+
         <section className="space-y-4 mb-8">
-          <h2 className="font-heading text-xl text-foreground">What you can do</h2>
-          <ul className="list-disc pl-5 space-y-2 text-muted-foreground leading-relaxed">
-            <li>Discover nearby shops on an interactive map.</li>
-            <li>Browse menus, build a basket and place orders in one tap.</li>
-            <li>Open and manage your own shop with a powerful, mobile-first dashboard.</li>
-            <li>Use the app in your language, with the theme that suits you.</li>
-          </ul>
+          <h2 className="font-heading text-2xl text-foreground">Why Shop-a-Verse?</h2>
+          <p className="text-muted-foreground leading-relaxed">
+            Because the future of shopping is not just online.
+          </p>
+          <p className="text-muted-foreground leading-relaxed">
+            It is local, global, mobile, and immediate.
+          </p>
+          <p className="text-muted-foreground leading-relaxed">
+            It is your shop — anywhere.
+          </p>
         </section>
 
         <section className="space-y-4">
-          <h2 className="font-heading text-xl text-foreground">Get in touch</h2>
+          <h2 className="font-heading text-2xl text-foreground">Get In Touch</h2>
           <p className="text-muted-foreground leading-relaxed">
-            Questions, feedback or want to list your shop? Reach out at{" "}
+            Questions, feedback, partnerships, or want to list your shop?
+          </p>
+          <p className="text-muted-foreground leading-relaxed">
+            Contact us at:{" "}
             <a
-              href="mailto:hello@techguygeek.co.uk"
+              href="mailto:jason@techguygeek.com"
               className="text-primary hover:underline"
             >
-              hello@techguygeek.co.uk
+              jason@techguygeek.com
             </a>
-            .
           </p>
         </section>
       </main>
