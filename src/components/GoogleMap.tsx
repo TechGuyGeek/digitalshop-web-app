@@ -21,6 +21,7 @@ const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, 
   const shopLayerRef = useRef<L.LayerGroup | null>(null);
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null);
   const [locating, setLocating] = useState(true);
+  const [mapReady, setMapReady] = useState(false);
 
   // Get user GPS
   useEffect(() => {
@@ -58,6 +59,7 @@ const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, 
 
     shopLayerRef.current = L.layerGroup().addTo(map);
     mapInstanceRef.current = map;
+    setMapReady(true);
 
     // Ensure correct sizing once visible
     setTimeout(() => map.invalidateSize(), 50);
@@ -68,6 +70,7 @@ const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, 
       shopLayerRef.current = null;
       circleRef.current = null;
       userMarkerRef.current = null;
+      setMapReady(false);
     };
   }, [locating]);
 
@@ -129,7 +132,7 @@ const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, 
         marker.on("click", () => onShopClick(shop));
       }
     });
-  }, [shops, onShopClick]);
+  }, [shops, onShopClick, mapReady]);
 
   return (
     <div className={className} style={{ position: "relative" }}>
