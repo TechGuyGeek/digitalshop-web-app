@@ -149,14 +149,17 @@ export function groupCompanyOrders(orders: CompanyOrderItem[]): CompanyGroupedOr
     const dateTime = String(order.DateandTime || "");
     const orderId = String(order.orderid || (order as CompanyOrderItem & { OrderID?: string | number; OrderId?: string | number }).OrderID || (order as CompanyOrderItem & { OrderID?: string | number; OrderId?: string | number }).OrderId || "");
     const randomCode = String(order.RandomeCode || "");
-    // Group by RandomeCode (checkout session) like customer-side; fall back to composite key for legacy rows
+    // Group by RandomeCode (checkout session) like customer-side.
+    // Fallback: same company + same client + same DateandTime (down to the second) — items submitted together.
     let key: string;
     if (randomCode) {
       key = `rc:${randomCode}`;
+    } else if (companyId || clientId || dateTime) {
+      key = `${companyId}|${clientId}|${dateTime}`;
     } else {
-      const hasKeyParts = Boolean(companyId || clientId || dateTime || orderId);
-      key = hasKeyParts ? `${companyId}|${clientId}|${dateTime}|${orderId}` : `unknown_${Math.random()}`;
+      key = `unknown_${Math.random()}`;
     }
+    void orderId;
 
     if (!map.has(key)) map.set(key, []);
     map.get(key)!.push(order);
