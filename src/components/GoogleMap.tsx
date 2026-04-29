@@ -1,5 +1,6 @@
-/// <reference types="google.maps" />
 import { useEffect, useRef, useState } from "react";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
 interface GoogleMapProps {
   className?: string;
@@ -9,12 +10,15 @@ interface GoogleMapProps {
   rangeCircleMetres?: number;
 }
 
-const MAPS_KEY = "AIzaSyC2FqDdFRLWpEeGLijR2zN8b2Ue-AeWgbo";
+const TILE_URL = "https://maps.techguygeek.co.uk/tiles/osm/webmercator/{z}/{x}/{y}.png";
+const TILE_ATTRIBUTION = "© OpenStreetMap contributors";
 
 const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, rangeCircleMetres }: GoogleMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<google.maps.Map | null>(null);
-  const circleRef = useRef<google.maps.Circle | null>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+  const circleRef = useRef<L.Circle | null>(null);
+  const userMarkerRef = useRef<L.CircleMarker | null>(null);
+  const shopLayerRef = useRef<L.LayerGroup | null>(null);
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null);
   const [locating, setLocating] = useState(true);
 
@@ -34,121 +38,107 @@ const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, 
     }
   }, []);
 
+  // Initialise map once container is mounted
   useEffect(() => {
-    if (locating || !mapRef.current) return;
+    if (locating || !mapRef.current || mapInstanceRef.current) return;
 
     const center = userPos || { lat: 53.3498, lng: -6.2603 };
 
-    const initMap = () => {
-      if (!(window as any).google?.maps) {
-        setTimeout(initMap, 200);
-        return;
-      }
+    const map = L.map(mapRef.current, {
+      center: [center.lat, center.lng],
+      zoom: defaultZoom,
+      zoomControl: true,
+      attributionControl: true,
+    });
 
-      const map = new google.maps.Map(mapRef.current!, {
-        center,
-        zoom: defaultZoom,
-        disableDefaultUI: true,
-        zoomControl: true,
-        styles: [
-          { featureType: "poi", stylers: [{ visibility: "off" }] },
-        ],
-      });
+    L.tileLayer(TILE_URL, {
+      maxZoom: 19,
+      attribution: TILE_ATTRIBUTION,
+    }).addTo(map);
 
-      mapInstanceRef.current = map;
+    shopLayerRef.current = L.layerGroup().addTo(map);
+    mapInstanceRef.current = map;
 
-      // User location marker
-      if (userPos) {
-        new google.maps.Marker({
-          position: userPos,
-          map,
-          title: "You are here",
-          icon: {
-            path: google.maps.SymbolPath.CIRCLE,
-            scale: 8,
-            fillColor: "#4285F4",
-            fillOpacity: 1,
-            strokeColor: "#fff",
-            strokeWeight: 2,
-          },
-        });
+    // Ensure correct sizing once visible
+    setTimeout(() => map.invalidateSize(), 50);
 
-        // Range circle overlay
-        if (rangeCircleMetres && rangeCircleMetres > 0) {
-          if (circleRef.current) circleRef.current.setMap(null);
-          circleRef.current = new google.maps.Circle({
-            center: userPos,
-            radius: rangeCircleMetres,
-            map,
-            fillColor: "#4285F4",
-            fillOpacity: 0.06,
-            strokeColor: "#4285F4",
-            strokeOpacity: 0.3,
-            strokeWeight: 1.5,
-          });
-        }
-      }
-
-      // Shop markers – emoji only, no red pin
-      shops.forEach((shop) => {
-        if (shop.lat && shop.lng) {
-          const isDemo = shop.icon === "🔢";
-          let iconConfig: google.maps.Icon;
-
-          if (isDemo) {
-            iconConfig = {
-              url: `${import.meta.env.BASE_URL}demo-shop-icon.png`,
-              scaledSize: new google.maps.Size(44, 44),
-              anchor: new google.maps.Point(22, 22),
-            };
-          } else {
-            const canvas = document.createElement("canvas");
-            canvas.width = 48;
-            canvas.height = 48;
-            const ctx = canvas.getContext("2d");
-            if (ctx) {
-              ctx.font = "36px serif";
-              ctx.textAlign = "center";
-              ctx.textBaseline = "middle";
-              ctx.fillText(shop.icon, 24, 24);
-            }
-            iconConfig = {
-              url: canvas.toDataURL(),
-              scaledSize: new google.maps.Size(40, 40),
-              anchor: new google.maps.Point(20, 20),
-            };
-          }
-
-          const marker = new google.maps.Marker({
-            position: { lat: shop.lat, lng: shop.lng },
-            map,
-            title: shop.name,
-            icon: iconConfig,
-          });
-          if (onShopClick) {
-            marker.addListener("click", () => onShopClick(shop));
-          }
-        }
-      });
+    return () => {
+      map.remove();
+      mapInstanceRef.current = null;
+      shopLayerRef.current = null;
+      circleRef.current = null;
+      userMarkerRef.current = null;
     };
+  }, [locating]);
 
-    if ((window as any).google?.maps) {
-      initMap();
-    } else {
-      const script = document.createElement("script");
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${MAPS_KEY}&callback=Function.prototype`;
-      script.async = true;
-      script.onload = () => initMap();
-      document.head.appendChild(script);
+  // User position marker + range circle
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map || !userPos) return;
+
+    map.setView([userPos.lat, userPos.lng], defaultZoom);
+
+    if (userMarkerRef.current) userMarkerRef.current.remove();
+    userMarkerRef.current = L.circleMarker([userPos.lat, userPos.lng], {
+      radius: 8,
+      fillColor: "#4285F4",
+      fillOpacity: 1,
+      color: "#ffffff",
+      weight: 2,
+    }).addTo(map);
+
+    if (circleRef.current) {
+      circleRef.current.remove();
+      circleRef.current = null;
     }
-  }, [locating, userPos, shops]);
+    if (rangeCircleMetres && rangeCircleMetres > 0) {
+      circleRef.current = L.circle([userPos.lat, userPos.lng], {
+        radius: rangeCircleMetres,
+        fillColor: "#4285F4",
+        fillOpacity: 0.06,
+        color: "#4285F4",
+        opacity: 0.3,
+        weight: 1.5,
+      }).addTo(map);
+    }
+  }, [userPos, rangeCircleMetres, defaultZoom]);
+
+  // Shop markers
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    const layer = shopLayerRef.current;
+    if (!map || !layer) return;
+
+    layer.clearLayers();
+
+    shops.forEach((shop) => {
+      if (shop.lat == null || shop.lng == null) return;
+      const isDemo = shop.icon === "🔢";
+      const html = isDemo
+        ? `<img src="${import.meta.env.BASE_URL}demo-shop-icon.png" style="width:44px;height:44px;display:block;" alt="" />`
+        : `<div style="font-size:32px;line-height:1;text-align:center;">${shop.icon}</div>`;
+      const size = isDemo ? 44 : 40;
+      const divIcon = L.divIcon({
+        html,
+        className: "shopaverse-emoji-marker",
+        iconSize: [size, size],
+        iconAnchor: [size / 2, size / 2],
+      });
+      const marker = L.marker([shop.lat, shop.lng], { icon: divIcon, title: shop.name }).addTo(layer);
+      if (onShopClick) {
+        marker.on("click", () => onShopClick(shop));
+      }
+    });
+  }, [shops, onShopClick]);
 
   return (
-    <div ref={mapRef} className={className}>
-      {locating && (
+    <div className={className} style={{ position: "relative" }}>
+      {locating ? (
         <div className="flex items-center justify-center h-full bg-muted text-muted-foreground text-sm">
           Finding your location…
         </div>
+      ) : (
+        <div ref={mapRef} style={{ width: "100%", height: "100%" }} />
       )}
     </div>
   );
