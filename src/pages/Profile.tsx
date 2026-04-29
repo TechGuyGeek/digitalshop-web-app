@@ -321,6 +321,7 @@ const Profile = () => {
   };
 
   useRegisterNavActions(
+    "profile-delete",
     [
       {
         id: "delete-profile",
