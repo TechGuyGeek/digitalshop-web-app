@@ -7,6 +7,7 @@ import { BasketProvider } from "@/contexts/BasketContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
 import Index from "./pages/Index.tsx";
+import About from "./pages/About.tsx";
 import Profile from "./pages/Profile.tsx";
 import OAuthCallback from "./pages/OAuthCallback.tsx";
 import ViewShops from "./pages/ViewShops.tsx";
@@ -56,6 +57,7 @@ const AppShell = () => {
             <BasketProvider>
               <Routes>
                 <Route path="/" element={<Index />} />
+                <Route path="/about" element={<About />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/oauth-callback" element={<OAuthCallback />} />
                 <Route path="/view-shops" element={<ViewShops />} />
