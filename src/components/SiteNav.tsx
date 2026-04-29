@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSiteNavExtras } from "@/contexts/SiteNavExtras";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -19,6 +20,7 @@ const SiteNav = ({ items, className }: SiteNavProps) => {
   const { t } = useLanguage();
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
+  const { actions } = useSiteNavExtras();
 
   const links: NavItem[] =
     items ?? [
@@ -71,6 +73,32 @@ const SiteNav = ({ items, className }: SiteNavProps) => {
               );
             })}
           </ul>
+          {actions.length > 0 && (
+            <>
+              <div className="border-t border-border my-2" />
+              <ul className="flex flex-col pb-4">
+                {actions.map((a) => (
+                  <li key={a.id}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setOpen(false);
+                        a.onClick();
+                      }}
+                      className={cn(
+                        "w-full text-left block px-6 py-3 text-base font-heading tracking-wide transition-colors",
+                        a.variant === "destructive"
+                          ? "text-destructive hover:bg-destructive/10"
+                          : "text-foreground hover:bg-secondary",
+                      )}
+                    >
+                      {a.label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
         </SheetContent>
       </Sheet>
     </nav>
