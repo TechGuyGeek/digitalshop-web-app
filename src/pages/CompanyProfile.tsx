@@ -372,6 +372,19 @@ const CompanyProfile = () => {
     }
   };
 
+  useRegisterNavActions(
+    "company-delete-shop",
+    [
+      {
+        id: "delete-shop",
+        label: t("DELETEYOURSHOP") || "DELETE YOUR SHOP",
+        variant: "destructive",
+        onClick: handleDeleteClick,
+      },
+    ],
+    [t, company?.companyid],
+  );
+
   const inputClass =
     "border-0 border-b border-border rounded-none bg-transparent px-0 focus-visible:ring-0 focus-visible:border-primary text-center";
 
