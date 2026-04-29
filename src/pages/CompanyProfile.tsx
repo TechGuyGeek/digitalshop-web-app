@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Camera, Image as ImageIcon, Save, Trash2, Loader2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useRegisterNavActions } from "@/contexts/SiteNavExtras";
 import MapMarkerPicker, { type MapMarkerOption } from "@/components/MapMarkerPicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -371,6 +372,19 @@ const CompanyProfile = () => {
     }
   };
 
+  useRegisterNavActions(
+    "company-delete-shop",
+    [
+      {
+        id: "delete-shop",
+        label: t("DELETEYOURSHOP") || "DELETE YOUR SHOP",
+        variant: "destructive",
+        onClick: handleDeleteClick,
+      },
+    ],
+    [t, company?.companyid],
+  );
+
   const inputClass =
     "border-0 border-b border-border rounded-none bg-transparent px-0 focus-visible:ring-0 focus-visible:border-primary text-center";
 
@@ -538,11 +552,6 @@ const CompanyProfile = () => {
 
           {/* Description */}
           <Input value={form.description} onChange={e => handleChange("description", e.target.value)} placeholder={t("CompanyDescription")} className={inputClass} />
-
-          {/* Delete */}
-          <Button variant="destructive" className="w-full rounded-md font-bold uppercase" onClick={handleDeleteClick}>
-            <Trash2 size={16} className="mr-2" /> {t("DELETEYOURSHOP")}
-          </Button>
 
           {/* Bottom actions */}
           <div className="flex gap-3 pb-4">
