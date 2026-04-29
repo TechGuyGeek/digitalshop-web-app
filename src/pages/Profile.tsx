@@ -451,11 +451,6 @@ const Profile = () => {
           </Button>
         </div>
 
-        <Button variant="outline" className="w-full mb-8 rounded-full" onClick={handleLogout}>
-          <LogOut size={16} className="mr-2" />
-          {t("Signout")}
-        </Button>
-
         {/* Demo: video advert trigger button */}
         <Button
           variant="outline"

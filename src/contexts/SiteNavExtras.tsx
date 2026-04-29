@@ -6,6 +6,7 @@ export interface SiteNavAction {
   onClick: () => void;
   variant?: "default" | "destructive";
   disabled?: boolean;
+  order?: number;
 }
 
 interface SiteNavExtrasContextValue {
@@ -31,7 +32,13 @@ export const SiteNavExtrasProvider = ({ children }: { children: ReactNode }) => 
     });
   }, []);
 
-  const actions = useMemo(() => Object.values(groups).flat(), [groups]);
+  const actions = useMemo(
+    () =>
+      Object.values(groups)
+        .flat()
+        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0)),
+    [groups],
+  );
 
   return (
     <SiteNavExtrasContext.Provider value={{ actions, registerGroup, unregisterGroup }}>

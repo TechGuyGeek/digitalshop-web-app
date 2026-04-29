@@ -12,6 +12,7 @@ import About from "./pages/About.tsx";
 import Legal from "./pages/Legal.tsx";
 import SiteNav from "./components/SiteNav";
 import GlobalUpgradeNavAction from "./components/GlobalUpgradeNavAction";
+import GlobalSignOutNavAction from "./components/GlobalSignOutNavAction";
 import Profile from "./pages/Profile.tsx";
 import OAuthCallback from "./pages/OAuthCallback.tsx";
 import ViewShops from "./pages/ViewShops.tsx";
@@ -62,6 +63,7 @@ const AppShell = () => {
               <SiteNavExtrasProvider>
                 <SiteNav />
                 <GlobalUpgradeNavAction />
+                <GlobalSignOutNavAction />
                 <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/about" element={<About />} />
