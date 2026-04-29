@@ -1,26 +1,40 @@
-import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from "react";
 
 export interface SiteNavAction {
   id: string;
   label: string;
   onClick: () => void;
   variant?: "default" | "destructive";
+  disabled?: boolean;
 }
 
 interface SiteNavExtrasContextValue {
   actions: SiteNavAction[];
-  registerActions: (actions: SiteNavAction[]) => void;
-  clearActions: () => void;
+  registerGroup: (groupId: string, actions: SiteNavAction[]) => void;
+  unregisterGroup: (groupId: string) => void;
 }
 
 const SiteNavExtrasContext = createContext<SiteNavExtrasContextValue | null>(null);
 
 export const SiteNavExtrasProvider = ({ children }: { children: ReactNode }) => {
-  const [actions, setActions] = useState<SiteNavAction[]>([]);
-  const registerActions = useCallback((a: SiteNavAction[]) => setActions(a), []);
-  const clearActions = useCallback(() => setActions([]), []);
+  const [groups, setGroups] = useState<Record<string, SiteNavAction[]>>({});
+
+  const registerGroup = useCallback((groupId: string, actions: SiteNavAction[]) => {
+    setGroups((prev) => ({ ...prev, [groupId]: actions }));
+  }, []);
+
+  const unregisterGroup = useCallback((groupId: string) => {
+    setGroups((prev) => {
+      const next = { ...prev };
+      delete next[groupId];
+      return next;
+    });
+  }, []);
+
+  const actions = useMemo(() => Object.values(groups).flat(), [groups]);
+
   return (
-    <SiteNavExtrasContext.Provider value={{ actions, registerActions, clearActions }}>
+    <SiteNavExtrasContext.Provider value={{ actions, registerGroup, unregisterGroup }}>
       {children}
     </SiteNavExtrasContext.Provider>
   );
@@ -32,12 +46,12 @@ export const useSiteNavExtras = () => {
   return ctx;
 };
 
-/** Hook for pages to register menu actions. Auto-clears on unmount. */
-export const useRegisterNavActions = (actions: SiteNavAction[], deps: unknown[]) => {
-  const { registerActions, clearActions } = useSiteNavExtras();
+/** Register a named group of nav actions. Auto-clears on unmount. */
+export const useRegisterNavActions = (groupId: string, actions: SiteNavAction[], deps: unknown[]) => {
+  const { registerGroup, unregisterGroup } = useSiteNavExtras();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    registerActions(actions);
-    return () => clearActions();
+    registerGroup(groupId, actions);
+    return () => unregisterGroup(groupId);
   }, deps);
 };
