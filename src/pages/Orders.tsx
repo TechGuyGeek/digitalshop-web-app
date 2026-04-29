@@ -4,6 +4,7 @@ import { ArrowLeft, Loader2, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useRegisterNavActions } from "@/contexts/SiteNavExtras";
 import {
   fetchOrdersToday, fetchOrdersWeek, fetchOrdersMonth,
   requestCancelOrder, groupOrdersBySession, getCompanyPhotoUrl,
@@ -43,6 +44,26 @@ const Orders = () => {
   }, []);
 
   useEffect(() => { loadOrders(); }, [loadOrders]);
+
+  useRegisterNavActions(
+    "orders-payment",
+    [
+      {
+        id: "payment-methods",
+        label: t("MyPaymentMethods") || "My Payment Methods",
+        onClick: () => navigate("/payment-methods"),
+      },
+    ],
+    [t, navigate],
+  );
+
+  const handlePay = (order: GroupedOrder) => {
+    if (order.hasPaid === "1") return;
+    toast.info(
+      t("PaymentMethodComingSoon") ||
+        "Payments aren't set up yet. Open the menu and tap 'My Payment Methods' to get started.",
+    );
+  };
 
   const currentOrders = activeTab === "today" ? todayOrders : activeTab === "week" ? weekOrders : monthOrders;
 
@@ -134,6 +155,13 @@ const Orders = () => {
                     {t("CompanyProfile")}
                   </Button>
                 </div>
+                {order.hasPaid !== "1" && (
+                  <div className="mt-3" onClick={(e) => e.stopPropagation()}>
+                    <Button className="w-full rounded-full text-sm" onClick={() => handlePay(order)}>
+                      {t("Pay") || "Pay"}
+                    </Button>
+                  </div>
+                )}
               </div>
             );
           })
