@@ -553,11 +553,6 @@ const CompanyProfile = () => {
           {/* Description */}
           <Input value={form.description} onChange={e => handleChange("description", e.target.value)} placeholder={t("CompanyDescription")} className={inputClass} />
 
-          {/* Delete */}
-          <Button variant="destructive" className="w-full rounded-md font-bold uppercase" onClick={handleDeleteClick}>
-            <Trash2 size={16} className="mr-2" /> {t("DELETEYOURSHOP")}
-          </Button>
-
           {/* Bottom actions */}
           <div className="flex gap-3 pb-4">
             <Button variant="outline" className="flex-1 rounded-md" onClick={handleAddProducts} disabled={addProductsLoading}>
