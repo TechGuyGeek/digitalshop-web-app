@@ -9,6 +9,7 @@ import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
 import Index from "./pages/Index.tsx";
 import About from "./pages/About.tsx";
 import Legal from "./pages/Legal.tsx";
+import SiteNav from "./components/SiteNav";
 import Profile from "./pages/Profile.tsx";
 import OAuthCallback from "./pages/OAuthCallback.tsx";
 import ViewShops from "./pages/ViewShops.tsx";
@@ -56,6 +57,7 @@ const AppShell = () => {
       <div className={`w-full max-w-[430px] min-h-screen relative ${isLight ? "shadow-[0_0_60px_-15px_hsl(220_40%_25%/0.15)] bg-background" : "shadow-2xl"}`}>
           <BrowserRouter>
             <BasketProvider>
+              <SiteNav />
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/about" element={<About />} />
