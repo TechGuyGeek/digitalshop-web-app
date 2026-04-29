@@ -1,12 +1,12 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { ArrowLeft, CreditCard, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 const PaymentMethods = () => {
   const { t } = useLanguage();
-  const navigate = useNavigate();
   const [hasMethod, setHasMethod] = useState(false);
 
   useEffect(() => {
@@ -25,9 +25,10 @@ const PaymentMethods = () => {
   }, []);
 
   const handleSetup = () => {
-    // Placeholder — real Stripe SetupIntent / Customer Portal flow will be wired later.
-    // Intentionally no backend call here per current scope.
-    navigate("/profile");
+    toast.info(
+      t("PaymentMethodComingSoon") ||
+        "Payment method setup is still being implemented. Check back soon!",
+    );
   };
 
   return (
