@@ -129,6 +129,7 @@ const Index = () => {
           : "flex min-h-screen items-center justify-center bg-background p-4"
       }
     >
+      <SiteNav />
       {/* Background decorations */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         {isLight ? (
