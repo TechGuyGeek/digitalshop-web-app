@@ -411,15 +411,6 @@ const Profile = () => {
           <ProfileField label={t("DeliveryNotes")} value={form.deliveryNotes} onChange={(v) => handleChange("deliveryNotes", v)} />
         </div>
 
-        <Button
-          variant="destructive"
-          className="w-full mb-4 rounded-full font-semibold"
-          onClick={handleDeleteProfile}
-        >
-          <Trash2 size={16} className="mr-2" />
-          {t("DELETEYOURPROFILE")}
-        </Button>
-
         <div className="flex gap-2 mb-6">
           <Button
             variant="secondary"
