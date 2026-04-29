@@ -320,6 +320,18 @@ const Profile = () => {
     }
   };
 
+  useRegisterNavActions(
+    [
+      {
+        id: "delete-profile",
+        label: t("DELETEYOURPROFILE") || "DELETE YOUR PROFILE",
+        variant: "destructive",
+        onClick: handleDeleteProfile,
+      },
+    ],
+    [t],
+  );
+
   if (!user) return null;
 
   const imagePath = (() => {
