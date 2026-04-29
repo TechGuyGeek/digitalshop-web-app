@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { BasketProvider } from "@/contexts/BasketContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
+import { SiteNavExtrasProvider } from "@/contexts/SiteNavExtras";
 import Index from "./pages/Index.tsx";
 import About from "./pages/About.tsx";
 import Legal from "./pages/Legal.tsx";
@@ -57,8 +58,9 @@ const AppShell = () => {
       <div className={`w-full max-w-[430px] min-h-screen relative ${isLight ? "shadow-[0_0_60px_-15px_hsl(220_40%_25%/0.15)] bg-background" : "shadow-2xl"}`}>
           <BrowserRouter>
             <BasketProvider>
-              <SiteNav />
-              <Routes>
+              <SiteNavExtrasProvider>
+                <SiteNav />
+                <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/legal" element={<Legal />} />
@@ -90,7 +92,8 @@ const AppShell = () => {
                 <Route path="/thank-you" element={<ThankYou />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
-              </Routes>
+                </Routes>
+              </SiteNavExtrasProvider>
             </BasketProvider>
           </BrowserRouter>
         </div>
