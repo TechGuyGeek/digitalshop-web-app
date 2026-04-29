@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import SiteNav from "@/components/SiteNav";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
@@ -14,7 +13,6 @@ const Legal = () => {
   const { t } = useLanguage();
   return (
     <div className="relative min-h-screen bg-background text-foreground">
-      <SiteNav />
       <header className="px-6 pt-6 pb-2">
         <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="h-4 w-4" />

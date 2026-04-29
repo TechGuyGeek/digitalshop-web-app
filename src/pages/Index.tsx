@@ -9,7 +9,6 @@ import { loginUser, registerUser, requestPasswordReset, type DigitalPerson } fro
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme, type ThemeMode } from "@/contexts/ThemeContext";
-import SiteNav from "@/components/SiteNav";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -129,7 +128,6 @@ const Index = () => {
           : "flex min-h-screen items-center justify-center bg-background p-4"
       }
     >
-      <SiteNav />
       {/* Background decorations */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         {isLight ? (

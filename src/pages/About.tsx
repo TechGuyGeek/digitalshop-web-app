@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import SiteNav from "@/components/SiteNav";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const About = () => {
@@ -8,7 +7,6 @@ const About = () => {
 
   return (
     <div className="relative min-h-screen bg-background text-foreground">
-      <SiteNav />
 
       <header className="px-6 pt-6 pb-2">
         <Link
