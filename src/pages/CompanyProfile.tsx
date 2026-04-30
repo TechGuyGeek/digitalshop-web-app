@@ -514,6 +514,22 @@ const CompanyProfile = () => {
           <LabeledInput label={t("TableNumber")} type="number" value={form.notificationCount} onChange={v => handleChange("notificationCount", v)} inputClass={inputClass} />
           <LabeledInput label={t("EnableNotifications")} value={form.notifications} onChange={v => handleChange("notifications", v)} inputClass={inputClass} />
 
+          {/* Payment Method */}
+          <div className="space-y-1">
+            <label className="text-xs text-muted-foreground block">
+              {t("PaymentMethod") || "Payment Method"}
+            </label>
+            <select
+              value={paymentMethod}
+              onChange={(e) => handlePaymentMethodChange(e.target.value)}
+              className={`${inputClass} h-10 w-full appearance-none cursor-pointer`}
+            >
+              <option value="0">{t("CashOnly") || "Cash only"}</option>
+              <option value="1">{t("CardOnly") || "Card only"}</option>
+              <option value="2">{t("CashAndCard") || "Cash and Card"}</option>
+            </select>
+          </div>
+
           {/* Toggles */}
           <div className="space-y-4 pt-2">
             <div className="flex items-center justify-between">
