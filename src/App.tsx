@@ -40,6 +40,8 @@ import CompanyOrderDetail from "./pages/CompanyOrderDetail.tsx";
 import CustomerProfileReadonly from "./pages/CustomerProfileReadonly.tsx";
 import CompanyProfileReadonly from "./pages/CompanyProfileReadonly.tsx";
 import ThankYou from "./pages/ThankYou.tsx";
+import PaymentComplete from "./pages/PaymentComplete.tsx";
+import PaymentRetry from "./pages/PaymentRetry.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -96,6 +98,8 @@ const AppShell = () => {
                 <Route path="/customer-profile-readonly" element={<CustomerProfileReadonly />} />
                 <Route path="/company-profile-readonly" element={<CompanyProfileReadonly />} />
                 <Route path="/thank-you" element={<ThankYou />} />
+                <Route path="/payment-complete" element={<PaymentComplete />} />
+                <Route path="/payment-retry" element={<PaymentRetry />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
                 </Routes>
