@@ -107,6 +107,10 @@ const CompanyProfile = () => {
   const [publicNumber, setPublicNumber] = useState(0);
   const [selectedMarker, setSelectedMarker] = useState({ emoji: "🧸", label: "TOYS ICON" });
 
+  // Payment method: "0" cash only, "1" card only, "2" cash and card
+  const [paymentMethod, setPaymentMethod] = useState<string>("0");
+  const [stripeEnabled, setStripeEnabled] = useState<boolean>(false);
+
   // Load user & company
   useEffect(() => {
     const stored = localStorage.getItem("digitalUser");
@@ -144,6 +148,9 @@ const CompanyProfile = () => {
         setPublicNumber(Number(c.PublicNumber) || 0);
         const marker = getMarkerForPublicNumber(c.PublicNumber);
         setSelectedMarker({ emoji: marker.emoji, label: marker.label.toUpperCase() + " ICON" });
+        const pm = String((c as Record<string, unknown>).PaymentMethod ?? "0");
+        setPaymentMethod(["0", "1", "2"].includes(pm) ? pm : "0");
+        setStripeEnabled(String((c as Record<string, unknown>).StripeEnabled ?? "0") === "1");
         const imgUrl = getCompanyImageUrl(c.companyphoto);
         if (imgUrl) setShopImage(imgUrl);
       }
