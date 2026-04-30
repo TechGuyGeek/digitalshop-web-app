@@ -485,7 +485,7 @@ const CompanyProfile = () => {
           {/* Toggles */}
           <div className="space-y-4 pt-2">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-foreground">{toggles.liveOrders ? t("LiveOrdersPageTitle") : t("EnabletoRecieveOrders")}</span>
+              <span className="text-sm text-foreground">{toggles.liveOrders ? t("YourLivetorecieveOrders") : t("EnabletoRecieveOrders")}</span>
               <Switch checked={toggles.liveOrders} onCheckedChange={v => handleToggle("liveOrders", v)} />
             </div>
             <div className="flex items-center justify-between">
