@@ -522,11 +522,11 @@ const CompanyProfile = () => {
             <select
               value={paymentMethod}
               onChange={(e) => handlePaymentMethodChange(e.target.value)}
-              className={`${inputClass} h-10 w-full appearance-none cursor-pointer`}
+              className={`${inputClass} h-10 w-full appearance-none cursor-pointer bg-background text-foreground`}
             >
-              <option value="0">{t("CashOnly") || "Cash only"}</option>
-              <option value="1">{t("CardOnly") || "Card only"}</option>
-              <option value="2">{t("CashAndCard") || "Cash and Card"}</option>
+              <option value="0" className="bg-background text-foreground">{t("CashOnly") || "Cash only"}</option>
+              <option value="1" className="bg-background text-foreground">{t("CardOnly") || "Card only"}</option>
+              <option value="2" className="bg-background text-foreground">{t("CashAndCard") || "Cash and Card"}</option>
             </select>
           </div>
 
