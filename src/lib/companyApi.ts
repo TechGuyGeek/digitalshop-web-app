@@ -387,6 +387,38 @@ export async function saveMapMarker(
   }
 }
 
+// ─── Update Payment Method ─────────────────────────────────────
+export async function updatePaymentMethod(
+  companyid: number,
+  userId: number,
+  paymentMethod: number,
+): Promise<{ success: boolean; message?: string }> {
+  const url = SERVER_DOMAIN + "menu1/PHPwrite/Company/UpdateCompanyPaymentMethodSecure.php";
+  try {
+    const form = new URLSearchParams();
+    form.append("companyID", String(companyid));
+    form.append("UserID", String(userId));
+    form.append("PaymentMethod", String(paymentMethod));
+    console.log("[updatePaymentMethod] POST", url, Object.fromEntries(form.entries()));
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: form.toString(),
+    });
+    const text = await res.text();
+    console.log("[updatePaymentMethod] response:", text);
+    try {
+      const data = JSON.parse(text);
+      return { success: data.success === true, message: data.message };
+    } catch {
+      return { success: false, message: "Invalid server response" };
+    }
+  } catch (err) {
+    console.error("[updatePaymentMethod] error:", err);
+    return { success: false, message: "Network error" };
+  }
+}
+
 // ─── Map marker mapping ────────────────────────────────────────
 export const MAP_MARKER_EMOJIS: Record<string, { emoji: string; label: string }> = {
   "0": { emoji: "📍", label: "Google" },
