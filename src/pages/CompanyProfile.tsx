@@ -512,7 +512,20 @@ const CompanyProfile = () => {
 
           {/* Notification count & notifications */}
           <LabeledInput label={t("TableNumber")} type="number" value={form.notificationCount} onChange={v => handleChange("notificationCount", v)} inputClass={inputClass} />
-          <LabeledInput label={t("EnableNotifications")} value={form.notifications} onChange={v => handleChange("notifications", v)} inputClass={inputClass} />
+
+          <div className="space-y-1">
+            <label className="text-xs text-muted-foreground block">
+              {t("EnableNotifications") || "Enable Notifications"}
+            </label>
+            <select
+              value={form.notifications === "1" ? "1" : "0"}
+              onChange={(e) => handleChange("notifications", e.target.value)}
+              className={`${inputClass} h-10 w-full appearance-none cursor-pointer bg-background text-foreground`}
+            >
+              <option value="1" className="bg-background text-foreground">{t("Enable") || "Enable"}</option>
+              <option value="0" className="bg-background text-foreground">{t("Disable") || "Disable"}</option>
+            </select>
+          </div>
 
           {/* Payment Method */}
           <div className="space-y-1">
