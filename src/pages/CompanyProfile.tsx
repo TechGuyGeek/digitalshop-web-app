@@ -13,7 +13,8 @@ import {
   loadCompanyProfile, saveCompanyProfile, toggleOrderEnable, toggleTakeawayEnable,
   toggleDeliveryEnable, toggleGlobalEnable, updateCompanyGPS,
   getDeleteBlockers, deleteCompany, getCompanyImageUrl,
-  getMarkerForPublicNumber, saveMapMarker, countMenuGroups, type CompanyProfile as CompanyProfileType
+  getMarkerForPublicNumber, saveMapMarker, countMenuGroups, updatePaymentMethod,
+  type CompanyProfile as CompanyProfileType
 } from "@/lib/companyApi";
 import { fetchOrderCountCombined } from "@/lib/companyOrders";
 import type { DigitalPerson } from "@/lib/api";
