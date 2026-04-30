@@ -13,7 +13,8 @@ import {
   loadCompanyProfile, saveCompanyProfile, toggleOrderEnable, toggleTakeawayEnable,
   toggleDeliveryEnable, toggleGlobalEnable, updateCompanyGPS,
   getDeleteBlockers, deleteCompany, getCompanyImageUrl,
-  getMarkerForPublicNumber, saveMapMarker, countMenuGroups, type CompanyProfile as CompanyProfileType
+  getMarkerForPublicNumber, saveMapMarker, countMenuGroups, updatePaymentMethod,
+  type CompanyProfile as CompanyProfileType
 } from "@/lib/companyApi";
 import { fetchOrderCountCombined } from "@/lib/companyOrders";
 import type { DigitalPerson } from "@/lib/api";
@@ -106,6 +107,10 @@ const CompanyProfile = () => {
   const [publicNumber, setPublicNumber] = useState(0);
   const [selectedMarker, setSelectedMarker] = useState({ emoji: "🧸", label: "TOYS ICON" });
 
+  // Payment method: "0" cash only, "1" card only, "2" cash and card
+  const [paymentMethod, setPaymentMethod] = useState<string>("0");
+  const [stripeEnabled, setStripeEnabled] = useState<boolean>(false);
+
   // Load user & company
   useEffect(() => {
     const stored = localStorage.getItem("digitalUser");
@@ -143,6 +148,9 @@ const CompanyProfile = () => {
         setPublicNumber(Number(c.PublicNumber) || 0);
         const marker = getMarkerForPublicNumber(c.PublicNumber);
         setSelectedMarker({ emoji: marker.emoji, label: marker.label.toUpperCase() + " ICON" });
+        const pm = String((c as Record<string, unknown>).PaymentMethod ?? "0");
+        setPaymentMethod(["0", "1", "2"].includes(pm) ? pm : "0");
+        setStripeEnabled(String((c as Record<string, unknown>).StripeEnabled ?? "0") === "1");
         const imgUrl = getCompanyImageUrl(c.companyphoto);
         if (imgUrl) setShopImage(imgUrl);
       }
@@ -276,6 +284,30 @@ const CompanyProfile = () => {
       setToggles(prev => ({ ...prev, [field]: !value }));
       toast.error("Failed to update toggle");
     }
+  };
+
+  // Payment method change
+  const handlePaymentMethodChange = async (newValue: string) => {
+    const previous = paymentMethod;
+    if (newValue === previous) return;
+
+    // Card-only or Cash+Card require Stripe connected
+    if ((newValue === "1" || newValue === "2") && !stripeEnabled) {
+      toast.error("Stripe needs to be connected before card payments can be enabled.");
+      setPaymentMethod("0");
+      return;
+    }
+
+    if (!company || !user) return;
+    setPaymentMethod(newValue);
+    const userId = Number(user.PersonID || user.ID || 0);
+    const result = await updatePaymentMethod(company.companyid, userId, Number(newValue));
+    if (!result.success) {
+      toast.error(result.message || "Failed to update payment method");
+      setPaymentMethod(previous);
+      return;
+    }
+    toast.success(result.message || "Payment method updated");
   };
 
   // Update GPS
@@ -481,6 +513,22 @@ const CompanyProfile = () => {
           {/* Notification count & notifications */}
           <LabeledInput label={t("TableNumber")} type="number" value={form.notificationCount} onChange={v => handleChange("notificationCount", v)} inputClass={inputClass} />
           <LabeledInput label={t("EnableNotifications")} value={form.notifications} onChange={v => handleChange("notifications", v)} inputClass={inputClass} />
+
+          {/* Payment Method */}
+          <div className="space-y-1">
+            <label className="text-xs text-muted-foreground block">
+              {t("PaymentMethod") || "Payment Method"}
+            </label>
+            <select
+              value={paymentMethod}
+              onChange={(e) => handlePaymentMethodChange(e.target.value)}
+              className={`${inputClass} h-10 w-full appearance-none cursor-pointer`}
+            >
+              <option value="0">{t("CashOnly") || "Cash only"}</option>
+              <option value="1">{t("CardOnly") || "Card only"}</option>
+              <option value="2">{t("CashAndCard") || "Cash and Card"}</option>
+            </select>
+          </div>
 
           {/* Toggles */}
           <div className="space-y-4 pt-2">
