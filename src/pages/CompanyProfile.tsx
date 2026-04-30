@@ -286,6 +286,30 @@ const CompanyProfile = () => {
     }
   };
 
+  // Payment method change
+  const handlePaymentMethodChange = async (newValue: string) => {
+    const previous = paymentMethod;
+    if (newValue === previous) return;
+
+    // Card-only or Cash+Card require Stripe connected
+    if ((newValue === "1" || newValue === "2") && !stripeEnabled) {
+      toast.error("Stripe needs to be connected before card payments can be enabled.");
+      setPaymentMethod("0");
+      return;
+    }
+
+    if (!company || !user) return;
+    setPaymentMethod(newValue);
+    const userId = Number(user.PersonID || user.ID || 0);
+    const result = await updatePaymentMethod(company.companyid, userId, Number(newValue));
+    if (!result.success) {
+      toast.error(result.message || "Failed to update payment method");
+      setPaymentMethod(previous);
+      return;
+    }
+    toast.success(result.message || "Payment method updated");
+  };
+
   // Update GPS
   const handleUpdateGPS = async () => {
     if (String(user?.PaidUser ?? user?.Paiduser) !== "2") {
