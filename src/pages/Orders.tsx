@@ -85,15 +85,23 @@ const Orders = () => {
       const checkBody = new URLSearchParams();
       checkBody.append("companyID", order.companyId);
       checkBody.append("UserID", personId);
-      const checkRes = await fetch(
-        SERVER_DOMAIN + "menu1/PHPread/Stripe/CheckStripePaymentAllowed.php",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: checkBody.toString(),
-        },
-      );
-      const checkData = await checkRes.json().catch(() => null);
+      let checkText = "";
+      let checkData: { success?: boolean; [k: string]: unknown } | null = null;
+      try {
+        const checkRes = await fetch(
+          SERVER_DOMAIN + "menu1/PHPread/Stripe/CheckStripePaymentAllowed.php",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: checkBody.toString(),
+          },
+        );
+        checkText = await checkRes.text();
+        console.log("[Pay] CheckStripePaymentAllowed status:", checkRes.status, "body:", checkText);
+        try { checkData = JSON.parse(checkText); } catch { checkData = null; }
+      } catch (netErr) {
+        console.error("[Pay] CheckStripePaymentAllowed network error:", netErr);
+      }
       if (!checkData || checkData.success !== true) {
         toast.info(
           t("PaymentMethodComingSoon") ||
@@ -109,12 +117,18 @@ const Orders = () => {
       detailBody.append("companyID", order.companyId);
       detailBody.append("OrderResult", clientId);
       detailBody.append("getDateandTime", order.dateTime);
-      const detailRes = await fetch(SERVER_DOMAIN + ORDER_DETAIL_ENDPOINTS[activeTab], {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: detailBody.toString(),
-      });
-      const detailText = await detailRes.text();
+      let detailText = "";
+      try {
+        const detailRes = await fetch(SERVER_DOMAIN + ORDER_DETAIL_ENDPOINTS[activeTab], {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: detailBody.toString(),
+        });
+        detailText = await detailRes.text();
+        console.log("[Pay] Order details status:", detailRes.status);
+      } catch (netErr) {
+        console.error("[Pay] Order details network error:", netErr);
+      }
       let detailItems: Array<Record<string, unknown>> = [];
       if (detailText && detailText.trim() !== "" && detailText.trim() !== "[]") {
         try {
@@ -139,23 +153,31 @@ const Orders = () => {
       sessionBody.append("orderID", orderId);
       sessionBody.append("amount", totalAmount.toFixed(2));
       sessionBody.append("email", userEmail);
-      const sessionRes = await fetch(
-        SERVER_DOMAIN + "menu1/PHPwrite/Stripe/CreateOrderCheckoutSession.php",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: sessionBody.toString(),
-        },
-      );
-      const sessionData = await sessionRes.json().catch(() => null);
+      let sessionText = "";
+      let sessionData: { success?: boolean; checkoutUrl?: string; [k: string]: unknown } | null = null;
+      try {
+        const sessionRes = await fetch(
+          SERVER_DOMAIN + "menu1/PHPwrite/Stripe/CreateOrderCheckoutSession.php",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: sessionBody.toString(),
+          },
+        );
+        sessionText = await sessionRes.text();
+        console.log("[Pay] CreateOrderCheckoutSession status:", sessionRes.status, "body:", sessionText);
+        try { sessionData = JSON.parse(sessionText); } catch { sessionData = null; }
+      } catch (netErr) {
+        console.error("[Pay] CreateOrderCheckoutSession network error:", netErr);
+      }
       if (sessionData && sessionData.success === true && sessionData.checkoutUrl) {
         window.location.href = String(sessionData.checkoutUrl);
         return;
       }
       toast.error(t("SaveFailed") || "Could not start checkout.");
     } catch (err) {
-      console.error("Pay flow failed:", err);
-      toast.error(t("Pleasecheckyourinternetconnection") || "Network error.");
+      console.error("[Pay] Unexpected error:", err);
+      toast.error(t("SaveFailed") || "Could not start checkout.");
     } finally {
       setPayingId(null);
     }
