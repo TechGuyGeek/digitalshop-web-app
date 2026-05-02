@@ -42,6 +42,8 @@ import CompanyProfileReadonly from "./pages/CompanyProfileReadonly.tsx";
 import ThankYou from "./pages/ThankYou.tsx";
 import PaymentComplete from "./pages/PaymentComplete.tsx";
 import PaymentRetry from "./pages/PaymentRetry.tsx";
+import PaymentSuccess from "./pages/PaymentSuccess.tsx";
+import PaymentCancelled from "./pages/PaymentCancelled.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -100,6 +102,8 @@ const AppShell = () => {
                 <Route path="/thank-you" element={<ThankYou />} />
                 <Route path="/payment-complete" element={<PaymentComplete />} />
                 <Route path="/payment-retry" element={<PaymentRetry />} />
+                <Route path="/payment-success" element={<PaymentSuccess />} />
+                <Route path="/payment-cancelled" element={<PaymentCancelled />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
                 </Routes>
