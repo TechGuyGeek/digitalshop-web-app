@@ -324,11 +324,6 @@ const Profile = () => {
     "profile-delete",
     [
       {
-        id: "payment-methods",
-        label: t("MyPaymentMethods") || "My Payment Methods",
-        onClick: () => navigate("/payment-methods"),
-      },
-      {
         id: "delete-profile",
         label: t("DELETEYOURPROFILE") || "DELETE YOUR PROFILE",
         variant: "destructive",
