@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Loader2, Store, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
+import OrderPayButton from "@/components/OrderPayButton";
 
 const SERVER_DOMAIN = "https://app.techguygeek.co.uk/";
 interface OrderLineItem { companyid?: string; clientid?: string; DateandTime?: string; productid?: string; OrderName?: string; orderName?: string; OrderPrice?: string; orderPrice?: string; imagepath?: string; OrderDesription?: string; [key: string]: unknown; }
@@ -19,6 +20,7 @@ const OrderDetailMonth = () => {
   const clientId = searchParams.get("clientid") || "";
   const dateTime = searchParams.get("datetime") || "";
   const companyName = searchParams.get("companyname") || t("Ordersofthemonth");
+  const hasPaid = searchParams.get("haspaid") === "1";
 
   useEffect(() => {
     const loadDetails = async () => {
@@ -67,6 +69,9 @@ const OrderDetailMonth = () => {
           })
         )}
       </div>
+      {!loading && !error && items.length > 0 && (
+        <OrderPayButton companyId={companyId} orderId={clientId} totalAmount={totalPrice} hasPaid={hasPaid} />
+      )}
     </div>
   );
 };
