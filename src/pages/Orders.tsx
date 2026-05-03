@@ -13,14 +13,6 @@ import {
 
 type TabKey = "today" | "week" | "month";
 
-const SERVER_DOMAIN = "https://app.techguygeek.co.uk/";
-
-const ORDER_DETAIL_ENDPOINTS: Record<TabKey, string> = {
-  today: "menu1/PHPread/CompanyLiveUserOrders/RetriveLiveUserOrderDetails.php",
-  week: "menu1/PHPread/CompanyLiveUserOrders/RetriveLiveUserOrderDetailsweek.php",
-  month: "menu1/PHPread/CompanyLiveUserOrders/RetriveLiveUserOrderDetailsmonth.php",
-};
-
 const Orders = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
@@ -30,7 +22,6 @@ const Orders = () => {
   const [todayOrders, setTodayOrders] = useState<GroupedOrder[]>([]);
   const [weekOrders, setWeekOrders] = useState<GroupedOrder[]>([]);
   const [monthOrders, setMonthOrders] = useState<GroupedOrder[]>([]);
-  const [payingId, setPayingId] = useState<string | null>(null);
 
   const TABS: { key: TabKey; label: string }[] = [
     { key: "today", label: t("Today") },
@@ -66,123 +57,6 @@ const Orders = () => {
     [t, navigate],
   );
 
-  const handlePay = async (order: GroupedOrder) => {
-    if (order.hasPaid === "1" || payingId) return;
-    const personId = getPersonId();
-    if (!personId) return;
-    let userEmail = "";
-    try {
-      const stored = localStorage.getItem("digitalUser");
-      if (stored) {
-        const u = JSON.parse(stored);
-        userEmail = String(u.Email || u.email || "");
-      }
-    } catch {}
-
-    setPayingId(order.randomCode);
-    try {
-      // 1) Check if Stripe payments are allowed for this user/company
-      const checkBody = new URLSearchParams();
-      checkBody.append("companyID", order.companyId);
-      checkBody.append("UserID", personId);
-      let checkText = "";
-      let checkData: { success?: boolean; [k: string]: unknown } | null = null;
-      try {
-        const checkRes = await fetch(
-          SERVER_DOMAIN + "menu1/PHPread/Stripe/CheckStripePaymentAllowed.php",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: checkBody.toString(),
-          },
-        );
-        checkText = await checkRes.text();
-        console.log("[Pay] CheckStripePaymentAllowed status:", checkRes.status, "body:", checkText);
-        try { checkData = JSON.parse(checkText); } catch { checkData = null; }
-      } catch (netErr) {
-        console.error("[Pay] CheckStripePaymentAllowed network error:", netErr);
-      }
-      if (!checkData || checkData.success !== true) {
-        toast.info(
-          t("PaymentMethodComingSoon") ||
-            "Payments aren't set up yet. Open the menu and tap 'My Payment Methods' to get started.",
-        );
-        return;
-      }
-
-      // 2) Load real order details to calculate the real total
-      const first = order.items[0];
-      const clientId = String(first.clientid || first.Companyid || "");
-      const detailBody = new URLSearchParams();
-      detailBody.append("companyID", order.companyId);
-      detailBody.append("OrderResult", clientId);
-      detailBody.append("getDateandTime", order.dateTime);
-      let detailText = "";
-      try {
-        const detailRes = await fetch(SERVER_DOMAIN + ORDER_DETAIL_ENDPOINTS[activeTab], {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: detailBody.toString(),
-        });
-        detailText = await detailRes.text();
-        console.log("[Pay] Order details status:", detailRes.status);
-      } catch (netErr) {
-        console.error("[Pay] Order details network error:", netErr);
-      }
-      let detailItems: Array<Record<string, unknown>> = [];
-      if (detailText && detailText.trim() !== "" && detailText.trim() !== "[]") {
-        try {
-          const parsed = JSON.parse(detailText);
-          if (Array.isArray(parsed)) detailItems = parsed;
-        } catch {}
-      }
-      if (detailItems.length === 0) {
-        toast.error(t("SaveFailed") || "Could not load order details.");
-        return;
-      }
-      const totalAmount = detailItems.reduce((sum, item) => {
-        const price = parseFloat(String(item.OrderPrice || item.orderPrice || "0"));
-        return sum + (isNaN(price) ? 0 : price);
-      }, 0);
-      const orderId = String(first.orderid || first.Orderid || order.randomCode);
-
-      // 3) Create Stripe checkout session and redirect
-      const sessionBody = new URLSearchParams();
-      sessionBody.append("companyID", order.companyId);
-      sessionBody.append("UserID", personId);
-      sessionBody.append("orderID", orderId);
-      sessionBody.append("amount", totalAmount.toFixed(2));
-      sessionBody.append("email", userEmail);
-      let sessionText = "";
-      let sessionData: { success?: boolean; checkoutUrl?: string; [k: string]: unknown } | null = null;
-      try {
-        const sessionRes = await fetch(
-          SERVER_DOMAIN + "menu1/PHPwrite/Stripe/CreateOrderCheckoutSession.php",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: sessionBody.toString(),
-          },
-        );
-        sessionText = await sessionRes.text();
-        console.log("[Pay] CreateOrderCheckoutSession status:", sessionRes.status, "body:", sessionText);
-        try { sessionData = JSON.parse(sessionText); } catch { sessionData = null; }
-      } catch (netErr) {
-        console.error("[Pay] CreateOrderCheckoutSession network error:", netErr);
-      }
-      if (sessionData && sessionData.success === true && sessionData.checkoutUrl) {
-        window.location.href = String(sessionData.checkoutUrl);
-        return;
-      }
-      toast.error(t("SaveFailed") || "Could not start checkout.");
-    } catch (err) {
-      console.error("[Pay] Unexpected error:", err);
-      toast.error(t("SaveFailed") || "Could not start checkout.");
-    } finally {
-      setPayingId(null);
-    }
-  };
-
   const currentOrders = activeTab === "today" ? todayOrders : activeTab === "week" ? weekOrders : monthOrders;
 
   const handleCancel = async (order: GroupedOrder) => {
@@ -196,7 +70,7 @@ const Orders = () => {
   const handleOrderTap = (order: GroupedOrder) => {
     const first = order.items[0];
     const clientId = String(first.clientid || first.Companyid || "");
-    const params = new URLSearchParams({ companyid: order.companyId, clientid: clientId, datetime: order.dateTime, companyname: order.companyName });
+    const params = new URLSearchParams({ companyid: order.companyId, clientid: clientId, datetime: order.dateTime, companyname: order.companyName, haspaid: order.hasPaid === "1" ? "1" : "0" });
     const detailRoutes: Record<TabKey, string> = { today: "/order-detail", week: "/order-detail-week", month: "/order-detail-month" };
     navigate(`${detailRoutes[activeTab]}?${params.toString()}`);
   };
@@ -271,18 +145,6 @@ const Orders = () => {
                   </Button>
                   <Button variant="outline" className="flex-1 rounded-full text-sm" onClick={() => handleCompanyProfile(order)}>
                     {t("CompanyProfile")}
-                  </Button>
-                </div>
-                <div className="mt-3" onClick={(e) => e.stopPropagation()}>
-                  <Button
-                    className="w-full rounded-full text-sm"
-                    disabled={order.hasPaid === "1" || payingId === order.randomCode}
-                    onClick={() => handlePay(order)}
-                  >
-                    {payingId === order.randomCode ? (
-                      <Loader2 className="animate-spin mr-1" size={14} />
-                    ) : null}
-                    {order.hasPaid === "1" ? (t("Paid") || "Paid") : (t("Pay") || "Pay")}
                   </Button>
                 </div>
               </div>
