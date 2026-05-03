@@ -6,7 +6,7 @@ const ShopsAVerse = () => {
       <img
         src={shopsAVerseImg}
         alt="Shops-A-Verse - Every shop. One verse. Infinite possibilities."
-        className="w-full h-full object-cover"
+        className="w-full h-full object-contain"
       />
     </div>
   );
