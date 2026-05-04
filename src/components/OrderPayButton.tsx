@@ -71,6 +71,7 @@ const OrderPayButton = ({ companyId, orderId, totalAmount, hasPaid }: OrderPayBu
       const sessionBody = new URLSearchParams();
       sessionBody.append("companyID", companyId);
       sessionBody.append("UserID", personId);
+      sessionBody.append("clientID", personId);
       sessionBody.append("orderID", orderId);
       sessionBody.append("amount", totalAmount.toFixed(2));
       sessionBody.append("email", getEmail());
