@@ -37,6 +37,7 @@ const OrderDetail = () => {
 
   const totalItems = items.length;
   const totalPrice = items.reduce((sum, item) => { const price = parseFloat(String(item.OrderPrice || item.orderPrice || "0")); return sum + (isNaN(price) ? 0 : price); }, 0);
+  const liveOrderId = String((items[0] as Record<string, unknown> | undefined)?.["Orderid"] ?? (items[0] as Record<string, unknown> | undefined)?.["orderid"] ?? "");
 
   return (
     <div className="h-screen bg-muted flex flex-col">
@@ -78,7 +79,7 @@ const OrderDetail = () => {
         )}
       </div>
       {!loading && items.length > 0 && (
-        <OrderPayButton companyId={companyId} orderId={clientId} totalAmount={totalPrice} hasPaid={hasPaid} />
+        <OrderPayButton companyId={companyId} orderId={liveOrderId} totalAmount={totalPrice} hasPaid={hasPaid} />
       )}
     </div>
   );
