@@ -1,11 +1,19 @@
-import { useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useRegisterNavActions } from "@/contexts/SiteNavExtras";
 
 const ADMIN_EMAIL = "jason.purkiss.bsc@gmail.com";
 
 const GlobalAdminNavAction = () => {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const [tick, setTick] = useState(0);
+
+  useEffect(() => {
+    const onStorage = () => setTick((n) => n + 1);
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
 
   const email = (() => {
     try {
@@ -36,7 +44,7 @@ const GlobalAdminNavAction = () => {
           },
         ]
       : [],
-    [isAdmin, handleClick],
+    [isAdmin, handleClick, pathname, tick],
   );
 
   return null;
