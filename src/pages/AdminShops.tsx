@@ -21,13 +21,13 @@ const AdminShops = () => {
     if (!password.trim()) { setError("Enter password"); return; }
     setLoading(true); setError(null);
     try {
-      const body = new URLSearchParams();
-      body.append("password", password);
       const res = await fetch(ENDPOINT, {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: body.toString(),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ AdminKey: password }),
       });
+      if (res.status === 403) { setError("Wrong admin key"); setLoading(false); return; }
+      if (!res.ok) { setError(`Error ${res.status}: ${res.statusText}`); setLoading(false); return; }
       const text = await res.text();
       if (!text || text.trim() === "") { setError("No data returned (check password)"); setLoading(false); return; }
       let companies: NearbyCompany[] = [];
