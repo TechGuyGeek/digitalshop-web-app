@@ -13,6 +13,7 @@ import Legal from "./pages/Legal.tsx";
 import SiteNav from "./components/SiteNav";
 import GlobalUpgradeNavAction from "./components/GlobalUpgradeNavAction";
 import GlobalSignOutNavAction from "./components/GlobalSignOutNavAction";
+import GlobalAdminNavAction from "./components/GlobalAdminNavAction";
 import Profile from "./pages/Profile.tsx";
 import PaymentMethods from "./pages/PaymentMethods.tsx";
 import OAuthCallback from "./pages/OAuthCallback.tsx";
@@ -71,6 +72,7 @@ const AppShell = () => {
                 <SiteNav />
                 <GlobalUpgradeNavAction />
                 <GlobalSignOutNavAction />
+                <GlobalAdminNavAction />
                 <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/about" element={<About />} />
