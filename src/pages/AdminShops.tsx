@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, RefreshCw, MapPin, Lock } from "lucide-react";
+import { ArrowLeft, RefreshCw, MapPin, Lock, Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import GoogleMap from "@/components/GoogleMap";
@@ -16,6 +16,7 @@ const AdminShops = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [connected, setConnected] = useState(false);
+  const [mapExpanded, setMapExpanded] = useState(false);
 
   const handleConnect = async () => {
     if (!password.trim()) {
@@ -119,7 +120,29 @@ const AdminShops = () => {
 
       {connected && (
         <>
-          <GoogleMap className="h-56 w-full" shops={mapShops} onShopClick={handleShopMapClick} defaultZoom={3} />
+          <div
+            className={
+              mapExpanded
+                ? "fixed inset-0 z-50 bg-background"
+                : "relative h-56 w-full"
+            }
+          >
+            <GoogleMap
+              className="h-full w-full"
+              shops={mapShops}
+              onShopClick={handleShopMapClick}
+              defaultZoom={3}
+            />
+            <Button
+              size="icon"
+              variant="secondary"
+              className="absolute top-2 right-2 z-[1000] shadow-md"
+              onClick={() => setMapExpanded((v) => !v)}
+              aria-label={mapExpanded ? "Collapse map" : "Expand map"}
+            >
+              {mapExpanded ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+            </Button>
+          </div>
           <div className="px-4 py-2 text-xs text-muted-foreground">{shops.length} shops loaded</div>
           <div className="divide-y divide-border">
             {shops.length === 0 && (
