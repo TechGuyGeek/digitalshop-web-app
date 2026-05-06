@@ -64,7 +64,14 @@ const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, 
     // Ensure correct sizing once visible
     setTimeout(() => map.invalidateSize(), 50);
 
+    // Recalculate map size when container resizes (e.g. expand/collapse)
+    const resizeObserver = new ResizeObserver(() => {
+      setTimeout(() => map.invalidateSize(), 200);
+    });
+    resizeObserver.observe(map.getContainer());
+
     return () => {
+      resizeObserver.disconnect();
       map.remove();
       mapInstanceRef.current = null;
       shopLayerRef.current = null;
