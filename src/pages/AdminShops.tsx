@@ -38,19 +38,20 @@ const AdminShops = () => {
         setLoading(false);
         return;
       }
-      let companies: NearbyCompany[] = [];
+      let result;
       try {
-        companies = JSON.parse(text);
+        result = JSON.parse(text);
       } catch {
         setError(`Invalid response: ${text.slice(0, 120)}`);
         setLoading(false);
         return;
       }
-      if (!Array.isArray(companies)) {
-        setError("Unexpected response format");
+      if (!result.success || !Array.isArray(result.data)) {
+        setError(result.error || "Unexpected response format");
         setLoading(false);
         return;
       }
+      const companies: NearbyCompany[] = result.data;
       const mapped: NearbyShop[] = companies.map((c) => {
         const cat = getCategoryByCode(Number(c.PublicNumber) || 0);
         return {
