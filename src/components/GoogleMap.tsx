@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { getMarkerIconUrl, DEFAULT_MARKER_ICON } from "@/lib/mapMarkerIcons";
 
 interface GoogleMapProps {
   className?: string;
@@ -123,11 +124,9 @@ const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, 
 
     shops.forEach((shop) => {
       if (shop.lat == null || shop.lng == null) return;
-      const isDemo = shop.icon === "🔢";
-      const html = isDemo
-        ? `<img src="${import.meta.env.BASE_URL}demo-shop-icon.png" style="width:44px;height:44px;display:block;" alt="" />`
-        : `<div style="font-size:32px;line-height:1;text-align:center;">${shop.icon}</div>`;
-      const size = isDemo ? 44 : 40;
+      const iconUrl = getMarkerIconUrl({ emoji: shop.icon });
+      const size = 40;
+      const html = `<img src="${iconUrl}" style="width:${size}px;height:${size}px;display:block;object-fit:contain;" alt="" onerror="this.onerror=null;this.src='${DEFAULT_MARKER_ICON}';" />`;
       const divIcon = L.divIcon({
         html,
         className: "shopaverse-emoji-marker",
