@@ -6,6 +6,7 @@ import GoogleMap from "@/components/GoogleMap";
 import { fetchNearbyShops, fetchGlobalShops, NearbyShop } from "@/lib/nearbyShops";
 import { useLanguage } from "@/contexts/LanguageContext";
 import AdvertSlot from "@/components/adverts/AdvertSlot";
+import { getMarkerIconUrl, DEFAULT_MARKER_ICON } from "@/lib/mapMarkerIcons";
 
 interface ShopListingPageProps { title: string; variant?: "free" | "paid" | "global"; }
 
