@@ -6,6 +6,7 @@ import GoogleMap from "@/components/GoogleMap";
 import { fetchNearbyShops, fetchGlobalShops, NearbyShop } from "@/lib/nearbyShops";
 import { useLanguage } from "@/contexts/LanguageContext";
 import AdvertSlot from "@/components/adverts/AdvertSlot";
+import { getMarkerIconUrl, DEFAULT_MARKER_ICON } from "@/lib/mapMarkerIcons";
 
 interface ShopListingPageProps { title: string; variant?: "free" | "paid" | "global"; }
 
@@ -79,9 +80,12 @@ const ShopList = ({ shops, isGlobal = false }: { shops: NearbyShop[]; isGlobal?:
     <div className="divide-y divide-border">
       {shops.map((shop) => (
         <button key={shop.companyid} className="w-full flex items-center gap-4 px-6 py-4 text-left hover:bg-accent/50 transition-colors" onClick={() => navigate(`/shop-profile?companyid=${shop.companyid}&name=${encodeURIComponent(shop.name)}&icon=${encodeURIComponent(shop.icon)}`)}>
-          {shop.categoryLabel === "Digits"
-            ? <img src={`${import.meta.env.BASE_URL}demo-shop-icon.png`} alt="Demo" className="w-8 h-8" />
-            : <span className="text-2xl">{shop.icon}</span>}
+          <img
+            src={getMarkerIconUrl({ categoryCode: shop.categoryCode, emoji: shop.icon })}
+            alt=""
+            className="w-8 h-8 object-contain"
+            onError={(e) => { (e.currentTarget as HTMLImageElement).src = DEFAULT_MARKER_ICON; }}
+          />
           <div className="flex-1 min-w-0">
             <span className="text-sm font-medium text-foreground block truncate">{shop.name}</span>
             <span className="text-xs text-muted-foreground">{shop.categoryLabel}{!isGlobal && shop.distance > 0 ? ` · ${shop.distance.toFixed(2)} mi` : ""}</span>

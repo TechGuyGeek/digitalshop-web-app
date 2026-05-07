@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import GoogleMap from "@/components/GoogleMap";
 import { getCategoryByCode } from "@/lib/shopCategories";
+import { getMarkerIconUrl, DEFAULT_MARKER_ICON } from "@/lib/mapMarkerIcons";
 import type { NearbyShop, NearbyCompany } from "@/lib/nearbyShops";
 
 const ENDPOINT = "https://app.techguygeek.co.uk/menu1/PHPread/ClientMenu/getallshops.php";
@@ -163,7 +164,12 @@ const AdminShops = () => {
                   )
                 }
               >
-                <span className="text-2xl">{shop.icon}</span>
+                <img
+                  src={getMarkerIconUrl({ categoryCode: shop.categoryCode, emoji: shop.icon })}
+                  alt=""
+                  className="w-8 h-8 object-contain"
+                  onError={(e) => { (e.currentTarget as HTMLImageElement).src = DEFAULT_MARKER_ICON; }}
+                />
                 <div className="flex-1 min-w-0">
                   <span className="text-sm font-medium text-foreground block truncate">{shop.name}</span>
                   <span className="text-xs text-muted-foreground">
