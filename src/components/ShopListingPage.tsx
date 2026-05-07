@@ -59,9 +59,9 @@ const ShopListingPage = ({ title, variant = "free" }: ShopListingPageProps) => {
       </div>
       <div className="flex-1 flex flex-col">
         {activeTab === "hybrid" && (<>
-          <ExpandableMap expanded={mapExpanded} onToggle={() => setMapExpanded(v => !v)} baseClassName="relative h-56 w-full">
+          <div className="relative h-56 w-full">
             <GoogleMap className="h-full w-full" shops={mapShops} onShopClick={handleShopMapClick} defaultZoom={isGlobal ? 3 : 14} rangeCircleMetres={variant === "free" ? 804.67 : variant === "paid" ? 1609.34 : undefined} />
-          </ExpandableMap>
+          </div>
           {(variant === "free" || variant === "paid") && <p className="text-[11px] text-muted-foreground text-center py-1">{variant === "free" ? (t("Showingshopswithin") !== "Showingshopswithin" ? t("Showingshopswithin") : "Showing shops within 0.5 miles") : "Showing shops within 1 mile"}</p>}
           <ShopContent shops={shops} loading={loading} error={error} isGlobal={isGlobal} onRetry={() => isGlobal ? loadShops() : userPos && loadShops(userPos.lat, userPos.lng)} />
         </>)}
