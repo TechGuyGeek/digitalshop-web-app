@@ -20,10 +20,10 @@ const About = () => {
 
       <main className="px-6 pb-16 pt-4 max-w-prose mx-auto">
         <h1 className="font-heading text-3xl md:text-4xl tracking-tight text-foreground mb-4">
-          About Shop-a-Verse
+          About GPS Shops
         </h1>
         <p className="text-muted-foreground mb-6 leading-relaxed">
-          Shop-a-Verse is a global, location-aware marketplace that connects
+          GPS Shops is a global, location-aware marketplace that connects
           people with the shops, services, and experiences around them — wherever
           they are in the world.
         </p>
@@ -47,7 +47,7 @@ const About = () => {
             marketing budgets.
           </p>
           <p className="text-muted-foreground leading-relaxed">
-            Shop-a-Verse makes that possible.
+            GPS Shops makes that possible.
           </p>
         </section>
 
@@ -96,7 +96,7 @@ const About = () => {
         </section>
 
         <section className="space-y-4 mb-8">
-          <h2 className="font-heading text-2xl text-foreground">Why Shop-a-Verse?</h2>
+          <h2 className="font-heading text-2xl text-foreground">Why GPS Shops?</h2>
           <p className="text-muted-foreground leading-relaxed">
             Because the future of shopping is not just online.
           </p>
@@ -111,7 +111,7 @@ const About = () => {
         <section className="space-y-4 mb-8">
           <h2 className="font-heading text-2xl text-foreground">Founder Vision</h2>
           <p className="text-muted-foreground leading-relaxed">
-            Shop-a-Verse began as an idea to bridge the gap between physical
+            GPS Shops began as an idea to bridge the gap between physical
             shops and the digital world.
           </p>
           <p className="text-muted-foreground leading-relaxed">
@@ -125,7 +125,7 @@ const About = () => {
           </p>
           <p className="text-muted-foreground leading-relaxed">
             This original founder video shares the early concept behind what is
-            now Shop-a-Verse.
+            now GPS Shops.
           </p>
           <p className="text-muted-foreground leading-relaxed">
             While the platform has evolved significantly since then, the
@@ -141,7 +141,7 @@ const About = () => {
             <iframe
               className="absolute inset-0 h-full w-full"
               src="https://www.youtube.com/embed/fT_XSVrbfqM?start=4"
-              title="Shop-a-Verse founder concept video"
+              title="GPS Shops founder concept video"
               loading="lazy"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
