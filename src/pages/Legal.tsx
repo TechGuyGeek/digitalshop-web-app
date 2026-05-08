@@ -24,22 +24,22 @@ const Legal = () => {
           Terms, Disclaimer & Limitation of Liability
         </h1>
         <p className="text-sm text-muted-foreground mb-6">Effective Date: 29 April 2026</p>
-        <p className="text-muted-foreground leading-relaxed mb-3">Welcome to Shop-a-Verse.</p>
+        <p className="text-muted-foreground leading-relaxed mb-3">Welcome to GPS Shops.</p>
         <p className="text-muted-foreground leading-relaxed mb-3">
-          Shop-a-Verse is a location-aware digital marketplace platform that allows businesses, sellers, and customers to connect through online storefronts, map-based discovery, and digital ordering services.
+          GPS Shops is a location-aware digital marketplace platform that allows businesses, sellers, and customers to connect through online storefronts, map-based discovery, and digital ordering services.
         </p>
         <p className="text-muted-foreground leading-relaxed mb-8">
-          By using this website, mobile app, or any related services operated by Shop-a-Verse, you agree to the following terms and conditions.
+          By using this website, mobile app, or any related services operated by GPS Shops, you agree to the following terms and conditions.
         </p>
 
         <Section title="1. Platform Role">
-          <p>Shop-a-Verse provides a platform for independent businesses, sellers, and customers to connect.</p>
+          <p>GPS Shops provides a platform for independent businesses, sellers, and customers to connect.</p>
           <p>We are not the direct seller, supplier, manufacturer, or delivery provider for goods or services listed by third-party businesses unless explicitly stated otherwise.</p>
           <p>Transactions made through the platform are primarily agreements between the buyer and the individual seller or business.</p>
         </Section>
 
         <Section title="2. User Responsibility">
-          <p>All users use Shop-a-Verse at their own risk.</p>
+          <p>All users use GPS Shops at their own risk.</p>
           <p>Buyers are responsible for verifying the legitimacy, quality, suitability, and reliability of any seller, product, or service before making a purchase.</p>
           <p>Sellers are responsible for ensuring that all products, services, pricing, descriptions, and business information provided are accurate, lawful, and up to date.</p>
           <p>Users are responsible for maintaining the security of their own accounts, passwords, and login credentials.</p>
@@ -47,7 +47,7 @@ const Legal = () => {
 
         <Section title="3. Payments and Disputes">
           <p>Payment transactions may be processed through third-party providers such as Stripe or other payment platforms.</p>
-          <p>Shop-a-Verse is not responsible for:</p>
+          <p>GPS Shops is not responsible for:</p>
           <ul className="list-disc pl-6 space-y-1">
             <li>payment failures</li>
             <li>chargebacks</li>
@@ -71,7 +71,7 @@ const Legal = () => {
         </Section>
 
         <Section title="5. Platform Availability">
-          <p>While we aim to provide reliable service, Shop-a-Verse does not guarantee uninterrupted access, permanent uptime, or error-free operation.</p>
+          <p>While we aim to provide reliable service, GPS Shops does not guarantee uninterrupted access, permanent uptime, or error-free operation.</p>
           <p>We are not liable for:</p>
           <ul className="list-disc pl-6 space-y-1">
             <li>website downtime</li>
@@ -87,7 +87,7 @@ const Legal = () => {
         </Section>
 
         <Section title="6. Limitation of Liability">
-          <p>To the maximum extent permitted by law, Shop-a-Verse, its owners, operators, affiliates, employees, and partners shall not be liable for:</p>
+          <p>To the maximum extent permitted by law, GPS Shops, its owners, operators, affiliates, employees, and partners shall not be liable for:</p>
           <ul className="list-disc pl-6 space-y-1">
             <li>direct or indirect financial loss</li>
             <li>lost profits</li>
@@ -104,7 +104,7 @@ const Legal = () => {
         </Section>
 
         <Section title="7. Acceptable Use">
-          <p>Users must not use Shop-a-Verse for:</p>
+          <p>Users must not use GPS Shops for:</p>
           <ul className="list-disc pl-6 space-y-1">
             <li>illegal goods or services</li>
             <li>fraudulent activity</li>
@@ -120,13 +120,13 @@ const Legal = () => {
         </Section>
 
         <Section title="8. Intellectual Property">
-          <p>All branding, logos, platform design, software, content structure, and original materials relating to Shop-a-Verse remain the intellectual property of Shop-a-Verse unless otherwise stated.</p>
+          <p>All branding, logos, platform design, software, content structure, and original materials relating to GPS Shops remain the intellectual property of GPS Shops unless otherwise stated.</p>
           <p>Users may not copy, reproduce, resell, or exploit platform materials without written permission.</p>
         </Section>
 
         <Section title="9. Privacy">
           <p>Use of the platform is also governed by our Privacy Policy.</p>
-          <p>By using Shop-a-Verse, users agree to the collection and processing of data necessary to operate the platform, including account details, location-based services, and transaction-related information where applicable.</p>
+          <p>By using GPS Shops, users agree to the collection and processing of data necessary to operate the platform, including account details, location-based services, and transaction-related information where applicable.</p>
         </Section>
 
         <Section title="10. Changes to These Terms">
@@ -145,7 +145,7 @@ const Legal = () => {
         </Section>
 
         <p className="text-muted-foreground leading-relaxed border-t border-border pt-6">
-          By continuing to use Shop-a-Verse, you confirm that you understand and accept these Terms, Disclaimer, and Limitation of Liability.
+          By continuing to use GPS Shops, you confirm that you understand and accept these Terms, Disclaimer, and Limitation of Liability.
         </p>
       </main>
     </div>

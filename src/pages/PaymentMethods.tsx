@@ -144,7 +144,7 @@ const PaymentMethods = () => {
 
         <p className="text-muted-foreground mb-6 leading-relaxed">
           {t("PaymentMethodsIntro") ||
-            "Customers can use Stripe to securely pay for goods. Shop-a-Verse does not store card details directly. Payment details are handled by Stripe."}
+            "Customers can use Stripe to securely pay for goods. GPS Shops does not store card details directly. Payment details are handled by Stripe."}
         </p>
 
         <section className="rounded-lg border border-border bg-card p-4 mb-6">
@@ -156,7 +156,7 @@ const PaymentMethods = () => {
               </h2>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 {t("PaymentMethodsSecurityNote") ||
-                  "Your card information is encrypted and stored by Stripe, a PCI-DSS certified payment provider. Shop-a-Verse never sees or stores your full card number."}
+                  "Your card information is encrypted and stored by Stripe, a PCI-DSS certified payment provider. GPS Shops never sees or stores your full card number."}
               </p>
             </div>
           </div>

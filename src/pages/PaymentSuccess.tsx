@@ -14,10 +14,10 @@ const PaymentSuccess = () => {
         <div className="space-y-3 text-muted-foreground">
           <p>Thank you — your payment has been received.</p>
           <p>Your order has now been marked as paid and the shop will be notified.</p>
-          <p>You can safely close this page or return to Shop-A-Verse.</p>
+          <p>You can safely close this page or return to GPS Shops.</p>
         </div>
         <Button onClick={() => navigate("/")} className="w-full">
-          Return to Shop-A-Verse
+          Return to GPS Shops
         </Button>
       </div>
     </div>
