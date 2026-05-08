@@ -3,7 +3,7 @@
 // To add a new category, add an entry to CATEGORY_ICON_URLS keyed by category id
 // (matching SHOP_CATEGORIES in shopCategories.ts).
 
-const ICON_BASE = "https://shop-a-verse.com/map-icons/";
+const ICON_BASE = "https://gpsshops.com/map-icons/";
 
 export const DEFAULT_MARKER_ICON = ICON_BASE + "shop01.png";
 
