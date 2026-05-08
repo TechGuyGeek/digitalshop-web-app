@@ -49,7 +49,7 @@ const SiteNav = ({ items, className }: SiteNavProps) => {
         </SheetTrigger>
         <SheetContent side="right" className="w-[280px] sm:w-[320px] p-0 flex flex-col">
           <SheetHeader className="px-6 pt-6 pb-4 border-b border-border">
-            <SheetTitle className="font-heading text-xl">GPSSHOPS</SheetTitle>
+            <SheetTitle className="font-heading text-xl">GPS Shops</SheetTitle>
           </SheetHeader>
           <ul className="flex flex-col py-4">
             {links.map((l) => {
