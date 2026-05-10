@@ -376,6 +376,27 @@ const Profile = () => {
       <input ref={galleryInputRef} type="file" accept="image/*" className="hidden" onChange={onFileChange} />
       <WebcamCapture open={webcamOpen} onOpenChange={setWebcamOpen} onCapture={handleWebcamCapture} />
 
+      <AlertDialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("DELETEYOURPROFILE") || "Delete your profile"}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("Areyousureyouwanttodeleteyouruserprofileandallitscontents") ||
+                "Are you sure you want to delete your user profile and all its contents?"}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("Cancel") || "Cancel"}</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={performDelete}
+            >
+              {t("Delete") || "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Top banner advert slot */}
       <AdvertSlot position="topBanner" className="px-4 pt-4" />
 
