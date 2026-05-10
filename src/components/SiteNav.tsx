@@ -84,7 +84,9 @@ const SiteNav = ({ items, className }: SiteNavProps) => {
                       disabled={a.disabled}
                       onClick={() => {
                         setOpen(false);
-                        a.onClick();
+                        // Defer so the sheet finishes closing before
+                        // toasts/dialogs from the action render.
+                        setTimeout(() => a.onClick(), 200);
                       }}
                       className={cn(
                         "w-full text-left block px-6 py-3 text-base font-heading tracking-wide transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
