@@ -237,7 +237,7 @@
     "RegistrationFailedLastNamecannotbeempty": "Помилка реєстрації. Прізвище не може бути порожнім",
     "RegistrationFailedPasswordcannotbeempty": "Помилка реєстрації, пароль не може бути порожнім",
     "RegistrationFailedPasswordcannotbeLessThan7": "Помилка реєстрації Пароль не може мати менше 7 символів",
-    "RegistrationLinkClicked": "Ми надіслали вам посилання електронною поштою для підтвердження вашого облікового запису електронної пошти, натисніть, а потім поверніться до Digital Shop, щоб увійти",
+    "RegistrationLinkClicked": "Ми надіслали вам посилання електронною поштою для підтвердження вашого облікового запису електронної пошти, натисніть, а потім поверніться до GPS Shops, щоб увійти",
     "RegistrationSuccessful": "Реєстрація успішна",
     "RequestCancel": "Запит скасувати",
     "REQUESTTOCANCEL": "ЗАПИТ НА СКАСУВАННЯ",

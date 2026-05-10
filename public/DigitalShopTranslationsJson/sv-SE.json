@@ -237,7 +237,7 @@
     "RegistrationFailedLastNamecannotbeempty": "Registreringen misslyckades, efternamnet kan inte vara tomt",
     "RegistrationFailedPasswordcannotbeempty": "Registreringen misslyckades, lösenordet kan inte vara tomt",
     "RegistrationFailedPasswordcannotbeLessThan7": "Registreringen misslyckades Lösenordet får inte vara mindre än sju kartläggare långt",
-    "RegistrationLinkClicked": "Vi har skickat en länk via e-post för att bekräfta ditt e-postkonto, klicka och återgå sedan till Digital Shop för att gå in",
+    "RegistrationLinkClicked": "Vi har skickat en länk via e-post för att bekräfta ditt e-postkonto, klicka och återgå sedan till GPS Shops för att gå in",
     "RegistrationSuccessful": "Registrering lyckad",
     "RequestCancel": "Begär avbryt",
     "REQUESTTOCANCEL": "BEGÄRAN OM AVBRYT",

@@ -237,7 +237,7 @@
     "RegistrationFailedLastNamecannotbeempty": "Registrierung fehlgeschlagen, Nachname darf nicht leer sein",
     "RegistrationFailedPasswordcannotbeempty": "Registrierung fehlgeschlagen, Passwort darf nicht leer sein",
     "RegistrationFailedPasswordcannotbeLessThan7": "Registrierung fehlgeschlagen Das Passwort darf nicht kürzer als 7 Zeichen sein",
-    "RegistrationLinkClicked": "Wir haben Ihnen einen Link per E-Mail geschickt, um Ihr E-Mail-Konto zu bestätigen, klicken Sie bitte und kehren Sie dann zum Digital Shop zurück, um einzutreten",
+    "RegistrationLinkClicked": "Wir haben Ihnen einen Link per E-Mail geschickt, um Ihr E-Mail-Konto zu bestätigen, klicken Sie bitte und kehren Sie dann zum GPS Shops zurück, um einzutreten",
     "RegistrationSuccessful": "Registrierung erfolgreich",
     "RequestCancel": "Anfrage abbrechen",
     "REQUESTTOCANCEL": "ANTRAG AUF STORNIERUNG",

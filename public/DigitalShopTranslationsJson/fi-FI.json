@@ -237,7 +237,7 @@
     "RegistrationFailedLastNamecannotbeempty": "Rekisteröinti epäonnistui, sukunimi ei voi olla tyhjä",
     "RegistrationFailedPasswordcannotbeempty": "Rekisteröinti epäonnistui, salasana ei voi olla tyhjä",
     "RegistrationFailedPasswordcannotbeLessThan7": "Rekisteröinti epäonnistui Salasana voi olla vähintään 7 merkkiä pitkä",
-    "RegistrationLinkClicked": "Olemme lähettäneet sinulle sähköpostilinkin vahvistaaksesi sähköpostitilisi, napsauta ja palaa sitten Digital Shopiin Enter-tilille",
+    "RegistrationLinkClicked": "Olemme lähettäneet sinulle sähköpostilinkin vahvistaaksesi sähköpostitilisi, napsauta ja palaa sitten GPS Shopsiin Enter-tilille",
     "RegistrationSuccessful": "Rekisteröinti onnistui",
     "RequestCancel": "Pyydä Peruuta",
     "REQUESTTOCANCEL": "PYYNTÖ PERUUTTAMISEKSI",

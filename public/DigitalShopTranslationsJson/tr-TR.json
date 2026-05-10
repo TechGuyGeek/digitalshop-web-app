@@ -237,7 +237,7 @@
     "RegistrationFailedLastNamecannotbeempty": "Kayıt Başarısız, Soyadı boş olamaz",
     "RegistrationFailedPasswordcannotbeempty": "Kayıt Başarısız, Parola boş olamaz",
     "RegistrationFailedPasswordcannotbeLessThan7": "Kayıt Başarısız Şifre uzunluğu 7 karakterden az olamaz",
-    "RegistrationLinkClicked": "E-posta hesabınızı onaylamanız için size e-posta yoluyla bir bağlantı gönderdik, lütfen tıklayın ve ardından Giriş yapmak için Digital Shop'a dönün",
+    "RegistrationLinkClicked": "E-posta hesabınızı onaylamanız için size e-posta yoluyla bir bağlantı gönderdik, lütfen tıklayın ve ardından Giriş yapmak için GPS Shops'a dönün",
     "RegistrationSuccessful": "Kayıt başarılı",
     "RequestCancel": "İstek İptal",
     "REQUESTTOCANCEL": "İPTAL TALEBİ",

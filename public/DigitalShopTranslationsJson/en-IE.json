@@ -237,7 +237,7 @@
     "RegistrationFailedLastNamecannotbeempty": "Theip ar chlárú, ní féidir an t-ainm deireanach a bheith folamh",
     "RegistrationFailedPasswordcannotbeempty": "Theip ar an gClárú, ní féidir leis an bPasfhocal a bheith folamh",
     "RegistrationFailedPasswordcannotbeLessThan7": "Ní féidir le Pasfhocal Theip ar Chlárú a bheith níos lú ná 7 gcarachtar ar fhad",
-    "RegistrationLinkClicked": "Sheol muid nasc chugat trí ríomhphost chun do chuntas ríomhphoist a dhearbhú, cliceáil le do thoil agus ansin seol ar ais chuig Digital Shop chun Iontráil",
+    "RegistrationLinkClicked": "Sheol muid nasc chugat trí ríomhphost chun do chuntas ríomhphoist a dhearbhú, cliceáil le do thoil agus ansin seol ar ais chuig GPS Shops chun Iontráil",
     "RegistrationSuccessful": "Clárú rathúil",
     "RequestCancel": "Iarr Cealaigh",
     "REQUESTTOCANCEL": "IARRATAS LE CANCEL",
