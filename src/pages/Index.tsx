@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { loginUser, registerUser, requestPasswordReset, type DigitalPerson } from "@/lib/api";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -20,6 +21,10 @@ const Index = () => {
   const [helpEnabled, setHelpEnabled] = useState(false);
   const [view, setView] = useState<"login" | "register" | "forgot">("login");
   const [loading, setLoading] = useState(false);
+  const [resendOpen, setResendOpen] = useState(false);
+  const [resendEmail, setResendEmail] = useState("");
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendMessage, setResendMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const isLight = false;
 
@@ -117,6 +122,54 @@ const Index = () => {
       toast.error("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const openResendModal = () => {
+    setResendEmail(email || "");
+    setResendMessage(null);
+    setResendOpen(true);
+  };
+
+  const handleResendVerification = async () => {
+    const trimmed = resendEmail.trim();
+    if (!trimmed) {
+      setResendMessage({ type: "error", text: "Email address required" });
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmed)) {
+      setResendMessage({ type: "error", text: "Invalid email address" });
+      return;
+    }
+    setResendLoading(true);
+    setResendMessage(null);
+    try {
+      const body = new URLSearchParams();
+      body.append("email", trimmed);
+      body.append("user_email", trimmed);
+      const res = await fetch("https://app.techguygeek.co.uk/menu1/Registration/resendverification.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: body.toString(),
+      });
+      const text = (await res.text()).trim();
+      const lower = text.toLowerCase();
+      const isError =
+        lower.includes("no account") ||
+        lower.includes("invalid") ||
+        lower.includes("required") ||
+        lower.includes("already activated") ||
+        lower.includes("error");
+      setResendMessage({
+        type: isError ? "error" : "success",
+        text: text || "Verification email resent successfully",
+      });
+    } catch (err) {
+      console.error(err);
+      setResendMessage({ type: "error", text: t("Pleasecheckyourinternetconnection") });
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -264,6 +317,15 @@ const Index = () => {
                   >
                     {t("ResetLoginPassword")}
                   </button>
+                  <div>
+                    <button
+                      type="button"
+                      onClick={openResendModal}
+                      className="text-xs text-primary hover:text-primary/80 transition-colors font-medium mt-1"
+                    >
+                      Resend Verification Email
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -453,6 +515,54 @@ const Index = () => {
           )}
         </div>
       </div>
+
+      <Dialog open={resendOpen} onOpenChange={(o) => { if (!resendLoading) setResendOpen(o); }}>
+        <DialogContent className="sm:max-w-md rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="font-heading">Resend Verification Email</DialogTitle>
+            <DialogDescription>
+              Please enter the email address you used to register.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Input
+              type="email"
+              placeholder="you@example.com"
+              value={resendEmail}
+              onChange={(e) => setResendEmail(e.target.value)}
+              className="h-11 bg-secondary border-0 text-foreground placeholder:text-muted-foreground focus-visible:ring-primary"
+            />
+            {resendMessage && (
+              <div
+                className={
+                  "rounded-lg px-3 py-2 text-sm animate-fade-in " +
+                  (resendMessage.type === "success"
+                    ? "bg-primary/10 text-primary border border-primary/30"
+                    : "bg-destructive/10 text-destructive border border-destructive/30")
+                }
+              >
+                {resendMessage.text}
+              </div>
+            )}
+          </div>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setResendOpen(false)}
+              disabled={resendLoading}
+            >
+              {t("Cancel") || "Cancel"}
+            </Button>
+            <Button
+              variant="glow"
+              onClick={handleResendVerification}
+              disabled={resendLoading}
+            >
+              {resendLoading ? t("Pleasewait") : "Resend Email"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
