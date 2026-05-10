@@ -237,7 +237,7 @@
     "RegistrationFailedLastNamecannotbeempty": "Dh'fhàillig clàradh, chan urrainn don ainm mu dheireadh a bhith falamh",
     "RegistrationFailedPasswordcannotbeempty": "Dh'fhàillig clàradh, chan urrainn don fhacal-faire a bhith falamh",
     "RegistrationFailedPasswordcannotbeLessThan7": "Chan fhaod am facal-faire a dh ’fhàillig a chlàradh a bhith nas lugha na 7 charecters de dh'fhaid",
-    "RegistrationLinkClicked": "Tha sinn air ceangal a chuir thugad tro phost-d gus do chunntas post-d a dhearbhadh, cliog agus an uairsin till air ais gu Digital Shop gus a dhol a-steach",
+    "RegistrationLinkClicked": "Tha sinn air ceangal a chuir thugad tro phost-d gus do chunntas post-d a dhearbhadh, cliog agus an uairsin till air ais gu GPS Shops gus a dhol a-steach",
     "RegistrationSuccessful": "Clàradh soirbheachail",
     "RequestCancel": "Iarr air cuir dheth",
     "REQUESTTOCANCEL": "IARRTAS AIR CANCEL",

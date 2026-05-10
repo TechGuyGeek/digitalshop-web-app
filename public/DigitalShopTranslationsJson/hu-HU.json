@@ -237,7 +237,7 @@
     "RegistrationFailedLastNamecannotbeempty": "A regisztráció nem sikerült, a vezetéknév nem lehet üres",
     "RegistrationFailedPasswordcannotbeempty": "A regisztráció nem sikerült, a jelszó nem lehet üres",
     "RegistrationFailedPasswordcannotbeLessThan7": "Sikertelen regisztráció A jelszó nem lehet rövidebb, mint 7 karakter",
-    "RegistrationLinkClicked": "E-mailben elküldtünk egy linket az e-mail fiók megerősítéséhez. Kattintson, majd térjen vissza a Digital Shop-hoz a belépéshez",
+    "RegistrationLinkClicked": "E-mailben elküldtünk egy linket az e-mail fiók megerősítéséhez. Kattintson, majd térjen vissza a GPS Shops-hoz a belépéshez",
     "RegistrationSuccessful": "Sikeres regisztráció",
     "RequestCancel": "Kérjen visszavonást",
     "REQUESTTOCANCEL": "KÉRÉS TÖRLÉSRE",

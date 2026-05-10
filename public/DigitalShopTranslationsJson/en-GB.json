@@ -237,7 +237,7 @@
     "RegistrationFailedLastNamecannotbeempty":  "Registration Failed, Last Name cannot be empty",
     "RegistrationFailedPasswordcannotbeempty":  "Registration Failed, Password cannot be empty",
     "RegistrationFailedPasswordcannotbeLessThan7":  "Registration Failed Password can not be less than 7 charecters in length",
-    "RegistrationLinkClicked":  "We have sent you a link via email to confirm your email account, please click and then return to Digital Shop to Enter",
+    "RegistrationLinkClicked":  "We have sent you a link via email to confirm your email account, please click and then return to GPS Shops to Enter",
     "RegistrationSuccessful":  "Registration Successful",
     "RequestCancel":  "Request Cancel",
     "REQUESTTOCANCEL":  "REQUEST TO CANCEL",

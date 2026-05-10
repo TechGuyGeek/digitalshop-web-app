@@ -237,7 +237,7 @@
     "RegistrationFailedLastNamecannotbeempty": "فشل التسجيل ، لا يمكن ترك اسم العائلة فارغًا",
     "RegistrationFailedPasswordcannotbeempty": "فشل التسجيل ، لا يمكن أن تكون كلمة المرور فارغة",
     "RegistrationFailedPasswordcannotbeLessThan7": "فشل التسجيل كلمة المرور لا يمكن أن يكون أقل من 7 رموز في الطول",
-    "RegistrationLinkClicked": "لقد أرسلنا لك رابطًا عبر البريد الإلكتروني لتأكيد حساب بريدك الإلكتروني ، يرجى النقر ثم العودة إلى Digital Shop للدخول",
+    "RegistrationLinkClicked": "لقد أرسلنا لك رابطًا عبر البريد الإلكتروني لتأكيد حساب بريدك الإلكتروني ، يرجى النقر ثم العودة إلى GPS Shops للدخول",
     "RegistrationSuccessful": "تم التسجيل بنجاح",
     "RequestCancel": "طلب إلغاء",
     "REQUESTTOCANCEL": "طلب الإلغاء",

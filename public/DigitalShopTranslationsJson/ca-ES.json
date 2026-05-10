@@ -237,7 +237,7 @@
     "RegistrationFailedLastNamecannotbeempty": "Ha fallat el registre, el cognom no pot estar buit",
     "RegistrationFailedPasswordcannotbeempty": "Ha fallat el registre, la contrasenya no pot estar buida",
     "RegistrationFailedPasswordcannotbeLessThan7": "Error de registre La contrasenya no pot tenir una longitud inferior a 7 persones",
-    "RegistrationLinkClicked": "Us hem enviat un enllaç per correu electrònic per confirmar el vostre compte de correu electrònic, feu clic i torneu a Digital Shop per entrar",
+    "RegistrationLinkClicked": "Us hem enviat un enllaç per correu electrònic per confirmar el vostre compte de correu electrònic, feu clic i torneu a GPS Shops per entrar",
     "RegistrationSuccessful": "Registre correcte",
     "RequestCancel": "Sol·licitud de cancel·lació",
     "REQUESTTOCANCEL": "SOL·LICITUD DE CANCEL·LACIÓ",
