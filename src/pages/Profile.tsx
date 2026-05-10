@@ -13,6 +13,16 @@ import AdvertSlot from "@/components/adverts/AdvertSlot";
 import VideoAdvert from "@/components/adverts/VideoAdvert";
 import { useAdverts } from "@/hooks/useAdverts";
 import { useRegisterNavActions } from "@/contexts/SiteNavExtras";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const MAX_IMAGE_SIZE = 800;
 
@@ -60,6 +70,7 @@ const Profile = () => {
   const [webcamOpen, setWebcamOpen] = useState(false);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem("digitalUser");
@@ -285,11 +296,21 @@ const Profile = () => {
 
       toast.dismiss("delete-profile");
 
-      // 3) Confirm + delete
-      if (!window.confirm(t("Areyousureyouwanttodeleteyouruserprofileandallitscontents"))) {
-        return;
-      }
+      // 3) Open confirm dialog (actual delete in performDelete)
+      setConfirmDeleteOpen(true);
+    } catch (err) {
+      console.error("[deleteProfile] exception:", err);
+      toast.dismiss("delete-profile");
+      toast.error(t("Pleasecheckyourinternetconnection"));
+    }
+  };
 
+  const performDelete = async () => {
+    if (!user) return;
+    const personId = String((user as any).PersonID || (user as any).ID || "");
+    const userEmail = String((user as any).Email || (user as any).email || "");
+    const userPassword = String((user as any).Password || (user as any).password || (user as any).hash || "");
+    try {
       const deleteUrl = "https://app.techguygeek.co.uk/menu1/PHPwrite/User/DeleteUserSecure.php";
       const deleteForm = new URLSearchParams();
       deleteForm.append("UserID", personId);
@@ -315,7 +336,6 @@ const Profile = () => {
       }
     } catch (err) {
       console.error("[deleteProfile] exception:", err);
-      toast.dismiss("delete-profile");
       toast.error(t("Pleasecheckyourinternetconnection"));
     }
   };
