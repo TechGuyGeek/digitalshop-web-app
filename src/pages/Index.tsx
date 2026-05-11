@@ -572,34 +572,28 @@ const Index = () => {
         </DialogContent>
       </Dialog>
 
-      {/* SEO content — visible to crawlers and assistive tech, hidden from main UI */}
-      <section className="sr-only" aria-label="About GPS Shops">
-        <h1>GPS Shops — Discover Local Shops &amp; Order Online Anywhere</h1>
-        <h2>What is GPS Shops?</h2>
-        <p>
-          GPS Shops is a global, location-aware digital marketplace that connects people
-          with the shops, services, and experiences around them. Use the interactive map
-          to find nearby businesses, browse menus and products, and place orders in
-          seconds &mdash; all from your phone.
+      {/* Visible public intro — short, honest, matches the page purpose */}
+      <section
+        aria-labelledby="gps-intro-heading"
+        className="relative z-10 mx-auto mt-10 w-full max-w-md px-4 text-center"
+      >
+        <h1
+          id="gps-intro-heading"
+          className="font-heading text-lg text-foreground mb-2"
+        >
+          GPS Shops
+        </h1>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          Sign in to discover nearby shops on the map, place orders, or open your
+          own digital storefront.
         </p>
-        <h2>Open Your Own Digital Shop</h2>
-        <p>
-          Any business, anywhere, can create a beautiful mobile-first storefront on GPS
-          Shops &mdash; no expensive website, no complex setup. Upgrade to Pro to unlock
-          global visibility, custom GPS settings, and reduced adverts.
+        <p className="mt-2 text-xs text-muted-foreground">
+          New here?{" "}
+          <Link to="/about" className="text-primary hover:underline">
+            Learn more about GPS Shops
+          </Link>
+          .
         </p>
-        <h2>Multi-language &amp; Multi-theme</h2>
-        <p>
-          Use GPS Shops in your preferred language and visual theme for a personalised
-          experience worldwide.
-        </p>
-        <nav aria-label="Site links">
-          <ul>
-            <li><Link to="/about">About GPS Shops</Link></li>
-            <li><Link to="/contact">Contact</Link></li>
-            <li><Link to="/legal">Legal &amp; Terms</Link></li>
-          </ul>
-        </nav>
       </section>
 
       {/* Visible footer with public links */}
