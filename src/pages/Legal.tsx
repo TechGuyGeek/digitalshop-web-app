@@ -146,8 +146,8 @@ const Legal = () => {
         <Section title="11. Contact">
           <p>For legal enquiries, platform concerns, or general support, please contact:</p>
           <p>
-            <a href="mailto:jason@techguygeek.com" className="text-primary hover:underline">
-              jason@techguygeek.com
+            <a href="mailto:support@gpsshops.com" className="text-primary hover:underline">
+              support@gpsshops.com
             </a>
           </p>
         </Section>
