@@ -420,21 +420,26 @@ export async function updatePaymentMethod(
 }
 
 // ─── Map marker mapping ────────────────────────────────────────
-export const MAP_MARKER_EMOJIS: Record<string, { emoji: string; label: string }> = {
-  "0": { emoji: "📍", label: "Google" },
-  "1": { emoji: "🏪", label: "Shop" },
-  "2": { emoji: "🍻", label: "Pub" },
-  "3": { emoji: "☕", label: "Cafe" },
-  "4": { emoji: "🍴", label: "Restaurant" },
-  "5": { emoji: "🏠", label: "Home" },
-  "6": { emoji: "🎪", label: "Mobile" },
-  "7": { emoji: "🧸", label: "Toys" },
-  "8": { emoji: "🥪", label: "Sandwiches" },
-  "9": { emoji: "📍", label: "Google" },
-  "10": { emoji: "🍳", label: "Breakfast" },
-  "11": { emoji: "👔", label: "Mens Clothing" },
-  "12": { emoji: "👗", label: "Ladies Clothing" },
-  "13": { emoji: "🔢", label: "Digits" },
+// Icons are PNGs hosted on gpsshops.com so the web app and MAUI app
+// share the same assets. The emoji field is kept only as a text
+// fallback for legacy callers.
+const MARKER_ICON_BASE = "https://gpsshops.com/map-icons/";
+
+export const MAP_MARKER_EMOJIS: Record<string, { emoji: string; label: string; iconUrl: string }> = {
+  "0":  { emoji: "📍", label: "Google",         iconUrl: MARKER_ICON_BASE + "google09.png" },
+  "1":  { emoji: "🏪", label: "Shop",           iconUrl: MARKER_ICON_BASE + "shop01.png" },
+  "2":  { emoji: "🍻", label: "Pub",            iconUrl: MARKER_ICON_BASE + "pub02.png" },
+  "3":  { emoji: "☕", label: "Cafe",           iconUrl: MARKER_ICON_BASE + "cafe03.png" },
+  "4":  { emoji: "🍴", label: "Restaurant",     iconUrl: MARKER_ICON_BASE + "restaurant04.png" },
+  "5":  { emoji: "🏠", label: "Home",           iconUrl: MARKER_ICON_BASE + "home05.png" },
+  "6":  { emoji: "🎪", label: "Mobile",         iconUrl: MARKER_ICON_BASE + "mobile06.png" },
+  "7":  { emoji: "🧸", label: "Toys",           iconUrl: MARKER_ICON_BASE + "toys07.png" },
+  "8":  { emoji: "🥪", label: "Sandwiches",     iconUrl: MARKER_ICON_BASE + "sandwichs08.png" },
+  "9":  { emoji: "📍", label: "Google",         iconUrl: MARKER_ICON_BASE + "google09.png" },
+  "10": { emoji: "🍳", label: "Breakfast",      iconUrl: MARKER_ICON_BASE + "breakfast10.png" },
+  "11": { emoji: "👔", label: "Mens Clothing",  iconUrl: MARKER_ICON_BASE + "clothing11.png" },
+  "12": { emoji: "👗", label: "Ladies Clothing",iconUrl: MARKER_ICON_BASE + "clothing12.png" },
+  "13": { emoji: "🔢", label: "Digits",         iconUrl: MARKER_ICON_BASE + "digit.png" },
 };
 
 export function getMarkerForPublicNumber(publicNumber?: string) {
