@@ -5,21 +5,25 @@ export interface MapMarkerOption {
   id: number;
   emoji: string;
   label: string;
+  iconUrl: string;
 }
 
+const MARKER_ICON_BASE = "https://gpsshops.com/map-icons/";
+
 export const MAP_MARKERS: MapMarkerOption[] = [
-  { id: 1, emoji: "🏪", label: "SHOP ICON" },
-  { id: 2, emoji: "🍻", label: "PUB ICON" },
-  { id: 3, emoji: "☕", label: "CAFE ICON" },
-  { id: 4, emoji: "🍴", label: "RESTAURANT ICON" },
-  { id: 5, emoji: "🏠", label: "HOME ICON" },
-  { id: 6, emoji: "🎪", label: "MOBILE ICON" },
-  { id: 7, emoji: "🧸", label: "TOYS ICON" },
-  { id: 8, emoji: "🥪", label: "SANDWICHES ICON" },
-  { id: 9, emoji: "📍", label: "GOOGLE ICON" },
-  { id: 10, emoji: "🍳", label: "BREAKFAST ICON" },
-  { id: 11, emoji: "👔", label: "MENS CLOTHING ICON" },
-  { id: 12, emoji: "👗", label: "LADIES CLOTHING ICON" },
+  { id: 1,  emoji: "🏪", label: "SHOP ICON",            iconUrl: MARKER_ICON_BASE + "shop01.png" },
+  { id: 2,  emoji: "🍻", label: "PUB ICON",             iconUrl: MARKER_ICON_BASE + "pub02.png" },
+  { id: 3,  emoji: "☕", label: "CAFE ICON",            iconUrl: MARKER_ICON_BASE + "cafe03.png" },
+  { id: 4,  emoji: "🍴", label: "RESTAURANT ICON",      iconUrl: MARKER_ICON_BASE + "restaurant04.png" },
+  { id: 5,  emoji: "🏠", label: "HOME ICON",            iconUrl: MARKER_ICON_BASE + "home05.png" },
+  { id: 6,  emoji: "🎪", label: "MOBILE ICON",          iconUrl: MARKER_ICON_BASE + "mobile06.png" },
+  { id: 7,  emoji: "🧸", label: "TOYS ICON",            iconUrl: MARKER_ICON_BASE + "toys07.png" },
+  { id: 8,  emoji: "🥪", label: "SANDWICHES ICON",      iconUrl: MARKER_ICON_BASE + "sandwichs08.png" },
+  { id: 9,  emoji: "📍", label: "GOOGLE ICON",          iconUrl: MARKER_ICON_BASE + "google09.png" },
+  { id: 10, emoji: "🍳", label: "BREAKFAST ICON",       iconUrl: MARKER_ICON_BASE + "breakfast10.png" },
+  { id: 11, emoji: "👔", label: "MENS CLOTHING ICON",   iconUrl: MARKER_ICON_BASE + "clothing11.png" },
+  { id: 12, emoji: "👗", label: "LADIES CLOTHING ICON", iconUrl: MARKER_ICON_BASE + "clothing12.png" },
+  { id: 13, emoji: "🔢", label: "DIGITS ICON",          iconUrl: MARKER_ICON_BASE + "digit.png" },
 ];
 
 interface MapMarkerPickerProps {
@@ -49,7 +53,11 @@ const MapMarkerPicker = ({ open, onOpenChange, onSelect, selectedId }: MapMarker
                   selectedId === marker.id ? "bg-accent" : ""
                 }`}
               >
-                <span className="text-5xl mb-1">{marker.emoji}</span>
+                <img
+                  src={marker.iconUrl}
+                  alt={marker.label}
+                  className="w-12 h-12 object-contain mb-1"
+                />
                 <span className="text-xs font-bold tracking-wider text-foreground uppercase">
                   {marker.label}
                 </span>
