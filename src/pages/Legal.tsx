@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSeo } from "@/hooks/useSeo";
+import SiteFooter from "@/components/SiteFooter";
 
 const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
   <section className="space-y-3 mb-8">
@@ -11,8 +13,14 @@ const Section = ({ title, children }: { title: string; children: React.ReactNode
 
 const Legal = () => {
   const { t } = useLanguage();
+  useSeo({
+    title: "Legal, Terms & Disclaimer — GPS Shops",
+    description:
+      "GPS Shops legal terms, disclaimer, and limitation of liability. Read the conditions for using our location-aware marketplace platform.",
+    canonical: "https://gpsshops.com/legal",
+  });
   return (
-    <div className="relative min-h-screen bg-background text-foreground">
+    <div className="relative min-h-screen bg-background text-foreground flex flex-col">
       <header className="px-6 pt-6 pb-2">
         <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="h-4 w-4" />
@@ -148,6 +156,7 @@ const Legal = () => {
           By continuing to use GPS Shops, you confirm that you understand and accept these Terms, Disclaimer, and Limitation of Liability.
         </p>
       </main>
+      <SiteFooter />
     </div>
   );
 };

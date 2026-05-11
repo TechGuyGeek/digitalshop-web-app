@@ -26,6 +26,7 @@ const SiteNav = ({ items, className }: SiteNavProps) => {
     items ?? [
       { to: "/", label: t("Home") || "Home" },
       { to: "/about", label: t("About") || "About" },
+      { to: "/contact", label: t("Contact") || "Contact" },
       { to: "/legal", label: t("Legal") || "Legal" },
     ];
 

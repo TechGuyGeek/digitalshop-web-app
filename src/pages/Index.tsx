@@ -10,9 +10,17 @@ import { loginUser, registerUser, requestPasswordReset, type DigitalPerson } fro
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme, type ThemeMode } from "@/contexts/ThemeContext";
+import { useSeo } from "@/hooks/useSeo";
+import { Link } from "react-router-dom";
 
 const Index = () => {
   const navigate = useNavigate();
+  useSeo({
+    title: "GPS Shops — Discover Local Shops & Order Online Anywhere",
+    description:
+      "GPS Shops is a global, location-aware marketplace. Discover nearby shops on the map, browse menus, order in seconds, or open your own digital storefront.",
+    canonical: "https://gpsshops.com/",
+  });
   const { t, language, setLanguage, availableLanguages } = useLanguage();
   const { theme, setTheme } = useTheme();
   const [showPassword, setShowPassword] = useState(false);
@@ -563,6 +571,60 @@ const Index = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* SEO content — visible to crawlers and assistive tech, hidden from main UI */}
+      <section className="sr-only" aria-label="About GPS Shops">
+        <h1>GPS Shops — Discover Local Shops &amp; Order Online Anywhere</h1>
+        <h2>What is GPS Shops?</h2>
+        <p>
+          GPS Shops is a global, location-aware digital marketplace that connects people
+          with the shops, services, and experiences around them. Use the interactive map
+          to find nearby businesses, browse menus and products, and place orders in
+          seconds &mdash; all from your phone.
+        </p>
+        <h2>Open Your Own Digital Shop</h2>
+        <p>
+          Any business, anywhere, can create a beautiful mobile-first storefront on GPS
+          Shops &mdash; no expensive website, no complex setup. Upgrade to Pro to unlock
+          global visibility, custom GPS settings, and reduced adverts.
+        </p>
+        <h2>Multi-language &amp; Multi-theme</h2>
+        <p>
+          Use GPS Shops in your preferred language and visual theme for a personalised
+          experience worldwide.
+        </p>
+        <nav aria-label="Site links">
+          <ul>
+            <li><Link to="/about">About GPS Shops</Link></li>
+            <li><Link to="/contact">Contact</Link></li>
+            <li><Link to="/legal">Legal &amp; Terms</Link></li>
+          </ul>
+        </nav>
+      </section>
+
+      {/* Visible footer with public links */}
+      <footer className="relative z-10 mt-8 w-full max-w-md mx-auto px-4 pb-6 text-center text-xs text-muted-foreground">
+        <nav aria-label="Footer">
+          <ul className="flex items-center justify-center gap-5">
+            <li>
+              <Link to="/about" className="hover:text-foreground transition-colors">
+                About
+              </Link>
+            </li>
+            <li>
+              <Link to="/contact" className="hover:text-foreground transition-colors">
+                Contact
+              </Link>
+            </li>
+            <li>
+              <Link to="/legal" className="hover:text-foreground transition-colors">
+                Legal
+              </Link>
+            </li>
+          </ul>
+        </nav>
+        <p className="mt-2 opacity-70">&copy; {new Date().getFullYear()} GPS Shops</p>
+      </footer>
     </div>
   );
 };

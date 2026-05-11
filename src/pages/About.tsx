@@ -1,12 +1,20 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSeo } from "@/hooks/useSeo";
+import SiteFooter from "@/components/SiteFooter";
 
 const About = () => {
   const { t } = useLanguage();
+  useSeo({
+    title: "About GPS Shops — Your Shop, Anywhere",
+    description:
+      "Learn about GPS Shops: a global, location-aware marketplace that helps people discover nearby shops and lets any business build a digital storefront in minutes.",
+    canonical: "https://gpsshops.com/about",
+  });
 
   return (
-    <div className="relative min-h-screen bg-background text-foreground">
+    <div className="relative min-h-screen bg-background text-foreground flex flex-col">
 
       <header className="px-6 pt-6 pb-2">
         <Link
@@ -165,6 +173,7 @@ const About = () => {
           </p>
         </section>
       </main>
+      <SiteFooter />
     </div>
   );
 };
