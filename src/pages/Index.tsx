@@ -185,8 +185,8 @@ const Index = () => {
     <div
       className={
         isLight
-          ? "flex min-h-screen items-center justify-center p-4 bg-gradient-to-br from-[hsl(210_40%_98%)] via-white to-[hsl(217_91%_96%)]"
-          : "flex min-h-screen items-center justify-center bg-background p-4"
+          ? "flex flex-col min-h-screen items-center justify-center p-4 bg-gradient-to-br from-[hsl(210_40%_98%)] via-white to-[hsl(217_91%_96%)]"
+          : "flex flex-col min-h-screen items-center justify-center bg-background p-4"
       }
     >
       {/* Background decorations */}
