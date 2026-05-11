@@ -5,7 +5,7 @@ import { useBasket } from "@/contexts/BasketContext";
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-const SERVER_DOMAIN = "https://app.techguygeek.co.uk/";
+const SERVER_DOMAIN = "https://web.gpsshops.com/";
 
 interface MenuGroup { ID: string; OrderGroup: string; companyid?: string; MenuEnable?: string; }
 

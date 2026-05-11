@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-const SERVER_DOMAIN = "https://app.techguygeek.co.uk/";
+const SERVER_DOMAIN = "https://web.gpsshops.com/";
 
 interface CompanyData { CompanyID?: string; CompanyName?: string; companyphoto?: string; LineOneAddress?: string; LineTwoAddress?: string; LineThreeAddress?: string; LineFourAddress?: string; LineCountryAddress?: string; CompanyMobile?: string; CompanyEmail?: string; [key: string]: any; }
 

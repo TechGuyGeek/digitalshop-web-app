@@ -7,7 +7,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import AdvertSlot from "@/components/adverts/AdvertSlot";
 import type { DigitalPerson } from "@/lib/api";
 
-const SERVER_DOMAIN = "https://app.techguygeek.co.uk/";
+const SERVER_DOMAIN = "https://web.gpsshops.com/";
 
 async function fetchCustomerProfile(userId: string): Promise<DigitalPerson | null> {
   const url = SERVER_DOMAIN + "menu1/PHPread/User/RetrievUserProfiledetails.php";

@@ -1,4 +1,4 @@
-const SERVER_DOMAIN = "https://app.techguygeek.co.uk/";
+const SERVER_DOMAIN = "https://web.gpsshops.com/";
 
 // ─── Endpoints (configurable) ───────────────────────────────────
 const ENDPOINTS = {
@@ -275,10 +275,10 @@ export async function liveOrderCountAll(companyid: number): Promise<{ today: num
 
 // ─── Delete blockers ────────────────────────────────────────────
 const DELETE_COUNT_URLS = {
-  menuGroups: "https://app.techguygeek.co.uk/menu1/PHPread/CompanyMenu/DeleteCountMenuGroup.php",
-  dayOrders: "https://app.techguygeek.co.uk/menu1/PHPread/CompanyLiveOrders/DeleteLiveOrderCount.php",
-  weekOrders: "https://app.techguygeek.co.uk/menu1/PHPread/CompanyLiveOrders/DeleteLiveOrderCountweek.php",
-  monthOrders: "https://app.techguygeek.co.uk/menu1/PHPread/CompanyLiveOrders/DeleteLiveOrderCountmonth.php",
+  menuGroups: "https://web.gpsshops.com/menu1/PHPread/CompanyMenu/DeleteCountMenuGroup.php",
+  dayOrders: "https://web.gpsshops.com/menu1/PHPread/CompanyLiveOrders/DeleteLiveOrderCount.php",
+  weekOrders: "https://web.gpsshops.com/menu1/PHPread/CompanyLiveOrders/DeleteLiveOrderCountweek.php",
+  monthOrders: "https://web.gpsshops.com/menu1/PHPread/CompanyLiveOrders/DeleteLiveOrderCountmonth.php",
 };
 
 async function fetchDeleteCount(url: string, companyid: number): Promise<number> {

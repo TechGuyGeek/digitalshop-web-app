@@ -8,7 +8,7 @@ import { getCategoryByCode } from "@/lib/shopCategories";
 import { getMarkerIconUrl, DEFAULT_MARKER_ICON } from "@/lib/mapMarkerIcons";
 import type { NearbyShop, NearbyCompany } from "@/lib/nearbyShops";
 
-const ENDPOINT = "https://app.techguygeek.co.uk/menu1/PHPread/ClientMenu/getallshops.php";
+const ENDPOINT = "https://web.gpsshops.com/menu1/PHPread/ClientMenu/getallshops.php";
 
 const AdminShops = () => {
   const navigate = useNavigate();

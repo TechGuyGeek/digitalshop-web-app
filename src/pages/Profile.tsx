@@ -152,7 +152,7 @@ const Profile = () => {
       body.append("PersonID", String(personId));
       body.append("Email", String(userEmail));
       const res = await fetch(
-        "https://app.techguygeek.co.uk/menu1/PHPwrite/User/CreateStripeCheckoutSession.php",
+        "https://web.gpsshops.com/menu1/PHPwrite/User/CreateStripeCheckoutSession.php",
         {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -220,7 +220,7 @@ const Profile = () => {
 
     try {
       // 1) Check whether user has a company
-      const companyUrl = "https://app.techguygeek.co.uk/menu1/PHPread/Company/DoesCompanyExistorNotSecure.php";
+      const companyUrl = "https://web.gpsshops.com/menu1/PHPread/Company/DoesCompanyExistorNotSecure.php";
       const companyPayload = { PersonID: personId, UserEmail: userEmail };
       console.log("[deleteProfile] company check URL:", companyUrl);
       console.log("[deleteProfile] company check payload:", companyPayload);
@@ -252,7 +252,7 @@ const Profile = () => {
       }
 
       // 2) Check orders paid status
-      const ordersUrl = "https://app.techguygeek.co.uk/menu1/PHPread/User/CheckUserOrdersPaidStatusSecure.php";
+      const ordersUrl = "https://web.gpsshops.com/menu1/PHPread/User/CheckUserOrdersPaidStatusSecure.php";
       const ordersForm = new URLSearchParams();
       ordersForm.append("UserID", personId);
       ordersForm.append("UserEmail", userEmail);
@@ -311,7 +311,7 @@ const Profile = () => {
     const userEmail = String((user as any).Email || (user as any).email || "");
     const userPassword = String((user as any).Password || (user as any).password || (user as any).hash || "");
     try {
-      const deleteUrl = "https://app.techguygeek.co.uk/menu1/PHPwrite/User/DeleteUserSecure.php";
+      const deleteUrl = "https://web.gpsshops.com/menu1/PHPwrite/User/DeleteUserSecure.php";
       const deleteForm = new URLSearchParams();
       deleteForm.append("UserID", personId);
       deleteForm.append("UserEmail", userEmail);
@@ -361,7 +361,7 @@ const Profile = () => {
     const raw = user.Imagepath as string | undefined;
     if (!raw) return null;
     if (raw.startsWith("http://") || raw.startsWith("https://")) return raw;
-    const base = "https://app.techguygeek.co.uk";
+    const base = "https://web.gpsshops.com";
     const cleaned = raw.replace(/^\/+/, "");
     const fullPath = cleaned.startsWith("menu1/") ? cleaned : `menu1/${cleaned}`;
     return `${base}/${fullPath}`;

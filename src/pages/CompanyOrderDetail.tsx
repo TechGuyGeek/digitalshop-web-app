@@ -4,7 +4,7 @@ import { ArrowLeft, Loader2, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-const SERVER_DOMAIN = "https://app.techguygeek.co.uk/";
+const SERVER_DOMAIN = "https://web.gpsshops.com/";
 interface LiveOrderDetailItem { ID?: string; GroupID?: string; OrderName?: string; OrderDesription?: string; OrderPrice?: string; imagepathx?: string; Imagepath?: string; imagepath?: string; companyid?: string; clientid?: string; DateandTime?: string; [key: string]: unknown; }
 const ENDPOINTS: Record<string, string> = { today: "RetriveLiveOrderDetails.php", week: "RetriveLiveOrderDetailsweek.php", month: "RetriveLiveOrderDetailsmonth.php" };
 

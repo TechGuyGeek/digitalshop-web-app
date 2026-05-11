@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { QRCodeCanvas } from "qrcode.react";
 
-const SERVER_DOMAIN = "https://app.techguygeek.co.uk/";
+const SERVER_DOMAIN = "https://web.gpsshops.com/";
 
 function buildAddress(company: CompanyDetails): string {
   return [company.LineOneAddress, company.LineTwoAddress, company.LineThreeAddress, company.LineFourAddress, company.LineCountryAddress].filter((line) => line && line.trim() !== "").join(", ");

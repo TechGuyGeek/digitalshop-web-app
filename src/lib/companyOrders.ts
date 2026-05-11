@@ -1,4 +1,4 @@
-const SERVER_DOMAIN = "https://app.techguygeek.co.uk/";
+const SERVER_DOMAIN = "https://web.gpsshops.com/";
 
 export interface CompanyOrderItem {
   GroupID?: number | string;

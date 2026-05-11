@@ -6,7 +6,7 @@ import { useBasket } from "@/contexts/BasketContext";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-const SERVER_DOMAIN = "https://app.techguygeek.co.uk/";
+const SERVER_DOMAIN = "https://web.gpsshops.com/";
 
 interface Product { ID: string; OrderName: string; OrderPrice?: string; OrderDesription?: string; imagepath?: string; count?: number; }
 

@@ -156,7 +156,7 @@ const Index = () => {
       const body = new URLSearchParams();
       body.append("email", trimmed);
       body.append("user_email", trimmed);
-      const res = await fetch("https://app.techguygeek.co.uk/menu1/Registration/resendverification.php", {
+      const res = await fetch("https://web.gpsshops.com/menu1/Registration/resendverification.php", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: body.toString(),
@@ -494,7 +494,7 @@ const Index = () => {
                   size="lg"
                   className="flex-1 gap-2"
                   onClick={() =>
-                    (window.location.href = `https://app.techguygeek.co.uk/menu1/Digitalweb/Auth/google-start.php?returnUrl=${encodeURIComponent(window.location.origin + "/oauth-callback")}`)
+                    (window.location.href = `https://web.gpsshops.com/menu1/Digitalweb/Auth/google-start.php?returnUrl=${encodeURIComponent(window.location.origin + "/oauth-callback")}`)
                   }
                 >
                   <svg className="h-5 w-5" viewBox="0 0 24 24">
@@ -510,7 +510,7 @@ const Index = () => {
                   size="lg"
                   className="flex-1 gap-2"
                   onClick={() =>
-                    (window.location.href = `https://app.techguygeek.co.uk/menu1/Digitalweb/Auth/facebook-start.php?returnUrl=${encodeURIComponent(window.location.origin + "/oauth-callback")}`)
+                    (window.location.href = `https://web.gpsshops.com/menu1/Digitalweb/Auth/facebook-start.php?returnUrl=${encodeURIComponent(window.location.origin + "/oauth-callback")}`)
                   }
                 >
                   <svg className="h-5 w-5" viewBox="0 0 24 24" fill="#1877F2">
