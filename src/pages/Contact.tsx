@@ -9,7 +9,7 @@ const Contact = () => {
   useSeo({
     title: "Contact GPS Shops — Get in Touch",
     description:
-      "Contact GPS Shops for support, partnerships, listing your business, or general questions. Email jason@techguygeek.com.",
+      "Contact GPS Shops for support, partnerships, listing your business, or general questions. Email support@gpsshops.com.",
     canonical: "https://gpsshops.com/contact",
   });
 
@@ -47,10 +47,10 @@ const Contact = () => {
                   Best for support, partnerships, and general enquiries.
                 </p>
                 <a
-                  href="mailto:jason@techguygeek.com"
+                  href="mailto:support@gpsshops.com"
                   className="text-primary hover:underline break-all"
                 >
-                  jason@techguygeek.com
+                  support@gpsshops.com
                 </a>
               </div>
             </div>
@@ -110,13 +110,13 @@ const Contact = () => {
             mainEntity: {
               "@type": "Organization",
               name: "GPS Shops",
-              email: "jason@techguygeek.com",
+              email: "support@gpsshops.com",
               url: "https://gpsshops.com",
               contactPoint: [
                 {
                   "@type": "ContactPoint",
                   contactType: "customer support",
-                  email: "jason@techguygeek.com",
+                  email: "support@gpsshops.com",
                   availableLanguage: ["English"],
                 },
               ],
