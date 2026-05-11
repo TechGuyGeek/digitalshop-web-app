@@ -1,6 +1,6 @@
 import { getCategoryByCode } from "./shopCategories";
 
-const SERVER_DOMAIN = "https://app.techguygeek.co.uk/";
+const SERVER_DOMAIN = "https://web.gpsshops.com/";
 
 export interface NearbyCompany {
   companyid: number;

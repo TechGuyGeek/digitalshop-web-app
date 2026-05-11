@@ -10,7 +10,7 @@ import { useAdverts } from "@/hooks/useAdverts";
 import VideoAdvert from "@/components/adverts/VideoAdvert";
 import { useRegisterNavActions } from "@/contexts/SiteNavExtras";
 
-const SERVER_DOMAIN = "https://app.techguygeek.co.uk/";
+const SERVER_DOMAIN = "https://web.gpsshops.com/";
 
 const isEnabled = (value: unknown): boolean => String(value) === "1";
 const generateRandomCode = (length: number) => {

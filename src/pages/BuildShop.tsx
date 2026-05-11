@@ -57,7 +57,7 @@ const BuildShop = () => {
     if (!shopName.trim()) { toast.error(t("RegistrationFailedCompanyNamecannotbeempty")); return; }
     if (!companyEmail.trim()) { toast.error(t("RegistrationFailedCompanyEmailscannotbeempty")); return; }
     setSaving(true);
-    const SERVER_DOMAIN = "https://app.techguygeek.co.uk/";
+    const SERVER_DOMAIN = "https://web.gpsshops.com/";
     const user = JSON.parse(localStorage.getItem("digitalUser") || "{}");
     const personId = user.PersonID || user.personID || user.ID || "";
     const email = user.Email || user.email || "";

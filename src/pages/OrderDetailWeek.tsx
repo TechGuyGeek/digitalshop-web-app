@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import OrderPayButton from "@/components/OrderPayButton";
 
-const SERVER_DOMAIN = "https://app.techguygeek.co.uk/";
+const SERVER_DOMAIN = "https://web.gpsshops.com/";
 interface OrderLineItem { companyid?: string; clientid?: string; DateandTime?: string; productid?: string; OrderName?: string; orderName?: string; OrderPrice?: string; orderPrice?: string; imagepath?: string; OrderDesription?: string; [key: string]: unknown; }
 function getProductPhotoUrl(photo: string | undefined): string { if (!photo) return ""; if (photo.startsWith("http")) return photo; const cleaned = photo.startsWith("/") ? photo.slice(1) : photo; return `${SERVER_DOMAIN}menu1/${cleaned}`; }
 
