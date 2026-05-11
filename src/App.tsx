@@ -46,7 +46,6 @@ import PaymentComplete from "./pages/PaymentComplete.tsx";
 import PaymentRetry from "./pages/PaymentRetry.tsx";
 import PaymentSuccess from "./pages/PaymentSuccess.tsx";
 import PaymentCancelled from "./pages/PaymentCancelled.tsx";
-import ShopsAVerse from "./pages/ShopsAVerse.tsx";
 import AdminShops from "./pages/AdminShops.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
@@ -110,7 +109,6 @@ const AppShell = () => {
                 <Route path="/payment-retry" element={<PaymentRetry />} />
                 <Route path="/payment-success" element={<PaymentSuccess />} />
                 <Route path="/payment-cancelled" element={<PaymentCancelled />} />
-                <Route path="/shopsaverse" element={<ShopsAVerse />} />
                 <Route path="/admin-shops" element={<AdminShops />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
