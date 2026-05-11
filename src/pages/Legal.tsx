@@ -156,6 +156,7 @@ const Legal = () => {
           By continuing to use GPS Shops, you confirm that you understand and accept these Terms, Disclaimer, and Limitation of Liability.
         </p>
       </main>
+      <SiteFooter />
     </div>
   );
 };
