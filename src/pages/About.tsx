@@ -165,10 +165,10 @@ const About = () => {
           <p className="text-muted-foreground leading-relaxed">
             Contact us at:{" "}
             <a
-              href="mailto:jason@techguygeek.com"
+              href="mailto:support@gpsshops.com"
               className="text-primary hover:underline"
             >
-              jason@techguygeek.com
+              support@gpsshops.com
             </a>
           </p>
         </section>
