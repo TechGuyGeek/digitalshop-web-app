@@ -350,7 +350,7 @@ const Index = () => {
                     <SelectContent>
                       <SelectItem value="Male">{t("Male")}</SelectItem>
                       <SelectItem value="Female">{t("Female")}</SelectItem>
-                      <SelectItem value="Non-binary">Non-binary</SelectItem>
+                      <SelectItem value="Non-binary">{t("NonBinary")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
