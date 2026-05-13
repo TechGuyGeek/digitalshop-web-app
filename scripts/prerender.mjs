@@ -2,10 +2,10 @@
 // Boots a sirv server on dist/, visits each /{lang}/ variant, waits for the
 // translated content to render, then writes dist/<path>/index.html.
 
-import { mkdirSync, writeFileSync, existsSync } from "fs";
+import { mkdirSync, writeFileSync, existsSync, readFileSync } from "fs";
 import { resolve, join } from "path";
-import sirv from "sirv";
 import http from "http";
+import sirv from "sirv";
 import puppeteer from "puppeteer";
 
 const DIST = resolve("dist");
@@ -27,8 +27,18 @@ if (!existsSync(DIST)) {
   process.exit(1);
 }
 
-const handler = sirv(DIST, { single: true, dev: false, etag: false });
-const server = http.createServer(handler);
+// Cache the original build template so SPA fallback never serves a
+// page that React has already mounted into — otherwise subsequent
+// routes try to hydrate the wrong tree, fail, and Puppeteer captures
+// an empty <body>.
+const TEMPLATE = readFileSync(join(DIST, "index.html"), "utf8");
+const assets = sirv(DIST, { dev: false, etag: false, single: false });
+const server = http.createServer((req, res) => {
+  assets(req, res, () => {
+    res.setHeader("content-type", "text/html; charset=utf-8");
+    res.end(TEMPLATE);
+  });
+});
 await new Promise((r) => server.listen(PORT, r));
 console.log(`prerender server on http://localhost:${PORT}`);
 
@@ -39,6 +49,7 @@ const browser = await puppeteer.launch({
 
 let ok = 0;
 let failed = 0;
+const outputs = [];
 
 for (const route of ROUTES) {
   const page = await browser.newPage();
@@ -52,10 +63,7 @@ for (const route of ROUTES) {
     // Small extra delay to let async translation fetches settle.
     await new Promise((r) => setTimeout(r, 800));
     const html = await page.content();
-
-    const outDir = route === "/" ? DIST : join(DIST, route);
-    mkdirSync(outDir, { recursive: true });
-    writeFileSync(join(outDir, "index.html"), html);
+    outputs.push({ route, html });
     ok++;
     console.log(`  ✓ ${route}`);
   } catch (e) {
@@ -68,5 +76,14 @@ for (const route of ROUTES) {
 
 await browser.close();
 await new Promise((r) => server.close(r));
+
+// Write all snapshots after the server is down, so nothing we wrote
+// during the loop could have leaked into a fallback response.
+for (const { route, html } of outputs) {
+  const outDir = route === "/" ? DIST : join(DIST, route);
+  mkdirSync(outDir, { recursive: true });
+  writeFileSync(join(outDir, "index.html"), html);
+}
+
 console.log(`prerender done: ${ok} ok, ${failed} failed`);
 if (failed > 0) process.exit(1);
