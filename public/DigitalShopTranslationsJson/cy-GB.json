@@ -448,5 +448,9 @@
   "Legal_S11_Title": "11. Cyswllt",
   "Legal_S11_P1": "Am ymholiadau cyfreithiol, pryderon platfform, neu gefnogaeth gyffredinol, cysylltwch â:",
   "Legal_Footer": "Trwy barhau i ddefnyddio GPS Shops, rydych yn cadarnhau eich bod yn deall ac yn derbyn y Telerau, Ymwadiad, a Chyfyngiad ar Atebolrwydd hyn.",
-  "OrContinueWith": "neu parhau gyda"
+  "OrContinueWith": "neu parhau gyda",
+  "PaymentMethod": "Dull talu",
+  "CashOnly": "Arian parod yn unig",
+  "CardOnly": "Cerdyn yn unig",
+  "CashAndCard": "Arian a cherdyn"
 }

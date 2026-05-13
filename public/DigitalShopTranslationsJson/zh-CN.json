@@ -448,5 +448,9 @@
   "Legal_S11_Title": "11. 联系方式",
   "Legal_S11_P1": "如需法律咨询、平台问题或一般支持，请联系：",
   "Legal_Footer": "继续使用 GPS Shops，即表示您确认理解并接受这些条款、免责声明和责任限制。",
-  "OrContinueWith": "或继续使用"
+  "OrContinueWith": "或继续使用",
+  "PaymentMethod": "支付方式",
+  "CashOnly": "仅现金",
+  "CardOnly": "仅刷卡",
+  "CashAndCard": "现金和刷卡"
 }

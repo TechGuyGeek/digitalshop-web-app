@@ -448,5 +448,9 @@
   "Legal_S11_Title": "11. እውቂያ",
   "Legal_S11_P1": "ለህጋዊ ጥያቄዎች፣ የመድረክ ስጋቶች ወይም አጠቃላይ ድጋፍ፣ እባክዎ ያነጋግሩ፦",
   "Legal_Footer": "GPS Shops ን መጠቀሙን በመቀጠል፣ እነዚህን ውሎች፣ ማስተባበያ እና የኃላፊነት ገደብ እንደተረዱ እና እንደተቀበሉ ያረጋግጣሉ።",
-  "OrContinueWith": "ወይም ቀጥሉ በ"
+  "OrContinueWith": "ወይም ቀጥሉ በ",
+  "PaymentMethod": "የክፍያ ዘዴ",
+  "CashOnly": "ጥሬ ገንዘብ ብቻ",
+  "CardOnly": "ካርድ ብቻ",
+  "CashAndCard": "ጥሬ ገንዘብ እና ካርድ"
 }

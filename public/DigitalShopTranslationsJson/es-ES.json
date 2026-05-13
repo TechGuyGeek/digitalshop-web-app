@@ -448,5 +448,9 @@
   "Legal_S11_Title": "11. Contacto",
   "Legal_S11_P1": "Para consultas legales, inquietudes sobre la plataforma o soporte general, por favor contacte con:",
   "Legal_Footer": "Al continuar utilizando GPS Shops, usted confirma que entiende y acepta estos Términos, la Exención de Responsabilidad y la Limitación de Responsabilidad.",
-  "OrContinueWith": "o continúa con"
+  "OrContinueWith": "o continúa con",
+  "PaymentMethod": "Método de pago",
+  "CashOnly": "Solo efectivo",
+  "CardOnly": "Solo tarjeta",
+  "CashAndCard": "Efectivo y tarjeta"
 }

@@ -448,5 +448,9 @@
   "Legal_S11_Title": "11. Contacte",
   "Legal_S11_P1": "Per a consultes legals, dubtes sobre la plataforma o suport general, poseu-vos en contacte amb:",
   "Legal_Footer": "En continuar utilitzant GPS Shops, confirmeu que enteneu i accepteu aquestes Condicions, Exempció de responsabilitat i Limitació de responsabilitat.",
-  "OrContinueWith": "o continua amb"
+  "OrContinueWith": "o continua amb",
+  "PaymentMethod": "Mètode de pagament",
+  "CashOnly": "Només efectiu",
+  "CardOnly": "Només targeta",
+  "CashAndCard": "Efectiu i targeta"
 }

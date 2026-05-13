@@ -448,5 +448,9 @@
   "Legal_S11_Title": "11. 문의",
   "Legal_S11_P1": "법적 문의, 플랫폼 관련 문제 또는 일반적인 지원은 다음으로 문의하십시오.",
   "Legal_Footer": "GPS Shops를 계속 사용함으로써 귀하는 본 약관, 면책 고지 및 책임 제한을 이해하고 수락함을 확인합니다.",
-  "OrContinueWith": "또는 다음으로 계속"
+  "OrContinueWith": "또는 다음으로 계속",
+  "PaymentMethod": "결제 방법",
+  "CashOnly": "현금만",
+  "CardOnly": "카드만",
+  "CashAndCard": "현금과 카드"
 }

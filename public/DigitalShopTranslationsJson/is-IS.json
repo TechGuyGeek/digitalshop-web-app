@@ -448,5 +448,9 @@
   "Legal_S11_Title": "11. Samband (tengiliður)",
   "Legal_S11_P1": "Fyrir lögfræðilegar fyrirspurnir, áhyggjur vegna vettvangsins eða almennan stuðning, vinsamlegast hafðu samband við:",
   "Legal_Footer": "Með því að halda áfram að nota GPS Shops, staðfestir þú að þú skiljir og samþykkir þessa skilmála, fyrirvara og takmörkun ábyrgðar.",
-  "OrContinueWith": "eða haltu áfram með"
+  "OrContinueWith": "eða haltu áfram með",
+  "PaymentMethod": "Greiðslumáti",
+  "CashOnly": "Aðeins reiðufé",
+  "CardOnly": "Aðeins kort",
+  "CashAndCard": "Reiðufé og kort"
 }
