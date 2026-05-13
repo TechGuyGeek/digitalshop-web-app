@@ -147,5 +147,6 @@
   "PaymentMethod": "Payment method",
   "CashOnly": "Cash only",
   "CardOnly": "Card only",
-  "CashAndCard": "Cash and card"
+  "CashAndCard": "Cash and card",
+  "UpdateGPS": "Update GPS"
 }
