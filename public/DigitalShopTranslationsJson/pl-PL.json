@@ -305,5 +305,6 @@
   "YourcurrentGPSisnegative": "Twój aktualny GPS jest ujemny, wyloguj się i zaloguj ponownie lub zmień obecne połączenie internetowe",
   "YourLivetorecieveOrders": "Twoje Live, aby otrzymywać zamówienia",
   "Zero": "0",
-  "ChooseMapMarker": "Wybierz znacznik na mapie"
+  "ChooseMapMarker": "Wybierz znacznik na mapie",
+  "ResendVerificationEmail": "Wyślij ponownie e-mail weryfikacyjny"
 }
