@@ -425,21 +425,21 @@ export async function updatePaymentMethod(
 // fallback for legacy callers.
 const MARKER_ICON_BASE = "https://gpsshops.com/map-icons/";
 
-export const MAP_MARKER_EMOJIS: Record<string, { emoji: string; label: string; iconUrl: string }> = {
-  "0":  { emoji: "📍", label: "Google",         iconUrl: MARKER_ICON_BASE + "google09.png" },
-  "1":  { emoji: "🏪", label: "Shop",           iconUrl: MARKER_ICON_BASE + "shop01.png" },
-  "2":  { emoji: "🍻", label: "Pub",            iconUrl: MARKER_ICON_BASE + "pub02.png" },
-  "3":  { emoji: "☕", label: "Cafe",           iconUrl: MARKER_ICON_BASE + "cafe03.png" },
-  "4":  { emoji: "🍴", label: "Restaurant",     iconUrl: MARKER_ICON_BASE + "restaurant04.png" },
-  "5":  { emoji: "🏠", label: "Home",           iconUrl: MARKER_ICON_BASE + "home05.png" },
-  "6":  { emoji: "🎪", label: "Mobile",         iconUrl: MARKER_ICON_BASE + "mobile06.png" },
-  "7":  { emoji: "🧸", label: "Toys",           iconUrl: MARKER_ICON_BASE + "toys07.png" },
-  "8":  { emoji: "🥪", label: "Sandwiches",     iconUrl: MARKER_ICON_BASE + "sandwichs08.png" },
-  "9":  { emoji: "📍", label: "Google",         iconUrl: MARKER_ICON_BASE + "google09.png" },
-  "10": { emoji: "🍳", label: "Breakfast",      iconUrl: MARKER_ICON_BASE + "breakfast10.png" },
-  "11": { emoji: "👔", label: "Mens Clothing",  iconUrl: MARKER_ICON_BASE + "clothing11.png" },
-  "12": { emoji: "👗", label: "Ladies Clothing",iconUrl: MARKER_ICON_BASE + "clothing12.png" },
-  "13": { emoji: "🔢", label: "Digits",         iconUrl: MARKER_ICON_BASE + "digit.png" },
+export const MAP_MARKER_EMOJIS: Record<string, { emoji: string; label: string; translationKey: string; iconUrl: string }> = {
+  "0":  { emoji: "📍", label: "Google",          translationKey: "GoogleIcon",         iconUrl: MARKER_ICON_BASE + "google09.png" },
+  "1":  { emoji: "🏪", label: "Shop",            translationKey: "ShopIcon",           iconUrl: MARKER_ICON_BASE + "shop01.png" },
+  "2":  { emoji: "🍻", label: "Pub",             translationKey: "PubIcon",            iconUrl: MARKER_ICON_BASE + "pub02.png" },
+  "3":  { emoji: "☕", label: "Cafe",            translationKey: "CafeIcon",           iconUrl: MARKER_ICON_BASE + "cafe03.png" },
+  "4":  { emoji: "🍴", label: "Restaurant",      translationKey: "RestaurantIcon",     iconUrl: MARKER_ICON_BASE + "restaurant04.png" },
+  "5":  { emoji: "🏠", label: "Home",            translationKey: "HomeIcon",           iconUrl: MARKER_ICON_BASE + "home05.png" },
+  "6":  { emoji: "🎪", label: "Mobile",          translationKey: "MobileIcon",         iconUrl: MARKER_ICON_BASE + "mobile06.png" },
+  "7":  { emoji: "🧸", label: "Toys",            translationKey: "ToysIcon",           iconUrl: MARKER_ICON_BASE + "toys07.png" },
+  "8":  { emoji: "🥪", label: "Sandwiches",      translationKey: "SandwichesIcon",     iconUrl: MARKER_ICON_BASE + "sandwichs08.png" },
+  "9":  { emoji: "📍", label: "Google",          translationKey: "GoogleIcon",         iconUrl: MARKER_ICON_BASE + "google09.png" },
+  "10": { emoji: "🍳", label: "Breakfast",       translationKey: "BreakfastIcon",      iconUrl: MARKER_ICON_BASE + "breakfast10.png" },
+  "11": { emoji: "👔", label: "Mens Clothing",   translationKey: "MensClothingIcon",   iconUrl: MARKER_ICON_BASE + "clothing11.png" },
+  "12": { emoji: "👗", label: "Ladies Clothing", translationKey: "LadiesClothingIcon", iconUrl: MARKER_ICON_BASE + "clothing12.png" },
+  "13": { emoji: "🔢", label: "Digits",          translationKey: "DigitsIcon",         iconUrl: MARKER_ICON_BASE + "digit.png" },
 };
 
 export function getMarkerForPublicNumber(publicNumber?: string) {
