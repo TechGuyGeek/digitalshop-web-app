@@ -28,123 +28,63 @@ const About = () => {
 
       <main className="px-6 pb-16 pt-4 max-w-prose mx-auto">
         <h1 className="font-heading text-3xl md:text-4xl tracking-tight text-foreground mb-4">
-          About GPS Shops
+          {t("AboutPageHeading")}
         </h1>
-        <p className="text-muted-foreground mb-6 leading-relaxed">
-          GPS Shops is a global, location-aware marketplace that connects
-          people with the shops, services, and experiences around them — wherever
-          they are in the world.
-        </p>
-        <p className="text-muted-foreground mb-8 leading-relaxed">
-          We combine the power of local discovery with the convenience of online
-          shopping, helping businesses create beautiful digital storefronts that
-          customers can find instantly through map-based search and global
-          discovery.
-        </p>
+        <p className="text-muted-foreground mb-6 leading-relaxed">{t("AboutIntro1")}</p>
+        <p className="text-muted-foreground mb-8 leading-relaxed">{t("AboutIntro2")}</p>
 
         <section className="space-y-4 mb-8">
-          <h2 className="font-heading text-2xl text-foreground">Our Mission</h2>
-          <p className="text-muted-foreground leading-relaxed">
-            We believe local commerce should feel as effortless as scrolling a
-            feed.
-          </p>
-          <p className="text-muted-foreground leading-relaxed">
-            From a single market stall to a growing retail chain, every business
-            deserves the ability to be discovered, browsed, and supported online
-            without needing expensive websites, complex systems, or large
-            marketing budgets.
-          </p>
-          <p className="text-muted-foreground leading-relaxed">
-            GPS Shops makes that possible.
-          </p>
+          <h2 className="font-heading text-2xl text-foreground">{t("OurMission")}</h2>
+          <p className="text-muted-foreground leading-relaxed">{t("OurMissionP1")}</p>
+          <p className="text-muted-foreground leading-relaxed">{t("OurMissionP2")}</p>
+          <p className="text-muted-foreground leading-relaxed">{t("OurMissionP3")}</p>
         </section>
 
         <section className="space-y-6 mb-8">
-          <h2 className="font-heading text-2xl text-foreground">What You Can Do</h2>
+          <h2 className="font-heading text-2xl text-foreground">{t("WhatYouCanDo")}</h2>
 
           <div className="space-y-2">
-            <h3 className="font-heading text-lg text-foreground">Discover Nearby Shops</h3>
-            <p className="text-muted-foreground leading-relaxed">
-              Use the interactive map to explore shops, services, and local
-              businesses near your current location.
-            </p>
+            <h3 className="font-heading text-lg text-foreground">{t("DiscoverNearbyShopsTitle")}</h3>
+            <p className="text-muted-foreground leading-relaxed">{t("DiscoverNearbyShopsDesc")}</p>
           </div>
 
           <div className="space-y-2">
-            <h3 className="font-heading text-lg text-foreground">Browse and Order</h3>
-            <p className="text-muted-foreground leading-relaxed">
-              View menus, products, and services, build your basket, and place
-              orders quickly from your phone.
-            </p>
+            <h3 className="font-heading text-lg text-foreground">{t("BrowseAndOrderTitle")}</h3>
+            <p className="text-muted-foreground leading-relaxed">{t("BrowseAndOrderDesc")}</p>
           </div>
 
           <div className="space-y-2">
-            <h3 className="font-heading text-lg text-foreground">Open Your Own Shop</h3>
-            <p className="text-muted-foreground leading-relaxed">
-              Create and manage your own digital storefront with a powerful
-              mobile-first dashboard designed for speed and simplicity.
-            </p>
+            <h3 className="font-heading text-lg text-foreground">{t("OpenYourOwnShopTitle")}</h3>
+            <p className="text-muted-foreground leading-relaxed">{t("OpenYourOwnShopDesc")}</p>
           </div>
 
           <div className="space-y-2">
-            <h3 className="font-heading text-lg text-foreground">Go Global</h3>
-            <p className="text-muted-foreground leading-relaxed">
-              Upgrade to Pro Mode to unlock Global Shop visibility, custom GPS
-              location settings, reduced adverts, and premium features.
-            </p>
+            <h3 className="font-heading text-lg text-foreground">{t("GoGlobalTitle")}</h3>
+            <p className="text-muted-foreground leading-relaxed">{t("GoGlobalDesc")}</p>
           </div>
 
           <div className="space-y-2">
-            <h3 className="font-heading text-lg text-foreground">Multi-Language and Multi-Theme</h3>
-            <p className="text-muted-foreground leading-relaxed">
-              Use the platform in your preferred language and theme for a fully
-              personalised experience.
-            </p>
+            <h3 className="font-heading text-lg text-foreground">{t("MultiLanguageThemeTitle")}</h3>
+            <p className="text-muted-foreground leading-relaxed">{t("MultiLanguageThemeDesc")}</p>
           </div>
         </section>
 
         <section className="space-y-4 mb-8">
-          <h2 className="font-heading text-2xl text-foreground">Why GPS Shops?</h2>
-          <p className="text-muted-foreground leading-relaxed">
-            Because the future of shopping is not just online.
-          </p>
-          <p className="text-muted-foreground leading-relaxed">
-            It is local, global, mobile, and immediate.
-          </p>
-          <p className="text-muted-foreground leading-relaxed">
-            It is your shop — anywhere.
-          </p>
+          <h2 className="font-heading text-2xl text-foreground">{t("WhyGPSShops")}</h2>
+          <p className="text-muted-foreground leading-relaxed">{t("WhyGPSShopsP1")}</p>
+          <p className="text-muted-foreground leading-relaxed">{t("WhyGPSShopsP2")}</p>
+          <p className="text-muted-foreground leading-relaxed">{t("WhyGPSShopsP3")}</p>
         </section>
 
         <section className="space-y-4 mb-8">
-          <h2 className="font-heading text-2xl text-foreground">Founder Vision</h2>
-          <p className="text-muted-foreground leading-relaxed">
-            GPS Shops began as an idea to bridge the gap between physical
-            shops and the digital world.
-          </p>
-          <p className="text-muted-foreground leading-relaxed">
-            Long before modern AI tools and rapid app builders, the vision was
-            simple:
-          </p>
-          <p className="text-muted-foreground leading-relaxed italic">
-            Make it possible for any business, anywhere, to create a digital
-            shop that customers could discover instantly through location and
-            mobile technology.
-          </p>
-          <p className="text-muted-foreground leading-relaxed">
-            This original founder video shares the early concept behind what is
-            now GPS Shops.
-          </p>
-          <p className="text-muted-foreground leading-relaxed">
-            While the platform has evolved significantly since then, the
-            mission remains the same:
-          </p>
-          <p className="text-foreground font-heading text-lg">
-            Your shop — anywhere.
-          </p>
-          <p className="text-muted-foreground leading-relaxed">
-            Watch the original concept video below.
-          </p>
+          <h2 className="font-heading text-2xl text-foreground">{t("FounderVision")}</h2>
+          <p className="text-muted-foreground leading-relaxed">{t("FounderVisionP1")}</p>
+          <p className="text-muted-foreground leading-relaxed">{t("FounderVisionP2")}</p>
+          <p className="text-muted-foreground leading-relaxed italic">{t("FounderVisionP3")}</p>
+          <p className="text-muted-foreground leading-relaxed">{t("FounderVisionP4")}</p>
+          <p className="text-muted-foreground leading-relaxed">{t("FounderVisionP5")}</p>
+          <p className="text-foreground font-heading text-lg">{t("YourShopAnywhere")}</p>
+          <p className="text-muted-foreground leading-relaxed">{t("WatchOriginalConceptVideo")}</p>
           <div className="relative w-full overflow-hidden rounded-lg border border-border bg-muted" style={{ paddingBottom: "56.25%" }}>
             <iframe
               className="absolute inset-0 h-full w-full"
@@ -158,12 +98,10 @@ const About = () => {
         </section>
 
         <section className="space-y-4">
-          <h2 className="font-heading text-2xl text-foreground">Get In Touch</h2>
+          <h2 className="font-heading text-2xl text-foreground">{t("GetInTouch")}</h2>
+          <p className="text-muted-foreground leading-relaxed">{t("GetInTouchP1")}</p>
           <p className="text-muted-foreground leading-relaxed">
-            Questions, feedback, partnerships, or want to list your shop?
-          </p>
-          <p className="text-muted-foreground leading-relaxed">
-            Contact us at:{" "}
+            {t("ContactUsAt")}{" "}
             <a
               href="mailto:support@gpsshops.com"
               className="text-primary hover:underline"
