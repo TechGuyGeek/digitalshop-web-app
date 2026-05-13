@@ -11,6 +11,7 @@ import Index from "./pages/Index.tsx";
 import About from "./pages/About.tsx";
 import Legal from "./pages/Legal.tsx";
 import Contact from "./pages/Contact.tsx";
+import LocalizedRoute from "./components/LocalizedRoute";
 import SiteNav from "./components/SiteNav";
 import GlobalUpgradeNavAction from "./components/GlobalUpgradeNavAction";
 import GlobalSignOutNavAction from "./components/GlobalSignOutNavAction";
@@ -78,6 +79,10 @@ const AppShell = () => {
                 <Route path="/about" element={<About />} />
                 <Route path="/legal" element={<Legal />} />
                 <Route path="/contact" element={<Contact />} />
+                <Route path="/:lang" element={<LocalizedRoute><Index /></LocalizedRoute>} />
+                <Route path="/:lang/about" element={<LocalizedRoute><About /></LocalizedRoute>} />
+                <Route path="/:lang/legal" element={<LocalizedRoute><Legal /></LocalizedRoute>} />
+                <Route path="/:lang/contact" element={<LocalizedRoute><Contact /></LocalizedRoute>} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/payment-methods" element={<PaymentMethods />} />
                 <Route path="/oauth-callback" element={<OAuthCallback />} />
