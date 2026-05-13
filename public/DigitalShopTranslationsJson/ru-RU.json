@@ -306,5 +306,11 @@
   "YourLivetorecieveOrders": "Ваш Live для получения заказов",
   "Zero": "0",
   "ChooseMapMarker": "Выберите маркер на карте",
-  "ResendVerificationEmail": "Отправить письмо подтверждения снова"
+  "ResendVerificationEmail": "Отправить письмо подтверждения снова",
+  "LoginIntroDescription": "Войдите, чтобы находить магазины рядом на карте, оформлять заказы или открыть свой цифровой магазин.",
+  "NewHere": "Новичок здесь?",
+  "LearnMoreAboutGPSShops": "Узнать больше о GPS Shops",
+  "About": "О нас",
+  "Contact": "Контакты",
+  "Legal": "Юридическая информация"
 }

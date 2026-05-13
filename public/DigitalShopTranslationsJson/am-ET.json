@@ -306,5 +306,11 @@
   "YourLivetorecieveOrders": "ትዕዛዞችን ለመቀበል የእርስዎ ቀጥታ ስርጭት",
   "Zero": "0",
   "ChooseMapMarker": "የካርታ ምልክት ይምረጡ",
-  "ResendVerificationEmail": "የማረጋገጫ ኢሜይል እንደገና ላክ"
+  "ResendVerificationEmail": "የማረጋገጫ ኢሜይል እንደገና ላክ",
+  "LoginIntroDescription": "በካርታ ላይ የቅርብ ሱቆችን ለማግኘት፣ ትዕዛዝ ለመስጠት፣ ወይም የራስዎን ዲጂታል ሱቅ ለመክፈት ይግቡ።",
+  "NewHere": "አዲስ ነዎት?",
+  "LearnMoreAboutGPSShops": "ስለ GPS Shops የበለጠ ይወቁ",
+  "About": "ስለ",
+  "Contact": "አግኙን",
+  "Legal": "ሕጋዊ"
 }

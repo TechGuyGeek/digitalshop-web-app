@@ -306,5 +306,11 @@
   "YourLivetorecieveOrders": "你的直播接收訂單",
   "Zero": "0",
   "ChooseMapMarker": "選擇地圖標記",
-  "ResendVerificationEmail": "重新傳送驗證電子郵件"
+  "ResendVerificationEmail": "重新傳送驗證電子郵件",
+  "LoginIntroDescription": "登入以在地圖上探索附近的商店、下單或開設您自己的數位店面。",
+  "NewHere": "新來的？",
+  "LearnMoreAboutGPSShops": "進一步了解 GPS Shops",
+  "About": "關於",
+  "Contact": "聯絡",
+  "Legal": "法律"
 }

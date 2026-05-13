@@ -306,5 +306,11 @@
   "YourLivetorecieveOrders": "El vostre Live per rebre comandes",
   "Zero": "0",
   "ChooseMapMarker": "Elegir marcador del mapa",
-  "ResendVerificationEmail": "Reenvia el correu de verificació"
+  "ResendVerificationEmail": "Reenvia el correu de verificació",
+  "LoginIntroDescription": "Inicia sessió per descobrir botigues properes al mapa, fer comandes o obrir la teva pròpia botiga digital.",
+  "NewHere": "Ets nou?",
+  "LearnMoreAboutGPSShops": "Més informació sobre GPS Shops",
+  "About": "Sobre",
+  "Contact": "Contacte",
+  "Legal": "Legal"
 }

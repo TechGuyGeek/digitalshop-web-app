@@ -306,5 +306,11 @@
   "YourLivetorecieveOrders": "Do bheò gus òrdughan fhaighinn",
   "Zero": "0",
   "ChooseMapMarker": "Tagh comharra a’ mhapa",
-  "ResendVerificationEmail": "Cuir am post-d dearbhaidh a-rithist"
+  "ResendVerificationEmail": "Cuir am post-d dearbhaidh a-rithist",
+  "LoginIntroDescription": "Clàraich a-steach gus bùthan faisg ort fhaicinn air a' mhapa, òrdughan a chur, no do bhùth dhidseatach fhèin fhosgladh.",
+  "NewHere": "Ùr an seo?",
+  "LearnMoreAboutGPSShops": "Ionnsaich barrachd mu GPS Shops",
+  "About": "Mu dheidhinn",
+  "Contact": "Cuir fios",
+  "Legal": "Laghail"
 }
