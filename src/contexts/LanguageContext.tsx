@@ -46,6 +46,7 @@ type Translations = Record<string, string>;
 interface LanguageContextType {
   language: string;
   setLanguage: (lang: string) => void;
+  setLanguageFromUrl: (lang: string) => void;
   t: (key: string) => string;
   availableLanguages: { code: string; name: string }[];
   loading: boolean;
@@ -140,6 +141,12 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setLanguageState(lang);
   }, []);
 
+  // Used when the URL prefix dictates the language. Does not persist to
+  // localStorage so the user's explicit choice on app pages is preserved.
+  const setLanguageFromUrl = useCallback((lang: string) => {
+    setLanguageState((prev) => (prev === lang ? prev : lang));
+  }, []);
+
   // selectedLanguage[key] ?? en[key] ?? key
   const t = useCallback(
     (key: string): string => {
@@ -153,7 +160,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   );
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t, availableLanguages, loading }}>
+    <LanguageContext.Provider value={{ language, setLanguage, setLanguageFromUrl, t, availableLanguages, loading }}>
       {children}
     </LanguageContext.Provider>
   );
