@@ -1,23 +1,20 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft, Mail, Globe, MapPin } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useSeo } from "@/hooks/useSeo";
+import SeoHead from "@/components/SeoHead";
+import { LOCALE_TO_PREFIX, buildLocalizedPath } from "@/lib/i18nRoutes";
 import SiteFooter from "@/components/SiteFooter";
 
 const Contact = () => {
-  const { t } = useLanguage();
-  useSeo({
-    title: "Contact GPS Shops — Get in Touch",
-    description:
-      "Contact GPS Shops for support, partnerships, listing your business, or general questions. Email support@gpsshops.com.",
-    canonical: "https://gpsshops.com/contact",
-  });
+  const { t, language } = useLanguage();
+  const prefix = LOCALE_TO_PREFIX[language] ?? "";
 
   return (
     <div className="relative min-h-screen bg-background text-foreground flex flex-col">
+      <SeoHead page="contact" />
       <header className="px-6 pt-6 pb-2">
         <Link
-          to="/"
+          to={buildLocalizedPath(prefix, "")}
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -27,24 +24,22 @@ const Contact = () => {
 
       <main className="px-6 pb-12 pt-4 max-w-prose mx-auto flex-1">
         <h1 className="font-heading text-3xl md:text-4xl tracking-tight text-foreground mb-4">
-          Contact GPS Shops
+          {t("ContactPageHeading")}
         </h1>
         <p className="text-muted-foreground leading-relaxed mb-8">
-          We&rsquo;d love to hear from you. Whether you have a question about the platform,
-          want to list your shop, need support with an order, or are exploring partnerships,
-          our team is here to help.
+          {t("ContactPageIntro")}
         </p>
 
         <section className="space-y-5 mb-10" aria-labelledby="reach-us">
-          <h2 id="reach-us" className="font-heading text-2xl text-foreground">Ways to Reach Us</h2>
+          <h2 id="reach-us" className="font-heading text-2xl text-foreground">{t("ContactWaysToReachUs")}</h2>
 
           <div className="rounded-xl border border-border/60 bg-card p-5">
             <div className="flex items-start gap-3">
               <Mail className="h-5 w-5 text-primary mt-0.5 shrink-0" />
               <div>
-                <h3 className="font-heading text-base text-foreground">Email</h3>
+                <h3 className="font-heading text-base text-foreground">{t("ContactEmailLabel")}</h3>
                 <p className="text-sm text-muted-foreground mb-1">
-                  Best for support, partnerships, and general enquiries.
+                  {t("ContactEmailDesc")}
                 </p>
                 <a
                   href="mailto:support@gpsshops.com"
@@ -60,9 +55,9 @@ const Contact = () => {
             <div className="flex items-start gap-3">
               <Globe className="h-5 w-5 text-primary mt-0.5 shrink-0" />
               <div>
-                <h3 className="font-heading text-base text-foreground">Website</h3>
+                <h3 className="font-heading text-base text-foreground">{t("ContactWebsiteLabel")}</h3>
                 <p className="text-sm text-muted-foreground mb-1">
-                  Visit our homepage to explore the platform.
+                  {t("ContactWebsiteDesc")}
                 </p>
                 <a
                   href="https://gpsshops.com"
@@ -78,10 +73,9 @@ const Contact = () => {
             <div className="flex items-start gap-3">
               <MapPin className="h-5 w-5 text-primary mt-0.5 shrink-0" />
               <div>
-                <h3 className="font-heading text-base text-foreground">List Your Shop</h3>
+                <h3 className="font-heading text-base text-foreground">{t("ContactListShopLabel")}</h3>
                 <p className="text-sm text-muted-foreground">
-                  Open your own digital storefront from inside the app &mdash; sign in,
-                  then choose <em>Build Shop</em> from the menu.
+                  {t("ContactListShopDesc")}
                 </p>
               </div>
             </div>
@@ -89,10 +83,9 @@ const Contact = () => {
         </section>
 
         <section className="space-y-3" aria-labelledby="response">
-          <h2 id="response" className="font-heading text-2xl text-foreground">Response Times</h2>
+          <h2 id="response" className="font-heading text-2xl text-foreground">{t("ContactResponseTimesLabel")}</h2>
           <p className="text-muted-foreground leading-relaxed">
-            We aim to respond to all enquiries within 1&ndash;2 business days. For urgent
-            order issues, please include your order reference in the subject line.
+            {t("ContactResponseTimesDesc")}
           </p>
         </section>
       </main>
