@@ -107,7 +107,8 @@ const CompanyProfile = () => {
   const [publicNumber, setPublicNumber] = useState(0);
   const [selectedMarker, setSelectedMarker] = useState({
     emoji: "🧸",
-    label: "TOYS ICON",
+    label: "Toys",
+    translationKey: "ToysIcon",
     iconUrl: "https://gpsshops.com/map-icons/toys07.png",
   });
 
@@ -153,7 +154,8 @@ const CompanyProfile = () => {
         const marker = getMarkerForPublicNumber(c.PublicNumber);
         setSelectedMarker({
           emoji: marker.emoji,
-          label: marker.label.toUpperCase() + " ICON",
+          label: marker.label,
+          translationKey: marker.translationKey,
           iconUrl: marker.iconUrl,
         });
         const pm = String((c as Record<string, unknown>).PaymentMethod ?? "0");
