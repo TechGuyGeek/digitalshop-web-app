@@ -448,5 +448,9 @@
   "Legal_S11_Title": "11. Kapcsolat",
   "Legal_S11_P1": "Jogi kérdések, platformmal kapcsolatos aggályok vagy általános támogatás esetén kérjük, vegye fel a kapcsolatot:",
   "Legal_Footer": "A GPS Shops további használatával megerősíti, hogy megértette és elfogadja ezeket a Feltételeket, Jogi Nyilatkozatot és Felelősségkorlátozást.",
-  "OrContinueWith": "vagy folytasd ezzel"
+  "OrContinueWith": "vagy folytasd ezzel",
+  "PaymentMethod": "Fizetési mód",
+  "CashOnly": "Csak készpénz",
+  "CardOnly": "Csak kártya",
+  "CashAndCard": "Készpénz és kártya"
 }

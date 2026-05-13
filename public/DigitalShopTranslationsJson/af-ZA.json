@@ -448,5 +448,9 @@
   "Legal_S11_Title": "11. Kontak",
   "Legal_S11_P1": "Vir regsnavrae,平台kwessies of algemene ondersteuning, kontak asseblief:",
   "Legal_Footer": "Deur voort te gaan om GPS Shops te gebruik, bevestig u dat u hierdie Bepalings, Vrywaring en Beperking van Aanspreeklikheid verstaan en aanvaar.",
-  "OrContinueWith": "of gaan voort met"
+  "OrContinueWith": "of gaan voort met",
+  "PaymentMethod": "Betaalmetode",
+  "CashOnly": "Slegs kontant",
+  "CardOnly": "Slegs kaart",
+  "CashAndCard": "Kontant en kaart"
 }

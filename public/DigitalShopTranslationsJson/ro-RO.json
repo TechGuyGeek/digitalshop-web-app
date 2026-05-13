@@ -448,5 +448,9 @@
   "Legal_S11_Title": "11. Contact",
   "Legal_S11_P1": "Pentru întrebări juridice, nelămuriri legate de platformă sau suport general, vă rugăm să contactați:",
   "Legal_Footer": "Prin continuarea utilizării GPS Shops, confirmați că înțelegeți și acceptați acești Termeni, Exonerarea de Răspundere și Limitarea Răspunderii.",
-  "OrContinueWith": "sau continuă cu"
+  "OrContinueWith": "sau continuă cu",
+  "PaymentMethod": "Metodă de plată",
+  "CashOnly": "Doar numerar",
+  "CardOnly": "Doar card",
+  "CashAndCard": "Numerar și card"
 }

@@ -448,5 +448,9 @@
   "Legal_S11_Title": "11. İletişim",
   "Legal_S11_P1": "Hukuki sorular, platformla ilgili endişeler veya genel destek için lütfen iletişime geçin:",
   "Legal_Footer": "GPS Shops'u kullanmaya devam ederek, bu Şartları, Feragatnameyi ve Sorumluluk Sınırlamasını anladığınızı ve kabul ettiğinizi onaylamış olursunuz.",
-  "OrContinueWith": "veya şununla devam et"
+  "OrContinueWith": "veya şununla devam et",
+  "PaymentMethod": "Ödeme yöntemi",
+  "CashOnly": "Sadece nakit",
+  "CardOnly": "Sadece kart",
+  "CashAndCard": "Nakit ve kart"
 }

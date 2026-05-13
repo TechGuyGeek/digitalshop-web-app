@@ -448,5 +448,9 @@
   "Legal_S11_Title": "11. Kontakt",
   "Legal_S11_P1": "För juridiska förfrågningar, plattformsfrågor eller allmän support, kontakta:",
   "Legal_Footer": "Genom att fortsätta använda GPS Shops bekräftar du att du förstår och accepterar dessa villkor, friskrivning och ansvarsbegränsning.",
-  "OrContinueWith": "eller fortsätt med"
+  "OrContinueWith": "eller fortsätt med",
+  "PaymentMethod": "Betalningsmetod",
+  "CashOnly": "Endast kontant",
+  "CardOnly": "Endast kort",
+  "CashAndCard": "Kontant och kort"
 }

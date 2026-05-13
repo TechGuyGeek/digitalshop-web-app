@@ -143,5 +143,9 @@
   "Legal_S11_Title": "11. Contact",
   "Legal_S11_P1": "Po na ba mpikani ya mobeko, ba mpikani ya platforme, to ba support ya kozala, soki olanga: support@gpshops.com",
   "Legal_Footer": "Na kosalela kaka GPS Shops, ozali kondima ete oyebi mpe oyambi Ba Tiriki oyo, Eko, mpe Limites ya Liabilite.",
-  "OrContinueWith": "or continue with"
+  "OrContinueWith": "or continue with",
+  "PaymentMethod": "Payment method",
+  "CashOnly": "Cash only",
+  "CardOnly": "Card only",
+  "CashAndCard": "Cash and card"
 }
