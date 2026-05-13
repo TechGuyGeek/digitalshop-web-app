@@ -593,7 +593,7 @@ const CompanyProfile = () => {
               alt={selectedMarker.label}
               className="w-16 h-16 object-contain"
             />
-            <span className="text-xs font-bold text-muted-foreground mt-1">{selectedMarker.label}</span>
+            <span className="text-xs font-bold text-muted-foreground mt-1 uppercase">{t(selectedMarker.translationKey)}</span>
           </div>
 
           <MapMarkerPicker
@@ -602,7 +602,7 @@ const CompanyProfile = () => {
             selectedId={publicNumber}
             onSelect={async (marker: MapMarkerOption) => {
               console.log("[MapMarker] Selected:", marker);
-              setSelectedMarker({ emoji: marker.emoji, label: marker.label, iconUrl: marker.iconUrl });
+              setSelectedMarker({ emoji: marker.emoji, label: marker.label, translationKey: marker.translationKey, iconUrl: marker.iconUrl });
               setPublicNumber(marker.id);
               setMarkerPickerOpen(false);
 
