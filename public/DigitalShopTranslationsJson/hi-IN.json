@@ -452,5 +452,8 @@
   "PaymentMethod": "भुगतान विधि",
   "CashOnly": "केवल नकद",
   "CardOnly": "केवल कार्ड",
-  "CashAndCard": "नकद और कार्ड"
+  "CashAndCard": "नकद और कार्ड",
+  "SelectIconShop": "मानचित्र पर अपनी दुकान दिखाने के लिए आइकन चुनें",
+  "LadiesClothingIcon": "महिला परिधान आइकन",
+  "DigitsIcon": "अंक आइकन"
 }

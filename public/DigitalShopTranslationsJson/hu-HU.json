@@ -452,5 +452,8 @@
   "PaymentMethod": "Fizetési mód",
   "CashOnly": "Csak készpénz",
   "CardOnly": "Csak kártya",
-  "CashAndCard": "Készpénz és kártya"
+  "CashAndCard": "Készpénz és kártya",
+  "SelectIconShop": "Válasszon ikont az üzlete megjelenítéséhez a térképen",
+  "LadiesClothingIcon": "Női ruházat ikon",
+  "DigitsIcon": "Számjegyek ikon"
 }

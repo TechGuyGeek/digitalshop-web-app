@@ -452,5 +452,8 @@
   "PaymentMethod": "Maksutapa",
   "CashOnly": "Vain käteinen",
   "CardOnly": "Vain kortti",
-  "CashAndCard": "Käteinen ja kortti"
+  "CashAndCard": "Käteinen ja kortti",
+  "SelectIconShop": "Valitse kuvake edustamaan kauppaasi kartalla",
+  "LadiesClothingIcon": "Naisten vaatteet -kuvake",
+  "DigitsIcon": "Numerot-kuvake"
 }

@@ -452,5 +452,8 @@
   "PaymentMethod": "Betaalmethode",
   "CashOnly": "Alleen contant",
   "CardOnly": "Alleen kaart",
-  "CashAndCard": "Contant en kaart"
+  "CashAndCard": "Contant en kaart",
+  "SelectIconShop": "Selecteer een pictogram om uw winkel op de kaart weer te geven",
+  "LadiesClothingIcon": "Pictogram dameskleding",
+  "DigitsIcon": "Pictogram cijfers"
 }

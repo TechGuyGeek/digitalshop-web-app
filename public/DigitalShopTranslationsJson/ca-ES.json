@@ -452,5 +452,8 @@
   "PaymentMethod": "Mètode de pagament",
   "CashOnly": "Només efectiu",
   "CardOnly": "Només targeta",
-  "CashAndCard": "Efectiu i targeta"
+  "CashAndCard": "Efectiu i targeta",
+  "SelectIconShop": "Selecciona una icona per representar la teva botiga al mapa",
+  "LadiesClothingIcon": "Icona de roba de dona",
+  "DigitsIcon": "Icona de dígits"
 }

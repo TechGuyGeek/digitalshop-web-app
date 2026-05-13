@@ -452,5 +452,8 @@
   "PaymentMethod": "Metodă de plată",
   "CashOnly": "Doar numerar",
   "CardOnly": "Doar card",
-  "CashAndCard": "Numerar și card"
+  "CashAndCard": "Numerar și card",
+  "SelectIconShop": "Selectați o pictogramă pentru a reprezenta magazinul pe hartă",
+  "LadiesClothingIcon": "Pictogramă îmbrăcăminte damă",
+  "DigitsIcon": "Pictogramă cifre"
 }

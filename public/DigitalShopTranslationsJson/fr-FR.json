@@ -452,5 +452,8 @@
   "PaymentMethod": "Mode de paiement",
   "CashOnly": "Espèces uniquement",
   "CardOnly": "Carte uniquement",
-  "CashAndCard": "Espèces et carte"
+  "CashAndCard": "Espèces et carte",
+  "SelectIconShop": "Choisissez une icône pour représenter votre boutique sur la carte",
+  "LadiesClothingIcon": "Icône vêtements femme",
+  "DigitsIcon": "Icône chiffres"
 }

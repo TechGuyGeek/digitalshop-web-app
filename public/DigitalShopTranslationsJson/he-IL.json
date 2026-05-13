@@ -452,5 +452,8 @@
   "PaymentMethod": "אמצעי תשלום",
   "CashOnly": "מזומן בלבד",
   "CardOnly": "כרטיס בלבד",
-  "CashAndCard": "מזומן וכרטיס"
+  "CashAndCard": "מזומן וכרטיס",
+  "SelectIconShop": "בחר סמל שייצג את החנות שלך במפה",
+  "LadiesClothingIcon": "סמל ביגוד נשים",
+  "DigitsIcon": "סמל ספרות"
 }

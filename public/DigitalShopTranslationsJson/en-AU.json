@@ -452,5 +452,8 @@
   "PaymentMethod": "Payment method",
   "CashOnly": "Cash only",
   "CardOnly": "Card only",
-  "CashAndCard": "Cash and card"
+  "CashAndCard": "Cash and card",
+  "SelectIconShop": "Select an icon to represent your shop on the map",
+  "LadiesClothingIcon": "Ladies Clothing Icon",
+  "DigitsIcon": "Digits Icon"
 }

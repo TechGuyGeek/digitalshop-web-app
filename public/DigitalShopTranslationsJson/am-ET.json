@@ -452,5 +452,8 @@
   "PaymentMethod": "የክፍያ ዘዴ",
   "CashOnly": "ጥሬ ገንዘብ ብቻ",
   "CardOnly": "ካርድ ብቻ",
-  "CashAndCard": "ጥሬ ገንዘብ እና ካርድ"
+  "CashAndCard": "ጥሬ ገንዘብ እና ካርድ",
+  "SelectIconShop": "ሱቅዎን በካርታው ላይ የሚወክል አዶ ይምረጡ",
+  "LadiesClothingIcon": "የሴት ልብስ አዶ",
+  "DigitsIcon": "የቁጥሮች አዶ"
 }

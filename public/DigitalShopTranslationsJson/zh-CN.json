@@ -452,5 +452,8 @@
   "PaymentMethod": "支付方式",
   "CashOnly": "仅现金",
   "CardOnly": "仅刷卡",
-  "CashAndCard": "现金和刷卡"
+  "CashAndCard": "现金和刷卡",
+  "SelectIconShop": "选择一个图标在地图上代表您的商店",
+  "LadiesClothingIcon": "女装图标",
+  "DigitsIcon": "数字图标"
 }

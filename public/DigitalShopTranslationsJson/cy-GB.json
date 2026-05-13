@@ -452,5 +452,8 @@
   "PaymentMethod": "Dull talu",
   "CashOnly": "Arian parod yn unig",
   "CardOnly": "Cerdyn yn unig",
-  "CashAndCard": "Arian a cherdyn"
+  "CashAndCard": "Arian a cherdyn",
+  "SelectIconShop": "Dewiswch eicon i gynrychioli eich siop ar y map",
+  "LadiesClothingIcon": "Eicon dillad merched",
+  "DigitsIcon": "Eicon digidau"
 }

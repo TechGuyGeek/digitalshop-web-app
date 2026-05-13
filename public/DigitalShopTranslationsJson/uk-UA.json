@@ -452,5 +452,8 @@
   "PaymentMethod": "Спосіб оплати",
   "CashOnly": "Лише готівка",
   "CardOnly": "Лише картка",
-  "CashAndCard": "Готівка та картка"
+  "CashAndCard": "Готівка та картка",
+  "SelectIconShop": "Виберіть значок, який представлятиме ваш магазин на карті",
+  "LadiesClothingIcon": "Значок жіночого одягу",
+  "DigitsIcon": "Значок цифр"
 }

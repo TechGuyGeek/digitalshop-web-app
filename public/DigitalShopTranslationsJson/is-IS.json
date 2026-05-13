@@ -452,5 +452,8 @@
   "PaymentMethod": "Greiðslumáti",
   "CashOnly": "Aðeins reiðufé",
   "CardOnly": "Aðeins kort",
-  "CashAndCard": "Reiðufé og kort"
+  "CashAndCard": "Reiðufé og kort",
+  "SelectIconShop": "Veldu táknmynd til að tákna verslunina þína á kortinu",
+  "LadiesClothingIcon": "Kvenfatnaður táknmynd",
+  "DigitsIcon": "Tölustafir táknmynd"
 }

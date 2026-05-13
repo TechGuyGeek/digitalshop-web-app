@@ -452,5 +452,8 @@
   "PaymentMethod": "결제 방법",
   "CashOnly": "현금만",
   "CardOnly": "카드만",
-  "CashAndCard": "현금과 카드"
+  "CashAndCard": "현금과 카드",
+  "SelectIconShop": "지도에서 매장을 나타낼 아이콘을 선택하세요",
+  "LadiesClothingIcon": "여성 의류 아이콘",
+  "DigitsIcon": "숫자 아이콘"
 }
