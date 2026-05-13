@@ -452,5 +452,8 @@
   "PaymentMethod": "Metoda płatności",
   "CashOnly": "Tylko gotówka",
   "CardOnly": "Tylko karta",
-  "CashAndCard": "Gotówka i karta"
+  "CashAndCard": "Gotówka i karta",
+  "SelectIconShop": "Wybierz ikonę reprezentującą Twój sklep na mapie",
+  "LadiesClothingIcon": "Ikona odzieży damskiej",
+  "DigitsIcon": "Ikona cyfr"
 }

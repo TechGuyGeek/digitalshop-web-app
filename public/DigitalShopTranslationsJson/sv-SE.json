@@ -452,5 +452,8 @@
   "PaymentMethod": "Betalningsmetod",
   "CashOnly": "Endast kontant",
   "CardOnly": "Endast kort",
-  "CashAndCard": "Kontant och kort"
+  "CashAndCard": "Kontant och kort",
+  "SelectIconShop": "Välj en ikon för att representera din butik på kartan",
+  "LadiesClothingIcon": "Ikon för damkläder",
+  "DigitsIcon": "Ikon för siffror"
 }

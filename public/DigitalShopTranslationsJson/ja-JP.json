@@ -452,5 +452,8 @@
   "PaymentMethod": "支払方法",
   "CashOnly": "現金のみ",
   "CardOnly": "カードのみ",
-  "CashAndCard": "現金とカード"
+  "CashAndCard": "現金とカード",
+  "SelectIconShop": "地図上であなたのお店を表すアイコンを選択してください",
+  "LadiesClothingIcon": "レディース衣料アイコン",
+  "DigitsIcon": "数字アイコン"
 }

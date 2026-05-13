@@ -452,5 +452,8 @@
   "PaymentMethod": "Betaalmetode",
   "CashOnly": "Slegs kontant",
   "CardOnly": "Slegs kaart",
-  "CashAndCard": "Kontant en kaart"
+  "CashAndCard": "Kontant en kaart",
+  "SelectIconShop": "Kies 'n ikoon om jou winkel op die kaart voor te stel",
+  "LadiesClothingIcon": "Dames-klereikoon",
+  "DigitsIcon": "Syfersikoon"
 }

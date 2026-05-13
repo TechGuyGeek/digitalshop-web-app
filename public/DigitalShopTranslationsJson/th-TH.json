@@ -452,5 +452,8 @@
   "PaymentMethod": "วิธีการชำระเงิน",
   "CashOnly": "เงินสดเท่านั้น",
   "CardOnly": "บัตรเท่านั้น",
-  "CashAndCard": "เงินสดและบัตร"
+  "CashAndCard": "เงินสดและบัตร",
+  "SelectIconShop": "เลือกไอคอนเพื่อแทนร้านของคุณบนแผนที่",
+  "LadiesClothingIcon": "ไอคอนเสื้อผ้าสตรี",
+  "DigitsIcon": "ไอคอนตัวเลข"
 }

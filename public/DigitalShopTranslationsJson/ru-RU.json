@@ -452,5 +452,8 @@
   "PaymentMethod": "Способ оплаты",
   "CashOnly": "Только наличные",
   "CardOnly": "Только карта",
-  "CashAndCard": "Наличные и карта"
+  "CashAndCard": "Наличные и карта",
+  "SelectIconShop": "Выберите значок для вашего магазина на карте",
+  "LadiesClothingIcon": "Значок женской одежды",
+  "DigitsIcon": "Значок цифр"
 }

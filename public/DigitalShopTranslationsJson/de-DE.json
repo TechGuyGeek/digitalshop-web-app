@@ -452,5 +452,8 @@
   "PaymentMethod": "Zahlungsmethode",
   "CashOnly": "Nur Bargeld",
   "CardOnly": "Nur Karte",
-  "CashAndCard": "Bargeld und Karte"
+  "CashAndCard": "Bargeld und Karte",
+  "SelectIconShop": "Wählen Sie ein Symbol für Ihren Shop auf der Karte",
+  "LadiesClothingIcon": "Damenbekleidung-Symbol",
+  "DigitsIcon": "Ziffern-Symbol"
 }

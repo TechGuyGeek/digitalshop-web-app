@@ -452,5 +452,8 @@
   "PaymentMethod": "Dòigh pàighidh",
   "CashOnly": "Airgead a-mhàin",
   "CardOnly": "Cairt a-mhàin",
-  "CashAndCard": "Airgead is cairt"
+  "CashAndCard": "Airgead is cairt",
+  "SelectIconShop": "Tagh ìomhaigheag airson do bhùth a riochdachadh air a' mhapa",
+  "LadiesClothingIcon": "Ìomhaigheag aodach bhoireannach",
+  "DigitsIcon": "Ìomhaigheag àireamhan"
 }
