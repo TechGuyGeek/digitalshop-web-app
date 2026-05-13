@@ -1,24 +1,21 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { useSeo } from "@/hooks/useSeo";
+import SeoHead from "@/components/SeoHead";
+import { LOCALE_TO_PREFIX, buildLocalizedPath } from "@/lib/i18nRoutes";
 import SiteFooter from "@/components/SiteFooter";
 
 const About = () => {
-  const { t } = useLanguage();
-  useSeo({
-    title: "About GPS Shops — Your Shop, Anywhere",
-    description:
-      "Learn about GPS Shops: a global, location-aware marketplace that helps people discover nearby shops and lets any business build a digital storefront in minutes.",
-    canonical: "https://gpsshops.com/about",
-  });
+  const { t, language } = useLanguage();
+  const prefix = LOCALE_TO_PREFIX[language] ?? "";
 
   return (
     <div className="relative min-h-screen bg-background text-foreground flex flex-col">
+      <SeoHead page="about" />
 
       <header className="px-6 pt-6 pb-2">
         <Link
-          to="/"
+          to={buildLocalizedPath(prefix, "")}
           className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />

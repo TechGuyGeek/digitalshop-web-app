@@ -10,17 +10,11 @@ import { loginUser, registerUser, requestPasswordReset, type DigitalPerson } fro
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme, type ThemeMode } from "@/contexts/ThemeContext";
-import { useSeo } from "@/hooks/useSeo";
+import SeoHead from "@/components/SeoHead";
 import { Link } from "react-router-dom";
 
 const Index = () => {
   const navigate = useNavigate();
-  useSeo({
-    title: "GPS Shops — Discover Local Shops & Order Online Anywhere",
-    description:
-      "GPS Shops is a global, location-aware marketplace. Discover nearby shops on the map, browse menus, order in seconds, or open your own digital storefront.",
-    canonical: "https://gpsshops.com/",
-  });
   const { t, language, setLanguage, availableLanguages } = useLanguage();
   const { theme, setTheme } = useTheme();
   const [showPassword, setShowPassword] = useState(false);
@@ -189,6 +183,7 @@ const Index = () => {
           : "flex flex-col min-h-screen items-center justify-center bg-background p-4"
       }
     >
+      <SeoHead page="" />
       {/* Background decorations */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         {isLight ? (
