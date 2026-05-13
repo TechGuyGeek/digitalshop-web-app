@@ -1,4 +1,4 @@
-import { useRef, useCallback } from "react";
+import { memo, useRef, useCallback } from "react";
 import { QRCodeCanvas } from "qrcode.react";
 import { Button } from "@/components/ui/button";
 import {
@@ -63,4 +63,4 @@ const QRCodeGenerator = ({ open, onOpenChange, companyId, companyName }: QRCodeG
   );
 };
 
-export default QRCodeGenerator;
+export default memo(QRCodeGenerator);
