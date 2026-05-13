@@ -15,10 +15,7 @@ interface QRCodeGeneratorProps {
 const QRCodeGenerator = ({ open, onOpenChange, companyId, companyName }: QRCodeGeneratorProps) => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
 
-  console.log("[QRCodeGenerator] opened:", open, "companyId:", companyId, "companyName:", companyName);
-
   const handleSave = useCallback(() => {
-    console.log("[QRCodeGenerator] Save triggered for:", companyName, "companyId:", companyId);
     const canvas = canvasContainerRef.current?.querySelector("canvas");
     if (!canvas) {
       console.error("[QRCodeGenerator] No canvas found");
@@ -29,7 +26,6 @@ const QRCodeGenerator = ({ open, onOpenChange, companyId, companyName }: QRCodeG
     link.download = `${companyName.replace(/[^a-zA-Z0-9]/g, "_")}_QRCode.png`;
     link.href = canvas.toDataURL("image/png");
     link.click();
-    console.log("[QRCodeGenerator] Download triggered:", link.download);
   }, [companyId, companyName]);
 
   return (
