@@ -7,22 +7,36 @@ const OAuthCallback = () => {
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
+    // Accept multiple param shapes from different PHP callbacks
     const serverMessage = searchParams.get("ServerMessage");
-    const email = searchParams.get("email");
-    const name = searchParams.get("name");
-    const surname = searchParams.get("surname");
+    const status = searchParams.get("status");
+    const email = searchParams.get("email") || searchParams.get("Email");
+    const name = searchParams.get("name") || searchParams.get("Name");
+    const surname = searchParams.get("surname") || searchParams.get("Surname");
+    const personId = searchParams.get("personId") || searchParams.get("PersonID");
+    const password = searchParams.get("password") || searchParams.get("Password");
+    const error = searchParams.get("error") || searchParams.get("ServerMessage");
 
-    if (serverMessage === "Success" && email) {
-      const user = {
+    const ok =
+      serverMessage === "Success" ||
+      (status && status.toLowerCase() === "success");
+
+    if (ok && email) {
+      const user: Record<string, unknown> = {
         Email: email,
         Name: name || "",
         Surname: surname || "",
       };
+      if (personId) {
+        user.PersonID = personId;
+        user.ID = personId;
+      }
+      if (password) user.Password = password;
       localStorage.setItem("digitalUser", JSON.stringify(user));
       toast.success(`Welcome, ${name || email}!`);
       navigate("/profile", { replace: true });
     } else {
-      toast.error(serverMessage || "OAuth login failed");
+      toast.error(error || "OAuth login failed");
       navigate("/", { replace: true });
     }
   }, [searchParams, navigate]);
