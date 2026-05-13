@@ -305,5 +305,6 @@
   "YourcurrentGPSisnegative": "ה- GPS הנוכחי שלך שלילי אנא היכנס חזרה והתחבר או שנה את חיבור האינטרנט הנוכחי",
   "YourLivetorecieveOrders": "Live שלך \\u200b\\u200bלקבל הזמנות",
   "Zero": "0",
-  "ChooseMapMarker": "בחר סמן במפה"
+  "ChooseMapMarker": "בחר סמן במפה",
+  "ResendVerificationEmail": "שלח שוב אימייל אימות"
 }

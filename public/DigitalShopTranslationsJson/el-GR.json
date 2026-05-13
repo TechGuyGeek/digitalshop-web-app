@@ -305,5 +305,6 @@
   "YourcurrentGPSisnegative": "Το τρέχον GPS σας είναι αρνητικό, αποσυνδεθείτε και συνδεθείτε ξανά ή αλλάξτε την τρέχουσα σύνδεσή σας στο Διαδίκτυο",
   "YourLivetorecieveOrders": "Το Live για να λαμβάνετε παραγγελίες",
   "Zero": "0",
-  "ChooseMapMarker": "Επιλέξτε δείκτη χάρτη"
+  "ChooseMapMarker": "Επιλέξτε δείκτη χάρτη",
+  "ResendVerificationEmail": "Επαναποστολή email επαλήθευσης"
 }

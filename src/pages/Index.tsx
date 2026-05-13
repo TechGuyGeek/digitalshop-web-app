@@ -331,7 +331,7 @@ const Index = () => {
                       onClick={openResendModal}
                       className="text-xs text-primary hover:text-primary/80 transition-colors font-medium mt-1"
                     >
-                      Resend Verification Email
+                      {t("ResendVerificationEmail")}
                     </button>
                   </div>
                 </div>
@@ -527,7 +527,7 @@ const Index = () => {
       <Dialog open={resendOpen} onOpenChange={(o) => { if (!resendLoading) setResendOpen(o); }}>
         <DialogContent className="sm:max-w-md rounded-2xl">
           <DialogHeader>
-            <DialogTitle className="font-heading">Resend Verification Email</DialogTitle>
+            <DialogTitle className="font-heading">{t("ResendVerificationEmail")}</DialogTitle>
             <DialogDescription>
               Please enter the email address you used to register.
             </DialogDescription>

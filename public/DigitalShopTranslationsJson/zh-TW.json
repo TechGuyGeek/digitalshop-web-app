@@ -305,5 +305,6 @@
   "YourcurrentGPSisnegative": "您当前的GPS为负，请注销并重新登录或更改当前的互联网连接",
   "YourLivetorecieveOrders": "你的直播接收訂單",
   "Zero": "0",
-  "ChooseMapMarker": "選擇地圖標記"
+  "ChooseMapMarker": "選擇地圖標記",
+  "ResendVerificationEmail": "重新傳送驗證電子郵件"
 }

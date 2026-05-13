@@ -305,5 +305,6 @@
   "YourcurrentGPSisnegative": "現在のGPSがマイナスですログアウトして再度ログインするか、現在のインターネット接続を変更してください",
   "YourLivetorecieveOrders": "注文を受け取るためのライブ",
   "Zero": "0",
-  "ChooseMapMarker": "地図マーカーを選択"
+  "ChooseMapMarker": "地図マーカーを選択",
+  "ResendVerificationEmail": "確認メールを再送信"
 }

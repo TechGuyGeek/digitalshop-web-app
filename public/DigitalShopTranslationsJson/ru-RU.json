@@ -305,5 +305,6 @@
   "YourcurrentGPSisnegative": "Ваш текущий GPS отрицательный, пожалуйста, выйдите из системы и снова войдите или измените текущее интернет-соединение",
   "YourLivetorecieveOrders": "Ваш Live для получения заказов",
   "Zero": "0",
-  "ChooseMapMarker": "Выберите маркер на карте"
+  "ChooseMapMarker": "Выберите маркер на карте",
+  "ResendVerificationEmail": "Отправить письмо подтверждения снова"
 }

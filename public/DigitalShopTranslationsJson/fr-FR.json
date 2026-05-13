@@ -305,5 +305,6 @@
   "YourcurrentGPSisnegative": "Votre GPS actuel est négatif, veuillez vous déconnecter et vous reconnecter ou modifier votre connexion Internet actuelle",
   "YourLivetorecieveOrders": "Votre Live pour recevoir des commandes",
   "Zero": "0",
-  "ChooseMapMarker": "Choisir un repère sur la carte"
+  "ChooseMapMarker": "Choisir un repère sur la carte",
+  "ResendVerificationEmail": "Renvoyer l'e-mail de vérification"
 }
