@@ -456,5 +456,7 @@
   "SelectIconShop": "Valitse kuvake edustamaan kauppaasi kartalla",
   "LadiesClothingIcon": "Naisten vaatteet -kuvake",
   "DigitsIcon": "Numerot-kuvake",
-  "NonBinary": "Muunsukupuolinen"
+  "NonBinary": "Muunsukupuolinen",
+  "Enable": "Ota käyttöön",
+  "Disable": "Poista käytöstä"
 }

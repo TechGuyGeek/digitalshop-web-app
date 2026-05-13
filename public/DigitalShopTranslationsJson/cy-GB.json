@@ -456,5 +456,7 @@
   "SelectIconShop": "Dewiswch eicon i gynrychioli eich siop ar y map",
   "LadiesClothingIcon": "Eicon dillad merched",
   "DigitsIcon": "Eicon digidau",
-  "NonBinary": "Anneuaidd"
+  "NonBinary": "Anneuaidd",
+  "Enable": "Galluogi",
+  "Disable": "Analluogi"
 }

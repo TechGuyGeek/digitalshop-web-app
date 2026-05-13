@@ -456,5 +456,7 @@
   "SelectIconShop": "اختر أيقونة لتمثيل متجرك على الخريطة",
   "LadiesClothingIcon": "أيقونة ملابس نسائية",
   "DigitsIcon": "أيقونة الأرقام",
-  "NonBinary": "غير ثنائي"
+  "NonBinary": "غير ثنائي",
+  "Enable": "تفعيل",
+  "Disable": "تعطيل"
 }

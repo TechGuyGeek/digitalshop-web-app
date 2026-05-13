@@ -456,5 +456,7 @@
   "SelectIconShop": "选择一个图标在地图上代表您的商店",
   "LadiesClothingIcon": "女装图标",
   "DigitsIcon": "数字图标",
-  "NonBinary": "非二元"
+  "NonBinary": "非二元",
+  "Enable": "启用",
+  "Disable": "禁用"
 }

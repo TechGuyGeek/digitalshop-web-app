@@ -456,5 +456,7 @@
   "SelectIconShop": "मानचित्र पर अपनी दुकान दिखाने के लिए आइकन चुनें",
   "LadiesClothingIcon": "महिला परिधान आइकन",
   "DigitsIcon": "अंक आइकन",
-  "NonBinary": "नॉन-बाइनरी"
+  "NonBinary": "नॉन-बाइनरी",
+  "Enable": "सक्षम करें",
+  "Disable": "अक्षम करें"
 }

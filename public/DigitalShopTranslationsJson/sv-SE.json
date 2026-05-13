@@ -456,5 +456,7 @@
   "SelectIconShop": "Välj en ikon för att representera din butik på kartan",
   "LadiesClothingIcon": "Ikon för damkläder",
   "DigitsIcon": "Ikon för siffror",
-  "NonBinary": "Icke-binär"
+  "NonBinary": "Icke-binär",
+  "Enable": "Aktivera",
+  "Disable": "Inaktivera"
 }

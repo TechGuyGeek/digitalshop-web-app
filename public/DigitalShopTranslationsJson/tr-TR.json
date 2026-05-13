@@ -456,5 +456,7 @@
   "SelectIconShop": "Mağazanızı haritada temsil edecek bir simge seçin",
   "LadiesClothingIcon": "Bayan giyim simgesi",
   "DigitsIcon": "Rakamlar simgesi",
-  "NonBinary": "İkili olmayan"
+  "NonBinary": "İkili olmayan",
+  "Enable": "Etkinleştir",
+  "Disable": "Devre dışı"
 }
