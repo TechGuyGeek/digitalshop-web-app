@@ -306,5 +306,11 @@
   "YourLivetorecieveOrders": "Live-tilauksesi tilausten vastaanottamiseen",
   "Zero": "0",
   "ChooseMapMarker": "Valitse karttamerkki",
-  "ResendVerificationEmail": "Lähetä vahvistussähköposti uudelleen"
+  "ResendVerificationEmail": "Lähetä vahvistussähköposti uudelleen",
+  "LoginIntroDescription": "Kirjaudu sisään löytääksesi lähellä olevat kaupat kartalta, tehdäksesi tilauksia tai avataksesi oman digitaalisen kauppasi.",
+  "NewHere": "Uusi täällä?",
+  "LearnMoreAboutGPSShops": "Lue lisää GPS Shopsista",
+  "About": "Tietoja",
+  "Contact": "Yhteystiedot",
+  "Legal": "Lakitiedot"
 }

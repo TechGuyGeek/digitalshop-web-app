@@ -306,5 +306,11 @@
   "YourLivetorecieveOrders": "注文を受け取るためのライブ",
   "Zero": "0",
   "ChooseMapMarker": "地図マーカーを選択",
-  "ResendVerificationEmail": "確認メールを再送信"
+  "ResendVerificationEmail": "確認メールを再送信",
+  "LoginIntroDescription": "サインインして、地図で近くのお店を見つけたり、注文したり、自分のデジタルストアを開設しましょう。",
+  "NewHere": "初めての方ですか？",
+  "LearnMoreAboutGPSShops": "GPS Shopsについて詳しく見る",
+  "About": "概要",
+  "Contact": "お問い合わせ",
+  "Legal": "法的事項"
 }

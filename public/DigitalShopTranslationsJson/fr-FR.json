@@ -306,5 +306,11 @@
   "YourLivetorecieveOrders": "Votre Live pour recevoir des commandes",
   "Zero": "0",
   "ChooseMapMarker": "Choisir un repère sur la carte",
-  "ResendVerificationEmail": "Renvoyer l'e-mail de vérification"
+  "ResendVerificationEmail": "Renvoyer l'e-mail de vérification",
+  "LoginIntroDescription": "Connectez-vous pour découvrir les boutiques à proximité sur la carte, passer des commandes ou ouvrir votre propre boutique numérique.",
+  "NewHere": "Nouveau ici ?",
+  "LearnMoreAboutGPSShops": "En savoir plus sur GPS Shops",
+  "About": "À propos",
+  "Contact": "Contact",
+  "Legal": "Mentions légales"
 }

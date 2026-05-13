@@ -584,13 +584,12 @@ const Index = () => {
           GPS Shops
         </h1>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          Sign in to discover nearby shops on the map, place orders, or open your
-          own digital storefront.
+          {t("LoginIntroDescription")}
         </p>
         <p className="mt-2 text-xs text-muted-foreground">
-          New here?{" "}
+          {t("NewHere")}{" "}
           <Link to="/about" className="text-primary hover:underline">
-            Learn more about GPS Shops
+            {t("LearnMoreAboutGPSShops")}
           </Link>
           .
         </p>
@@ -602,17 +601,17 @@ const Index = () => {
           <ul className="flex items-center justify-center gap-5">
             <li>
               <Link to="/about" className="hover:text-foreground transition-colors">
-                About
+                {t("About")}
               </Link>
             </li>
             <li>
               <Link to="/contact" className="hover:text-foreground transition-colors">
-                Contact
+                {t("Contact")}
               </Link>
             </li>
             <li>
               <Link to="/legal" className="hover:text-foreground transition-colors">
-                Legal
+                {t("Legal")}
               </Link>
             </li>
           </ul>

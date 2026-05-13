@@ -306,5 +306,11 @@
   "YourLivetorecieveOrders": "Tu Live para recibir pedidos",
   "Zero": "0",
   "ChooseMapMarker": "Elegir marcador del mapa",
-  "ResendVerificationEmail": "Reenviar correo de verificación"
+  "ResendVerificationEmail": "Reenviar correo de verificación",
+  "LoginIntroDescription": "Inicia sesión para descubrir tiendas cercanas en el mapa, hacer pedidos o abrir tu propia tienda digital.",
+  "NewHere": "¿Nuevo aquí?",
+  "LearnMoreAboutGPSShops": "Más información sobre GPS Shops",
+  "About": "Acerca de",
+  "Contact": "Contacto",
+  "Legal": "Legal"
 }

@@ -306,5 +306,11 @@
   "YourLivetorecieveOrders": "Live الخاص بك لتلقي الطلبات",
   "Zero": "0",
   "ChooseMapMarker": "اختر علامة الخريطة",
-  "ResendVerificationEmail": "إعادة إرسال بريد التحقق"
+  "ResendVerificationEmail": "إعادة إرسال بريد التحقق",
+  "LoginIntroDescription": "سجّل الدخول لاكتشاف المتاجر القريبة على الخريطة، أو لتقديم الطلبات، أو لفتح متجرك الرقمي الخاص.",
+  "NewHere": "جديد هنا؟",
+  "LearnMoreAboutGPSShops": "تعرّف أكثر على GPS Shops",
+  "About": "حول",
+  "Contact": "اتصل بنا",
+  "Legal": "قانوني"
 }

@@ -306,5 +306,11 @@
   "YourLivetorecieveOrders": "Sipariş almak için Canlı Yayınlarınız",
   "Zero": "0",
   "ChooseMapMarker": "Harita işaretleyicisi seç",
-  "ResendVerificationEmail": "Doğrulama E-postasını Yeniden Gönder"
+  "ResendVerificationEmail": "Doğrulama E-postasını Yeniden Gönder",
+  "LoginIntroDescription": "Haritada yakındaki dükkânları keşfetmek, sipariş vermek veya kendi dijital mağazanızı açmak için giriş yapın.",
+  "NewHere": "Burada yeni misiniz?",
+  "LearnMoreAboutGPSShops": "GPS Shops hakkında daha fazla bilgi",
+  "About": "Hakkında",
+  "Contact": "İletişim",
+  "Legal": "Yasal"
 }

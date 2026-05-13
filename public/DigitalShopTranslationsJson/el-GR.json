@@ -306,5 +306,11 @@
   "YourLivetorecieveOrders": "Το Live για να λαμβάνετε παραγγελίες",
   "Zero": "0",
   "ChooseMapMarker": "Επιλέξτε δείκτη χάρτη",
-  "ResendVerificationEmail": "Επαναποστολή email επαλήθευσης"
+  "ResendVerificationEmail": "Επαναποστολή email επαλήθευσης",
+  "LoginIntroDescription": "Συνδεθείτε για να ανακαλύψετε κοντινά καταστήματα στον χάρτη, να κάνετε παραγγελίες ή να ανοίξετε το δικό σας ψηφιακό κατάστημα.",
+  "NewHere": "Νέος εδώ;",
+  "LearnMoreAboutGPSShops": "Μάθετε περισσότερα για το GPS Shops",
+  "About": "Σχετικά",
+  "Contact": "Επικοινωνία",
+  "Legal": "Νομικά"
 }

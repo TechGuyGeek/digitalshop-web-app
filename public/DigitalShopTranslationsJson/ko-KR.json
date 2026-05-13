@@ -306,5 +306,11 @@
   "YourLivetorecieveOrders": "주문을 받기 위해 당신의 라이브",
   "Zero": "0",
   "ChooseMapMarker": "지도 마커 선택",
-  "ResendVerificationEmail": "인증 이메일 다시 보내기"
+  "ResendVerificationEmail": "인증 이메일 다시 보내기",
+  "LoginIntroDescription": "로그인하여 지도에서 근처 상점을 찾고, 주문하거나, 나만의 디지털 매장을 열어보세요.",
+  "NewHere": "처음이신가요?",
+  "LearnMoreAboutGPSShops": "GPS Shops에 대해 자세히 알아보기",
+  "About": "소개",
+  "Contact": "문의",
+  "Legal": "법적 고지"
 }

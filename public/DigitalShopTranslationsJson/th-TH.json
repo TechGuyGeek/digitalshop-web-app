@@ -306,5 +306,11 @@
   "YourLivetorecieveOrders": "สดของคุณเพื่อรับคำสั่งซื้อ",
   "Zero": "0",
   "ChooseMapMarker": "เลือกหมุดบนแผนที่",
-  "ResendVerificationEmail": "ส่งอีเมลยืนยันอีกครั้ง"
+  "ResendVerificationEmail": "ส่งอีเมลยืนยันอีกครั้ง",
+  "LoginIntroDescription": "เข้าสู่ระบบเพื่อค้นหาร้านค้าใกล้เคียงบนแผนที่ สั่งซื้อ หรือเปิดร้านดิจิทัลของคุณเอง",
+  "NewHere": "มาใหม่ใช่ไหม?",
+  "LearnMoreAboutGPSShops": "เรียนรู้เพิ่มเติมเกี่ยวกับ GPS Shops",
+  "About": "เกี่ยวกับ",
+  "Contact": "ติดต่อ",
+  "Legal": "กฎหมาย"
 }

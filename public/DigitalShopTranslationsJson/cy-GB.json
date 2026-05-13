@@ -306,5 +306,11 @@
   "YourLivetorecieveOrders": "Eich Byw i dderbyn Gorchmynion",
   "Zero": "0",
   "ChooseMapMarker": "Dewis marciwr map",
-  "ResendVerificationEmail": "Ailanfon E-bost Dilysu"
+  "ResendVerificationEmail": "Ailanfon E-bost Dilysu",
+  "LoginIntroDescription": "Mewngofnodwch i ddarganfod siopau cyfagos ar y map, gosod archebion, neu agor eich siop ddigidol eich hun.",
+  "NewHere": "Newydd yma?",
+  "LearnMoreAboutGPSShops": "Dysgwch fwy am GPS Shops",
+  "About": "Amdanom",
+  "Contact": "Cyswllt",
+  "Legal": "Cyfreithiol"
 }

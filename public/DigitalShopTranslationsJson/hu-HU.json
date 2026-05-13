@@ -306,5 +306,11 @@
   "YourLivetorecieveOrders": "Élő a megrendelések fogadásához",
   "Zero": "0",
   "ChooseMapMarker": "Válasszon térképjelölőt",
-  "ResendVerificationEmail": "Megerősítő e-mail újraküldése"
+  "ResendVerificationEmail": "Megerősítő e-mail újraküldése",
+  "LoginIntroDescription": "Jelentkezz be, hogy felfedezd a közeli üzleteket a térképen, rendeléseket adj le, vagy nyisd meg saját digitális üzletedet.",
+  "NewHere": "Új vagy itt?",
+  "LearnMoreAboutGPSShops": "Tudj meg többet a GPS Shopsról",
+  "About": "Rólunk",
+  "Contact": "Kapcsolat",
+  "Legal": "Jogi"
 }

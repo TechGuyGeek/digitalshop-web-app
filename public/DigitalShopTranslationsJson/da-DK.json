@@ -306,5 +306,11 @@
   "YourLivetorecieveOrders": "Din Live til at modtage ordrer",
   "Zero": "0",
   "ChooseMapMarker": "Vælg kortmarkør",
-  "ResendVerificationEmail": "Send bekræftelsesmail igen"
+  "ResendVerificationEmail": "Send bekræftelsesmail igen",
+  "LoginIntroDescription": "Log ind for at finde butikker i nærheden på kortet, afgive bestillinger eller åbne din egen digitale butik.",
+  "NewHere": "Ny her?",
+  "LearnMoreAboutGPSShops": "Læs mere om GPS Shops",
+  "About": "Om",
+  "Contact": "Kontakt",
+  "Legal": "Juridisk"
 }
