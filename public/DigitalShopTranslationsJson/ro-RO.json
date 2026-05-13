@@ -456,5 +456,7 @@
   "SelectIconShop": "Selectați o pictogramă pentru a reprezenta magazinul pe hartă",
   "LadiesClothingIcon": "Pictogramă îmbrăcăminte damă",
   "DigitsIcon": "Pictogramă cifre",
-  "NonBinary": "Non-binar"
+  "NonBinary": "Non-binar",
+  "Enable": "Activează",
+  "Disable": "Dezactivează"
 }

@@ -456,5 +456,7 @@
   "SelectIconShop": "Selecciona un icono para representar tu tienda en el mapa",
   "LadiesClothingIcon": "Icono de ropa de mujer",
   "DigitsIcon": "Icono de dígitos",
-  "NonBinary": "No binario"
+  "NonBinary": "No binario",
+  "Enable": "Activar",
+  "Disable": "Desactivar"
 }

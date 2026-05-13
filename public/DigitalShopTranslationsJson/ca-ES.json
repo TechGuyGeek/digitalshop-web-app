@@ -456,5 +456,7 @@
   "SelectIconShop": "Selecciona una icona per representar la teva botiga al mapa",
   "LadiesClothingIcon": "Icona de roba de dona",
   "DigitsIcon": "Icona de dígits",
-  "NonBinary": "No binari"
+  "NonBinary": "No binari",
+  "Enable": "Activa",
+  "Disable": "Desactiva"
 }

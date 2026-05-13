@@ -456,5 +456,7 @@
   "SelectIconShop": "เลือกไอคอนเพื่อแทนร้านของคุณบนแผนที่",
   "LadiesClothingIcon": "ไอคอนเสื้อผ้าสตรี",
   "DigitsIcon": "ไอคอนตัวเลข",
-  "NonBinary": "นอนไบนารี"
+  "NonBinary": "นอนไบนารี",
+  "Enable": "เปิดใช้งาน",
+  "Disable": "ปิดใช้งาน"
 }

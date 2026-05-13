@@ -456,5 +456,7 @@
   "SelectIconShop": "Válasszon ikont az üzlete megjelenítéséhez a térképen",
   "LadiesClothingIcon": "Női ruházat ikon",
   "DigitsIcon": "Számjegyek ikon",
-  "NonBinary": "Nem bináris"
+  "NonBinary": "Nem bináris",
+  "Enable": "Engedélyezés",
+  "Disable": "Letiltás"
 }

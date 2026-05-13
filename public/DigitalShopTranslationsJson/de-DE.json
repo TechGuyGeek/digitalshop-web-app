@@ -456,5 +456,7 @@
   "SelectIconShop": "Wählen Sie ein Symbol für Ihren Shop auf der Karte",
   "LadiesClothingIcon": "Damenbekleidung-Symbol",
   "DigitsIcon": "Ziffern-Symbol",
-  "NonBinary": "Nichtbinär"
+  "NonBinary": "Nichtbinär",
+  "Enable": "Aktivieren",
+  "Disable": "Deaktivieren"
 }

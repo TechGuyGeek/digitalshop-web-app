@@ -456,5 +456,7 @@
   "SelectIconShop": "Selecteer een pictogram om uw winkel op de kaart weer te geven",
   "LadiesClothingIcon": "Pictogram dameskleding",
   "DigitsIcon": "Pictogram cijfers",
-  "NonBinary": "Non-binair"
+  "NonBinary": "Non-binair",
+  "Enable": "Inschakelen",
+  "Disable": "Uitschakelen"
 }
