@@ -26,6 +26,7 @@ export const MAP_MARKERS: MapMarkerOption[] = [
   { id: 11, emoji: "👔", label: "MENS CLOTHING ICON",   translationKey: "MensClothingIcon",    iconUrl: MARKER_ICON_BASE + "clothing11.png" },
   { id: 12, emoji: "👗", label: "LADIES CLOTHING ICON", translationKey: "LadiesClothingIcon",  iconUrl: MARKER_ICON_BASE + "clothing12.png" },
   { id: 13, emoji: "🔢", label: "DIGITS ICON",          translationKey: "DigitsIcon",          iconUrl: MARKER_ICON_BASE + "digit.png" },
+  { id: 14, emoji: "🥐", label: "BAKERY ICON",          translationKey: "BakeryIcon",          iconUrl: MARKER_ICON_BASE + "Bakery14.png" },
 ];
 
 interface MapMarkerPickerProps {
