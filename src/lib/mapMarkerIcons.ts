@@ -39,6 +39,7 @@ const EMOJI_TO_CATEGORY_ID: Record<string, number> = {
   "🍳": 10,
   "👔": 11,
   "👗": 12,
+  "🥐": 14,
 };
 
 export function getMarkerIconUrl(opts: { categoryCode?: number; emoji?: string }): string {
