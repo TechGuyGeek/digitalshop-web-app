@@ -23,6 +23,14 @@ export const CATEGORY_ICON_URLS: Record<number, string> = {
   11: ICON_BASE + "clothing11.png",   // Mens Clothing
   12: ICON_BASE + "clothing12.png",   // Ladies Clothing
   14: ICON_BASE + "Bakery14.png",     // Bakery
+  15: ICON_BASE + "Ptizza15.png",     // Pizza
+  16: ICON_BASE + "Dentist16.png",    // Dentist
+  17: ICON_BASE + "Pets17.png",       // Pets
+  18: ICON_BASE + "Movies18.png",     // Movies
+  19: ICON_BASE + "Gym19.png",        // Gym
+  20: ICON_BASE + "Chemist20.png",    // Chemist
+  21: ICON_BASE + "Barbers21.png",    // Barbers
+  22: ICON_BASE + "Fashion22.png",    // Fashion
 };
 
 // Emoji -> category id reverse lookup, for places that only have the emoji.
@@ -40,6 +48,14 @@ const EMOJI_TO_CATEGORY_ID: Record<string, number> = {
   "👔": 11,
   "👗": 12,
   "🥐": 14,
+  "🍕": 15,
+  "🦷": 16,
+  "🐾": 17,
+  "🎬": 18,
+  "🏋️": 19,
+  "💊": 20,
+  "💈": 21,
+  "👠": 22,
 };
 
 export function getMarkerIconUrl(opts: { categoryCode?: number; emoji?: string }): string {
