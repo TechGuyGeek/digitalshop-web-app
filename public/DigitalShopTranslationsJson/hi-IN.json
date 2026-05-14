@@ -459,5 +459,13 @@
   "NonBinary": "नॉन-बाइनरी",
   "Enable": "सक्षम करें",
   "Disable": "अक्षम करें",
-  "BakeryIcon": "Need review"
+  "BakeryIcon": "Need review",
+  "PizzaIcon": "Pizza Icon",
+  "DentistIcon": "Dentist Icon",
+  "PetsIcon": "Pets Icon",
+  "MoviesIcon": "Movies Icon",
+  "GymIcon": "Gym Icon",
+  "ChemistIcon": "Chemist Icon",
+  "BarbersIcon": "Barbers Icon",
+  "FashionIcon": "Fashion Icon"
 }

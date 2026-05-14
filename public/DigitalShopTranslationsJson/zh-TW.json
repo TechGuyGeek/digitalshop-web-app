@@ -459,5 +459,13 @@
   "NonBinary": "非二元",
   "Enable": "啟用",
   "Disable": "停用",
-  "BakeryIcon": "Need review"
+  "BakeryIcon": "Need review",
+  "PizzaIcon": "Pizza Icon",
+  "DentistIcon": "Dentist Icon",
+  "PetsIcon": "Pets Icon",
+  "MoviesIcon": "Movies Icon",
+  "GymIcon": "Gym Icon",
+  "ChemistIcon": "Chemist Icon",
+  "BarbersIcon": "Barbers Icon",
+  "FashionIcon": "Fashion Icon"
 }

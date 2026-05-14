@@ -459,5 +459,13 @@
   "NonBinary": "غير ثنائي",
   "Enable": "تفعيل",
   "Disable": "تعطيل",
-  "BakeryIcon": "Need review"
+  "BakeryIcon": "Need review",
+  "PizzaIcon": "Pizza Icon",
+  "DentistIcon": "Dentist Icon",
+  "PetsIcon": "Pets Icon",
+  "MoviesIcon": "Movies Icon",
+  "GymIcon": "Gym Icon",
+  "ChemistIcon": "Chemist Icon",
+  "BarbersIcon": "Barbers Icon",
+  "FashionIcon": "Fashion Icon"
 }
