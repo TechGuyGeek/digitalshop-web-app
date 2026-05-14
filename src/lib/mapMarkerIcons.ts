@@ -22,6 +22,7 @@ export const CATEGORY_ICON_URLS: Record<number, string> = {
   10: ICON_BASE + "breakfast10.png",  // Breakfast
   11: ICON_BASE + "clothing11.png",   // Mens Clothing
   12: ICON_BASE + "clothing12.png",   // Ladies Clothing
+  14: ICON_BASE + "Bakery14.png",     // Bakery
 };
 
 // Emoji -> category id reverse lookup, for places that only have the emoji.

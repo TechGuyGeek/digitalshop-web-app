@@ -20,6 +20,7 @@ export const SHOP_CATEGORIES: ShopCategory[] = [
   { id: 11, label: "Mens Clothing",    emoji: "👔" },
   { id: 12, label: "Ladies Clothing",  emoji: "👗" },
   { id: 13, label: "Digits",           emoji: "🔢" },
+  { id: 14, label: "Bakery",           emoji: "🥐" },
 ];
 
 export function getCategoryByCode(code: number): ShopCategory {
