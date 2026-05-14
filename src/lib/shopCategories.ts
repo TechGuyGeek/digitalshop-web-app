@@ -21,6 +21,14 @@ export const SHOP_CATEGORIES: ShopCategory[] = [
   { id: 12, label: "Ladies Clothing",  emoji: "👗" },
   { id: 13, label: "Digits",           emoji: "🔢" },
   { id: 14, label: "Bakery",           emoji: "🥐" },
+  { id: 15, label: "Pizza",            emoji: "🍕" },
+  { id: 16, label: "Dentist",          emoji: "🦷" },
+  { id: 17, label: "Pets",             emoji: "🐾" },
+  { id: 18, label: "Movies",           emoji: "🎬" },
+  { id: 19, label: "Gym",              emoji: "🏋️" },
+  { id: 20, label: "Chemist",          emoji: "💊" },
+  { id: 21, label: "Barbers",          emoji: "💈" },
+  { id: 22, label: "Fashion",          emoji: "👠" },
 ];
 
 export function getCategoryByCode(code: number): ShopCategory {
