@@ -27,6 +27,14 @@ export const MAP_MARKERS: MapMarkerOption[] = [
   { id: 12, emoji: "👗", label: "LADIES CLOTHING ICON", translationKey: "LadiesClothingIcon",  iconUrl: MARKER_ICON_BASE + "clothing12.png" },
   { id: 13, emoji: "🔢", label: "DIGITS ICON",          translationKey: "DigitsIcon",          iconUrl: MARKER_ICON_BASE + "digit.png" },
   { id: 14, emoji: "🥐", label: "BAKERY ICON",          translationKey: "BakeryIcon",          iconUrl: MARKER_ICON_BASE + "Bakery14.png" },
+  { id: 15, emoji: "🍕", label: "PIZZA ICON",           translationKey: "PizzaIcon",           iconUrl: MARKER_ICON_BASE + "Ptizza15.png" },
+  { id: 16, emoji: "🦷", label: "DENTIST ICON",         translationKey: "DentistIcon",         iconUrl: MARKER_ICON_BASE + "Dentist16.png" },
+  { id: 17, emoji: "🐾", label: "PETS ICON",            translationKey: "PetsIcon",            iconUrl: MARKER_ICON_BASE + "Pets17.png" },
+  { id: 18, emoji: "🎬", label: "MOVIES ICON",          translationKey: "MoviesIcon",          iconUrl: MARKER_ICON_BASE + "Movies18.png" },
+  { id: 19, emoji: "🏋️", label: "GYM ICON",            translationKey: "GymIcon",             iconUrl: MARKER_ICON_BASE + "Gym19.png" },
+  { id: 20, emoji: "💊", label: "CHEMIST ICON",         translationKey: "ChemistIcon",         iconUrl: MARKER_ICON_BASE + "Chemist20.png" },
+  { id: 21, emoji: "💈", label: "BARBERS ICON",         translationKey: "BarbersIcon",         iconUrl: MARKER_ICON_BASE + "Barbers21.png" },
+  { id: 22, emoji: "👠", label: "FASHION ICON",         translationKey: "FashionIcon",         iconUrl: MARKER_ICON_BASE + "Fashion22.png" },
 ];
 
 interface MapMarkerPickerProps {
