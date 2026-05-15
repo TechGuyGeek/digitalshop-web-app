@@ -18,6 +18,9 @@ const SiteFooter = () => {
         <Link to={buildLocalizedPath(prefix, "legal")} className="text-muted-foreground hover:text-foreground transition-colors">
           {t("Legal")}
         </Link>
+        <Link to="/privacy" className="text-muted-foreground hover:text-foreground transition-colors">
+          Privacy
+        </Link>
       </nav>
       <p className="mt-3 text-center text-xs text-muted-foreground">
         &copy; {year} GPS Shops. Your shop — anywhere.
