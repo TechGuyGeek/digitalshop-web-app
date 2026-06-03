@@ -217,6 +217,12 @@ const Index = () => {
             <p className="mt-3 text-sm md:text-base text-muted-foreground leading-relaxed">
               Find businesses near you, or create your own shop, advertise your products and services, and connect directly with customers.
             </p>
+            <Link
+              to="/about"
+              className="mt-3 inline-block text-sm font-medium text-primary hover:text-primary/80 transition-colors underline-offset-4 hover:underline"
+            >
+              About GPS Shops →
+            </Link>
           </div>
         )}
 
