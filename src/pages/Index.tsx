@@ -212,16 +212,16 @@ const Index = () => {
         {view === "login" && showIntro && (
           <div className="mb-6 text-center animate-fade-in transition-opacity duration-1000">
             <h1 className="font-heading text-2xl md:text-3xl font-bold text-foreground tracking-tight">
-              GPS Shops connects customers with local businesses.
+              {t("IntroHeadline")}
             </h1>
             <p className="mt-3 text-sm md:text-base text-muted-foreground leading-relaxed">
-              Find businesses near you, or create your own shop, advertise your products and services, and connect directly with customers.
+              {t("IntroDescription")}
             </p>
             <Link
               to="/about"
               className="mt-3 inline-block text-sm font-medium text-primary hover:text-primary/80 transition-colors underline-offset-4 hover:underline"
             >
-              About GPS Shops →
+              {t("IntroAboutLink")} →
             </Link>
           </div>
         )}
