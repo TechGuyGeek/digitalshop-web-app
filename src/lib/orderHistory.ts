@@ -148,5 +148,7 @@ export function getCompanyPhotoUrl(photo: string | undefined): string {
   if (!photo) return "";
   if (photo.startsWith("http")) return photo;
   const cleaned = photo.startsWith("/") ? photo.slice(1) : photo;
-  return `${SERVER_DOMAIN}menu1/${cleaned}`;
+  // Encode each path segment to handle spaces, '@', and other special chars
+  const encoded = cleaned.split("/").map(encodeURIComponent).join("/");
+  return `${SERVER_DOMAIN}menu1/${encoded}`;
 }
