@@ -467,5 +467,8 @@
   "GymIcon": "Gym Icon",
   "ChemistIcon": "Chemist Icon",
   "BarbersIcon": "Barbers Icon",
-  "FashionIcon": "Fashion Icon"
+  "FashionIcon": "Fashion Icon",
+  "IntroHeadline": "GPS Shops, müşterileri yerel işletmelerle buluşturur.",
+  "IntroDescription": "Yakınınızdaki işletmeleri bulun veya kendi mağazanızı oluşturun, ürün ve hizmetlerinizin reklamını yapın ve müşterilerle doğrudan bağlantı kurun.",
+  "IntroAboutLink": "GPS Shops Hakkında"
 }

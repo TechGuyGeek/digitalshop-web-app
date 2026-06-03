@@ -467,5 +467,8 @@
   "GymIcon": "Gym Icon",
   "ChemistIcon": "Chemist Icon",
   "BarbersIcon": "Barbers Icon",
-  "FashionIcon": "Fashion Icon"
+  "FashionIcon": "Fashion Icon",
+  "IntroHeadline": "GPS Shops는 고객과 지역 비즈니스를 연결합니다.",
+  "IntroDescription": "주변 매장을 찾거나, 자신만의 상점을 만들고 제품과 서비스를 광고하며 고객과 직접 소통하세요.",
+  "IntroAboutLink": "GPS Shops 소개"
 }

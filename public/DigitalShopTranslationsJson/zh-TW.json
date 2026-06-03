@@ -467,5 +467,8 @@
   "GymIcon": "Gym Icon",
   "ChemistIcon": "Chemist Icon",
   "BarbersIcon": "Barbers Icon",
-  "FashionIcon": "Fashion Icon"
+  "FashionIcon": "Fashion Icon",
+  "IntroHeadline": "GPS Shops 將顧客與本地商家連接起來。",
+  "IntroDescription": "尋找您附近的商家，或建立自己的商店，宣傳您的產品和服務，並直接與顧客聯繫。",
+  "IntroAboutLink": "關於 GPS Shops"
 }

@@ -467,5 +467,8 @@
   "GymIcon": "Gym Icon",
   "ChemistIcon": "Chemist Icon",
   "BarbersIcon": "Barbers Icon",
-  "FashionIcon": "Fashion Icon"
+  "FashionIcon": "Fashion Icon",
+  "IntroHeadline": "A GPS Shops összeköti az ügyfeleket a helyi vállalkozásokkal.",
+  "IntroDescription": "Keresse meg a közeli vállalkozásokat, vagy hozza létre saját üzletét, hirdesse termékeit és szolgáltatásait, és lépjen közvetlen kapcsolatba az ügyfelekkel.",
+  "IntroAboutLink": "A GPS Shopsról"
 }

@@ -467,5 +467,8 @@
   "GymIcon": "Gym Icon",
   "ChemistIcon": "Chemist Icon",
   "BarbersIcon": "Barbers Icon",
-  "FashionIcon": "Fashion Icon"
+  "FashionIcon": "Fashion Icon",
+  "IntroHeadline": "GPS Shops connects customers with local businesses.",
+  "IntroDescription": "Find businesses near you, or create your own shop, advertise your products and services, and connect directly with customers.",
+  "IntroAboutLink": "About GPS Shops"
 }
