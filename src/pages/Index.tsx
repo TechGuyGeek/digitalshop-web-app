@@ -202,6 +202,18 @@ const Index = () => {
 
       <div className="relative w-full max-w-md animate-fade-in" style={{ animationDelay: "0.1s" }}>
 
+        {/* Intro for new visitors */}
+        {view === "login" && (
+          <div className="mb-6 text-center">
+            <h1 className="font-heading text-2xl md:text-3xl font-bold text-foreground tracking-tight">
+              GPS Shops connects customers with local businesses.
+            </h1>
+            <p className="mt-3 text-sm md:text-base text-muted-foreground leading-relaxed">
+              Find businesses near you, or create your own shop, advertise your products and services, and connect directly with customers.
+            </p>
+          </div>
+        )}
+
         {/* Back arrow for register or forgot */}
         {(view === "register" || view === "forgot") && (
           <button
