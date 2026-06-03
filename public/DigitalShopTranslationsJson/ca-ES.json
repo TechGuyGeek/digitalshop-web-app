@@ -467,5 +467,8 @@
   "GymIcon": "Gym Icon",
   "ChemistIcon": "Chemist Icon",
   "BarbersIcon": "Barbers Icon",
-  "FashionIcon": "Fashion Icon"
+  "FashionIcon": "Fashion Icon",
+  "IntroHeadline": "GPS Shops connecta els clients amb els negocis locals.",
+  "IntroDescription": "Troba negocis a prop teu, o crea la teva pròpia botiga, anuncia els teus productes i serveis i connecta directament amb els clients.",
+  "IntroAboutLink": "Sobre GPS Shops"
 }

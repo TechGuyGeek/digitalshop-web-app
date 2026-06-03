@@ -467,5 +467,8 @@
   "GymIcon": "Gym Icon",
   "ChemistIcon": "Chemist Icon",
   "BarbersIcon": "Barbers Icon",
-  "FashionIcon": "Fashion Icon"
+  "FashionIcon": "Fashion Icon",
+  "IntroHeadline": "GPS Shops forbinder kunder med lokale virksomheder.",
+  "IntroDescription": "Find virksomheder i nærheden af dig, eller opret din egen butik, annoncér for dine produkter og tjenester og kontakt kunder direkte.",
+  "IntroAboutLink": "Om GPS Shops"
 }

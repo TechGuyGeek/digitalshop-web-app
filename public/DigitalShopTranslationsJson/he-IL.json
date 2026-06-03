@@ -467,5 +467,8 @@
   "GymIcon": "Gym Icon",
   "ChemistIcon": "Chemist Icon",
   "BarbersIcon": "Barbers Icon",
-  "FashionIcon": "Fashion Icon"
+  "FashionIcon": "Fashion Icon",
+  "IntroHeadline": "GPS Shops מחבר לקוחות לעסקים מקומיים.",
+  "IntroDescription": "מצאו עסקים בקרבתכם, או צרו חנות משלכם, פרסמו את המוצרים והשירותים שלכם והתחברו ישירות ללקוחות.",
+  "IntroAboutLink": "אודות GPS Shops"
 }
