@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Globe, Palette, HelpCircle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,12 @@ const Index = () => {
   const [resendEmail, setResendEmail] = useState("");
   const [resendLoading, setResendLoading] = useState(false);
   const [resendMessage, setResendMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [showIntro, setShowIntro] = useState(true);
+
+  useEffect(() => {
+    const t = setTimeout(() => setShowIntro(false), 12000);
+    return () => clearTimeout(t);
+  }, []);
 
   const isLight = false;
 
@@ -202,9 +208,9 @@ const Index = () => {
 
       <div className="relative w-full max-w-md animate-fade-in" style={{ animationDelay: "0.1s" }}>
 
-        {/* Intro for new visitors */}
-        {view === "login" && (
-          <div className="mb-6 text-center">
+        {/* Intro for new visitors — fades out after a short read */}
+        {view === "login" && showIntro && (
+          <div className="mb-6 text-center animate-fade-in transition-opacity duration-1000">
             <h1 className="font-heading text-2xl md:text-3xl font-bold text-foreground tracking-tight">
               GPS Shops connects customers with local businesses.
             </h1>
