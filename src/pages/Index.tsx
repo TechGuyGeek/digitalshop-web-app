@@ -281,7 +281,15 @@ const Index = () => {
                     if (f.email !== undefined) setEmail(f.email);
                     if (f.mobile_number !== undefined) setMobileNumber(f.mobile_number);
                     if (f.password !== undefined) setPassword(f.password);
-                    if (f.gender !== undefined) setDateOfBirth(f.gender);
+                    if (f.gender !== undefined) {
+                      const g = f.gender.toLowerCase().trim();
+                      const mapped =
+                        g.startsWith("m") ? "Male" :
+                        g.startsWith("f") || g.startsWith("w") ? "Female" :
+                        g.startsWith("n") || g.includes("binary") ? "Non-binary" :
+                        "";
+                      if (mapped) setDateOfBirth(mapped);
+                    }
                   }}
                 />
                 <div className="space-y-2">
