@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getHelpEnabled, onHelpPrefChange } from "@/lib/helpPref";
 
 const MUTED_KEY = "gpsshops_profilehelp_muted";
 
@@ -47,6 +48,8 @@ interface Props {
 export default function ProfileHelpAssistant({ translationKey = "HELPUSERPROFILE" }: Props) {
   const { t, language, loading } = useLanguage();
   const KEY = translationKey;
+  const [helpEnabled, setHelpEnabledState] = useState<boolean>(() => getHelpEnabled());
+  useEffect(() => onHelpPrefChange(setHelpEnabledState), []);
   const [muted, setMuted] = useState<boolean>(() => {
     if (typeof window === "undefined") return true;
     const stored = localStorage.getItem(MUTED_KEY);
@@ -97,6 +100,8 @@ export default function ProfileHelpAssistant({ translationKey = "HELPUSERPROFILE
       return next;
     });
   };
+
+  if (!helpEnabled) return null;
 
   return (
     <div
