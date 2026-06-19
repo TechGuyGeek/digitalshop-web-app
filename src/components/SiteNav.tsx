@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, HelpCircle, HelpCircleIcon } from "lucide-react";
+import { Menu, HelpCircle } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSiteNavExtras } from "@/contexts/SiteNavExtras";
