@@ -63,6 +63,7 @@ export default function HomeWelcomeAssistant({ onRegisterClick }: Props) {
     : t("HomeAssistant_WelcomeBack");
 
   const ttsOk = typeof window !== "undefined" && "speechSynthesis" in window;
+  const hideMs = Math.min(90000, Math.max(15000, message.length * 80));
 
   useEffect(() => {
     if (spokenRef.current) return;
@@ -73,16 +74,7 @@ export default function HomeWelcomeAssistant({ onRegisterClick }: Props) {
     // Mark visited for next time
     try { localStorage.setItem(VISITED_KEY, "1"); } catch {}
     if (muted || !ttsOk) return;
-    try {
-      const u = new SpeechSynthesisUtterance(message);
-      u.lang = language || "en-GB";
-      u.rate = 1; u.pitch = 1;
-      u.onstart = () => setSpeaking(true);
-      u.onend = () => setSpeaking(false);
-      u.onerror = () => setSpeaking(false);
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(u);
-    } catch {}
+    try { speakChunks(message, language, () => setSpeaking(true), () => setSpeaking(false)); } catch {}
     return () => {
       if (ttsOk) {
         try { window.speechSynthesis.cancel(); } catch {}
@@ -95,10 +87,10 @@ export default function HomeWelcomeAssistant({ onRegisterClick }: Props) {
     const id = setTimeout(() => {
       setVisible(false);
       if (ttsOk) { try { window.speechSynthesis.cancel(); } catch {} }
-    }, 15000);
+    }, hideMs);
     return () => clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [hideMs]);
 
   const toggleMute = () => {
     setMuted((m) => {
@@ -108,14 +100,7 @@ export default function HomeWelcomeAssistant({ onRegisterClick }: Props) {
         try { window.speechSynthesis.cancel(); } catch {}
         setSpeaking(false);
       } else if (!next && ttsOk) {
-        try {
-          const u = new SpeechSynthesisUtterance(message);
-          u.lang = language || "en-GB";
-          u.onstart = () => setSpeaking(true);
-          u.onend = () => setSpeaking(false);
-          u.onerror = () => setSpeaking(false);
-          window.speechSynthesis.speak(u);
-        } catch {}
+        try { speakChunks(message, language, () => setSpeaking(true), () => setSpeaking(false)); } catch {}
       }
       return next;
     });
