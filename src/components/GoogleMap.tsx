@@ -58,7 +58,6 @@ const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, 
       boxZoom: interactive,
       keyboard: interactive,
       touchZoom: interactive,
-      tap: interactive,
     });
 
     L.tileLayer(TILE_URL, {
