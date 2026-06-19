@@ -6,12 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { loginUser, registerUser, requestPasswordReset, type DigitalPerson } from "@/lib/api";
+import { loginUser, requestPasswordReset } from "@/lib/api";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme, type ThemeMode } from "@/contexts/ThemeContext";
 import SeoHead from "@/components/SeoHead";
 import { Link } from "react-router-dom";
+import RegisterChat from "@/components/RegisterChat";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -36,12 +37,6 @@ const Index = () => {
 
   const isLight = false;
 
-  // Register fields
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [dateOfBirth, setDateOfBirth] = useState("");
-  const [mobileNumber, setMobileNumber] = useState("");
-
   const handleLogin = async () => {
     if (!email || !password) {
       toast.error(t("Usernameorpasswordcannotbeempty"));
@@ -56,54 +51,6 @@ const Index = () => {
         navigate("/profile");
       } else {
         toast.error(t("MessageUsersEmailOrPassword"));
-      }
-    } catch (err) {
-      toast.error(t("Pleasecheckyourinternetconnection"));
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleRegister = async () => {
-    if (!firstName) {
-      toast.error(t("RegistrationFailedFirstNamecannotbeempty"));
-      return;
-    }
-    if (!lastName) {
-      toast.error(t("RegistrationFailedLastNamecannotbeempty"));
-      return;
-    }
-    if (!email) {
-      toast.error(t("RegistrationFailedEmailaddesscannotbeempty"));
-      return;
-    }
-    if (!password) {
-      toast.error(t("RegistrationFailedPasswordcannotbeempty"));
-      return;
-    }
-    setLoading(true);
-    try {
-      const result = await registerUser({
-        name: firstName,
-        surname: lastName,
-        dateOfBirth,
-        email,
-        password,
-        mobileNumber,
-        language,
-      });
-      if (result === "SUCCESS") {
-        toast.success(t("RegistrationLinkClicked"));
-        setView("login");
-        setFirstName("");
-        setLastName("");
-        setDateOfBirth("");
-        setMobileNumber("");
-        setEmail("");
-        setPassword("");
-      } else {
-        toast.error(result || t("RegistrationFailed"));
       }
     } catch (err) {
       toast.error(t("Pleasecheckyourinternetconnection"));
@@ -261,40 +208,10 @@ const Index = () => {
 
           <div className="space-y-4">
             {(() => { return null; })()}
-            {/* Register-only fields */}
-            {view === "register" && (
-              <>
-                <div className="space-y-2">
-                  <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground font-heading">
-                    {t("FirstName")}
-                  </label>
-                  <Input
-                    type="text"
-                    placeholder={t("FirstName")}
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    className={isLight
-                      ? "h-11 bg-white border border-border text-foreground placeholder:text-muted-foreground rounded-xl shadow-sm focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:border-primary transition-all"
-                      : "h-11 bg-secondary border-0 text-foreground placeholder:text-muted-foreground focus-visible:ring-primary"}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground font-heading">
-                    {t("LastName")}
-                  </label>
-                  <Input
-                    type="text"
-                    placeholder={t("LastName")}
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    className={isLight
-                      ? "h-11 bg-white border border-border text-foreground placeholder:text-muted-foreground rounded-xl shadow-sm focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:border-primary transition-all"
-                      : "h-11 bg-secondary border-0 text-foreground placeholder:text-muted-foreground focus-visible:ring-primary"}
-                  />
-                </div>
-              </>
-            )}
-
+            {view === "register" ? (
+              <RegisterChat onComplete={() => setView("login")} />
+            ) : (
+            <>
             {/* Email */}
             <div className="space-y-2">
               <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground font-heading">
@@ -358,43 +275,6 @@ const Index = () => {
             </div>
             )}
 
-            {/* Register-only: DOB & Mobile */}
-            {view === "register" && (
-              <>
-                <div className="space-y-2">
-                  <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground font-heading">
-                    {t("Gender")}
-                  </label>
-                  <Select value={dateOfBirth} onValueChange={(v) => setDateOfBirth(v)}>
-                    <SelectTrigger className={isLight
-                      ? "h-11 bg-white border border-border text-foreground rounded-xl shadow-sm focus:ring-2 focus:ring-primary/40"
-                      : "h-11 bg-secondary border-0 text-foreground focus:ring-primary"}>
-                      <SelectValue placeholder={t("Gender")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Male">{t("Male")}</SelectItem>
-                      <SelectItem value="Female">{t("Female")}</SelectItem>
-                      <SelectItem value="Non-binary">{t("NonBinary")}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground font-heading">
-                    {t("Mobile")}
-                  </label>
-                  <Input
-                    type="tel"
-                    placeholder={t("Mobile")}
-                    value={mobileNumber}
-                    onChange={(e) => setMobileNumber(e.target.value)}
-                    className={isLight
-                      ? "h-11 bg-white border border-border text-foreground placeholder:text-muted-foreground rounded-xl shadow-sm focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:border-primary transition-all"
-                      : "h-11 bg-secondary border-0 text-foreground placeholder:text-muted-foreground focus-visible:ring-primary"}
-                  />
-                </div>
-              </>
-            )}
-
             {view !== "forgot" && (
               <>
                 {/* Help Toggle */}
@@ -450,6 +330,8 @@ const Index = () => {
                 </div>
               </>
             )}
+            </>
+            )}
           </div>
 
           {/* Buttons */}
@@ -474,27 +356,27 @@ const Index = () => {
                   {t("Back")}
                 </Button>
               </>
-            ) : (
+            ) : view === "login" ? (
               <>
                 <Button
                   variant="glow"
                   size="lg"
                   className="w-full"
                   disabled={loading}
-                  onClick={view === "login" ? handleLogin : handleRegister}
+                  onClick={handleLogin}
                 >
-                  {loading ? t("Pleasewait") : view === "login" ? t("Signin") : t("Register")}
+                  {loading ? t("Pleasewait") : t("Signin")}
                 </Button>
                 <Button
                   variant="outline"
                   size="lg"
                   className="w-full"
-                  onClick={() => setView(view === "login" ? "register" : "login")}
+                  onClick={() => setView("register")}
                 >
-                  {view === "login" ? t("Register") : t("Back")}
+                  {t("Register")}
                 </Button>
               </>
-            )}
+            ) : null}
           </div>
 
           {view !== "forgot" && (
