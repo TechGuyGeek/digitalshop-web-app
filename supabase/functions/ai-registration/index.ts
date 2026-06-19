@@ -57,7 +57,8 @@ Always reply with a JSON object matching this exact schema and nothing else:
   "reply": string
 }
 Carry forward any values already known. "complete" is true only when every field is filled.
-"reply" is a short message to show the user (ask for the next missing field, redirect off-topic users back to registration, or confirm completion).`;
+"reply" is a short message to show the user (ask for the next missing field, redirect off-topic users back to registration, or confirm completion).
+When "complete" is true, the "reply" MUST tell the user their registration details are complete and to click the Register button to finish creating their account.`;
 
 const MAX_USER_MSG_LEN = 500;
 
@@ -98,13 +99,14 @@ function safeParse(text: string): Partial<RegistrationAIResponse> | null {
 function normalize(raw: Partial<RegistrationAIResponse> | null, prior: Registration): RegistrationAIResponse {
   const registration = mergeRegistration({ ...prior, ...(raw?.registration ?? {}) });
   const missing_fields = computeMissing(registration);
+  const complete = missing_fields.length === 0;
   return {
     registration,
     missing_fields,
-    complete: missing_fields.length === 0,
-    reply: raw?.reply ?? (missing_fields.length === 0
-      ? "All set — your details are complete."
-      : `Please provide your ${missing_fields[0].replace(/_/g, " ")}.`),
+    complete,
+    reply: complete
+      ? "All your details are complete — please click the Register button to finish creating your account."
+      : (raw?.reply ?? `Please provide your ${missing_fields[0].replace(/_/g, " ")}.`),
   };
 }
 
