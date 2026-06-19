@@ -6,6 +6,40 @@ import { useLanguage } from "@/contexts/LanguageContext";
 const MUTED_KEY = "gpsshops_welcome_muted";
 const VISITED_KEY = "gpsshops_welcome_visited";
 
+function chunkText(text: string, maxLen = 160): string[] {
+  const parts = text.match(/[^.!?]+[.!?]+|\S[^.!?]*$/g) ?? [text];
+  const out: string[] = [];
+  for (const p of parts) {
+    const s = p.trim();
+    if (!s) continue;
+    if (s.length <= maxLen) { out.push(s); continue; }
+    const sub = s.split(/,\s+/);
+    let buf = "";
+    for (const piece of sub) {
+      if ((buf + ", " + piece).length > maxLen && buf) { out.push(buf); buf = piece; }
+      else buf = buf ? buf + ", " + piece : piece;
+    }
+    if (buf) out.push(buf);
+  }
+  return out;
+}
+
+function speakChunks(text: string, lang: string, onStart: () => void, onEnd: () => void) {
+  const synth = window.speechSynthesis;
+  synth.cancel();
+  const chunks = chunkText(text);
+  let started = false;
+  chunks.forEach((chunk, idx) => {
+    const u = new SpeechSynthesisUtterance(chunk);
+    u.lang = lang || "en-GB";
+    u.rate = 1; u.pitch = 1;
+    u.onstart = () => { if (!started) { started = true; onStart(); } };
+    if (idx === chunks.length - 1) u.onend = onEnd;
+    u.onerror = () => { if (idx === chunks.length - 1) onEnd(); };
+    synth.speak(u);
+  });
+}
+
 interface Props {
   onRegisterClick?: () => void;
 }
