@@ -72,8 +72,28 @@ export default function ProfileHelpAssistant({ translationKey = "HELPUSERPROFILE
     if (message === KEY) return; // translations not loaded yet
     spokenRef.current = true;
     if (muted || !ttsOk) return;
-    try { speakChunks(message, language, () => setSpeaking(true), () => setSpeaking(false)); } catch {}
+    const trySpeak = () => {
+      try { speakChunks(message, language, () => setSpeaking(true), () => setSpeaking(false)); } catch {}
+    };
+    trySpeak();
+    let armed = true;
+    const onGesture = () => {
+      if (!armed) return;
+      armed = false;
+      try { window.speechSynthesis.cancel(); } catch {}
+      trySpeak();
+      window.removeEventListener("pointerdown", onGesture);
+      window.removeEventListener("keydown", onGesture);
+      window.removeEventListener("touchstart", onGesture);
+    };
+    window.addEventListener("pointerdown", onGesture, { once: true });
+    window.addEventListener("keydown", onGesture, { once: true });
+    window.addEventListener("touchstart", onGesture, { once: true });
     return () => {
+      armed = false;
+      window.removeEventListener("pointerdown", onGesture);
+      window.removeEventListener("keydown", onGesture);
+      window.removeEventListener("touchstart", onGesture);
       if (ttsOk) { try { window.speechSynthesis.cancel(); } catch {} }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
