@@ -1,0 +1,114 @@
+import { useEffect, useRef, useState } from "react";
+import { Volume2, VolumeX } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/contexts/LanguageContext";
+
+const MUTED_KEY = "gpsshops_welcome_muted";
+const VISITED_KEY = "gpsshops_welcome_visited";
+
+interface Props {
+  onRegisterClick?: () => void;
+}
+
+export default function HomeWelcomeAssistant({ onRegisterClick }: Props) {
+  const { t, language } = useLanguage();
+  const isFirstVisit = typeof window !== "undefined" && !localStorage.getItem(VISITED_KEY);
+  const [muted, setMuted] = useState<boolean>(() => {
+    if (typeof window === "undefined") return true;
+    const stored = localStorage.getItem(MUTED_KEY);
+    if (stored !== null) return stored === "1";
+    // First visit: unmuted by default; repeat visits: muted by default.
+    return !isFirstVisit;
+  });
+  const [speaking, setSpeaking] = useState(false);
+  const spokenRef = useRef(false);
+
+  const message = isFirstVisit
+    ? t("HomeAssistant_WelcomeFirst")
+    : t("HomeAssistant_WelcomeBack");
+
+  const ttsOk = typeof window !== "undefined" && "speechSynthesis" in window;
+
+  useEffect(() => {
+    if (spokenRef.current) return;
+    spokenRef.current = true;
+    // Mark visited for next time
+    try { localStorage.setItem(VISITED_KEY, "1"); } catch {}
+    if (muted || !ttsOk) return;
+    try {
+      const u = new SpeechSynthesisUtterance(message);
+      u.lang = language || "en-GB";
+      u.rate = 1; u.pitch = 1;
+      u.onstart = () => setSpeaking(true);
+      u.onend = () => setSpeaking(false);
+      u.onerror = () => setSpeaking(false);
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(u);
+    } catch {}
+    return () => {
+      if (ttsOk) {
+        try { window.speechSynthesis.cancel(); } catch {}
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const toggleMute = () => {
+    setMuted((m) => {
+      const next = !m;
+      try { localStorage.setItem(MUTED_KEY, next ? "1" : "0"); } catch {}
+      if (next && ttsOk) {
+        try { window.speechSynthesis.cancel(); } catch {}
+        setSpeaking(false);
+      } else if (!next && ttsOk) {
+        try {
+          const u = new SpeechSynthesisUtterance(message);
+          u.lang = language || "en-GB";
+          u.onstart = () => setSpeaking(true);
+          u.onend = () => setSpeaking(false);
+          u.onerror = () => setSpeaking(false);
+          window.speechSynthesis.speak(u);
+        } catch {}
+      }
+      return next;
+    });
+  };
+
+  return (
+    <div className="mb-4 rounded-2xl border border-border bg-secondary/40 p-4 flex items-start gap-3">
+      <img
+        src={`${import.meta.env.BASE_URL}gpsshops-mascot.png`}
+        alt={t("AIAssistant_Title")}
+        className={`h-14 w-14 shrink-0 object-contain drop-shadow-lg ${speaking ? "animate-mascot-bounce" : ""}`}
+      />
+      <div className="flex-1 min-w-0">
+        <div className="text-sm font-heading font-semibold text-foreground">
+          {t("AIAssistant_Title")}
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{message}</p>
+        {onRegisterClick && (
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="mt-2 h-8"
+            onClick={onRegisterClick}
+          >
+            {t("Register")}
+          </Button>
+        )}
+      </div>
+      {ttsOk && (
+        <Button
+          type="button"
+          size="icon"
+          variant="outline"
+          onClick={toggleMute}
+          aria-label={muted ? t("AIAssistant_Unmute") : t("AIAssistant_Mute")}
+        >
+          {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+        </Button>
+      )}
+    </div>
+  );
+}
