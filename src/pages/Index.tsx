@@ -211,6 +211,10 @@ const Index = () => {
 
       <div className="relative w-full max-w-md animate-fade-in" style={{ animationDelay: "0.1s" }}>
 
+        {view === "login" && (
+          <HomeWelcomeAssistant onRegisterClick={() => setView("register")} />
+        )}
+
         {/* Intro for new visitors — fades out after a short read */}
         {view === "login" && showIntro && (
           <div className="mb-6 text-center animate-fade-in transition-opacity duration-1000">
