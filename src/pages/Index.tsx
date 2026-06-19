@@ -13,6 +13,7 @@ import { useTheme, type ThemeMode } from "@/contexts/ThemeContext";
 import SeoHead from "@/components/SeoHead";
 import { Link } from "react-router-dom";
 import VoiceRegisterAssistant from "@/components/VoiceRegisterAssistant";
+import HomeWelcomeAssistant from "@/components/HomeWelcomeAssistant";
 import type { Registration } from "@/lib/aiService";
 
 const Index = () => {
