@@ -9,12 +9,13 @@ interface GoogleMapProps {
   onShopClick?: (shop: { name: string; icon: string; companyid?: number }) => void;
   defaultZoom?: number;
   rangeCircleMetres?: number;
+  interactive?: boolean;
 }
 
 const TILE_URL = "https://maps.techguygeek.co.uk/tiles/osm/webmercator/{z}/{x}/{y}.png";
 const TILE_ATTRIBUTION = "© OpenStreetMap contributors";
 
-const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, rangeCircleMetres }: GoogleMapProps) => {
+const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, rangeCircleMetres, interactive = true }: GoogleMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const circleRef = useRef<L.Circle | null>(null);
@@ -49,8 +50,15 @@ const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, 
     const map = L.map(mapRef.current, {
       center: [center.lat, center.lng],
       zoom: defaultZoom,
-      zoomControl: true,
+      zoomControl: interactive,
       attributionControl: true,
+      dragging: interactive,
+      scrollWheelZoom: interactive,
+      doubleClickZoom: interactive,
+      boxZoom: interactive,
+      keyboard: interactive,
+      touchZoom: interactive,
+      tap: interactive,
     });
 
     L.tileLayer(TILE_URL, {
