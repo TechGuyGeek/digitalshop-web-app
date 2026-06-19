@@ -78,8 +78,30 @@ export default function HomeWelcomeAssistant({ onRegisterClick }: Props) {
     // Mark visited for next time
     try { localStorage.setItem(VISITED_KEY, "1"); } catch {}
     if (muted || !ttsOk) return;
-    try { speakChunks(message, language, () => setSpeaking(true), () => setSpeaking(false)); } catch {}
+    const trySpeak = () => {
+      try { speakChunks(message, language, () => setSpeaking(true), () => setSpeaking(false)); } catch {}
+    };
+    // Browsers (esp. fresh/incognito sessions) block speechSynthesis until a user gesture.
+    // Try immediately, and also arm a one-shot gesture listener as a fallback.
+    trySpeak();
+    let armed = true;
+    const onGesture = () => {
+      if (!armed) return;
+      armed = false;
+      try { window.speechSynthesis.cancel(); } catch {}
+      trySpeak();
+      window.removeEventListener("pointerdown", onGesture);
+      window.removeEventListener("keydown", onGesture);
+      window.removeEventListener("touchstart", onGesture);
+    };
+    window.addEventListener("pointerdown", onGesture, { once: true });
+    window.addEventListener("keydown", onGesture, { once: true });
+    window.addEventListener("touchstart", onGesture, { once: true });
     return () => {
+      armed = false;
+      window.removeEventListener("pointerdown", onGesture);
+      window.removeEventListener("keydown", onGesture);
+      window.removeEventListener("touchstart", onGesture);
       if (ttsOk) {
         try { window.speechSynthesis.cancel(); } catch {}
       }
