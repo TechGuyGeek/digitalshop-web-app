@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AIService, EMPTY_REGISTRATION, type ChatMessage, type Registration } from "@/lib/aiService";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getHelpEnabled, onHelpPrefChange } from "@/lib/helpPref";
 
 interface Props {
   values: Partial<Registration>;
