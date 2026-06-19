@@ -21,6 +21,30 @@ function getSpeechRecognition(): SR | null {
 
 const ttsSupported = () => typeof window !== "undefined" && "speechSynthesis" in window;
 
+// Common mishears for gender words. If any alternative or word matches, prefer the canonical.
+const GENDER_MAP: Record<string, string> = {
+  male: "male", mail: "male", "m.a.l.e": "male", now: "male", nail: "male", may: "male", maple: "male",
+  man: "male", men: "male",
+  female: "female", "fee mail": "female", "fee male": "female", "fee-mail": "female", femail: "female",
+  woman: "female", women: "female",
+  "non binary": "non-binary", nonbinary: "non-binary", "non-binary": "non-binary", enby: "non-binary",
+};
+
+function normalizeTranscript(primary: string, alternatives: string[]): string {
+  const candidates = [primary, ...alternatives].map((s) => (s || "").toLowerCase().trim()).filter(Boolean);
+  // If any candidate is just a short gender-like word, return canonical form
+  for (const c of candidates) {
+    const stripped = c.replace(/[.,!?]/g, "").trim();
+    if (GENDER_MAP[stripped]) return GENDER_MAP[stripped];
+    // single-word check inside the phrase
+    const words = stripped.split(/\s+/);
+    if (words.length <= 3) {
+      for (const w of words) if (GENDER_MAP[w]) return GENDER_MAP[w];
+    }
+  }
+  return primary.trim();
+}
+
 export default function VoiceRegisterAssistant({ values, onFieldsUpdate, onComplete }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [status, setStatus] = useState<string>("");
