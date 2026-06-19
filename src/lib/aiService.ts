@@ -34,9 +34,13 @@ export const EMPTY_REGISTRATION: Registration = {
 };
 
 export const RegistrationAIService = {
-  async chat(messages: ChatMessage[], partial: Partial<Registration> = {}): Promise<RegistrationAIResponse> {
+  async chat(
+    messages: ChatMessage[],
+    partial: Partial<Registration> = {},
+    language?: string,
+  ): Promise<RegistrationAIResponse> {
     const { data, error } = await supabase.functions.invoke("ai-registration", {
-      body: { messages, partial },
+      body: { messages, partial, language },
     });
     if (error) throw error;
     if (!data || typeof data !== "object" || !("registration" in data)) {

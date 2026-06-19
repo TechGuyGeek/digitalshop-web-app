@@ -48,6 +48,11 @@ Always reply with a JSON object matching this exact schema and nothing else:
 Carry forward any values already known. "complete" is true only when every field is filled.
 "reply" is a short message to show the user (ask for the next missing field, or confirm completion).`;
 
+function languageInstruction(language?: string): string {
+  if (!language) return "";
+  return `\nIMPORTANT: The user's preferred language code is "${language}". Write the "reply" field in that language. JSON keys and field values (names, email, etc.) must stay verbatim.`;
+}
+
 function mergeRegistration(partial: Partial<Registration> | undefined): Registration {
   return { ...EMPTY, ...(partial ?? {}) };
 }
@@ -82,17 +87,17 @@ function normalize(raw: Partial<RegistrationAIResponse> | null, prior: Registrat
 // ---------- Providers ----------
 
 interface AIProvider {
-  generate(messages: ChatMessage[], partial: Registration): Promise<RegistrationAIResponse>;
+  generate(messages: ChatMessage[], partial: Registration, language?: string): Promise<RegistrationAIResponse>;
 }
 
 const lovableProvider: AIProvider = {
-  async generate(messages, partial) {
+  async generate(messages, partial, language) {
     const apiKey = Deno.env.get("LOVABLE_API_KEY");
     if (!apiKey) throw new Error("Missing LOVABLE_API_KEY");
 
     const sys: ChatMessage = {
       role: "system",
-      content: `${SYSTEM_PROMPT}\n\nKnown so far: ${JSON.stringify(partial)}`,
+      content: `${SYSTEM_PROMPT}${languageInstruction(language)}\n\nKnown so far: ${JSON.stringify(partial)}`,
     };
 
     const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -119,7 +124,7 @@ const lovableProvider: AIProvider = {
 };
 
 const gpsshopsProvider: AIProvider = {
-  async generate(messages, partial) {
+  async generate(messages, partial, language) {
     const base = Deno.env.get("GPSSHOPS_AI_URL") ?? "https://ai.gpsshops.com";
     const url = base.replace(/\/$/, "") + "/registration";
     const headers: Record<string, string> = { "Content-Type": "application/json" };
@@ -129,7 +134,7 @@ const gpsshopsProvider: AIProvider = {
     const res = await fetch(url, {
       method: "POST",
       headers,
-      body: JSON.stringify({ messages, partial }),
+      body: JSON.stringify({ messages, partial, language }),
     });
     if (!res.ok) {
       const body = await res.text();
@@ -159,6 +164,7 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const messages: ChatMessage[] = Array.isArray(body?.messages) ? body.messages : [];
     const partial = mergeRegistration(body?.partial);
+    const language = typeof body?.language === "string" ? body.language : undefined;
 
     if (messages.length === 0) {
       return new Response(JSON.stringify({ error: "messages array is required" }), {
@@ -168,7 +174,7 @@ Deno.serve(async (req) => {
     }
 
     const provider = pickProvider();
-    const result = await provider.generate(messages, partial);
+    const result = await provider.generate(messages, partial, language);
 
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

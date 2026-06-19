@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AIService, EMPTY_REGISTRATION, type ChatMessage, type Registration } from "@/lib/aiService";
 import mascot from "@/assets/gpsshops-mascot.png.asset.json";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Props {
   values: Partial<Registration>;
@@ -46,6 +47,7 @@ function normalizeTranscript(primary: string, alternatives: string[]): string {
 }
 
 export default function VoiceRegisterAssistant({ values, onFieldsUpdate, onComplete }: Props) {
+  const { t, language } = useLanguage();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [status, setStatus] = useState<string>("");
   const [listening, setListening] = useState(false);
@@ -95,9 +97,10 @@ export default function VoiceRegisterAssistant({ values, onFieldsUpdate, onCompl
         window.speechSynthesis.cancel();
         const u = new SpeechSynthesisUtterance(text);
         u.rate = 1; u.pitch = 1;
+        if (language) u.lang = language;
         u.onend = () => { if (thenListen && !completeRef.current) startListening(); resolve(); };
         u.onerror = () => { if (thenListen && !completeRef.current) startListening(); resolve(); };
-        setStatus("AI is speaking…");
+        setStatus(t("AIAssistant_Thinking"));
         window.speechSynthesis.speak(u);
       } catch { resolve(); }
     });
@@ -108,9 +111,9 @@ export default function VoiceRegisterAssistant({ values, onFieldsUpdate, onCompl
     const newMsgs: ChatMessage[] = [...messages, { role: "user", content: userText }];
     setMessages(newMsgs);
     setThinking(true);
-    setStatus("AI is thinking…");
+    setStatus(t("AIAssistant_Thinking"));
     try {
-      const res = await AIService.registration.chat(newMsgs, partialRef.current);
+      const res = await AIService.registration.chat(newMsgs, partialRef.current, language);
       // merge fields
       const merged: Partial<Registration> = { ...partialRef.current };
       (Object.keys(EMPTY_REGISTRATION) as (keyof Registration)[]).forEach((k) => {
@@ -125,7 +128,7 @@ export default function VoiceRegisterAssistant({ values, onFieldsUpdate, onCompl
       if (res.complete) {
         completeRef.current = true;
         stopListening();
-        setStatus("Registration details complete ✓");
+        setStatus(`${t("AIAssistant_Complete")} ✓`);
         await speak(res.reply, false);
         onComplete?.(res.registration);
       } else {
@@ -142,17 +145,17 @@ export default function VoiceRegisterAssistant({ values, onFieldsUpdate, onCompl
     if (!SR || completeRef.current) return;
     try {
       const rec = new SR();
-      rec.lang = (typeof navigator !== "undefined" && navigator.language) || "en-US";
+      rec.lang = language || (typeof navigator !== "undefined" && navigator.language) || "en-US";
       rec.interimResults = false;
       rec.continuous = false;
       rec.maxAlternatives = 5;
-      rec.onstart = () => { setListening(true); setStatus("Listening…"); };
+      rec.onstart = () => { setListening(true); setStatus(t("AIAssistant_Listening")); };
       rec.onerror = (e: any) => {
         setListening(false);
         if (e?.error === "not-allowed" || e?.error === "service-not-allowed") {
-          setStatus("Microphone permission denied. Please allow mic access.");
+          setStatus(t("AIAssistant_MicBlocked"));
         } else if (e?.error === "no-speech") {
-          setStatus("I didn't catch that. Tap the mascot to try again.");
+          setStatus(t("AIAssistant_NoSpeech"));
         } else {
           setStatus(`Mic error: ${e?.error || "unknown"}`);
         }
@@ -178,7 +181,7 @@ export default function VoiceRegisterAssistant({ values, onFieldsUpdate, onCompl
   const handleStart = async () => {
     if (completeRef.current) return;
     setStarted(true);
-    const intro = "Hi! I'm your GPS Shops registration assistant. I can help you sign up — just tell me your details.";
+    const intro = t("AIAssistant_Intro");
     setLastReply(intro);
     setMessages([{ role: "assistant", content: intro }]);
     await speak(intro, speechOk);
@@ -213,27 +216,27 @@ export default function VoiceRegisterAssistant({ values, onFieldsUpdate, onCompl
         <button
           type="button"
           onClick={handleMicClick}
-          aria-label={listening ? "Stop listening" : "Start voice assistant"}
+          aria-label={listening ? t("AIAssistant_Stop") : t("AIAssistant_StartVoice")}
           className={`relative shrink-0 rounded-full transition-transform hover:scale-105 ${listening ? "animate-pulse ring-4 ring-primary/50" : ""}`}
         >
-          <img src={mascot.url} alt="GPS Shops AI assistant" className="h-16 w-16 object-contain drop-shadow-lg" />
+          <img src={mascot.url} alt={t("AIAssistant_Title")} className="h-16 w-16 object-contain drop-shadow-lg" />
         </button>
         <div className="flex-1 min-w-0">
-          <div className="text-sm font-heading font-semibold text-foreground">GPS Shops AI Assistant</div>
+          <div className="text-sm font-heading font-semibold text-foreground">{t("AIAssistant_Title")}</div>
           <div className="text-xs text-muted-foreground truncate">
-            {!speechOk && !started && "Voice not supported — use text below"}
-            {speechOk && !started && "Tap the mascot to talk, or type below"}
+            {!speechOk && !started && t("AIAssistant_VoiceNotSupported")}
+            {speechOk && !started && t("AIAssistant_TapMascot")}
             {started && (status || (lastReply ? `AI: ${lastReply}` : ""))}
           </div>
         </div>
         <div className="flex flex-col gap-1">
           {speechOk && (
-            <Button type="button" size="icon" variant={listening ? "default" : "outline"} onClick={handleMicClick} aria-label="Mic">
+            <Button type="button" size="icon" variant={listening ? "default" : "outline"} onClick={handleMicClick} aria-label={listening ? t("AIAssistant_Listen") : t("AIAssistant_Speak")}>
               {listening ? <Mic className="h-4 w-4" /> : <MicOff className="h-4 w-4" />}
             </Button>
           )}
           {speakOk && (
-            <Button type="button" size="icon" variant="outline" onClick={toggleMute} aria-label={muted ? "Unmute" : "Mute"}>
+            <Button type="button" size="icon" variant="outline" onClick={toggleMute} aria-label={muted ? t("AIAssistant_Unmute") : t("AIAssistant_Mute")}>
               {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
             </Button>
           )}
@@ -241,7 +244,7 @@ export default function VoiceRegisterAssistant({ values, onFieldsUpdate, onCompl
       </div>
 
       {heard && (
-        <div className="text-xs text-muted-foreground italic">I heard: "{heard}"</div>
+        <div className="text-xs text-muted-foreground italic">{t("AIAssistant_IHeard")}: "{heard}"</div>
       )}
 
       <div className="flex gap-2">
@@ -249,11 +252,11 @@ export default function VoiceRegisterAssistant({ values, onFieldsUpdate, onCompl
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleTextSend(); } }}
-          placeholder={thinking ? "AI is thinking…" : "Type a reply…"}
+          placeholder={thinking ? t("AIAssistant_Thinking") : t("AIAssistant_TypeReply")}
           disabled={thinking}
           className="h-10 bg-background"
         />
-        <Button type="button" size="icon" onClick={handleTextSend} disabled={thinking || !input.trim()} aria-label="Send">
+        <Button type="button" size="icon" onClick={handleTextSend} disabled={thinking || !input.trim()} aria-label={t("AIAssistant_Send")}>
           <Send className="h-4 w-4" />
         </Button>
       </div>
