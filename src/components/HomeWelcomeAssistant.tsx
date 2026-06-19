@@ -21,6 +21,7 @@ export default function HomeWelcomeAssistant({ onRegisterClick }: Props) {
     return false;
   });
   const [speaking, setSpeaking] = useState(false);
+  const [visible, setVisible] = useState(true);
   const spokenRef = useRef(false);
 
   const message = isFirstVisit
@@ -53,6 +54,15 @@ export default function HomeWelcomeAssistant({ onRegisterClick }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    const id = setTimeout(() => {
+      setVisible(false);
+      if (ttsOk) { try { window.speechSynthesis.cancel(); } catch {} }
+    }, 15000);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const toggleMute = () => {
     setMuted((m) => {
       const next = !m;
@@ -75,7 +85,9 @@ export default function HomeWelcomeAssistant({ onRegisterClick }: Props) {
   };
 
   return (
-    <div className="mb-4 rounded-2xl border border-border bg-secondary/40 p-4 flex items-start gap-3">
+    <div
+      className={`mb-4 rounded-2xl border border-border bg-secondary/40 p-4 flex items-start gap-3 transition-opacity duration-1000 ${visible ? "opacity-100" : "opacity-0 pointer-events-none h-0 p-0 m-0 overflow-hidden border-0"}`}
+    >
       <img
         src={`${import.meta.env.BASE_URL}gpsshops-mascot.png`}
         alt={t("AIAssistant_Title")}
