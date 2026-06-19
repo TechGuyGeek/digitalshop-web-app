@@ -23,6 +23,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import QRCodeGenerator from "@/components/QRCodeGenerator";
+import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 
 
 const MAX_IMAGE_SIZE = 800;
@@ -507,6 +508,9 @@ const CompanyProfile = () => {
 
         {/* Form fields */}
         <div className="px-6 space-y-3">
+          {Object.values(form).some((v) => !String(v).trim()) && (
+            <ProfileHelpAssistant translationKey="HELPCOMPANYPROFILE" />
+          )}
           <LabeledInput label={t("CompanyName")} value={form.shopName} onChange={v => handleChange("shopName", v)} inputClass={inputClass} />
           <LabeledInput label={t("Mobile")} value={form.mobileNumber} onChange={v => handleChange("mobileNumber", v)} inputClass={inputClass} />
           <LabeledInput label={t("CompanyEmail")} type="email" value={form.companyEmail} onChange={v => handleChange("companyEmail", v)} inputClass={inputClass} />
