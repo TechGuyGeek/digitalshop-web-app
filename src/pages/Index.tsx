@@ -525,14 +525,16 @@ const Index = () => {
                 >
                   {loading ? t("Pleasewait") : view === "login" ? t("Signin") : t("Register")}
                 </Button>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="w-full"
-                  onClick={() => setView(view === "login" ? "register" : "login")}
-                >
-                  {view === "login" ? t("Register") : t("Back")}
-                </Button>
+                {view === "register" && (
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="w-full"
+                    onClick={() => setView("login")}
+                  >
+                    {t("Back")}
+                  </Button>
+                )}
               </>
             )}
           </div>
