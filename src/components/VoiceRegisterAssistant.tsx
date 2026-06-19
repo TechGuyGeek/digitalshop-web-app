@@ -3,7 +3,6 @@ import { Mic, MicOff, Volume2, VolumeX, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AIService, EMPTY_REGISTRATION, type ChatMessage, type Registration } from "@/lib/aiService";
-import mascot from "@/assets/gpsshops-mascot.png.asset.json";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Props {
@@ -222,7 +221,7 @@ export default function VoiceRegisterAssistant({ values, onFieldsUpdate, onCompl
           aria-label={listening ? t("AIAssistant_Stop") : t("AIAssistant_StartVoice")}
           className={`relative shrink-0 rounded-full transition-transform hover:scale-105 ${listening ? "animate-pulse ring-4 ring-primary/50" : ""}`}
         >
-          <img src={mascot.url} alt={t("AIAssistant_Title")} className={`h-16 w-16 object-contain drop-shadow-lg ${speaking ? "animate-mascot-bounce" : ""}`} />
+          <img src={`${import.meta.env.BASE_URL}gpsshops-mascot.png`} alt={t("AIAssistant_Title")} className={`h-16 w-16 object-contain drop-shadow-lg ${speaking ? "animate-mascot-bounce" : ""}`} />
         </button>
         <div className="flex-1 min-w-0">
           <div className="text-sm font-heading font-semibold text-foreground">{t("AIAssistant_Title")}</div>
