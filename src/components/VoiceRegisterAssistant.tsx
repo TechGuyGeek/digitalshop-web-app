@@ -44,6 +44,13 @@ export default function VoiceRegisterAssistant({ values, onFieldsUpdate, onCompl
   const speechOk = !!SR;
   const speakOk = ttsSupported();
 
+  // Auto-start intro on mount (best effort — mic may still need a tap on mobile)
+  useEffect(() => {
+    const id = setTimeout(() => { handleStart(); }, 250);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -111,9 +118,10 @@ export default function VoiceRegisterAssistant({ values, onFieldsUpdate, onCompl
     if (!SR || completeRef.current) return;
     try {
       const rec = new SR();
-      rec.lang = "en-US";
+      rec.lang = (typeof navigator !== "undefined" && navigator.language) || "en-US";
       rec.interimResults = false;
       rec.continuous = false;
+      rec.maxAlternatives = 5;
       rec.onstart = () => { setListening(true); setStatus("Listening…"); };
       rec.onerror = (e: any) => {
         setListening(false);
@@ -127,11 +135,14 @@ export default function VoiceRegisterAssistant({ values, onFieldsUpdate, onCompl
       };
       rec.onend = () => setListening(false);
       rec.onresult = (event: any) => {
-        const transcript = Array.from(event.results)
-          .map((r: any) => r[0]?.transcript || "")
-          .join(" ")
-          .trim();
-        if (transcript) sendToAI(transcript);
+        // Collect all alternatives and pick the best one for gender-like answers
+        const alts: string[] = [];
+        for (const result of Array.from(event.results) as any[]) {
+          for (let i = 0; i < result.length; i++) alts.push(result[i].transcript);
+        }
+        const primary = alts[0]?.trim() || "";
+        const normalized = normalizeTranscript(primary, alts);
+        if (normalized) sendToAI(normalized);
       };
       recognitionRef.current = rec;
       rec.start();
