@@ -6,6 +6,40 @@ import { useLanguage } from "@/contexts/LanguageContext";
 const MUTED_KEY = "gpsshops_welcome_muted";
 const VISITED_KEY = "gpsshops_welcome_visited";
 
+function chunkText(text: string, maxLen = 160): string[] {
+  const parts = text.match(/[^.!?]+[.!?]+|\S[^.!?]*$/g) ?? [text];
+  const out: string[] = [];
+  for (const p of parts) {
+    const s = p.trim();
+    if (!s) continue;
+    if (s.length <= maxLen) { out.push(s); continue; }
+    const sub = s.split(/,\s+/);
+    let buf = "";
+    for (const piece of sub) {
+      if ((buf + ", " + piece).length > maxLen && buf) { out.push(buf); buf = piece; }
+      else buf = buf ? buf + ", " + piece : piece;
+    }
+    if (buf) out.push(buf);
+  }
+  return out;
+}
+
+function speakChunks(text: string, lang: string, onStart: () => void, onEnd: () => void) {
+  const synth = window.speechSynthesis;
+  synth.cancel();
+  const chunks = chunkText(text);
+  let started = false;
+  chunks.forEach((chunk, idx) => {
+    const u = new SpeechSynthesisUtterance(chunk);
+    u.lang = lang || "en-GB";
+    u.rate = 1; u.pitch = 1;
+    u.onstart = () => { if (!started) { started = true; onStart(); } };
+    if (idx === chunks.length - 1) u.onend = onEnd;
+    u.onerror = () => { if (idx === chunks.length - 1) onEnd(); };
+    synth.speak(u);
+  });
+}
+
 interface Props {
   onRegisterClick?: () => void;
 }
@@ -29,6 +63,7 @@ export default function HomeWelcomeAssistant({ onRegisterClick }: Props) {
     : t("HomeAssistant_WelcomeBack");
 
   const ttsOk = typeof window !== "undefined" && "speechSynthesis" in window;
+  const hideMs = Math.min(90000, Math.max(15000, message.length * 80));
 
   useEffect(() => {
     if (spokenRef.current) return;
@@ -39,16 +74,7 @@ export default function HomeWelcomeAssistant({ onRegisterClick }: Props) {
     // Mark visited for next time
     try { localStorage.setItem(VISITED_KEY, "1"); } catch {}
     if (muted || !ttsOk) return;
-    try {
-      const u = new SpeechSynthesisUtterance(message);
-      u.lang = language || "en-GB";
-      u.rate = 1; u.pitch = 1;
-      u.onstart = () => setSpeaking(true);
-      u.onend = () => setSpeaking(false);
-      u.onerror = () => setSpeaking(false);
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(u);
-    } catch {}
+    try { speakChunks(message, language, () => setSpeaking(true), () => setSpeaking(false)); } catch {}
     return () => {
       if (ttsOk) {
         try { window.speechSynthesis.cancel(); } catch {}
@@ -61,10 +87,10 @@ export default function HomeWelcomeAssistant({ onRegisterClick }: Props) {
     const id = setTimeout(() => {
       setVisible(false);
       if (ttsOk) { try { window.speechSynthesis.cancel(); } catch {} }
-    }, 15000);
+    }, hideMs);
     return () => clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [hideMs]);
 
   const toggleMute = () => {
     setMuted((m) => {
@@ -74,14 +100,7 @@ export default function HomeWelcomeAssistant({ onRegisterClick }: Props) {
         try { window.speechSynthesis.cancel(); } catch {}
         setSpeaking(false);
       } else if (!next && ttsOk) {
-        try {
-          const u = new SpeechSynthesisUtterance(message);
-          u.lang = language || "en-GB";
-          u.onstart = () => setSpeaking(true);
-          u.onend = () => setSpeaking(false);
-          u.onerror = () => setSpeaking(false);
-          window.speechSynthesis.speak(u);
-        } catch {}
+        try { speakChunks(message, language, () => setSpeaking(true), () => setSpeaking(false)); } catch {}
       }
       return next;
     });
