@@ -107,8 +107,9 @@ export default function VoiceRegisterAssistant({ values, onFieldsUpdate, onCompl
 
   const sendToAI = async (userText: string) => {
     if (!userText.trim()) return;
-    setHeard(userText);
-    const newMsgs: ChatMessage[] = [...messages, { role: "user", content: userText }];
+    const trimmed = userText.trim().slice(0, 500);
+    setHeard(trimmed);
+    const newMsgs: ChatMessage[] = [...messages, { role: "user", content: trimmed }];
     setMessages(newMsgs);
     setThinking(true);
     setStatus(t("AIAssistant_Thinking"));
@@ -195,7 +196,7 @@ export default function VoiceRegisterAssistant({ values, onFieldsUpdate, onCompl
   };
 
   const handleTextSend = () => {
-    const t = input.trim();
+    const t = input.trim().slice(0, 500);
     if (!t) return;
     setInput("");
     if (!started) setStarted(true);
