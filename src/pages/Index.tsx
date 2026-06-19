@@ -302,7 +302,7 @@ const Index = () => {
                       if (mapped) setDateOfBirth(mapped);
                     }
                   }}
-                />
+                />}
                 <div className="space-y-2">
                   <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground font-heading">
                     {t("FirstName")}
