@@ -4,10 +4,14 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const MUTED_KEY = "gpsshops_profilehelp_muted";
-const KEY = "HELPUSERPROFILE";
 
-export default function ProfileHelpAssistant() {
+interface Props {
+  translationKey?: string;
+}
+
+export default function ProfileHelpAssistant({ translationKey = "HELPUSERPROFILE" }: Props) {
   const { t, language, loading } = useLanguage();
+  const KEY = translationKey;
   const [muted, setMuted] = useState<boolean>(() => {
     if (typeof window === "undefined") return true;
     const stored = localStorage.getItem(MUTED_KEY);
