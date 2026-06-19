@@ -66,6 +66,51 @@ const REQUIRED_FIELDS: (keyof Registration)[] = [
   "first_name", "last_name", "email", "mobile_number", "password", "gender",
 ];
 
+// ---------- Per-field validation ----------
+// Returns true if value is acceptable. Otherwise the field will be cleared
+// and the assistant will ask for it again.
+function isValidField(field: keyof Registration, raw: string): boolean {
+  const value = (raw ?? "").trim();
+  if (!value) return false;
+  switch (field) {
+    case "first_name":
+    case "last_name":
+      // Letters (incl. accents), spaces, hyphen, apostrophe. 2-50 chars.
+      return /^[\p{L}][\p{L}\s'\-]{1,49}$/u.test(value);
+    case "email":
+      return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value) && value.length <= 254;
+    case "mobile_number": {
+      const digits = value.replace(/[^\d]/g, "");
+      // 7-15 digits, optional leading + already stripped above.
+      return digits.length >= 7 && digits.length <= 15;
+    }
+    case "password":
+      // 6+ chars, no whitespace.
+      return value.length >= 6 && !/\s/.test(value);
+    case "gender": {
+      const v = value.toLowerCase();
+      return ["male", "female", "other", "prefer not to say", "non-binary", "nonbinary"].includes(v);
+    }
+    default:
+      return true;
+  }
+}
+
+function sanitizeRegistration(reg: Registration): { clean: Registration; rejected: string[] } {
+  const clean: Registration = { ...reg };
+  const rejected: string[] = [];
+  for (const f of REQUIRED_FIELDS) {
+    const v = String(clean[f] ?? "").trim();
+    if (v && !isValidField(f, v)) {
+      clean[f] = "";
+      rejected.push(f);
+    } else {
+      clean[f] = v;
+    }
+  }
+  return { clean, rejected };
+}
+
 function offTopicReply(missing: string[]): string {
   const next = missing[0]?.replace(/_/g, " ");
   return next
@@ -97,16 +142,21 @@ function safeParse(text: string): Partial<RegistrationAIResponse> | null {
 }
 
 function normalize(raw: Partial<RegistrationAIResponse> | null, prior: Registration): RegistrationAIResponse {
-  const registration = mergeRegistration({ ...prior, ...(raw?.registration ?? {}) });
+  const merged = mergeRegistration({ ...prior, ...(raw?.registration ?? {}) });
+  const { clean: registration, rejected } = sanitizeRegistration(merged);
   const missing_fields = computeMissing(registration);
   const complete = missing_fields.length === 0;
+  const nextField = missing_fields[0]?.replace(/_/g, " ");
+  const rejectMsg = rejected.length
+    ? `That doesn't look like a valid ${rejected[0].replace(/_/g, " ")}. Please provide a valid ${nextField ?? rejected[0].replace(/_/g, " ")}.`
+    : null;
   return {
     registration,
     missing_fields,
     complete,
     reply: complete
       ? "All your details are complete — please click the Register button to finish creating your account."
-      : (raw?.reply ?? `Please provide your ${missing_fields[0].replace(/_/g, " ")}.`),
+      : (rejectMsg ?? raw?.reply ?? `Please provide your ${nextField}.`),
   };
 }
 
