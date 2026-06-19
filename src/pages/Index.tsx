@@ -13,6 +13,7 @@ import { useTheme, type ThemeMode } from "@/contexts/ThemeContext";
 import SeoHead from "@/components/SeoHead";
 import { Link } from "react-router-dom";
 import VoiceRegisterAssistant from "@/components/VoiceRegisterAssistant";
+import HomeWelcomeAssistant from "@/components/HomeWelcomeAssistant";
 import type { Registration } from "@/lib/aiService";
 
 const Index = () => {
@@ -209,6 +210,10 @@ const Index = () => {
       </div>
 
       <div className="relative w-full max-w-md animate-fade-in" style={{ animationDelay: "0.1s" }}>
+
+        {view === "login" && (
+          <HomeWelcomeAssistant onRegisterClick={() => setView("register")} />
+        )}
 
         {/* Intro for new visitors — fades out after a short read */}
         {view === "login" && showIntro && (
