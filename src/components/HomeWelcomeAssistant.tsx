@@ -12,13 +12,13 @@ interface Props {
 
 export default function HomeWelcomeAssistant({ onRegisterClick }: Props) {
   const { t, language } = useLanguage();
-  const isFirstVisit = typeof window !== "undefined" && !localStorage.getItem(VISITED_KEY);
+  // TESTING: always treat as first visit so the assistant speaks on every load.
+  const isFirstVisit = true;
   const [muted, setMuted] = useState<boolean>(() => {
     if (typeof window === "undefined") return true;
     const stored = localStorage.getItem(MUTED_KEY);
     if (stored !== null) return stored === "1";
-    // First visit: unmuted by default; repeat visits: muted by default.
-    return !isFirstVisit;
+    return false;
   });
   const [speaking, setSpeaking] = useState(false);
   const spokenRef = useRef(false);
