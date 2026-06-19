@@ -37,12 +37,6 @@ const Index = () => {
 
   const isLight = false;
 
-  // Register fields
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [dateOfBirth, setDateOfBirth] = useState("");
-  const [mobileNumber, setMobileNumber] = useState("");
-
   const handleLogin = async () => {
     if (!email || !password) {
       toast.error(t("Usernameorpasswordcannotbeempty"));
@@ -57,54 +51,6 @@ const Index = () => {
         navigate("/profile");
       } else {
         toast.error(t("MessageUsersEmailOrPassword"));
-      }
-    } catch (err) {
-      toast.error(t("Pleasecheckyourinternetconnection"));
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleRegister = async () => {
-    if (!firstName) {
-      toast.error(t("RegistrationFailedFirstNamecannotbeempty"));
-      return;
-    }
-    if (!lastName) {
-      toast.error(t("RegistrationFailedLastNamecannotbeempty"));
-      return;
-    }
-    if (!email) {
-      toast.error(t("RegistrationFailedEmailaddesscannotbeempty"));
-      return;
-    }
-    if (!password) {
-      toast.error(t("RegistrationFailedPasswordcannotbeempty"));
-      return;
-    }
-    setLoading(true);
-    try {
-      const result = await registerUser({
-        name: firstName,
-        surname: lastName,
-        dateOfBirth,
-        email,
-        password,
-        mobileNumber,
-        language,
-      });
-      if (result === "SUCCESS") {
-        toast.success(t("RegistrationLinkClicked"));
-        setView("login");
-        setFirstName("");
-        setLastName("");
-        setDateOfBirth("");
-        setMobileNumber("");
-        setEmail("");
-        setPassword("");
-      } else {
-        toast.error(result || t("RegistrationFailed"));
       }
     } catch (err) {
       toast.error(t("Pleasecheckyourinternetconnection"));
