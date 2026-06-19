@@ -11,7 +11,7 @@ interface Props {
 }
 
 export default function HomeWelcomeAssistant({ onRegisterClick }: Props) {
-  const { t, language } = useLanguage();
+  const { t, language, loading } = useLanguage();
   // TESTING: always treat as first visit so the assistant speaks on every load.
   const isFirstVisit = true;
   const [muted, setMuted] = useState<boolean>(() => {
@@ -32,6 +32,9 @@ export default function HomeWelcomeAssistant({ onRegisterClick }: Props) {
 
   useEffect(() => {
     if (spokenRef.current) return;
+    if (loading) return;
+    // Guard against translations not being loaded yet — t() would return the raw key.
+    if (message === "HomeAssistant_WelcomeFirst" || message === "HomeAssistant_WelcomeBack") return;
     spokenRef.current = true;
     // Mark visited for next time
     try { localStorage.setItem(VISITED_KEY, "1"); } catch {}
@@ -52,7 +55,7 @@ export default function HomeWelcomeAssistant({ onRegisterClick }: Props) {
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loading, message]);
 
   useEffect(() => {
     const id = setTimeout(() => {
