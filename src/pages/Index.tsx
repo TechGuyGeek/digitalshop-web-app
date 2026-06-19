@@ -462,6 +462,7 @@ const Index = () => {
                       <SelectItem value="camo">Camo</SelectItem>
                       <SelectItem value="midnight">{t("BlueBackGround")}</SelectItem>
                       <SelectItem value="safari">{t("SafariBackGround")}</SelectItem>
+                      <SelectItem value="main">Main (Live Map)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
