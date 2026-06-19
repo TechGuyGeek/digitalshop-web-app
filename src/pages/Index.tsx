@@ -277,7 +277,7 @@ const Index = () => {
             {/* Register-only fields */}
             {view === "register" && (
               <>
-                <VoiceRegisterAssistant
+                {helpEnabled && <VoiceRegisterAssistant
                   values={{
                     first_name: firstName,
                     last_name: lastName,
