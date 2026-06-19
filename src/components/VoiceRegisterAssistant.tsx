@@ -21,6 +21,30 @@ function getSpeechRecognition(): SR | null {
 
 const ttsSupported = () => typeof window !== "undefined" && "speechSynthesis" in window;
 
+// Common mishears for gender words. If any alternative or word matches, prefer the canonical.
+const GENDER_MAP: Record<string, string> = {
+  male: "male", mail: "male", "m.a.l.e": "male", now: "male", nail: "male", may: "male", maple: "male",
+  man: "male", men: "male",
+  female: "female", "fee mail": "female", "fee male": "female", "fee-mail": "female", femail: "female",
+  woman: "female", women: "female",
+  "non binary": "non-binary", nonbinary: "non-binary", "non-binary": "non-binary", enby: "non-binary",
+};
+
+function normalizeTranscript(primary: string, alternatives: string[]): string {
+  const candidates = [primary, ...alternatives].map((s) => (s || "").toLowerCase().trim()).filter(Boolean);
+  // If any candidate is just a short gender-like word, return canonical form
+  for (const c of candidates) {
+    const stripped = c.replace(/[.,!?]/g, "").trim();
+    if (GENDER_MAP[stripped]) return GENDER_MAP[stripped];
+    // single-word check inside the phrase
+    const words = stripped.split(/\s+/);
+    if (words.length <= 3) {
+      for (const w of words) if (GENDER_MAP[w]) return GENDER_MAP[w];
+    }
+  }
+  return primary.trim();
+}
+
 export default function VoiceRegisterAssistant({ values, onFieldsUpdate, onComplete }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [status, setStatus] = useState<string>("");
@@ -43,6 +67,13 @@ export default function VoiceRegisterAssistant({ values, onFieldsUpdate, onCompl
   const SR = getSpeechRecognition();
   const speechOk = !!SR;
   const speakOk = ttsSupported();
+
+  // Auto-start intro on mount (best effort — mic may still need a tap on mobile)
+  useEffect(() => {
+    const id = setTimeout(() => { handleStart(); }, 250);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -111,9 +142,10 @@ export default function VoiceRegisterAssistant({ values, onFieldsUpdate, onCompl
     if (!SR || completeRef.current) return;
     try {
       const rec = new SR();
-      rec.lang = "en-US";
+      rec.lang = (typeof navigator !== "undefined" && navigator.language) || "en-US";
       rec.interimResults = false;
       rec.continuous = false;
+      rec.maxAlternatives = 5;
       rec.onstart = () => { setListening(true); setStatus("Listening…"); };
       rec.onerror = (e: any) => {
         setListening(false);
@@ -127,11 +159,14 @@ export default function VoiceRegisterAssistant({ values, onFieldsUpdate, onCompl
       };
       rec.onend = () => setListening(false);
       rec.onresult = (event: any) => {
-        const transcript = Array.from(event.results)
-          .map((r: any) => r[0]?.transcript || "")
-          .join(" ")
-          .trim();
-        if (transcript) sendToAI(transcript);
+        // Collect all alternatives and pick the best one for gender-like answers
+        const alts: string[] = [];
+        for (const result of Array.from(event.results) as any[]) {
+          for (let i = 0; i < result.length; i++) alts.push(result[i].transcript);
+        }
+        const primary = alts[0]?.trim() || "";
+        const normalized = normalizeTranscript(primary, alts);
+        if (normalized) sendToAI(normalized);
       };
       recognitionRef.current = rec;
       rec.start();
