@@ -217,7 +217,7 @@ const Index = () => {
 
       <div className="relative w-full max-w-md animate-fade-in" style={{ animationDelay: "0.1s" }}>
 
-        {view === "login" && !email && (
+        {view === "login" && !email && helpEnabled && (
           <HomeWelcomeAssistant onRegisterClick={() => setView("register")} />
         )}
 
