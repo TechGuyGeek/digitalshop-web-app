@@ -17,6 +17,7 @@ import SiteNav from "./components/SiteNav";
 import GlobalUpgradeNavAction from "./components/GlobalUpgradeNavAction";
 import GlobalSignOutNavAction from "./components/GlobalSignOutNavAction";
 import GlobalAdminNavAction from "./components/GlobalAdminNavAction";
+import BackgroundMap from "./components/BackgroundMap";
 import Profile from "./pages/Profile.tsx";
 import PaymentMethods from "./pages/PaymentMethods.tsx";
 import OAuthCallback from "./pages/OAuthCallback.tsx";
@@ -56,18 +57,22 @@ const queryClient = new QueryClient();
 const AppShell = () => {
   const { theme } = useTheme();
   const isLight = false;
+  const isMainTheme = theme === "main";
   const desktopBg =
-    theme === "midnight"
+    isMainTheme
+      ? ""
+      : theme === "midnight"
       ? "md:bg-[url('/bg-midnight.png')]"
       : theme === "safari"
       ? "md:bg-[url('/bg-safari.png')]"
       : theme === "camo"
       ? "md:bg-[url('/bg-camo.png')]"
       : "md:bg-[url('/images/bg-desktop.png')]";
-  const outerClass = `w-full min-h-screen bg-black ${desktopBg} md:bg-cover md:bg-center md:bg-fixed flex justify-center`;
+  const outerClass = `w-full min-h-screen bg-black ${desktopBg} md:bg-cover md:bg-center md:bg-fixed flex justify-center relative`;
   return (
     <div className={outerClass}>
-      <div className={`w-full max-w-[430px] min-h-screen relative ${isLight ? "shadow-[0_0_60px_-15px_hsl(220_40%_25%/0.15)] bg-background" : "shadow-2xl"}`}>
+      {isMainTheme && <BackgroundMap />}
+      <div className={`w-full max-w-[430px] min-h-screen relative z-10 ${isLight ? "shadow-[0_0_60px_-15px_hsl(220_40%_25%/0.15)] bg-background" : "shadow-2xl"}`}>
           <BrowserRouter>
             <BasketProvider>
               <SiteNavExtrasProvider>
