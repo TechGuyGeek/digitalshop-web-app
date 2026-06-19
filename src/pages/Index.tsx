@@ -12,6 +12,8 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme, type ThemeMode } from "@/contexts/ThemeContext";
 import SeoHead from "@/components/SeoHead";
 import { Link } from "react-router-dom";
+import VoiceRegisterAssistant from "@/components/VoiceRegisterAssistant";
+import type { Registration } from "@/lib/aiService";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -264,6 +266,24 @@ const Index = () => {
             {/* Register-only fields */}
             {view === "register" && (
               <>
+                <VoiceRegisterAssistant
+                  values={{
+                    first_name: firstName,
+                    last_name: lastName,
+                    email,
+                    mobile_number: mobileNumber,
+                    password,
+                    gender: dateOfBirth,
+                  }}
+                  onFieldsUpdate={(f: Partial<Registration>) => {
+                    if (f.first_name !== undefined) setFirstName(f.first_name);
+                    if (f.last_name !== undefined) setLastName(f.last_name);
+                    if (f.email !== undefined) setEmail(f.email);
+                    if (f.mobile_number !== undefined) setMobileNumber(f.mobile_number);
+                    if (f.password !== undefined) setPassword(f.password);
+                    if (f.gender !== undefined) setDateOfBirth(f.gender);
+                  }}
+                />
                 <div className="space-y-2">
                   <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground font-heading">
                     {t("FirstName")}
