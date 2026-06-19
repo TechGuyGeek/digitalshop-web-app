@@ -9,6 +9,7 @@ import { loadCompanyProfile } from "@/lib/companyApi";
 import { toast } from "sonner";
 import WebcamCapture from "@/components/WebcamCapture";
 import { useLanguage } from "@/contexts/LanguageContext";
+import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 import AdvertSlot from "@/components/adverts/AdvertSlot";
 import VideoAdvert from "@/components/adverts/VideoAdvert";
 import { useAdverts } from "@/hooks/useAdverts";
@@ -429,6 +430,10 @@ const Profile = () => {
         <h1 className="text-lg font-bold text-foreground font-heading text-center mb-6">
           {t("UserProfilePageTitle")}
         </h1>
+
+        {Object.values(form).some((v) => !String(v).trim()) && (
+          <ProfileHelpAssistant />
+        )}
 
         <div className="space-y-4 mb-8">
           <ProfileField label={t("Name")} value={form.name} onChange={(v) => handleChange("name", v)} />
