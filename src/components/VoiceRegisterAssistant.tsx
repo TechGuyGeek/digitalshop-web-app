@@ -57,6 +57,7 @@ export default function VoiceRegisterAssistant({ values, onFieldsUpdate, onCompl
   const [lastReply, setLastReply] = useState("");
   const [heard, setHeard] = useState("");
   const [started, setStarted] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
 
   const partialRef = useRef<Partial<Registration>>(values);
   const recognitionRef = useRef<any>(null);
@@ -98,8 +99,9 @@ export default function VoiceRegisterAssistant({ values, onFieldsUpdate, onCompl
         const u = new SpeechSynthesisUtterance(text);
         u.rate = 1; u.pitch = 1;
         if (language) u.lang = language;
-        u.onend = () => { if (thenListen && !completeRef.current) startListening(); resolve(); };
-        u.onerror = () => { if (thenListen && !completeRef.current) startListening(); resolve(); };
+        u.onstart = () => setSpeaking(true);
+        u.onend = () => { setSpeaking(false); if (thenListen && !completeRef.current) startListening(); resolve(); };
+        u.onerror = () => { setSpeaking(false); if (thenListen && !completeRef.current) startListening(); resolve(); };
         setStatus(t("AIAssistant_Thinking"));
         window.speechSynthesis.speak(u);
       } catch { resolve(); }
@@ -220,7 +222,7 @@ export default function VoiceRegisterAssistant({ values, onFieldsUpdate, onCompl
           aria-label={listening ? t("AIAssistant_Stop") : t("AIAssistant_StartVoice")}
           className={`relative shrink-0 rounded-full transition-transform hover:scale-105 ${listening ? "animate-pulse ring-4 ring-primary/50" : ""}`}
         >
-          <img src={mascot.url} alt={t("AIAssistant_Title")} className="h-16 w-16 object-contain drop-shadow-lg" />
+          <img src={mascot.url} alt={t("AIAssistant_Title")} className={`h-16 w-16 object-contain drop-shadow-lg ${speaking ? "animate-mascot-bounce" : ""}`} />
         </button>
         <div className="flex-1 min-w-0">
           <div className="text-sm font-heading font-semibold text-foreground">{t("AIAssistant_Title")}</div>
