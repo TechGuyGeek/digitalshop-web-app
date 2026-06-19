@@ -17,6 +17,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import VideoAdvert from "@/components/adverts/VideoAdvert";
+import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 import { ADVERT_LIBRARY, ADVERT_SETTINGS, VIDEO_TRIGGERS } from "@/lib/advertConfig";
 import { SERVER_DOMAIN } from "@/lib/companyApi";
 import {
@@ -453,6 +454,9 @@ const EditMenuGroupsPage = () => {
           </div>
         ) : (
           <>
+            {groups.length === 0 && (
+              <ProfileHelpAssistant translationKey="HELPCOMPANYGROUPANDROID" />
+            )}
             {groups.map((group) => (
               <div
                 key={group.ID}
