@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getHelpEnabled, onHelpPrefChange } from "@/lib/helpPref";
 
 const MUTED_KEY = "gpsshops_welcome_muted";
 const VISITED_KEY = "gpsshops_welcome_visited";
@@ -46,6 +47,8 @@ interface Props {
 
 export default function HomeWelcomeAssistant({ onRegisterClick }: Props) {
   const { t, language, loading } = useLanguage();
+  const [helpEnabled, setHelpEnabledState] = useState<boolean>(() => getHelpEnabled());
+  useEffect(() => onHelpPrefChange(setHelpEnabledState), []);
   // TESTING: always treat as first visit so the assistant speaks on every load.
   const isFirstVisit = true;
   const [muted, setMuted] = useState<boolean>(() => {
@@ -105,6 +108,8 @@ export default function HomeWelcomeAssistant({ onRegisterClick }: Props) {
       return next;
     });
   };
+
+  if (!helpEnabled) return null;
 
   return (
     <div
