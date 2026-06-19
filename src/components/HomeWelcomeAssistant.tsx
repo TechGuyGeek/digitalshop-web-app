@@ -70,6 +70,7 @@ export default function HomeWelcomeAssistant({ onRegisterClick }: Props) {
 
   useEffect(() => {
     if (spokenRef.current) return;
+    if (!helpEnabled) return;
     if (loading) return;
     // Guard against translations not being loaded yet — t() would return the raw key.
     if (message === "HomeAssistant_WelcomeFirst" || message === "HomeAssistant_WelcomeBack") return;
