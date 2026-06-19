@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AIService, EMPTY_REGISTRATION, type ChatMessage, type Registration } from "@/lib/aiService";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getHelpEnabled, onHelpPrefChange } from "@/lib/helpPref";
 
 interface Props {
   values: Partial<Registration>;
@@ -57,6 +58,8 @@ export default function VoiceRegisterAssistant({ values, onFieldsUpdate, onCompl
   const [heard, setHeard] = useState("");
   const [started, setStarted] = useState(false);
   const [speaking, setSpeaking] = useState(false);
+  const [helpEnabled, setHelpEnabledState] = useState<boolean>(() => getHelpEnabled());
+  useEffect(() => onHelpPrefChange(setHelpEnabledState), []);
 
   const partialRef = useRef<Partial<Registration>>(values);
   const recognitionRef = useRef<any>(null);
@@ -211,6 +214,8 @@ export default function VoiceRegisterAssistant({ values, onFieldsUpdate, onCompl
       return next;
     });
   };
+
+  if (!helpEnabled) return null;
 
   return (
     <div className="rounded-2xl border border-border bg-secondary/40 p-4 space-y-3">
