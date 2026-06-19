@@ -15,7 +15,7 @@ import { Link } from "react-router-dom";
 import VoiceRegisterAssistant from "@/components/VoiceRegisterAssistant";
 import HomeWelcomeAssistant from "@/components/HomeWelcomeAssistant";
 import type { Registration } from "@/lib/aiService";
-import { getHelpEnabled, setHelpEnabled, onHelpPrefChange } from "@/lib/helpPref";
+import { getHelpEnabled, setHelpEnabled as setHelpEnabledPref, onHelpPrefChange } from "@/lib/helpPref";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -24,9 +24,12 @@ const Index = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [helpOn, setHelpOn] = useState<boolean>(() => getHelpEnabled());
-  useEffect(() => onHelpPrefChange(setHelpOn), []);
-  const [helpEnabled, setHelpEnabled] = useState(false);
+  const [helpEnabled, setHelpEnabledState] = useState<boolean>(() => getHelpEnabled());
+  useEffect(() => onHelpPrefChange(setHelpEnabledState), []);
+  const setHelpEnabled = (v: boolean) => {
+    setHelpEnabledState(v);
+    setHelpEnabledPref(v);
+  };
   const [view, setView] = useState<"login" | "register" | "forgot">("login");
   const [loading, setLoading] = useState(false);
   const [resendOpen, setResendOpen] = useState(false);
@@ -388,16 +391,6 @@ const Index = () => {
                     >
                       {t("ResendVerificationEmail")}
                     </button>
-                  </div>
-                  <div className="mt-2 flex items-center justify-end gap-2">
-                    <span className="text-xs text-muted-foreground">
-                      {helpOn ? t("HelpAssistantOn") || "Help assistant on" : t("HelpAssistantOff") || "Help assistant off"}
-                    </span>
-                    <Switch
-                      checked={helpOn}
-                      onCheckedChange={(v) => setHelpEnabled(!!v)}
-                      aria-label="Toggle help assistant"
-                    />
                   </div>
                 </div>
               )}
