@@ -491,5 +491,7 @@
   "AIAssistant_TapMascot": "Tap the mascot to talk, or type below",
   "AIAssistant_Intro": "Hi! I'm your GPS Shops registration assistant. I can help you sign up — just tell me your details.",
   "AIAssistant_Send": "Send",
-  "AIAssistant_Stop": "Stop"
+  "AIAssistant_Stop": "Stop",
+  "HomeAssistant_WelcomeFirst": "Welcome to GPS Shops. GPS Shops helps customers discover local businesses and lets businesses create their own digital shop. To continue, please register or sign in.",
+  "HomeAssistant_WelcomeBack": "Welcome back. Please sign in or register to continue."
 }
