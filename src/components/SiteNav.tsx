@@ -1,11 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, HelpCircle } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSiteNavExtras } from "@/contexts/SiteNavExtras";
 import { cn } from "@/lib/utils";
-import { getHelpEnabled, setHelpEnabled, onHelpPrefChange } from "@/lib/helpPref";
 
 interface NavItem {
   to: string;
@@ -22,8 +21,6 @@ const SiteNav = ({ items, className }: SiteNavProps) => {
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
   const { actions } = useSiteNavExtras();
-  const [helpOn, setHelpOn] = useState<boolean>(() => getHelpEnabled());
-  useEffect(() => onHelpPrefChange(setHelpOn), []);
 
   const links: NavItem[] =
     items ?? [
@@ -34,7 +31,7 @@ const SiteNav = ({ items, className }: SiteNavProps) => {
     ];
 
   return (
-    <nav aria-label="Primary" className={cn("absolute top-3 right-3 z-50 flex items-center gap-2", className)}>
+    <nav aria-label="Primary" className={cn("absolute top-3 right-3 z-50", className)}>
       {/* SEO/crawler-visible links (hidden visually, real <a> tags) */}
       <ul className="sr-only">
         {links.map((l) => (
@@ -45,20 +42,6 @@ const SiteNav = ({ items, className }: SiteNavProps) => {
       </ul>
 
       <Sheet open={open} onOpenChange={setOpen}>
-        <button
-          type="button"
-          aria-label={helpOn ? "Turn help off" : "Turn help on"}
-          aria-pressed={helpOn}
-          onClick={() => setHelpEnabled(!helpOn)}
-          className={cn(
-            "inline-flex items-center justify-center h-10 w-10 rounded-lg backdrop-blur border border-border transition-colors shadow-md",
-            helpOn
-              ? "bg-primary/20 text-primary hover:bg-primary/30"
-              : "bg-background/70 text-muted-foreground hover:bg-background"
-          )}
-        >
-          <HelpCircle className="h-5 w-5" />
-        </button>
         <SheetTrigger
           aria-label="Open menu"
           className="inline-flex items-center justify-center h-10 w-10 rounded-lg bg-background/70 backdrop-blur border border-border text-foreground hover:bg-background transition-colors shadow-md"
