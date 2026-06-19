@@ -12,6 +12,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme, type ThemeMode } from "@/contexts/ThemeContext";
 import SeoHead from "@/components/SeoHead";
 import { Link } from "react-router-dom";
+import RegisterChat from "@/components/RegisterChat";
 
 const Index = () => {
   const navigate = useNavigate();
