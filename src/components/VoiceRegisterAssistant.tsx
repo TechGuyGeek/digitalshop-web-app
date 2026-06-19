@@ -255,6 +255,7 @@ export default function VoiceRegisterAssistant({ values, onFieldsUpdate, onCompl
           onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleTextSend(); } }}
           placeholder={thinking ? t("AIAssistant_Thinking") : t("AIAssistant_TypeReply")}
           disabled={thinking}
+          maxLength={500}
           className="h-10 bg-background"
         />
         <Button type="button" size="icon" onClick={handleTextSend} disabled={thinking || !input.trim()} aria-label={t("AIAssistant_Send")}>
