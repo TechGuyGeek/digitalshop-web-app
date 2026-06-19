@@ -389,6 +389,16 @@ const Index = () => {
                       {t("ResendVerificationEmail")}
                     </button>
                   </div>
+                  <div className="mt-2 flex items-center justify-end gap-2">
+                    <span className="text-xs text-muted-foreground">
+                      {helpOn ? t("HelpAssistantOn") || "Help assistant on" : t("HelpAssistantOff") || "Help assistant off"}
+                    </span>
+                    <Switch
+                      checked={helpOn}
+                      onCheckedChange={(v) => setHelpEnabled(!!v)}
+                      aria-label="Toggle help assistant"
+                    />
+                  </div>
                 </div>
               )}
             </div>
