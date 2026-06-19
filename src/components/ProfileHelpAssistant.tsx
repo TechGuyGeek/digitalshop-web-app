@@ -67,6 +67,7 @@ export default function ProfileHelpAssistant({ translationKey = "HELPUSERPROFILE
 
   useEffect(() => {
     if (spokenRef.current) return;
+    if (!helpEnabled) return;
     if (loading) return;
     if (message === KEY) return; // translations not loaded yet
     spokenRef.current = true;
@@ -76,7 +77,7 @@ export default function ProfileHelpAssistant({ translationKey = "HELPUSERPROFILE
       if (ttsOk) { try { window.speechSynthesis.cancel(); } catch {} }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, message]);
+  }, [loading, message, helpEnabled]);
 
   useEffect(() => {
     const id = setTimeout(() => {
