@@ -454,9 +454,7 @@ const EditMenuGroupsPage = () => {
           </div>
         ) : (
           <>
-            {groups.length === 0 && (
-              <ProfileHelpAssistant translationKey="HELPCOMPANYGROUPANDROID" />
-            )}
+            <ProfileHelpAssistant translationKey="HELPCOMPANYGROUPANDROID" />
             {groups.map((group) => (
               <div
                 key={group.ID}
