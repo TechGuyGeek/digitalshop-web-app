@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { SERVER_DOMAIN } from "@/lib/companyApi";
 import { useLanguage } from "@/contexts/LanguageContext";
+import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 
 function getImageUrl(path?: string) {
   if (!path) return "";
