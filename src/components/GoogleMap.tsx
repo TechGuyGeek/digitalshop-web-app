@@ -13,12 +13,13 @@ interface GoogleMapProps {
   worldViewFallback?: boolean;
   cinematicZoom?: boolean;
   showCinematicCounter?: boolean;
+  hideUserMarker?: boolean;
 }
 
 const TILE_URL = "https://maps.techguygeek.co.uk/tiles/osm/webmercator/{z}/{x}/{y}.png";
 const TILE_ATTRIBUTION = "© OpenStreetMap contributors";
 
-const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, rangeCircleMetres, interactive = true, worldViewFallback = false, cinematicZoom = false, showCinematicCounter = false }: GoogleMapProps) => {
+const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, rangeCircleMetres, interactive = true, worldViewFallback = false, cinematicZoom = false, showCinematicCounter = false, hideUserMarker = false }: GoogleMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const circleRef = useRef<L.Circle | null>(null);
@@ -129,13 +130,15 @@ const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, 
     }
 
     if (userMarkerRef.current) userMarkerRef.current.remove();
-    userMarkerRef.current = L.circleMarker([userPos.lat, userPos.lng], {
-      radius: 8,
-      fillColor: "#4285F4",
-      fillOpacity: 1,
-      color: "#ffffff",
-      weight: 2,
-    }).addTo(map);
+    if (!hideUserMarker) {
+      userMarkerRef.current = L.circleMarker([userPos.lat, userPos.lng], {
+        radius: 8,
+        fillColor: "#4285F4",
+        fillOpacity: 1,
+        color: "#ffffff",
+        weight: 2,
+      }).addTo(map);
+    }
 
     if (circleRef.current) {
       circleRef.current.remove();
