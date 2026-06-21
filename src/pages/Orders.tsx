@@ -141,11 +141,11 @@ const Orders = () => {
                   </div>
                 </div>
                 <div className="flex gap-3 mt-4" onClick={(e) => e.stopPropagation()}>
-                  <Button variant="outline" className="flex-1 rounded-full text-sm" disabled={isCancelling || order.requestCancel === "1"} onClick={() => handleCancel(order)}>
+                  <Button variant="outline" className="flex-1 rounded-full text-sm border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground" disabled={isCancelling || order.requestCancel === "1"} onClick={() => handleCancel(order)}>
                     {isCancelling ? <Loader2 className="animate-spin mr-1" size={14} /> : null}
                     {order.requestCancel === "1" ? t("RequestCancel") : t("REQUESTTOCANCEL")}
                   </Button>
-                  <Button variant="outline" className="flex-1 rounded-full text-sm" onClick={() => handleCompanyProfile(order)}>
+                  <Button variant="outline" className="flex-1 rounded-full text-sm border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground" onClick={() => handleCompanyProfile(order)}>
                     {t("CompanyProfile")}
                   </Button>
                 </div>
