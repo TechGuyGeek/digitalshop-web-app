@@ -38,7 +38,7 @@ const BackgroundMap = () => {
         <GoogleMap
           className="h-full w-full"
           shops={mapShops}
-          defaultZoom={hasGps ? 14 : 2}
+          defaultZoom={hasGps ? 18 : 2}
           rangeCircleMetres={0}
           worldViewFallback={!hasGps}
           cinematicZoom={hasGps}
