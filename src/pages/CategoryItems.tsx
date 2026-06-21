@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useBasket } from "@/contexts/BasketContext";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 
 const SERVER_DOMAIN = "https://web.gpsshops.com/";
 
@@ -54,6 +55,7 @@ const CategoryItems = () => {
         <h1 className="text-lg font-bold text-primary-foreground font-heading">{category}</h1>
       </div>
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-6 pb-24">
+        <ProfileHelpAssistant translationKey="HELPFRONTDOORPRODUCTS" />
         {loading && (<div className="flex items-center justify-center py-16"><Loader2 className="animate-spin text-primary" size={32} /></div>)}
         {!loading && error && (
           <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
