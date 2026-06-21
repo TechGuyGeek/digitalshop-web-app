@@ -11,12 +11,13 @@ interface GoogleMapProps {
   rangeCircleMetres?: number;
   interactive?: boolean;
   worldViewFallback?: boolean;
+  cinematicZoom?: boolean;
 }
 
 const TILE_URL = "https://maps.techguygeek.co.uk/tiles/osm/webmercator/{z}/{x}/{y}.png";
 const TILE_ATTRIBUTION = "© OpenStreetMap contributors";
 
-const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, rangeCircleMetres, interactive = true, worldViewFallback = false }: GoogleMapProps) => {
+const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, rangeCircleMetres, interactive = true, worldViewFallback = false, cinematicZoom = false }: GoogleMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const circleRef = useRef<L.Circle | null>(null);
@@ -25,6 +26,7 @@ const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, 
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null);
   const [locating, setLocating] = useState(true);
   const [mapReady, setMapReady] = useState(false);
+  const cinematicDoneRef = useRef(false);
 
   // Get user GPS
   useEffect(() => {
@@ -46,11 +48,14 @@ const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, 
   useEffect(() => {
     if (locating || !mapRef.current || mapInstanceRef.current) return;
 
-    const center = userPos || (worldViewFallback ? { lat: 20, lng: 0 } : { lat: 53.3498, lng: -6.2603 });
+    const center = cinematicZoom
+      ? { lat: 20, lng: 0 }
+      : userPos || (worldViewFallback ? { lat: 20, lng: 0 } : { lat: 53.3498, lng: -6.2603 });
+    const initialZoom = cinematicZoom ? 2 : defaultZoom;
 
     const map = L.map(mapRef.current, {
       center: [center.lat, center.lng],
-      zoom: defaultZoom,
+      zoom: initialZoom,
       zoomControl: interactive,
       attributionControl: true,
       dragging: interactive,
@@ -95,7 +100,18 @@ const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, 
     const map = mapInstanceRef.current;
     if (!map || !userPos) return;
 
-    map.setView([userPos.lat, userPos.lng], defaultZoom);
+    if (cinematicZoom && !cinematicDoneRef.current) {
+      cinematicDoneRef.current = true;
+      // brief pause so the world view is visible, then cinematic fly-in
+      setTimeout(() => {
+        map.flyTo([userPos.lat, userPos.lng], defaultZoom, {
+          duration: 4.5,
+          easeLinearity: 0.25,
+        });
+      }, 600);
+    } else {
+      map.setView([userPos.lat, userPos.lng], defaultZoom);
+    }
 
     if (userMarkerRef.current) userMarkerRef.current.remove();
     userMarkerRef.current = L.circleMarker([userPos.lat, userPos.lng], {
@@ -120,7 +136,7 @@ const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, 
         weight: 1.5,
       }).addTo(map);
     }
-  }, [userPos, rangeCircleMetres, defaultZoom]);
+  }, [userPos, rangeCircleMetres, defaultZoom, cinematicZoom]);
 
   // Shop markers
   useEffect(() => {
