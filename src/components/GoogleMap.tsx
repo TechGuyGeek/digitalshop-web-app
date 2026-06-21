@@ -105,8 +105,8 @@ const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, 
       // brief pause so the world view is visible, then cinematic fly-in
       setTimeout(() => {
         map.flyTo([userPos.lat, userPos.lng], defaultZoom, {
-          duration: 4.5,
-          easeLinearity: 0.25,
+          duration: 9,
+          easeLinearity: 0.1,
         });
       }, 600);
     } else {
