@@ -27,7 +27,7 @@ const BackgroundMap = () => {
     );
   }, []);
 
-  const mapShops = shops.map((s) => ({ name: s.name, icon: s.icon, lat: s.lat, lng: s.lng, companyid: s.companyid }));
+  const mapShops: { name: string; icon: string; lat?: number; lng?: number; companyid?: number }[] = [];
 
   return (
     <div
@@ -43,6 +43,7 @@ const BackgroundMap = () => {
           worldViewFallback={!hasGps}
           cinematicZoom={hasGps}
           showCinematicCounter={false}
+          hideUserMarker
           interactive={false}
         />
       )}
