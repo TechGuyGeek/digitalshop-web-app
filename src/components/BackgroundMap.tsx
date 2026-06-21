@@ -42,6 +42,7 @@ const BackgroundMap = () => {
           rangeCircleMetres={hasGps ? 804.67 : 0}
           worldViewFallback={!hasGps}
           cinematicZoom={hasGps}
+          showCinematicCounter={hasGps}
           interactive={false}
         />
       )}

@@ -12,12 +12,13 @@ interface GoogleMapProps {
   interactive?: boolean;
   worldViewFallback?: boolean;
   cinematicZoom?: boolean;
+  showCinematicCounter?: boolean;
 }
 
 const TILE_URL = "https://maps.techguygeek.co.uk/tiles/osm/webmercator/{z}/{x}/{y}.png";
 const TILE_ATTRIBUTION = "© OpenStreetMap contributors";
 
-const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, rangeCircleMetres, interactive = true, worldViewFallback = false, cinematicZoom = false }: GoogleMapProps) => {
+const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, rangeCircleMetres, interactive = true, worldViewFallback = false, cinematicZoom = false, showCinematicCounter = false }: GoogleMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const circleRef = useRef<L.Circle | null>(null);
@@ -27,6 +28,7 @@ const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, 
   const [locating, setLocating] = useState(true);
   const [mapReady, setMapReady] = useState(false);
   const cinematicDoneRef = useRef(false);
+  const [counter, setCounter] = useState<number | null>(null);
 
   // Get user GPS
   useEffect(() => {
@@ -105,9 +107,22 @@ const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, 
       // brief pause so the world view is visible, then cinematic fly-in
       setTimeout(() => {
         map.flyTo([userPos.lat, userPos.lng], defaultZoom, {
-          duration: 9,
+          duration: 20,
           easeLinearity: 0.1,
         });
+        if (showCinematicCounter) {
+          const start = Date.now();
+          setCounter(0);
+          const id = setInterval(() => {
+            const elapsed = (Date.now() - start) / 1000;
+            if (elapsed >= 20) {
+              setCounter(null);
+              clearInterval(id);
+            } else {
+              setCounter(elapsed);
+            }
+          }, 100);
+        }
       }, 600);
     } else {
       map.setView([userPos.lat, userPos.lng], defaultZoom);
@@ -172,6 +187,27 @@ const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, 
         </div>
       ) : (
         <div ref={mapRef} style={{ width: "100%", height: "100%" }} />
+      )}
+      {counter !== null && (
+        <div
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            background: "rgba(0,0,0,0.55)",
+            color: "#fff",
+            padding: "12px 20px",
+            borderRadius: "12px",
+            fontSize: "32px",
+            fontWeight: 700,
+            fontVariantNumeric: "tabular-nums",
+            pointerEvents: "none",
+            zIndex: 1000,
+          }}
+        >
+          {counter.toFixed(1)}s
+        </div>
       )}
     </div>
   );
