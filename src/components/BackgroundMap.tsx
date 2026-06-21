@@ -39,10 +39,10 @@ const BackgroundMap = () => {
           className="h-full w-full"
           shops={mapShops}
           defaultZoom={hasGps ? 14 : 2}
-          rangeCircleMetres={hasGps ? 804.67 : 0}
+          rangeCircleMetres={0}
           worldViewFallback={!hasGps}
           cinematicZoom={hasGps}
-          showCinematicCounter={hasGps}
+          showCinematicCounter={false}
           interactive={false}
         />
       )}
