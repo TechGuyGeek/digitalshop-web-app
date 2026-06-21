@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useRegisterNavActions } from "@/contexts/SiteNavExtras";
+import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 import {
   fetchOrdersToday, fetchOrdersWeek, fetchOrdersMonth,
   requestCancelOrder, groupOrdersBySession, getCompanyPhotoUrl,
@@ -107,6 +108,7 @@ const Orders = () => {
         <p className="text-center text-sm font-semibold text-foreground">{t("Orders")}</p>
       </div>
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+        <ProfileHelpAssistant translationKey="HELPORDERHISTORYANDROID" />
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
             <Loader2 className="animate-spin mb-4" size={32} /><p className="text-sm">{t("Pleasewait")}</p>
