@@ -9,6 +9,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useAdverts } from "@/hooks/useAdverts";
 import VideoAdvert from "@/components/adverts/VideoAdvert";
 import { useRegisterNavActions } from "@/contexts/SiteNavExtras";
+import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 
 const SERVER_DOMAIN = "https://web.gpsshops.com/";
 
@@ -143,6 +144,7 @@ const Basket = () => {
         </div>
       </div>
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-6">
+        <ProfileHelpAssistant translationKey="HELPTOTALORDERSNOPIC" />
         {items.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
             <span className="text-4xl mb-4">🛒</span>
