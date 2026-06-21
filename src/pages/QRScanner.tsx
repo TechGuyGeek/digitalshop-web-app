@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import AdvertSlot from "@/components/adverts/AdvertSlot";
+import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 
 const QRScanner = () => {
   const navigate = useNavigate();
@@ -69,6 +70,9 @@ const QRScanner = () => {
         <h1 className="text-lg font-bold text-primary-foreground font-heading">{t("Scan")}</h1>
       </div>
       <div className="flex-1 flex flex-col items-center justify-center px-4 py-6 gap-6">
+        <div className="w-full max-w-sm">
+          <ProfileHelpAssistant translationKey="HELPBARCODE" />
+        </div>
         <div className="relative w-full max-w-sm aspect-square bg-black rounded-2xl overflow-hidden border-2 border-border">
           {error ? (
             <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center gap-4">
