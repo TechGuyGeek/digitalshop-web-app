@@ -43,6 +43,11 @@ const Index = () => {
     return () => clearTimeout(t);
   }, []);
 
+  // Scroll to top whenever the view changes (e.g. switching to register)
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [view]);
+
   const isLight = false;
 
   // Register fields
