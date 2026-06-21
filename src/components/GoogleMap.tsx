@@ -10,12 +10,13 @@ interface GoogleMapProps {
   defaultZoom?: number;
   rangeCircleMetres?: number;
   interactive?: boolean;
+  worldViewFallback?: boolean;
 }
 
 const TILE_URL = "https://maps.techguygeek.co.uk/tiles/osm/webmercator/{z}/{x}/{y}.png";
 const TILE_ATTRIBUTION = "© OpenStreetMap contributors";
 
-const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, rangeCircleMetres, interactive = true }: GoogleMapProps) => {
+const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, rangeCircleMetres, interactive = true, worldViewFallback = false }: GoogleMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const circleRef = useRef<L.Circle | null>(null);
@@ -45,7 +46,7 @@ const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, 
   useEffect(() => {
     if (locating || !mapRef.current || mapInstanceRef.current) return;
 
-    const center = userPos || { lat: 53.3498, lng: -6.2603 };
+    const center = userPos || (worldViewFallback ? { lat: 20, lng: 0 } : { lat: 53.3498, lng: -6.2603 });
 
     const map = L.map(mapRef.current, {
       center: [center.lat, center.lng],
@@ -149,7 +150,7 @@ const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, 
 
   return (
     <div className={className} style={{ position: "relative" }}>
-      {locating ? (
+      {locating && !worldViewFallback ? (
         <div className="flex items-center justify-center h-full bg-muted text-muted-foreground text-sm">
           Finding your location…
         </div>

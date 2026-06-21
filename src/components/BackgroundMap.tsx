@@ -9,6 +9,7 @@ import { fetchNearbyShops, NearbyShop } from "@/lib/nearbyShops";
 const BackgroundMap = () => {
   const [shops, setShops] = useState<NearbyShop[]>([]);
   const [ready, setReady] = useState(false);
+  const [hasGps, setHasGps] = useState(false);
 
   useEffect(() => {
     if (!navigator.geolocation) { setReady(true); return; }
@@ -18,6 +19,7 @@ const BackgroundMap = () => {
           const results = await fetchNearbyShops(pos.coords.latitude, pos.coords.longitude, "free");
           setShops(results);
         } catch { /* ignore */ }
+        setHasGps(true);
         setReady(true);
       },
       () => setReady(true),
@@ -36,8 +38,9 @@ const BackgroundMap = () => {
         <GoogleMap
           className="h-full w-full"
           shops={mapShops}
-          defaultZoom={14}
-          rangeCircleMetres={804.67}
+          defaultZoom={hasGps ? 14 : 2}
+          rangeCircleMetres={hasGps ? 804.67 : 0}
+          worldViewFallback={!hasGps}
           interactive={false}
         />
       )}
