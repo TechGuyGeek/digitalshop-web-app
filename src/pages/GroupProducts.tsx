@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { SERVER_DOMAIN } from "@/lib/companyApi";
 import ProductCard, { type ProductCardItem } from "@/components/ProductCard";
 import { useLanguage } from "@/contexts/LanguageContext";
+import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 
 const OWNER_PRODUCTS_CACHE_PREFIX = "owner-group-products:";
 
@@ -72,6 +73,7 @@ const GroupProducts = () => {
         <h1 className="text-lg font-bold text-foreground flex-1 text-center pr-10">{groupName}</h1>
       </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <ProfileHelpAssistant translationKey="HELPEDITMENUDETAILSNOPIC" />
         {loading && (<div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={32} /></div>)}
         {error && !loading && (
           <div className="flex flex-col items-center gap-4 py-12"><AlertCircle className="text-destructive" size={40} /><p className="text-muted-foreground text-center">{error}</p>
