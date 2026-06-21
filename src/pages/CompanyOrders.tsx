@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import type { DigitalPerson } from "@/lib/api";
 import { fetchCompanyOrdersByTab, groupCompanyOrders, toggleCompanyOrderFlag, deleteCompanyOrder, type CompanyGroupedOrder } from "@/lib/companyOrders";
+import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 
 type TabKey = "today" | "week" | "month";
 
@@ -114,6 +115,7 @@ const CompanyOrders = () => {
         <p className="text-center text-sm font-semibold text-foreground">{t("Orders")}</p>
       </div>
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+        <ProfileHelpAssistant translationKey="HELPLIVEORSERSNOPIC" />
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16 text-muted-foreground"><Loader2 className="animate-spin mb-4" size={32} /><p className="text-sm">{t("Pleasewait")}</p></div>
         ) : error ? (
