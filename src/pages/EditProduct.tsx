@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { SERVER_DOMAIN } from "@/lib/companyApi";
 import { useLanguage } from "@/contexts/LanguageContext";
+import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 
 function getImageUrl(path?: string) {
   if (!path) return "";
@@ -229,6 +230,7 @@ const EditProduct = () => {
         <h1 className="text-lg font-bold text-foreground flex-1 text-center pr-10">{t("CompanyMenuDetailsPageTitle")}</h1>
       </div>
       <div className="flex-1 overflow-y-auto">
+        <ProfileHelpAssistant translationKey="HELPEDITDETAILSFULL" />
         <div className="w-full h-56 bg-muted flex items-center justify-center overflow-hidden">
           {imagePreview && !imageLoadFailed ? (<img key={imagePreview} src={imagePreview} alt={name || "Product image"} className="w-full h-full object-cover" onError={() => setImageLoadFailed(true)} />) : (
             <div className="flex flex-col items-center gap-2 text-muted-foreground"><ImageIcon size={48} /></div>
