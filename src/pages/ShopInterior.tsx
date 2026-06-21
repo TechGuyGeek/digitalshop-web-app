@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useBasket } from "@/contexts/BasketContext";
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 
 const SERVER_DOMAIN = "https://web.gpsshops.com/";
 
@@ -49,6 +50,7 @@ const ShopInterior = () => {
         <h1 className="text-lg font-bold text-primary-foreground font-heading">{shopName}</h1>
       </div>
       <div className="flex-1 flex flex-col">
+        <div className="px-4 pt-4"><ProfileHelpAssistant translationKey="HELPFRONTDOORGROUPS" /></div>
         {loading && (<div className="flex-1 flex items-center justify-center"><Loader2 className="animate-spin text-primary" size={32} /></div>)}
         {!loading && error && (
           <div className="flex-1 flex flex-col items-center justify-center gap-3 px-6 text-center">
