@@ -3,6 +3,7 @@ import { ArrowLeft, Store, Globe, CreditCard, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import AdvertSlot from "@/components/adverts/AdvertSlot";
+import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 
 const ViewShops = () => {
   const navigate = useNavigate();
@@ -25,6 +26,7 @@ const ViewShops = () => {
       </div>
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
         <div className="w-full max-w-sm space-y-4">
+          <ProfileHelpAssistant translationKey="HELPMAPTOP" />
           {shopCategories.map((cat) => (
             <button key={cat.label} className="w-full group relative overflow-hidden rounded-xl border border-border bg-card p-4 text-left transition-all hover:border-primary hover:shadow-lg hover:shadow-primary/10 active:scale-[0.98]" onClick={() => { if (cat.path) navigate(cat.path); }}>
               <div className="flex items-center gap-4">
