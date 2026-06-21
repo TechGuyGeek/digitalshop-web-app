@@ -6,6 +6,7 @@ import { fetchCompanyById, CompanyDetails } from "@/lib/api";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { QRCodeCanvas } from "qrcode.react";
+import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 
 const SERVER_DOMAIN = "https://web.gpsshops.com/";
 
@@ -232,6 +233,9 @@ const ShopProfile = () => {
         <QRCodeCanvas value={String(companyIdParam || "")} size={300} level="M" includeMargin />
       </div>
       <div className="flex-1 flex flex-col items-center px-6 pt-6 pb-28 text-center">
+        <div className="w-full max-w-sm text-left">
+          <ProfileHelpAssistant translationKey="HELPFRONTDOOR" />
+        </div>
         {activityDays !== null && (
           <div className="flex items-center gap-2 text-muted-foreground text-sm mb-2">
             <Activity size={14} /><span>{t("ShopActivity")} {activityDays === 0 ? t("Today") : `${activityDays} ${t("Daysago")}`}</span>
