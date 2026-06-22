@@ -225,11 +225,18 @@ const Index = () => {
 
   return (
     mapIntroActive ? (
-      <div
-        className="fixed inset-0 z-[5] cursor-pointer"
-        onClick={() => setMapIntroActive(false)}
-        title="Tap to skip"
-      />
+      <>
+        <div
+          className="fixed inset-0 z-[5] cursor-pointer"
+          onClick={() => setMapIntroActive(false)}
+          title="Tap to skip"
+        />
+        {view === "login" && !email && helpEnabled && (
+          <div className="fixed top-2 left-2 right-2 z-[6] max-w-[430px] mx-auto pointer-events-auto">
+            <HomeWelcomeAssistant onRegisterClick={() => { setMapIntroActive(false); setView("register"); }} />
+          </div>
+        )}
+      </>
     ) : (
     <div
       className={
