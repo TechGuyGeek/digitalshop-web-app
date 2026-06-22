@@ -489,5 +489,7 @@
   "AIAssistant_TapMascot": "Need review",
   "AIAssistant_Intro": "Need review",
   "AIAssistant_Send": "Need review",
-  "AIAssistant_Stop": "Need review"
+  "AIAssistant_Stop": "Need review",
+  "HomeAssistant_WelcomeFirst": "Croeso i GPS Shops. Dewch o hyd i siopau lleol yn agos atoch, neu crëwch eich siop ddigidol eich hun fel y gall cwsmeriaid eich darganfod. I barhau, cofrestrwch neu mewngofnodwch.",
+  "HomeAssistant_WelcomeBack": "Croeso i GPS Shops. Dewch o hyd i siopau lleol yn agos atoch, neu crëwch eich siop ddigidol eich hun fel y gall cwsmeriaid eich darganfod. I barhau, cofrestrwch neu mewngofnodwch."
 }

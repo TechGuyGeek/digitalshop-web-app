@@ -489,5 +489,7 @@
   "AIAssistant_TapMascot": "Need review",
   "AIAssistant_Intro": "Need review",
   "AIAssistant_Send": "Need review",
-  "AIAssistant_Stop": "Need review"
+  "AIAssistant_Stop": "Need review",
+  "HomeAssistant_WelcomeFirst": "ወደ GPS Shops እንኳን በደህና መጡ። በአቅራቢያዎ ያሉ የአካባቢ ሱቆችን ያግኙ፣ ወይም ደንበኞች እንዲያገኙዎት የራስዎን ዲጂታል ሱቅ ይፍጠሩ። ለመቀጠል፣ እባክዎ ይመዝገቡ ወይም ይግቡ።",
+  "HomeAssistant_WelcomeBack": "ወደ GPS Shops እንኳን በደህና መጡ። በአቅራቢያዎ ያሉ የአካባቢ ሱቆችን ያግኙ፣ ወይም ደንበኞች እንዲያገኙዎት የራስዎን ዲጂታል ሱቅ ይፍጠሩ። ለመቀጠል፣ እባክዎ ይመዝገቡ ወይም ይግቡ።"
 }

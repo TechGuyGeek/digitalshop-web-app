@@ -492,5 +492,7 @@
   "AIAssistant_TapMascot": "Need review",
   "AIAssistant_Intro": "Need review",
   "AIAssistant_Send": "Need review",
-  "AIAssistant_Stop": "Need review"
+  "AIAssistant_Stop": "Need review",
+  "HomeAssistant_WelcomeFirst": "ยินดีต้อนรับสู่ GPS Shops ค้นหาร้านค้าท้องถิ่นใกล้คุณ หรือสร้างร้านค้าดิจิทัลของคุณเองเพื่อให้ลูกค้าค้นพบคุณ หากต้องการดำเนินการต่อ โปรดลงทะเบียนหรือเข้าสู่ระบบ",
+  "HomeAssistant_WelcomeBack": "ยินดีต้อนรับสู่ GPS Shops ค้นหาร้านค้าท้องถิ่นใกล้คุณ หรือสร้างร้านค้าดิจิทัลของคุณเองเพื่อให้ลูกค้าค้นพบคุณ หากต้องการดำเนินการต่อ โปรดลงทะเบียนหรือเข้าสู่ระบบ"
 }

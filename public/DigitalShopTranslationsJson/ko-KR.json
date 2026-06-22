@@ -492,5 +492,7 @@
   "AIAssistant_TapMascot": "Need review",
   "AIAssistant_Intro": "Need review",
   "AIAssistant_Send": "Need review",
-  "AIAssistant_Stop": "Need review"
+  "AIAssistant_Stop": "Need review",
+  "HomeAssistant_WelcomeFirst": "GPS Shops에 오신 것을 환영합니다. 가까운 지역 매장을 찾거나, 고객이 당신을 찾을 수 있도록 자신만의 디지털 매장을 만드세요. 계속하려면 등록하거나 로그인해 주세요.",
+  "HomeAssistant_WelcomeBack": "GPS Shops에 오신 것을 환영합니다. 가까운 지역 매장을 찾거나, 고객이 당신을 찾을 수 있도록 자신만의 디지털 매장을 만드세요. 계속하려면 등록하거나 로그인해 주세요."
 }

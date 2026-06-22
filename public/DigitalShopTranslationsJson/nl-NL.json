@@ -492,5 +492,7 @@
   "AIAssistant_TapMascot": "Tik op de mascotte om te praten, of typ hieronder",
   "AIAssistant_Intro": "Hallo! Ik ben je GPS Shops registratie-assistent. Vertel me je gegevens.",
   "AIAssistant_Send": "Verzenden",
-  "AIAssistant_Stop": "Stop"
+  "AIAssistant_Stop": "Stop",
+  "HomeAssistant_WelcomeFirst": "Welkom bij GPS Shops. Vind lokale winkels bij jou in de buurt, of maak je eigen digitale winkel zodat klanten je kunnen vinden. Om door te gaan, registreer je of log in.",
+  "HomeAssistant_WelcomeBack": "Welkom bij GPS Shops. Vind lokale winkels bij jou in de buurt, of maak je eigen digitale winkel zodat klanten je kunnen vinden. Om door te gaan, registreer je of log in."
 }

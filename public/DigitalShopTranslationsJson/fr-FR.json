@@ -492,5 +492,7 @@
   "AIAssistant_TapMascot": "Touchez la mascotte pour parler, ou tapez ci-dessous",
   "AIAssistant_Intro": "Bonjour ! Je suis votre assistant d'inscription GPS Shops. Dites-moi simplement vos informations.",
   "AIAssistant_Send": "Envoyer",
-  "AIAssistant_Stop": "Arrêter"
+  "AIAssistant_Stop": "Arrêter",
+  "HomeAssistant_WelcomeFirst": "Bienvenue sur GPS Shops. Trouvez des boutiques locales près de chez vous, ou créez votre propre boutique numérique pour que les clients puissent vous trouver. Pour continuer, veuillez vous inscrire ou vous connecter.",
+  "HomeAssistant_WelcomeBack": "Bienvenue sur GPS Shops. Trouvez des boutiques locales près de chez vous, ou créez votre propre boutique numérique pour que les clients puissent vous trouver. Pour continuer, veuillez vous inscrire ou vous connecter."
 }
