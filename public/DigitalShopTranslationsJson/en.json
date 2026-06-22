@@ -114,7 +114,7 @@
   "HELPCOMPANYGROUPIPHONE": "Need review",
   "HELPCOMPANYGROUPNOPIC": "Need review",
   "HELPCOMPANYGROUPWINDOWS10": "Need review",
-  "HELPCOMPANYPROFILE": "Need review",
+  "HELPCOMPANYPROFILE": "This is your company profile. Please fill in all the fields so customers can find your shop and place orders correctly. Add your shop name, contact details, address, opening hours and payment options. Don't forget to set your map marker and add a shop photo. When you are done, tap Save.",
   "HELPCOMPANYREGISTER": "Need review",
   "HELPEDITDETAILSFULL": "Need review",
   "HELPEDITMENUDETAILSANDROID": "Need review",
@@ -142,7 +142,7 @@
   "HELPTOTALORDERSIPHONE": "Need review",
   "HELPTOTALORDERSNOPIC": "Need review",
   "HELPTOTALORDERSwWINDOWS10": "Need review",
-  "HELPUSERPROFILE": "Need review",
+  "HELPUSERPROFILE": "This is your profile page. Please fill in all the fields so we can deliver your orders correctly and keep your account up to date. When you are done, tap Save.",
   "HELPUSERREGISTER": "Need review",
   "Hindi": "Need review",
   "Home": "Need review",
@@ -492,8 +492,6 @@
   "AIAssistant_Intro": "Hi! I'm your GPS Shops registration assistant. I can help you sign up — just tell me your details.",
   "AIAssistant_Send": "Send",
   "AIAssistant_Stop": "Stop",
-  "HomeAssistant_WelcomeFirst": "Welcome to GPS Shops. GPS Shops helps customers discover local businesses and lets businesses create their own digital shop. To continue, please register or sign in.",
-  "HELPUSERPROFILE": "This is your profile page. Please fill in all the fields so we can deliver your orders correctly and keep your account up to date. When you are done, tap Save.",
-  "HELPCOMPANYPROFILE": "This is your company profile. Please fill in all the fields so customers can find your shop and place orders correctly. Add your shop name, contact details, address, opening hours and payment options. Don't forget to set your map marker and add a shop photo. When you are done, tap Save.",
-  "HomeAssistant_WelcomeBack": "Welcome back. Please sign in or register to continue."
+  "HomeAssistant_WelcomeFirst": "Welcome to GPS Shops. Find local shops near you, or create your own digital shop so customers can find you. To continue, please register or sign in.",
+  "HomeAssistant_WelcomeBack": "Welcome to GPS Shops. Find local shops near you, or create your own digital shop so customers can find you. To continue, please register or sign in."
 }
