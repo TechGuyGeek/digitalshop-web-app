@@ -46,6 +46,39 @@ const Index = () => {
   const isMobile = useIsMobile();
   const { theme: currentTheme } = useThemeForIntro();
   const [mapIntroActive, setMapIntroActive] = useState(false);
+  // Desktop autoplay-policy fix: speechSynthesis is blocked until a user
+  // gesture has occurred on the page. The browser's native "Allow location"
+  // button is NOT in our JS context, so it doesn't count. Prime the engine
+  // on the first pointerdown/keydown/touchstart anywhere on the page by
+  // queuing (and immediately cancelling) a silent utterance inside that
+  // gesture — this unlocks the TTS queue for the rest of the session so the
+  // welcome message plays reliably on PC.
+  useEffect(() => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    let primed = false;
+    const prime = () => {
+      if (primed) return;
+      primed = true;
+      try {
+        const u = new SpeechSynthesisUtterance(" ");
+        u.volume = 0;
+        window.speechSynthesis.speak(u);
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.resume();
+      } catch { /* ignore */ }
+      window.removeEventListener("pointerdown", prime);
+      window.removeEventListener("keydown", prime);
+      window.removeEventListener("touchstart", prime);
+    };
+    window.addEventListener("pointerdown", prime, { once: true });
+    window.addEventListener("keydown", prime, { once: true });
+    window.addEventListener("touchstart", prime, { once: true });
+    return () => {
+      window.removeEventListener("pointerdown", prime);
+      window.removeEventListener("keydown", prime);
+      window.removeEventListener("touchstart", prime);
+    };
+  }, []);
   useEffect(() => {
     if (currentTheme !== "main") return;
     if (!navigator.geolocation) return;
