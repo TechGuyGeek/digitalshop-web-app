@@ -91,6 +91,8 @@ const CompanyProfile = () => {
   const [deleteBlockerMsg, setDeleteBlockerMsg] = useState("");
   const [addProductsLoading, setAddProductsLoading] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
+  const [gpsDialogOpen, setGpsDialogOpen] = useState(false);
+  const [pendingGps, setPendingGps] = useState<{ lat: number; lng: number } | null>(null);
 
   // Form state
   const [form, setForm] = useState({
@@ -330,15 +332,19 @@ const CompanyProfile = () => {
     if (!company || !navigator.geolocation) { toast.error("Geolocation not supported"); return; }
     navigator.geolocation.getCurrentPosition(async (pos) => {
       const { latitude, longitude } = pos.coords;
-      const confirm = window.confirm(
-        `Update GPS?\n\nOld: ${company.companylat || 0}, ${company.companylong || 0}\nNew: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
-      );
-      if (!confirm) return;
-      const auth = getUserAuth()!;
-      const ok = await updateCompanyGPS(company.companyid, latitude, longitude, auth.userId, auth.email, auth.password);
-      if (ok) toast.success("GPS updated!");
-      else toast.error("Failed to update GPS");
+      setPendingGps({ lat: latitude, lng: longitude });
+      setGpsDialogOpen(true);
     }, () => toast.error("Could not get location"));
+  };
+
+  const handleConfirmGpsUpdate = async () => {
+    if (!company || !pendingGps) return;
+    const auth = getUserAuth()!;
+    const ok = await updateCompanyGPS(company.companyid, pendingGps.lat, pendingGps.lng, auth.userId, auth.email, auth.password);
+    setGpsDialogOpen(false);
+    setPendingGps(null);
+    if (ok) toast.success("GPS updated!");
+    else toast.error("Failed to update GPS");
   };
 
   // Add Products — mirrors MAUI: save profile, check group count, branch
@@ -680,6 +686,24 @@ const CompanyProfile = () => {
           companyName={form.shopName || company.companyname || "Shop"}
         />
       )}
+
+      {/* GPS Update Confirmation Dialog */}
+      <AlertDialog open={gpsDialogOpen} onOpenChange={setGpsDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Update GPS?</AlertDialogTitle>
+            <AlertDialogDescription className="whitespace-pre-line">
+              {pendingGps && company
+                ? `Old: ${company.companylat || 0}, ${company.companylong || 0}\nNew: ${pendingGps.lat.toFixed(6)}, ${pendingGps.lng.toFixed(6)}`
+                : ""}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setPendingGps(null)}>{t("Cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmGpsUpdate}>OK</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

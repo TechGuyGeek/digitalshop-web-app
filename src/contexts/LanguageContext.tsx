@@ -136,6 +136,15 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       .finally(() => setLoading(false));
   }, [language]);
 
+  // Sync <html lang> and <html dir> with the active language.
+  // Arabic (ar-*) and Hebrew (he-*) are RTL; everything else is LTR.
+  useEffect(() => {
+    const root = document.documentElement;
+    const isRtl = language.startsWith("ar") || language.startsWith("he");
+    root.setAttribute("lang", language);
+    root.setAttribute("dir", isRtl ? "rtl" : "ltr");
+  }, [language]);
+
   const setLanguage = useCallback((lang: string) => {
     localStorage.setItem(STORAGE_KEY, lang);
     setLanguageState(lang);
