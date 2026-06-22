@@ -128,7 +128,7 @@ const Basket = () => {
   };
 
   return (
-    <div className="h-screen bg-muted flex flex-col max-w-md mx-auto w-full">
+    <div className="h-dvh bg-muted flex flex-col max-w-md mx-auto w-full">
       <div className="bg-primary px-4 py-4 flex items-center gap-3">
         <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary/80" onClick={() => navigate(`/shop-interior?name=${encodeURIComponent(shopName)}&companyid=${encodeURIComponent(companyId)}`)}>
           <ArrowLeft size={20} />

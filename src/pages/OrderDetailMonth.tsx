@@ -41,7 +41,7 @@ const OrderDetailMonth = () => {
   const liveOrderId = String((items[0] as Record<string, unknown> | undefined)?.["Orderid"] ?? (items[0] as Record<string, unknown> | undefined)?.["orderid"] ?? "");
 
   return (
-    <div className="h-screen bg-muted flex flex-col">
+    <div className="h-dvh bg-muted flex flex-col">
       <div className="bg-primary px-4 py-4 flex items-center gap-3 shrink-0">
         <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary/80" onClick={() => navigate("/orders")}><ArrowLeft size={20} /></Button>
         <div className="min-w-0"><h1 className="text-lg font-bold text-primary-foreground font-heading truncate">{companyName}</h1><p className="text-xs text-primary-foreground/70">{t("Ordersofthemonth")}</p></div>

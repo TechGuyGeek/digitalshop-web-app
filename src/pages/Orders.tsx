@@ -90,7 +90,7 @@ const Orders = () => {
   const getDeliveryLabel = (order: GroupedOrder) => order.hasDelivered === "1" ? t("Delivered") : t("NotDelivered");
 
   return (
-    <div className="h-screen bg-muted flex flex-col">
+    <div className="h-dvh bg-muted flex flex-col">
       <div className="bg-primary px-4 py-4 flex items-center gap-3 shrink-0">
         <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary/80" onClick={() => navigate("/profile")}>
           <ArrowLeft size={20} />
