@@ -718,6 +718,7 @@ const Index = () => {
         <p className="mt-2 opacity-70">&copy; {new Date().getFullYear()} GPS Shops</p>
       </footer>
     </div>
+    )
   );
 };
 
