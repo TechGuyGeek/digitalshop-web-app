@@ -686,6 +686,24 @@ const CompanyProfile = () => {
           companyName={form.shopName || company.companyname || "Shop"}
         />
       )}
+
+      {/* GPS Update Confirmation Dialog */}
+      <AlertDialog open={gpsDialogOpen} onOpenChange={setGpsDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Update GPS?</AlertDialogTitle>
+            <AlertDialogDescription className="whitespace-pre-line">
+              {pendingGps && company
+                ? `Old: ${company.companylat || 0}, ${company.companylong || 0}\nNew: ${pendingGps.lat.toFixed(6)}, ${pendingGps.lng.toFixed(6)}`
+                : ""}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setPendingGps(null)}>{t("Cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmGpsUpdate}>OK</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
