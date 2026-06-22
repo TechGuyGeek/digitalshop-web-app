@@ -16,6 +16,8 @@ import VoiceRegisterAssistant from "@/components/VoiceRegisterAssistant";
 import HomeWelcomeAssistant from "@/components/HomeWelcomeAssistant";
 import type { Registration } from "@/lib/aiService";
 import { getHelpEnabled, setHelpEnabled as setHelpEnabledPref, onHelpPrefChange } from "@/lib/helpPref";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useTheme as useThemeForIntro } from "@/contexts/ThemeContext";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -37,6 +39,32 @@ const Index = () => {
   const [resendLoading, setResendLoading] = useState(false);
   const [resendMessage, setResendMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [showIntro, setShowIntro] = useState(true);
+
+  // Mobile map intro: when on mobile + main theme, if GPS is granted, hide the
+  // login UI so the BackgroundMap cinematic fly-in is visible. Reveal the UI
+  // once the cinematic zoom finishes (~20s flyTo + 600ms delay).
+  const isMobile = useIsMobile();
+  const { theme: currentTheme } = useThemeForIntro();
+  const [mapIntroActive, setMapIntroActive] = useState(false);
+  useEffect(() => {
+    if (!isMobile || currentTheme !== "main") return;
+    if (!navigator.geolocation) return;
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    navigator.geolocation.getCurrentPosition(
+      () => {
+        if (cancelled) return;
+        setMapIntroActive(true);
+        timer = setTimeout(() => setMapIntroActive(false), 21000);
+      },
+      () => { /* denied — leave UI visible */ },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+    return () => {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+    };
+  }, [isMobile, currentTheme]);
 
   useEffect(() => {
     const t = setTimeout(() => setShowIntro(false), 12000);
@@ -196,6 +224,13 @@ const Index = () => {
   };
 
   return (
+    mapIntroActive ? (
+      <div
+        className="fixed inset-0 z-[5] cursor-pointer"
+        onClick={() => setMapIntroActive(false)}
+        title="Tap to skip"
+      />
+    ) : (
     <div
       className={
         isLight
