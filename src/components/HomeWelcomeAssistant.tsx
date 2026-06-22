@@ -7,6 +7,12 @@ import { getHelpEnabled, onHelpPrefChange } from "@/lib/helpPref";
 const MUTED_KEY = "gpsshops_welcome_muted";
 const VISITED_KEY = "gpsshops_welcome_visited";
 
+// Module-level guard: ensure only ONE instance ever speaks per page load.
+// Index.tsx mounts this component twice (once over the map intro overlay, once in
+// the normal form layout). Without this guard, the second mount cancels the first
+// mid-utterance, causing intermittent / cut-off audio on desktop.
+let hasSpokenThisLoad = false;
+
 function chunkText(text: string, maxLen = 160): string[] {
   const parts = text.match(/[^.!?]+[.!?]+|\S[^.!?]*$/g) ?? [text];
   const out: string[] = [];
@@ -70,11 +76,13 @@ export default function HomeWelcomeAssistant({ onRegisterClick }: Props) {
 
   useEffect(() => {
     if (spokenRef.current) return;
+    if (hasSpokenThisLoad) { spokenRef.current = true; return; }
     if (!helpEnabled) return;
     if (loading) return;
     // Guard against translations not being loaded yet — t() would return the raw key.
     if (message === "HomeAssistant_WelcomeFirst" || message === "HomeAssistant_WelcomeBack") return;
     spokenRef.current = true;
+    hasSpokenThisLoad = true;
     // Mark visited for next time
     try { localStorage.setItem(VISITED_KEY, "1"); } catch {}
     if (muted || !ttsOk) return;
@@ -102,9 +110,9 @@ export default function HomeWelcomeAssistant({ onRegisterClick }: Props) {
       window.removeEventListener("pointerdown", onGesture);
       window.removeEventListener("keydown", onGesture);
       window.removeEventListener("touchstart", onGesture);
-      if (ttsOk) {
-        try { window.speechSynthesis.cancel(); } catch {}
-      }
+      // Do NOT cancel speech on unmount — this component is remounted when the
+      // map-intro overlay finishes, and cancelling here cuts the welcome message
+      // off mid-sentence. The mute toggle and visibility timer still cancel.
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, message]);
