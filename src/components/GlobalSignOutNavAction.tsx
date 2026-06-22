@@ -7,7 +7,7 @@ import { useRegisterNavActions } from "@/contexts/SiteNavExtras";
 const HIDDEN_ROUTES = new Set(["/", "/oauth-callback"]);
 
 const GlobalSignOutNavAction = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const [tick, setTick] = useState(0);
@@ -46,7 +46,7 @@ const GlobalSignOutNavAction = () => {
           },
         ]
       : [],
-    [shouldShow, handleLogout, t, tick],
+    [shouldShow, language, tick],
   );
 
   return null;

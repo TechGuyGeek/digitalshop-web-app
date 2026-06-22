@@ -6,8 +6,22 @@ import { useRegisterNavActions } from "@/contexts/SiteNavExtras";
 
 const HIDDEN_ROUTES = new Set(["/", "/oauth-callback"]);
 
+const readUser = (): Record<string, unknown> | null => {
+  try {
+    const raw = localStorage.getItem("digitalUser");
+    return raw ? (JSON.parse(raw) as Record<string, unknown>) : null;
+  } catch {
+    return null;
+  }
+};
+
+const readIsPaid = (): boolean => {
+  const u = readUser();
+  return u ? String(u.PaidUser ?? u.Paiduser) === "2" : false;
+};
+
 const GlobalUpgradeNavAction = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { pathname } = useLocation();
   const [loading, setLoading] = useState(false);
   const [tick, setTick] = useState(0);
@@ -19,18 +33,8 @@ const GlobalUpgradeNavAction = () => {
     return () => window.removeEventListener("storage", onStorage);
   }, []);
 
-  const user = (() => {
-    try {
-      const raw = localStorage.getItem("digitalUser");
-      return raw ? (JSON.parse(raw) as Record<string, unknown>) : null;
-    } catch {
-      return null;
-    }
-  })();
-
-  const isPaid = user ? String(user.PaidUser ?? user.Paiduser) === "2" : false;
-
   const handleUpgrade = useCallback(async () => {
+    const user = readUser();
     const personId = user?.PersonID ?? user?.personID ?? user?.personid ?? user?.PersonId;
     const userEmail = user?.Email ?? user?.email;
     if (!personId || !userEmail) {
@@ -62,9 +66,11 @@ const GlobalUpgradeNavAction = () => {
       toast.error(t("Pleasecheckyourinternetconnection"));
       setLoading(false);
     }
-  }, [user, t]);
+  }, [t]);
 
-  const shouldShow = !HIDDEN_ROUTES.has(pathname) && !!user && !isPaid;
+  const hasUser = !!readUser();
+  const isPaid = readIsPaid();
+  const shouldShow = !HIDDEN_ROUTES.has(pathname) && hasUser && !isPaid;
 
   useRegisterNavActions(
     "global-upgrade",
@@ -78,7 +84,7 @@ const GlobalUpgradeNavAction = () => {
           },
         ]
       : [],
-    [shouldShow, loading, handleUpgrade, t, tick],
+    [shouldShow, loading, language, tick],
   );
 
   return null;
