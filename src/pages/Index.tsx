@@ -47,7 +47,7 @@ const Index = () => {
   const { theme: currentTheme } = useThemeForIntro();
   const [mapIntroActive, setMapIntroActive] = useState(false);
   useEffect(() => {
-    if (!isMobile || currentTheme !== "main") return;
+    if (currentTheme !== "main") return;
     if (!navigator.geolocation) return;
     let cancelled = false;
     let timer: ReturnType<typeof setTimeout> | null = null;
@@ -64,7 +64,7 @@ const Index = () => {
       cancelled = true;
       if (timer) clearTimeout(timer);
     };
-  }, [isMobile, currentTheme]);
+  }, [currentTheme]);
 
   useEffect(() => {
     const t = setTimeout(() => setShowIntro(false), 12000);
@@ -232,7 +232,7 @@ const Index = () => {
           title="Tap to skip"
         />
         {view === "login" && !email && helpEnabled && (
-          <div className="fixed top-2 left-2 right-2 z-[6] max-w-[430px] mx-auto pointer-events-auto">
+          <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[6] w-[calc(100%-1rem)] max-w-[430px] pointer-events-auto backdrop-blur-md rounded-2xl">
             <HomeWelcomeAssistant onRegisterClick={() => { setMapIntroActive(false); setView("register"); }} />
           </div>
         )}
