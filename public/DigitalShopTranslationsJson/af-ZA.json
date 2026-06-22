@@ -489,5 +489,7 @@
   "AIAssistant_TapMascot": "Need review",
   "AIAssistant_Intro": "Need review",
   "AIAssistant_Send": "Need review",
-  "AIAssistant_Stop": "Need review"
+  "AIAssistant_Stop": "Need review",
+  "HomeAssistant_WelcomeFirst": "Welkom by GPS Shops. Vind plaaslike winkels naby jou, of skep jou eie digitale winkel sodat kliënte jou kan vind. Om voort te gaan, registreer asseblief of meld aan.",
+  "HomeAssistant_WelcomeBack": "Welkom by GPS Shops. Vind plaaslike winkels naby jou, of skep jou eie digitale winkel sodat kliënte jou kan vind. Om voort te gaan, registreer asseblief of meld aan."
 }

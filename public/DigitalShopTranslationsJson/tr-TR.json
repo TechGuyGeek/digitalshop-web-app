@@ -492,5 +492,7 @@
   "AIAssistant_TapMascot": "Need review",
   "AIAssistant_Intro": "Need review",
   "AIAssistant_Send": "Need review",
-  "AIAssistant_Stop": "Need review"
+  "AIAssistant_Stop": "Need review",
+  "HomeAssistant_WelcomeFirst": "GPS Shops'a hoş geldiniz. Yakınınızdaki yerel mağazaları bulun veya müşterilerin sizi bulabilmesi için kendi dijital mağazanızı oluşturun. Devam etmek için lütfen kayıt olun veya giriş yapın.",
+  "HomeAssistant_WelcomeBack": "GPS Shops'a hoş geldiniz. Yakınınızdaki yerel mağazaları bulun veya müşterilerin sizi bulabilmesi için kendi dijital mağazanızı oluşturun. Devam etmek için lütfen kayıt olun veya giriş yapın."
 }

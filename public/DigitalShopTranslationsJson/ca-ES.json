@@ -492,5 +492,7 @@
   "AIAssistant_TapMascot": "Need review",
   "AIAssistant_Intro": "Need review",
   "AIAssistant_Send": "Need review",
-  "AIAssistant_Stop": "Need review"
+  "AIAssistant_Stop": "Need review",
+  "HomeAssistant_WelcomeFirst": "Benvingut a GPS Shops. Troba botigues locals a prop teu, o crea la teva pròpia botiga digital perquè els clients et puguin trobar. Per continuar, registra't o inicia sessió.",
+  "HomeAssistant_WelcomeBack": "Benvingut a GPS Shops. Troba botigues locals a prop teu, o crea la teva pròpia botiga digital perquè els clients et puguin trobar. Per continuar, registra't o inicia sessió."
 }
