@@ -12,6 +12,23 @@ const BackgroundMap = () => {
   const [hasGps, setHasGps] = useState(false);
 
   useEffect(() => {
+    // If the active page (e.g. /build-shop) already obtained GPS and stashed
+    // its coords, reuse them so the background map aligns with the inner map.
+    let shared: { lat: number; lng: number } | null = null;
+    try {
+      const raw = sessionStorage.getItem("buildShopCoords");
+      if (raw) shared = JSON.parse(raw);
+    } catch { /* ignore */ }
+
+    if (shared && Number.isFinite(shared.lat) && Number.isFinite(shared.lng)) {
+      fetchNearbyShops(shared.lat, shared.lng, "free").then(setShops).catch(() => {});
+      // Seed a fake geolocation so GoogleMap centers on the shared coords.
+      (window as any).__bgMapForcedCenter = shared;
+      setHasGps(true);
+      setReady(true);
+      return;
+    }
+
     if (!navigator.geolocation) { setReady(true); return; }
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
