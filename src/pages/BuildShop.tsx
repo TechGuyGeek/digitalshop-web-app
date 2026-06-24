@@ -37,7 +37,7 @@ const BuildShop = () => {
 
   useEffect(() => {
     if (locating || !mapRef.current || mapInstanceRef.current) return;
-    const map = L.map(mapRef.current, { center: [coords.lat, coords.lng], zoom: 16, zoomControl: true });
+    const map = L.map(mapRef.current, { center: [coords.lat, coords.lng], zoom: 18, zoomControl: true });
     L.tileLayer(TILE_URL, { maxZoom: 19, attribution: TILE_ATTRIBUTION }).addTo(map);
     const marker = L.marker([coords.lat, coords.lng], { draggable: true, title: t("ClickPintoaddCompany") }).addTo(map);
     marker.on("dragend", () => {
