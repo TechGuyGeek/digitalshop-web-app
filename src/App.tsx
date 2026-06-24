@@ -55,6 +55,15 @@ import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
 
+const RoutedBackgroundMap = () => {
+  const location = useLocation();
+  // Remount (and replay cinematic zoom) when entering /build-shop so the
+  // background dramatically zooms in to street level on the Company Register
+  // page, even though the user reached it after the initial login zoom.
+  const key = location.pathname === "/build-shop" ? "build-shop" : "default";
+  return <BackgroundMap key={key} />;
+};
+
 const AppShell = () => {
   const { theme } = useTheme();
   const isLight = false;
