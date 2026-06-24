@@ -8,6 +8,7 @@ interface GoogleMapProps {
   shops?: { name: string; icon: string; lat?: number; lng?: number; companyid?: number }[];
   onShopClick?: (shop: { name: string; icon: string; companyid?: number }) => void;
   defaultZoom?: number;
+  forcedCenter?: { lat: number; lng: number } | null;
   rangeCircleMetres?: number;
   interactive?: boolean;
   worldViewFallback?: boolean;
@@ -19,7 +20,7 @@ interface GoogleMapProps {
 const TILE_URL = "https://maps.techguygeek.co.uk/tiles/osm/webmercator/{z}/{x}/{y}.png";
 const TILE_ATTRIBUTION = "© OpenStreetMap contributors";
 
-const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, rangeCircleMetres, interactive = true, worldViewFallback = false, cinematicZoom = false, showCinematicCounter = false, hideUserMarker = false }: GoogleMapProps) => {
+const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, forcedCenter = null, rangeCircleMetres, interactive = true, worldViewFallback = false, cinematicZoom = false, showCinematicCounter = false, hideUserMarker = false }: GoogleMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const circleRef = useRef<L.Circle | null>(null);
@@ -33,6 +34,11 @@ const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, 
 
   // Get user GPS
   useEffect(() => {
+    if (forcedCenter) {
+      setUserPos(forcedCenter);
+      setLocating(false);
+      return;
+    }
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {

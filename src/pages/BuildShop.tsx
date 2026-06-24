@@ -28,7 +28,12 @@ const BuildShop = () => {
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (pos) => { setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }); setLocating(false); },
+        (pos) => {
+          const c = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          setCoords(c);
+          try { sessionStorage.setItem("buildShopCoords", JSON.stringify(c)); } catch { /* ignore */ }
+          setLocating(false);
+        },
         () => { toast.error(t("LocationDenied")); setLocating(false); },
         { enableHighAccuracy: true, timeout: 10000 }
       );

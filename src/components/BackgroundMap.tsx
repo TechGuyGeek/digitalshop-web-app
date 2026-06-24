@@ -10,8 +10,26 @@ const BackgroundMap = () => {
   const [shops, setShops] = useState<NearbyShop[]>([]);
   const [ready, setReady] = useState(false);
   const [hasGps, setHasGps] = useState(false);
+  const [forcedCenter, setForcedCenter] = useState<{ lat: number; lng: number } | null>(null);
 
   useEffect(() => {
+    // If the active page (e.g. /build-shop) already obtained GPS and stashed
+    // its coords, reuse them so the background map aligns with the inner map.
+    let shared: { lat: number; lng: number } | null = null;
+    try {
+      const raw = sessionStorage.getItem("buildShopCoords");
+      if (raw) shared = JSON.parse(raw);
+    } catch { /* ignore */ }
+
+    if (shared && Number.isFinite(shared.lat) && Number.isFinite(shared.lng)) {
+      fetchNearbyShops(shared.lat, shared.lng, "free").then(setShops).catch(() => {});
+      // Seed a fake geolocation so GoogleMap centers on the shared coords.
+      setForcedCenter(shared);
+      setHasGps(true);
+      setReady(true);
+      return;
+    }
+
     if (!navigator.geolocation) { setReady(true); return; }
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
@@ -39,6 +57,7 @@ const BackgroundMap = () => {
           className="h-full w-full"
           shops={mapShops}
           defaultZoom={hasGps ? 18 : 2}
+          forcedCenter={forcedCenter}
           rangeCircleMetres={0}
           worldViewFallback={!hasGps}
           cinematicZoom={hasGps}
