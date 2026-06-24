@@ -23,7 +23,7 @@ const BackgroundMap = () => {
     if (shared && Number.isFinite(shared.lat) && Number.isFinite(shared.lng)) {
       fetchNearbyShops(shared.lat, shared.lng, "free").then(setShops).catch(() => {});
       // Seed a fake geolocation so GoogleMap centers on the shared coords.
-      (window as any).__bgMapForcedCenter = shared;
+      setForcedCenter(shared);
       setHasGps(true);
       setReady(true);
       return;
