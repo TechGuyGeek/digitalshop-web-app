@@ -9,6 +9,22 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 
+const RED_MARKER_HTML = `
+<svg width="28" height="44" viewBox="0 0 28 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="14" cy="40" rx="8" ry="3" fill="black" fill-opacity="0.25"/>
+  <path d="M14 0C6.268 0 0 6.268 0 14c0 10.5 14 30 14 30s14-19.5 14-30C28 6.268 21.732 0 14 0z" fill="#EF4444" stroke="#991B1B" stroke-width="2"/>
+  <circle cx="14" cy="14" r="5" fill="white"/>
+</svg>
+`;
+
+const redMarkerIcon = L.divIcon({
+  html: RED_MARKER_HTML,
+  className: "buildshop-red-marker",
+  iconSize: [28, 44],
+  iconAnchor: [14, 44],
+  popupAnchor: [0, -36],
+});
+
 const TILE_URL = "https://maps.techguygeek.co.uk/tiles/osm/webmercator/{z}/{x}/{y}.png";
 const TILE_ATTRIBUTION = "© OpenStreetMap contributors";
 
