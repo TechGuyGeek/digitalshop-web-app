@@ -62,7 +62,7 @@ const BuildShop = () => {
     const map = L.map(mapRef.current, { center: [coords.lat, coords.lng], zoom: 18, zoomControl: true });
     L.tileLayer(TILE_URL, { maxZoom: 19, attribution: TILE_ATTRIBUTION }).addTo(map);
 
-    const marker = L.marker([coords.lat, coords.lng], { draggable: true, title: t("ClickPintoaddCompany") }).addTo(map);
+    const marker = L.marker([coords.lat, coords.lng], { icon: redMarkerIcon, draggable: true, title: t("ClickPintoaddCompany") }).addTo(map);
     marker.on("dragend", () => {
       const pos = marker.getLatLng();
       setCoords({ lat: pos.lat, lng: pos.lng });
