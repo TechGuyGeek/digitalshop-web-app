@@ -72,13 +72,9 @@ const AppShell = () => {
   const outerClass = `w-full min-h-screen bg-black ${desktopBg} md:bg-cover md:bg-center md:bg-fixed flex justify-center relative`;
   return (
     <div className={outerClass}>
-      {isMainTheme && (
-        <BrowserRouter>
-          <RoutedBackgroundMap />
-        </BrowserRouter>
-      )}
-      <div className={`w-full max-w-[430px] min-h-screen relative z-10 ${isLight ? "shadow-[0_0_60px_-15px_hsl(220_40%_25%/0.15)] bg-background" : "shadow-2xl"}`}>
-          <BrowserRouter>
+      <BrowserRouter>
+        {isMainTheme && <RoutedBackgroundMap />}
+        <div className={`w-full max-w-[430px] min-h-screen relative z-10 ${isLight ? "shadow-[0_0_60px_-15px_hsl(220_40%_25%/0.15)] bg-background" : "shadow-2xl"}`}>
             <BasketProvider>
               <SiteNavExtrasProvider>
                 <SiteNav />
@@ -133,8 +129,8 @@ const AppShell = () => {
                 </Routes>
               </SiteNavExtrasProvider>
             </BasketProvider>
-          </BrowserRouter>
         </div>
+      </BrowserRouter>
       </div>
   );
 };
