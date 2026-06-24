@@ -18,7 +18,6 @@ const BuildShop = () => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
-  const cinematicDoneRef = useRef(false);
 
   const [shopName, setShopName] = useState("");
   const [coords, setCoords] = useState<{ lat: number; lng: number }>({ lat: 53.3498, lng: -6.2603 });
@@ -39,11 +38,7 @@ const BuildShop = () => {
   useEffect(() => {
     if (locating || !mapRef.current || mapInstanceRef.current) return;
 
-    const map = L.map(mapRef.current, {
-      center: [20, 0],
-      zoom: 2,
-      zoomControl: true,
-    });
+    const map = L.map(mapRef.current, { center: [coords.lat, coords.lng], zoom: 18, zoomControl: true });
     L.tileLayer(TILE_URL, { maxZoom: 19, attribution: TILE_ATTRIBUTION }).addTo(map);
 
     const marker = L.marker([coords.lat, coords.lng], { draggable: true, title: t("ClickPintoaddCompany") }).addTo(map);
@@ -60,18 +55,7 @@ const BuildShop = () => {
     markerRef.current = marker;
     setTimeout(() => map.invalidateSize(), 50);
 
-    // Cinematic zoom from world view down to street level, matching the background map.
-    setTimeout(() => {
-      if (mapInstanceRef.current && !cinematicDoneRef.current) {
-        cinematicDoneRef.current = true;
-        mapInstanceRef.current.flyTo([coords.lat, coords.lng], 18, {
-          duration: 20,
-          easeLinearity: 0.1,
-        });
-      }
-    }, 600);
-
-    return () => { map.remove(); mapInstanceRef.current = null; markerRef.current = null; cinematicDoneRef.current = false; };
+    return () => { map.remove(); mapInstanceRef.current = null; markerRef.current = null; };
   }, [locating]);
 
   const handleSave = async () => {
