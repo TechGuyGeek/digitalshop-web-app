@@ -18,6 +18,7 @@ import GlobalUpgradeNavAction from "./components/GlobalUpgradeNavAction";
 import GlobalSignOutNavAction from "./components/GlobalSignOutNavAction";
 import GlobalAdminNavAction from "./components/GlobalAdminNavAction";
 import BackgroundMap from "./components/BackgroundMap";
+import { useLocation } from "react-router-dom";
 import Profile from "./pages/Profile.tsx";
 import PaymentMethods from "./pages/PaymentMethods.tsx";
 import OAuthCallback from "./pages/OAuthCallback.tsx";
@@ -54,6 +55,15 @@ import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
 
+const RoutedBackgroundMap = () => {
+  const location = useLocation();
+  // Remount (and replay cinematic zoom) when entering /build-shop so the
+  // background dramatically zooms in to street level on the Company Register
+  // page, even though the user reached it after the initial login zoom.
+  const key = location.pathname === "/build-shop" ? "build-shop" : "default";
+  return <BackgroundMap key={key} />;
+};
+
 const AppShell = () => {
   const { theme } = useTheme();
   const isLight = false;
@@ -71,9 +81,9 @@ const AppShell = () => {
   const outerClass = `w-full min-h-screen bg-black ${desktopBg} md:bg-cover md:bg-center md:bg-fixed flex justify-center relative`;
   return (
     <div className={outerClass}>
-      {isMainTheme && <BackgroundMap />}
-      <div className={`w-full max-w-[430px] min-h-screen relative z-10 ${isLight ? "shadow-[0_0_60px_-15px_hsl(220_40%_25%/0.15)] bg-background" : "shadow-2xl"}`}>
-          <BrowserRouter>
+      <BrowserRouter>
+        {isMainTheme && <RoutedBackgroundMap />}
+        <div className={`w-full max-w-[430px] min-h-screen relative z-10 ${isLight ? "shadow-[0_0_60px_-15px_hsl(220_40%_25%/0.15)] bg-background" : "shadow-2xl"}`}>
             <BasketProvider>
               <SiteNavExtrasProvider>
                 <SiteNav />
@@ -128,8 +138,8 @@ const AppShell = () => {
                 </Routes>
               </SiteNavExtrasProvider>
             </BasketProvider>
-          </BrowserRouter>
         </div>
+      </BrowserRouter>
       </div>
   );
 };
