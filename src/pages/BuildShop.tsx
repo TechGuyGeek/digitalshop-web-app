@@ -18,6 +18,7 @@ const BuildShop = () => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
+  const cinematicDoneRef = useRef(false);
 
   const [shopName, setShopName] = useState("");
   const [coords, setCoords] = useState<{ lat: number; lng: number }>({ lat: 53.3498, lng: -6.2603 });
