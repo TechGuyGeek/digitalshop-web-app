@@ -18,6 +18,7 @@ import GlobalUpgradeNavAction from "./components/GlobalUpgradeNavAction";
 import GlobalSignOutNavAction from "./components/GlobalSignOutNavAction";
 import GlobalAdminNavAction from "./components/GlobalAdminNavAction";
 import BackgroundMap from "./components/BackgroundMap";
+import { useLocation } from "react-router-dom";
 import Profile from "./pages/Profile.tsx";
 import PaymentMethods from "./pages/PaymentMethods.tsx";
 import OAuthCallback from "./pages/OAuthCallback.tsx";
@@ -71,7 +72,11 @@ const AppShell = () => {
   const outerClass = `w-full min-h-screen bg-black ${desktopBg} md:bg-cover md:bg-center md:bg-fixed flex justify-center relative`;
   return (
     <div className={outerClass}>
-      {isMainTheme && <BackgroundMap />}
+      {isMainTheme && (
+        <BrowserRouter>
+          <RoutedBackgroundMap />
+        </BrowserRouter>
+      )}
       <div className={`w-full max-w-[430px] min-h-screen relative z-10 ${isLight ? "shadow-[0_0_60px_-15px_hsl(220_40%_25%/0.15)] bg-background" : "shadow-2xl"}`}>
           <BrowserRouter>
             <BasketProvider>
