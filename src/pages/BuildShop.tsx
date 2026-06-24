@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 
 const TILE_URL = "https://maps.techguygeek.co.uk/tiles/osm/webmercator/{z}/{x}/{y}.png";
 const TILE_ATTRIBUTION = "© OpenStreetMap contributors";
@@ -119,6 +120,7 @@ const BuildShop = () => {
         </p>
       </div>
       <div className="p-4 space-y-4 border-t border-border">
+        <ProfileHelpAssistant translationKey="HELPCOMPANYREGISTER" />
         <div>
           <label className="text-xs font-medium uppercase tracking-wider text-muted-foreground font-heading mb-1 block">{t("CompanyName")}</label>
           <Input value={shopName} onChange={(e) => setShopName(e.target.value)} placeholder={t("CompanyName")} className="border-0 border-b border-border rounded-none bg-transparent px-0 focus-visible:ring-0 focus-visible:border-primary" />
