@@ -75,6 +75,21 @@ const SiteNav = ({ items, className }: SiteNavProps) => {
               );
             })}
           </ul>
+          <div className="border-t border-border my-2" />
+          <ul className="flex flex-col pb-2">
+            <li>
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  openCookieSettings();
+                }}
+                className="w-full text-left block px-6 py-3 text-base font-heading tracking-wide transition-colors text-foreground hover:bg-secondary"
+              >
+                Cookie Settings
+              </button>
+            </li>
+          </ul>
           {actions.length > 0 && (
             <>
               <div className="border-t border-border my-2" />
