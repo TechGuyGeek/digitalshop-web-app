@@ -12,6 +12,14 @@ import { Switch } from "@/components/ui/switch";
 import { setConsent, trackPageview, type ConsentState } from "@/lib/analytics";
 
 const STORAGE_KEY = "gpsshops.cookieConsent.v1";
+const OPEN_EVENT = "gpsshops:openCookieSettings";
+
+/** Programmatically reopen the cookie consent banner (e.g. from a footer link). */
+export function openCookieSettings() {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event(OPEN_EVENT));
+  }
+}
 
 type StoredConsent = {
   analytics: boolean;
@@ -44,9 +52,30 @@ export default function CookieConsentBanner() {
       }
       const stored = JSON.parse(raw) as StoredConsent;
       applyConsent(stored);
+      setAnalytics(stored.analytics);
+      setAds(stored.ads);
     } catch {
       setVisible(true);
     }
+  }, []);
+
+  useEffect(() => {
+    const handler = () => {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const stored = JSON.parse(raw) as StoredConsent;
+          setAnalytics(stored.analytics);
+          setAds(stored.ads);
+        }
+      } catch {
+        /* ignore */
+      }
+      setVisible(true);
+      setManageOpen(true);
+    };
+    window.addEventListener(OPEN_EVENT, handler);
+    return () => window.removeEventListener(OPEN_EVENT, handler);
   }, []);
 
   const persist = (c: { analytics: boolean; ads: boolean }) => {
