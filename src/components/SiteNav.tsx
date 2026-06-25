@@ -4,6 +4,7 @@ import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSiteNavExtras } from "@/contexts/SiteNavExtras";
+import { openCookieSettings } from "@/components/CookieConsentBanner";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -73,6 +74,21 @@ const SiteNav = ({ items, className }: SiteNavProps) => {
                 </li>
               );
             })}
+          </ul>
+          <div className="border-t border-border my-2" />
+          <ul className="flex flex-col pb-2">
+            <li>
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  openCookieSettings();
+                }}
+                className="w-full text-left block px-6 py-3 text-base font-heading tracking-wide transition-colors text-foreground hover:bg-secondary"
+              >
+                Cookie Settings
+              </button>
+            </li>
           </ul>
           {actions.length > 0 && (
             <>
