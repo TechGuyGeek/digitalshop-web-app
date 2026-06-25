@@ -14,10 +14,14 @@ const MEASUREMENT_ID =
   (import.meta.env.VITE_GA4_MEASUREMENT_ID as string | undefined) || "";
 
 const isDev = import.meta.env.DEV;
+const isGaDebug =
+  typeof window !== "undefined" &&
+  new URLSearchParams(window.location.search).get("ga_debug") === "1";
+const debugMode = isDev || isGaDebug;
 let initialized = false;
 
 const debug = (...args: unknown[]) => {
-  if (isDev) console.log("[GA4]", ...args);
+  if (debugMode) console.log("[GA4]", ...args);
 };
 
 function ensureGtag() {
@@ -57,7 +61,7 @@ export function initGA() {
   // We track page views manually on route changes, so disable auto send.
   gtag("config", MEASUREMENT_ID, {
     send_page_view: false,
-    debug_mode: isDev,
+    debug_mode: debugMode,
   });
 
   // Inject gtag.js once.
@@ -83,6 +87,7 @@ export function trackPageview(path: string, title?: string) {
     page_location: typeof window !== "undefined" ? window.location.href : path,
     page_title: title || (typeof document !== "undefined" ? document.title : undefined),
     send_to: MEASUREMENT_ID,
+    ...(debugMode ? { debug_mode: true } : {}),
   });
   debug("page_view", path);
 }
@@ -98,7 +103,11 @@ export function trackEvent(
   }
   const gtag = ensureGtag();
   if (!gtag) return;
-  gtag("event", name, { ...params, send_to: MEASUREMENT_ID });
+  gtag("event", name, {
+    ...params,
+    send_to: MEASUREMENT_ID,
+    ...(debugMode ? { debug_mode: true } : {}),
+  });
   debug("event", name, params);
 }
 
