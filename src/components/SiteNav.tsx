@@ -4,6 +4,7 @@ import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useSiteNavExtras } from "@/contexts/SiteNavExtras";
+import { openCookieSettings } from "@/components/CookieConsentBanner";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
