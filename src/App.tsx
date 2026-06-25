@@ -18,6 +18,7 @@ import GlobalUpgradeNavAction from "./components/GlobalUpgradeNavAction";
 import GlobalSignOutNavAction from "./components/GlobalSignOutNavAction";
 import GlobalAdminNavAction from "./components/GlobalAdminNavAction";
 import BackgroundMap from "./components/BackgroundMap";
+import CookieConsentBanner from "./components/CookieConsentBanner";
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { trackPageview } from "@/lib/analytics";
@@ -148,6 +149,7 @@ const AppShell = () => {
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
                 </Routes>
+                <CookieConsentBanner />
               </SiteNavExtrasProvider>
             </BasketProvider>
         </div>
