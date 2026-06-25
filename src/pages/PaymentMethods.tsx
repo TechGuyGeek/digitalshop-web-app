@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { Analytics } from "@/lib/analytics";
 
 const SERVER_DOMAIN = "https://web.gpsshops.com/";
 
@@ -61,6 +62,7 @@ const PaymentMethods = () => {
     }
 
     setLoading(true);
+    Analytics.paymentStarted({ flow: "stripe_onboarding" });
     try {
       // 1. Check if Stripe setup is allowed
       const check = await postForm(

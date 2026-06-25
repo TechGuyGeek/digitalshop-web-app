@@ -1,9 +1,14 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2 } from "lucide-react";
+import { Analytics } from "@/lib/analytics";
 
 const PaymentSuccess = () => {
   const navigate = useNavigate();
+  useEffect(() => {
+    Analytics.paymentCompleted({ source: "payment_success_page" });
+  }, []);
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-6 py-12">
       <div className="w-full max-w-md text-center space-y-6">
