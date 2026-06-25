@@ -18,6 +18,7 @@ import type { Registration } from "@/lib/aiService";
 import { getHelpEnabled, setHelpEnabled as setHelpEnabledPref, onHelpPrefChange } from "@/lib/helpPref";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useTheme as useThemeForIntro } from "@/contexts/ThemeContext";
+import { Analytics } from "@/lib/analytics";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -128,6 +129,7 @@ const Index = () => {
       if (user && (user.Email || user.email)) {
         toast.success(`Welcome back, ${user.Name || user.name || user.Email || user.email}!`);
         localStorage.setItem("digitalUser", JSON.stringify(user));
+        Analytics.loginCompleted({ method: "password" });
         navigate("/profile");
       } else {
         toast.error(t("MessageUsersEmailOrPassword"));
@@ -158,6 +160,7 @@ const Index = () => {
       return;
     }
     setLoading(true);
+    Analytics.registrationStarted({ method: "password" });
     try {
       const result = await registerUser({
         name: firstName,
@@ -169,6 +172,7 @@ const Index = () => {
         language,
       });
       if (result === "SUCCESS") {
+        Analytics.registrationCompleted({ method: "password" });
         toast.success(t("RegistrationLinkClicked"));
         setView("login");
         setFirstName("");

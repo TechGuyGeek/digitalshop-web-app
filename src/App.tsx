@@ -19,6 +19,8 @@ import GlobalSignOutNavAction from "./components/GlobalSignOutNavAction";
 import GlobalAdminNavAction from "./components/GlobalAdminNavAction";
 import BackgroundMap from "./components/BackgroundMap";
 import { useLocation } from "react-router-dom";
+import { useEffect } from "react";
+import { trackPageview } from "@/lib/analytics";
 import Profile from "./pages/Profile.tsx";
 import PaymentMethods from "./pages/PaymentMethods.tsx";
 import OAuthCallback from "./pages/OAuthCallback.tsx";
@@ -64,6 +66,15 @@ const RoutedBackgroundMap = () => {
   return <BackgroundMap key={key} />;
 };
 
+// Fire a GA4 page_view on every client-side route change.
+const RouteAnalytics = () => {
+  const location = useLocation();
+  useEffect(() => {
+    trackPageview(location.pathname + location.search);
+  }, [location.pathname, location.search]);
+  return null;
+};
+
 const AppShell = () => {
   const { theme } = useTheme();
   const isLight = false;
@@ -83,6 +94,7 @@ const AppShell = () => {
     <div className={outerClass}>
       <BrowserRouter>
         {isMainTheme && <RoutedBackgroundMap />}
+        <RouteAnalytics />
         <div className={`w-full max-w-[430px] min-h-screen relative z-10 ${isLight ? "shadow-[0_0_60px_-15px_hsl(220_40%_25%/0.15)] bg-background" : "shadow-2xl"}`}>
             <BasketProvider>
               <SiteNavExtrasProvider>

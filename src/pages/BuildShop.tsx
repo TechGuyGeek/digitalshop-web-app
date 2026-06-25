@@ -8,6 +8,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
+import { Analytics } from "@/lib/analytics";
 
 const RED_MARKER_HTML = `
 <svg width="28" height="44" viewBox="0 0 28 44" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -42,6 +43,7 @@ const BuildShop = () => {
   const [companyEmail, setCompanyEmail] = useState("");
 
   useEffect(() => {
+    Analytics.shopCreationStarted();
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
@@ -112,6 +114,7 @@ const BuildShop = () => {
         const company = checkData.companies[0];
         localStorage.setItem("hasShop", "true");
         localStorage.setItem("currentCompany", JSON.stringify(company));
+        Analytics.shopCreated({ company_id: company?.companyid ?? company?.CompanyID });
         toast.success(t("RegistrationSuccessful"));
         navigate("/company-profile");
       } else { toast.error(t("RegistrationFailed")); }

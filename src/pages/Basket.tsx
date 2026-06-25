@@ -10,6 +10,7 @@ import { useAdverts } from "@/hooks/useAdverts";
 import VideoAdvert from "@/components/adverts/VideoAdvert";
 import { useRegisterNavActions } from "@/contexts/SiteNavExtras";
 import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
+import { Analytics } from "@/lib/analytics";
 
 const SERVER_DOMAIN = "https://web.gpsshops.com/";
 
@@ -92,6 +93,7 @@ const Basket = () => {
     const userName = String(user.Name || user.name || "");
     const userSurname = String(user.Surname || user.surname || "");
     setSubmitting(true);
+    Analytics.orderStarted({ company_id: companyId, items: items.length, total, mode });
     const randomCode = generateRandomCode(64);
     const needTakeaway = mode === "takeaway" ? "1" : "0";
     const needDelivery = mode === "delivery" ? "1" : "0";
@@ -112,6 +114,7 @@ const Basket = () => {
         }
       }
       clearBasket();
+      Analytics.orderCompleted({ company_id: companyId, items: items.length, total, mode, random_code: randomCode });
       toast.success(t("SaveSuccessful"));
       if (canShowVideo) {
         showVideoAd("afterOrderPlaced");
