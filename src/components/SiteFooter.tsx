@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { LOCALE_TO_PREFIX, buildLocalizedPath } from "@/lib/i18nRoutes";
+import { openCookieSettings } from "@/components/CookieConsentBanner";
 
 const SiteFooter = () => {
   const year = new Date().getFullYear();
@@ -21,6 +22,13 @@ const SiteFooter = () => {
         <Link to="/privacy" className="text-muted-foreground hover:text-foreground transition-colors">
           Privacy
         </Link>
+        <button
+          type="button"
+          onClick={openCookieSettings}
+          className="text-muted-foreground hover:text-foreground transition-colors"
+        >
+          Cookie Settings
+        </button>
       </nav>
       <p className="mt-3 text-center text-xs text-muted-foreground">
         &copy; {year} GPS Shops. Your shop — anywhere.
