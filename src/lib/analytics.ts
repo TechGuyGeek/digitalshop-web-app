@@ -1,7 +1,6 @@
-// GA4 analytics helper. One-time init, page-view tracking, custom events.
-// Designed to work with Google Consent Mode v2 — defaults set in initGA()
-// before gtag.js loads, and updatable via setConsent() once a cookie banner
-// is in place.
+// GA4 analytics helper. Page-view tracking and custom events for the SPA.
+// Consent Mode v2 defaults are set in index.html before gtag.js loads.
+// Use setConsent() from a cookie banner to update grants once the user chooses.
 
 declare global {
   interface Window {
@@ -36,7 +35,7 @@ function ensureGtag() {
   return window.gtag;
 }
 
-/** Initialise GA4 with Consent Mode v2 defaults. Safe to call multiple times. */
+/** Initialise GA4 for SPA routing. The gtag.js script is in index.html; this only re-configures. */
 export function initGA() {
   if (initialized || typeof window === "undefined") return;
   if (!MEASUREMENT_ID) {
@@ -46,32 +45,12 @@ export function initGA() {
   const gtag = ensureGtag();
   if (!gtag) return;
 
-  // Consent Mode v2 — deny by default until a banner grants it.
-  gtag("consent", "default", {
-    ad_storage: "denied",
-    ad_user_data: "denied",
-    ad_personalization: "denied",
-    analytics_storage: "denied",
-    functionality_storage: "granted",
-    security_storage: "granted",
-    wait_for_update: 500,
-  });
-
-  gtag("js", new Date());
-  // We track page views manually on route changes, so disable auto send.
+  // Re-configure for SPA routing: disable automatic page views so we can
+  // fire them manually on route changes.
   gtag("config", MEASUREMENT_ID, {
     send_page_view: false,
     debug_mode: debugMode,
   });
-
-  // Inject gtag.js once.
-  if (!document.querySelector(`script[data-ga4="${MEASUREMENT_ID}"]`)) {
-    const s = document.createElement("script");
-    s.async = true;
-    s.src = `https://www.googletagmanager.com/gtag/js?id=${MEASUREMENT_ID}`;
-    s.setAttribute("data-ga4", MEASUREMENT_ID);
-    document.head.appendChild(s);
-  }
 
   initialized = true;
   debug("initialised", MEASUREMENT_ID);
