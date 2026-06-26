@@ -10,6 +10,24 @@ import {
 
 const SITE_URL = "https://gpsshops.com";
 
+// Hardcoded English fallbacks used when translations haven't loaded yet,
+// so the browser tab never shows raw keys like "SeoTitle_Home".
+const SEO_FALLBACKS: Record<string, string> = {
+  SeoTitle_Home: "GPS Shops — Discover Local Shops Near You",
+  SeoTitle_About: "About GPS Shops — Your Shop, Anywhere",
+  SeoTitle_Legal: "Legal, Terms & Disclaimer — GPS Shops",
+  SeoTitle_Contact: "Contact GPS Shops — Get in Touch",
+  SeoDesc_Home:
+    "GPS Shops is a global, location-aware marketplace. Discover nearby shops on the map, browse menus, order in seconds, or open your own digital storefront.",
+  SeoDesc_About:
+    "Learn about GPS Shops — a global, location-aware marketplace connecting people with the shops and services around them.",
+  SeoDesc_Legal: "Legal information, terms of service and disclaimer for GPS Shops.",
+  SeoDesc_Contact: "Get in touch with the GPS Shops team.",
+};
+
+const resolve = (translated: string, key: string) =>
+  translated && translated !== key ? translated : SEO_FALLBACKS[key] ?? translated;
+
 interface SeoHeadProps {
   page: LocalizedPage;
 }
@@ -17,8 +35,8 @@ interface SeoHeadProps {
 const SeoHead = ({ page }: SeoHeadProps) => {
   const { t, language } = useLanguage();
   const seo = PAGE_SEO_KEYS[page];
-  const title = t(seo.title);
-  const description = t(seo.description);
+  const title = resolve(t(seo.title), seo.title);
+  const description = resolve(t(seo.description), seo.description);
   const prefix = LOCALE_TO_PREFIX[language] ?? "";
   const path = buildLocalizedPath(prefix, page);
   const canonical = `${SITE_URL}${path}`;
