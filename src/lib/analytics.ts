@@ -35,6 +35,21 @@ function ensureGtag() {
   return window.gtag;
 }
 
+/** Inject the gtag.js loader script if it isn't already on the page. */
+function ensureGtagScript() {
+  if (typeof document === "undefined" || !MEASUREMENT_ID) return;
+  const src = `https://www.googletagmanager.com/gtag/js?id=${MEASUREMENT_ID}`;
+  const existing = document.querySelector(
+    `script[src^="https://www.googletagmanager.com/gtag/js"]`,
+  );
+  if (existing) return;
+  const s = document.createElement("script");
+  s.async = true;
+  s.src = src;
+  document.head.appendChild(s);
+  debug("injected gtag.js", src);
+}
+
 /** Initialise GA4 for SPA routing. The gtag.js script is in index.html; this only re-configures. */
 export function initGA() {
   if (initialized || typeof window === "undefined") return;
@@ -44,6 +59,13 @@ export function initGA() {
   }
   const gtag = ensureGtag();
   if (!gtag) return;
+
+  // Make sure gtag.js is actually on the page. If the deployed index.html
+  // doesn't contain the tag (e.g. stale cache, prerender variant), inject it.
+  ensureGtagScript();
+
+  // Seed the timestamp the loader normally sets, in case we injected it.
+  gtag("js", new Date());
 
   // Re-configure for SPA routing: disable automatic page views so we can
   // fire them manually on route changes.
