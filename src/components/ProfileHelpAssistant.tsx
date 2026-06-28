@@ -39,6 +39,11 @@ function speakChunks(text: string, lang: string, onStart: () => void, onEnd: () 
     u.onerror = () => { if (idx === chunks.length - 1) onEnd(); };
     synth.speak(u);
   });
+  // Chrome bug workaround: speechSynthesis pauses itself after ~15s.
+  const keepAlive = window.setInterval(() => {
+    if (!synth.speaking) { window.clearInterval(keepAlive); return; }
+    try { synth.pause(); synth.resume(); } catch {}
+  }, 10000);
 }
 
 interface Props {
@@ -79,6 +84,14 @@ export default function ProfileHelpAssistant({ translationKey = "HELPUSERPROFILE
     let armed = true;
     const onGesture = () => {
       if (!armed) return;
+      // Already speaking — autoplay wasn't blocked, so don't restart on click.
+      if (window.speechSynthesis.speaking) {
+        armed = false;
+        window.removeEventListener("pointerdown", onGesture);
+        window.removeEventListener("keydown", onGesture);
+        window.removeEventListener("touchstart", onGesture);
+        return;
+      }
       armed = false;
       try { window.speechSynthesis.cancel(); } catch {}
       trySpeak();
@@ -102,7 +115,7 @@ export default function ProfileHelpAssistant({ translationKey = "HELPUSERPROFILE
   useEffect(() => {
     const id = setTimeout(() => {
       setVisible(false);
-      if (ttsOk) { try { window.speechSynthesis.cancel(); } catch {} }
+      // Hide visually but let in-flight speech finish.
     }, hideMs);
     return () => clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
