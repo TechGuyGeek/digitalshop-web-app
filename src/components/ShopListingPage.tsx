@@ -7,8 +7,9 @@ import { fetchNearbyShops, fetchGlobalShops, NearbyShop } from "@/lib/nearbyShop
 import { useLanguage } from "@/contexts/LanguageContext";
 import AdvertSlot from "@/components/adverts/AdvertSlot";
 import { getMarkerIconUrl, DEFAULT_MARKER_ICON } from "@/lib/mapMarkerIcons";
+import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 
-interface ShopListingPageProps { title: string; variant?: "free" | "paid" | "global"; }
+interface ShopListingPageProps { title: string; variant?: "free" | "paid" | "global"; helpKey?: string; }
 
 const tabs = [
   { id: "hybrid", labelKey: "HybridView", icon: Layers },
@@ -18,7 +19,7 @@ const tabs = [
 
 type TabId = (typeof tabs)[number]["id"];
 
-const ShopListingPage = ({ title, variant = "free" }: ShopListingPageProps) => {
+const ShopListingPage = ({ title, variant = "free", helpKey }: ShopListingPageProps) => {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState<TabId>("hybrid");
@@ -50,6 +51,11 @@ const ShopListingPage = ({ title, variant = "free" }: ShopListingPageProps) => {
         <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary/80" onClick={() => navigate("/view-shops")}><ArrowLeft size={20} /></Button>
         <h1 className="text-lg font-bold text-primary-foreground font-heading">{title}</h1>
       </div>
+      {helpKey && (
+        <div className="px-4 pt-3">
+          <ProfileHelpAssistant translationKey={helpKey} />
+        </div>
+      )}
       <div className="flex border-b border-border bg-card">
         {tabs.map((tab) => (
           <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex-1 py-3 text-xs font-semibold uppercase tracking-wider transition-colors ${activeTab === tab.id ? "text-primary border-b-2 border-primary" : "text-muted-foreground hover:text-foreground"}`}>
