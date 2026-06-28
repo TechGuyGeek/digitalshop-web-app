@@ -45,6 +45,12 @@ function speakChunks(text: string, lang: string, onStart: () => void, onEnd: () 
     u.onerror = () => { if (idx === chunks.length - 1) onEnd(); };
     synth.speak(u);
   });
+  // Chrome bug workaround: speechSynthesis pauses itself after ~15s of speech.
+  // Pinging pause/resume keeps the queue flowing so long messages don't cut off.
+  const keepAlive = window.setInterval(() => {
+    if (!synth.speaking) { window.clearInterval(keepAlive); return; }
+    try { synth.pause(); synth.resume(); } catch {}
+  }, 10000);
 }
 
 interface Props {
@@ -95,6 +101,15 @@ export default function HomeWelcomeAssistant({ onRegisterClick }: Props) {
     let armed = true;
     const onGesture = () => {
       if (!armed) return;
+      // If speech already started, the browser didn't block us — don't restart
+      // from the beginning just because the user clicked.
+      if (window.speechSynthesis.speaking) {
+        armed = false;
+        window.removeEventListener("pointerdown", onGesture);
+        window.removeEventListener("keydown", onGesture);
+        window.removeEventListener("touchstart", onGesture);
+        return;
+      }
       armed = false;
       try { window.speechSynthesis.cancel(); } catch {}
       trySpeak();
@@ -120,7 +135,7 @@ export default function HomeWelcomeAssistant({ onRegisterClick }: Props) {
   useEffect(() => {
     const id = setTimeout(() => {
       setVisible(false);
-      if (ttsOk) { try { window.speechSynthesis.cancel(); } catch {} }
+      // Hide the card but let any in-flight speech finish naturally.
     }, hideMs);
     return () => clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
