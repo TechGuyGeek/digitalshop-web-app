@@ -39,18 +39,33 @@ const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, 
       setLocating(false);
       return;
     }
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          setUserPos({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-          setLocating(false);
-        },
-        () => setLocating(false),
-        { enableHighAccuracy: true, timeout: 10000 }
-      );
-    } else {
+    if (!navigator.geolocation) {
       setLocating(false);
+      return;
     }
+    let settled = false;
+    // Fallback if the user ignores the browser's permission prompt.
+    const promptTimer = window.setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      setLocating(false);
+    }, 8000);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        if (settled) return;
+        settled = true;
+        window.clearTimeout(promptTimer);
+        setUserPos({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setLocating(false);
+      },
+      () => {
+        if (settled) return;
+        settled = true;
+        window.clearTimeout(promptTimer);
+        setLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
   }, []);
 
   // Initialise map once container is mounted
