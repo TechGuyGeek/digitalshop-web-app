@@ -35,7 +35,6 @@ const BackgroundMap = () => {
       return;
     }
 
-    if (!navigator.geolocation) { setReady(true); return; }
     if (!navigator.geolocation) {
       setForcedCenter(FALLBACK_CENTER);
       setUsedFallback(true);
