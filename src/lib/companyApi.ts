@@ -440,8 +440,23 @@ export const MAP_MARKER_EMOJIS: Record<string, { emoji: string; label: string; t
   "11": { emoji: "👔", label: "Mens Clothing",   translationKey: "MensClothingIcon",   iconUrl: MARKER_ICON_BASE + "clothing11.png" },
   "12": { emoji: "👗", label: "Ladies Clothing", translationKey: "LadiesClothingIcon", iconUrl: MARKER_ICON_BASE + "clothing12.png" },
   "13": { emoji: "🔢", label: "Digits",          translationKey: "DigitsIcon",         iconUrl: MARKER_ICON_BASE + "digit.png" },
+  "14": { emoji: "🥐", label: "Bakery",          translationKey: "BakeryIcon",         iconUrl: MARKER_ICON_BASE + "Bakery14.png" },
+  "15": { emoji: "🍕", label: "Pizza",           translationKey: "PizzaIcon",          iconUrl: MARKER_ICON_BASE + "Ptizza15.png" },
+  "16": { emoji: "🦷", label: "Dentist",         translationKey: "DentistIcon",        iconUrl: MARKER_ICON_BASE + "Dentist16.png" },
+  "17": { emoji: "🐾", label: "Pets",            translationKey: "PetsIcon",           iconUrl: MARKER_ICON_BASE + "Pets17.png" },
+  "18": { emoji: "🎬", label: "Movies",          translationKey: "MoviesIcon",         iconUrl: MARKER_ICON_BASE + "Movies18.png" },
+  "19": { emoji: "🏋️", label: "Gym",             translationKey: "GymIcon",            iconUrl: MARKER_ICON_BASE + "Gym19.png" },
+  "20": { emoji: "💊", label: "Chemist",         translationKey: "ChemistIcon",        iconUrl: MARKER_ICON_BASE + "Chemist20.png" },
+  "21": { emoji: "💈", label: "Barbers",         translationKey: "BarbersIcon",        iconUrl: MARKER_ICON_BASE + "Barbers21.png" },
+  "22": { emoji: "👠", label: "Fashion",         translationKey: "FashionIcon",        iconUrl: MARKER_ICON_BASE + "Fashion22.png" },
 };
 
 export function getMarkerForPublicNumber(publicNumber?: string) {
-  return MAP_MARKER_EMOJIS[publicNumber || "0"] || MAP_MARKER_EMOJIS["0"];
+  const key = String(publicNumber ?? "0").trim() || "0";
+  const found = MAP_MARKER_EMOJIS[key];
+  if (!found) {
+    console.warn("[getMarkerForPublicNumber] Unknown PublicNumber, falling back to Google:", publicNumber);
+    return MAP_MARKER_EMOJIS["0"];
+  }
+  return found;
 }
