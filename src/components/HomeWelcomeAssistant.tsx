@@ -31,14 +31,31 @@ function chunkText(text: string, maxLen = 160): string[] {
   return out;
 }
 
+function pickVoice(lang: string): SpeechSynthesisVoice | null {
+  try {
+    const voices = window.speechSynthesis.getVoices();
+    if (!voices?.length) return null;
+    const target = (lang || "").toLowerCase();
+    const base = target.split("-")[0];
+    return (
+      voices.find((v) => v.lang?.toLowerCase() === target) ||
+      voices.find((v) => v.lang?.toLowerCase().startsWith(base + "-")) ||
+      voices.find((v) => v.lang?.toLowerCase().startsWith(base)) ||
+      null
+    );
+  } catch { return null; }
+}
+
 function speakChunks(text: string, lang: string, onStart: () => void, onEnd: () => void) {
   const synth = window.speechSynthesis;
   synth.cancel();
   const chunks = chunkText(text);
   let started = false;
+  const voice = pickVoice(lang);
   chunks.forEach((chunk, idx) => {
     const u = new SpeechSynthesisUtterance(chunk);
     u.lang = lang || "en-GB";
+    if (voice) u.voice = voice;
     u.rate = 1; u.pitch = 1;
     u.onstart = () => { if (!started) { started = true; onStart(); } };
     if (idx === chunks.length - 1) u.onend = onEnd;
