@@ -494,5 +494,9 @@
   "AIAssistant_Send": "Need review",
   "AIAssistant_Stop": "Need review",
   "HomeAssistant_WelcomeFirst": "GPS Shopsへようこそ。近くの地元のお店を見つけたり、お客様に見つけてもらえるように自分のデジタルショップを作ったりできます。続行するには、登録またはサインインしてください。",
-  "HomeAssistant_WelcomeBack": "GPS Shopsへようこそ。近くの地元のお店を見つけたり、お客様に見つけてもらえるように自分のデジタルショップを作ったりできます。続行するには、登録またはサインインしてください。"
+  "HomeAssistant_WelcomeBack": "GPS Shopsへようこそ。近くの地元のお店を見つけたり、お客様に見つけてもらえるように自分のデジタルショップを作ったりできます。続行するには、登録またはサインインしてください。",
+  "SearchShopsOrLocations": "店舗または場所を検索",
+  "NoShopsFound": "店舗が見つかりませんでした",
+  "ClearSearch": "検索をクリア",
+  "SearchResults": "検索結果"
 }

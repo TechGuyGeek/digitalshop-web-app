@@ -187,5 +187,9 @@
   "AIAssistant_Send": "Need review",
   "AIAssistant_Stop": "Need review",
   "HomeAssistant_WelcomeFirst": "Welcome to GPS Shops. Find local shops near you, or create your own digital shop so customers can find you. To continue, please register or sign in.",
-  "HomeAssistant_WelcomeBack": "Welcome to GPS Shops. Find local shops near you, or create your own digital shop so customers can find you. To continue, please register or sign in."
+  "HomeAssistant_WelcomeBack": "Welcome to GPS Shops. Find local shops near you, or create your own digital shop so customers can find you. To continue, please register or sign in.",
+  "SearchShopsOrLocations": "Search shops or locations",
+  "NoShopsFound": "No shops found",
+  "ClearSearch": "Clear search",
+  "SearchResults": "Search results"
 }

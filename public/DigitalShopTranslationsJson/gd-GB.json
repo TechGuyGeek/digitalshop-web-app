@@ -491,5 +491,9 @@
   "AIAssistant_Send": "Need review",
   "AIAssistant_Stop": "Need review",
   "HomeAssistant_WelcomeFirst": "Fàilte gu GPS Shops. Lorg bùithtean ionadail faisg ort, no cruthaich do bhùth dhidseatach fhèin gus an lorg luchd-ceannach thu. Gus leantainn air adhart, clàraich no clàraich a-steach.",
-  "HomeAssistant_WelcomeBack": "Fàilte gu GPS Shops. Lorg bùithtean ionadail faisg ort, no cruthaich do bhùth dhidseatach fhèin gus an lorg luchd-ceannach thu. Gus leantainn air adhart, clàraich no clàraich a-steach."
+  "HomeAssistant_WelcomeBack": "Fàilte gu GPS Shops. Lorg bùithtean ionadail faisg ort, no cruthaich do bhùth dhidseatach fhèin gus an lorg luchd-ceannach thu. Gus leantainn air adhart, clàraich no clàraich a-steach.",
+  "SearchShopsOrLocations": "Lorg bùithtean no àiteachan",
+  "NoShopsFound": "Cha deach bùithtean a lorg",
+  "ClearSearch": "Glan an lorg",
+  "SearchResults": "Toraidhean luirg"
 }
