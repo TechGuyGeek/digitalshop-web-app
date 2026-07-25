@@ -1,4 +1,8 @@
 import ShopListingPage from "@/components/ShopListingPage";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-const PaidShops = () => <ShopListingPage title="Paid Shops" variant="paid" />;
+const PaidShops = () => {
+  const { t } = useLanguage();
+  return <ShopListingPage title={t("PaidView")} variant="paid" />;
+};
 export default PaidShops;
