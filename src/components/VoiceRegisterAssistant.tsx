@@ -22,6 +22,21 @@ function getSpeechRecognition(): SR | null {
 
 const ttsSupported = () => typeof window !== "undefined" && "speechSynthesis" in window;
 
+function pickVoice(lang: string): SpeechSynthesisVoice | null {
+  try {
+    const voices = window.speechSynthesis.getVoices();
+    if (!voices?.length) return null;
+    const target = (lang || "").toLowerCase();
+    const base = target.split("-")[0];
+    return (
+      voices.find((v) => v.lang?.toLowerCase() === target) ||
+      voices.find((v) => v.lang?.toLowerCase().startsWith(base + "-")) ||
+      voices.find((v) => v.lang?.toLowerCase().startsWith(base)) ||
+      null
+    );
+  } catch { return null; }
+}
+
 // Common mishears for gender words. If any alternative or word matches, prefer the canonical.
 const GENDER_MAP: Record<string, string> = {
   male: "male", mail: "male", "m.a.l.e": "male", now: "male", nail: "male", may: "male", maple: "male",
@@ -101,6 +116,8 @@ export default function VoiceRegisterAssistant({ values, onFieldsUpdate, onCompl
         const u = new SpeechSynthesisUtterance(text);
         u.rate = 1; u.pitch = 1;
         if (language) u.lang = language;
+        const v = pickVoice(language || "");
+        if (v) u.voice = v;
         u.onstart = () => setSpeaking(true);
         u.onend = () => { setSpeaking(false); if (thenListen && !completeRef.current) startListening(); resolve(); };
         u.onerror = () => { setSpeaking(false); if (thenListen && !completeRef.current) startListening(); resolve(); };
