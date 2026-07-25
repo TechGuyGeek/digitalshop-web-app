@@ -15,17 +15,19 @@ interface GoogleMapProps {
   cinematicZoom?: boolean;
   showCinematicCounter?: boolean;
   hideUserMarker?: boolean;
+  focusTarget?: { lat: number; lng: number; zoom?: number; companyid?: number; name?: string } | null;
 }
 
 const TILE_URL = "https://maps.techguygeek.co.uk/tiles/osm/webmercator/{z}/{x}/{y}.png";
 const TILE_ATTRIBUTION = "© OpenStreetMap contributors";
 
-const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, forcedCenter = null, rangeCircleMetres, interactive = true, worldViewFallback = false, cinematicZoom = false, showCinematicCounter = false, hideUserMarker = false }: GoogleMapProps) => {
+const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, forcedCenter = null, rangeCircleMetres, interactive = true, worldViewFallback = false, cinematicZoom = false, showCinematicCounter = false, hideUserMarker = false, focusTarget = null }: GoogleMapProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const circleRef = useRef<L.Circle | null>(null);
   const userMarkerRef = useRef<L.CircleMarker | null>(null);
   const shopLayerRef = useRef<L.LayerGroup | null>(null);
+  const shopMarkersRef = useRef<Map<number, L.Marker>>(new Map());
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null);
   const [locating, setLocating] = useState(true);
   const [mapReady, setMapReady] = useState(false);
@@ -184,6 +186,7 @@ const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, 
     if (!map || !layer) return;
 
     layer.clearLayers();
+    shopMarkersRef.current.clear();
 
     shops.forEach((shop) => {
       if (shop.lat == null || shop.lng == null) return;
@@ -197,11 +200,28 @@ const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, 
         iconAnchor: [size / 2, size / 2],
       });
       const marker = L.marker([shop.lat, shop.lng], { icon: divIcon, title: shop.name }).addTo(layer);
+      marker.bindPopup(`<div style="font-family:inherit;font-size:13px;font-weight:600;">${shop.name.replace(/</g, "&lt;")}</div>`);
+      if (shop.companyid != null) shopMarkersRef.current.set(shop.companyid, marker);
       if (onShopClick) {
         marker.on("click", () => onShopClick(shop));
       }
     });
   }, [shops, onShopClick, mapReady]);
+
+  // Fly to a search-selected shop and open its popup
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map || !focusTarget) return;
+    const zoom = focusTarget.zoom ?? 17;
+    map.flyTo([focusTarget.lat, focusTarget.lng], zoom, { duration: 1.2 });
+    if (focusTarget.companyid != null) {
+      const m = shopMarkersRef.current.get(focusTarget.companyid);
+      if (m) {
+        // slight delay so the popup opens after the fly starts
+        setTimeout(() => m.openPopup(), 300);
+      }
+    }
+  }, [focusTarget, mapReady]);
 
   return (
     <div className={className} style={{ position: "relative" }}>
