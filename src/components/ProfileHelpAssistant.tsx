@@ -80,7 +80,7 @@ export default function ProfileHelpAssistant({ translationKey = "HELPUSERPROFILE
   });
   const [speaking, setSpeaking] = useState(false);
   const [visible, setVisible] = useState(true);
-  const spokenRef = useRef(false);
+  const spokenKeyRef = useRef("");
 
   const message = t(KEY);
   const ttsOk = typeof window !== "undefined" && "speechSynthesis" in window;
@@ -88,11 +88,12 @@ export default function ProfileHelpAssistant({ translationKey = "HELPUSERPROFILE
   const hideMs = Math.min(90000, Math.max(15000, message.length * 80));
 
   useEffect(() => {
-    if (spokenRef.current) return;
     if (!helpEnabled) return;
     if (loading) return;
     if (message === KEY) return; // translations not loaded yet
-    spokenRef.current = true;
+    const speechKey = `${language}:${KEY}:${message}`;
+    if (spokenKeyRef.current === speechKey) return;
+    spokenKeyRef.current = speechKey;
     if (muted || !ttsOk) return;
     const trySpeak = () => {
       try { speakChunks(message, language, () => setSpeaking(true), () => setSpeaking(false)); } catch {}
@@ -127,7 +128,7 @@ export default function ProfileHelpAssistant({ translationKey = "HELPUSERPROFILE
       if (ttsOk) { try { window.speechSynthesis.cancel(); } catch {} }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading, message, helpEnabled]);
+  }, [loading, message, language, helpEnabled]);
 
   useEffect(() => {
     const id = setTimeout(() => {
