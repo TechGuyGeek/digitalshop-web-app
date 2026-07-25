@@ -8,6 +8,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import AdvertSlot from "@/components/adverts/AdvertSlot";
 import { getMarkerIconUrl, DEFAULT_MARKER_ICON } from "@/lib/mapMarkerIcons";
 import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
+import ShopSearch from "@/components/ShopSearch";
 
 interface ShopListingPageProps { title: string; variant?: "free" | "paid" | "global"; helpKey?: string; }
 
@@ -28,6 +29,7 @@ const ShopListingPage = ({ title, variant = "free", helpKey }: ShopListingPagePr
   const [error, setError] = useState<string | null>(null);
   const [userPos, setUserPos] = useState<{ lat: number; lng: number } | null>(null);
   const [mapExpanded, setMapExpanded] = useState(false);
+  const [focusTarget, setFocusTarget] = useState<{ lat: number; lng: number; zoom?: number; companyid?: number; name?: string } | null>(null);
   const isGlobal = variant === "global";
 
   const loadShops = async (lat?: number, lng?: number) => {
@@ -44,6 +46,9 @@ const ShopListingPage = ({ title, variant = "free", helpKey }: ShopListingPagePr
 
   const mapShops = shops.map((s) => ({ name: s.name, icon: s.icon, lat: s.lat, lng: s.lng, companyid: s.companyid }));
   const handleShopMapClick = (shop: { name: string; icon: string; companyid?: number }) => { if (shop.companyid) navigate(`/shop-profile?companyid=${shop.companyid}&name=${encodeURIComponent(shop.name)}&icon=${encodeURIComponent(shop.icon)}`); };
+  const handleSearchSelect = (shop: NearbyShop) => {
+    setFocusTarget({ lat: shop.lat, lng: shop.lng, zoom: 17, companyid: shop.companyid, name: shop.name });
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -66,14 +71,20 @@ const ShopListingPage = ({ title, variant = "free", helpKey }: ShopListingPagePr
       <div className="flex-1 flex flex-col">
         {activeTab === "hybrid" && (<>
           <div className="relative h-56 w-full">
-            <GoogleMap className="h-full w-full" shops={mapShops} onShopClick={handleShopMapClick} defaultZoom={isGlobal ? 3 : 14} rangeCircleMetres={variant === "free" ? 804.67 : variant === "paid" ? 1609.34 : undefined} />
+            <GoogleMap className="h-full w-full" shops={mapShops} onShopClick={handleShopMapClick} defaultZoom={isGlobal ? 3 : 14} rangeCircleMetres={variant === "free" ? 804.67 : variant === "paid" ? 1609.34 : undefined} focusTarget={focusTarget} />
+            <div className="absolute top-2 left-2 right-12 z-[1000]">
+              <ShopSearch shops={shops} onSelect={handleSearchSelect} />
+            </div>
           </div>
           {(variant === "free" || variant === "paid") && <p className="text-[11px] text-muted-foreground text-center py-1">{variant === "free" ? (t("Showingshopswithin") !== "Showingshopswithin" ? t("Showingshopswithin") : "Showing shops within 0.5 miles") : "Showing shops within 1 mile"}</p>}
           <ShopContent shops={shops} loading={loading} error={error} isGlobal={isGlobal} onRetry={() => isGlobal ? loadShops() : userPos && loadShops(userPos.lat, userPos.lng)} />
         </>)}
         {activeTab === "map" && (<>
           <ExpandableMap expanded={mapExpanded} onToggle={() => setMapExpanded(v => !v)} baseClassName="relative w-full h-[60vh] min-h-[400px]">
-            <GoogleMap className="h-full w-full" shops={mapShops} onShopClick={handleShopMapClick} defaultZoom={isGlobal ? 3 : 14} rangeCircleMetres={variant === "free" ? 804.67 : variant === "paid" ? 1609.34 : undefined} />
+            <GoogleMap className="h-full w-full" shops={mapShops} onShopClick={handleShopMapClick} defaultZoom={isGlobal ? 3 : 14} rangeCircleMetres={variant === "free" ? 804.67 : variant === "paid" ? 1609.34 : undefined} focusTarget={focusTarget} />
+            <div className="absolute top-2 left-2 right-12 z-[1000]">
+              <ShopSearch shops={shops} onSelect={handleSearchSelect} />
+            </div>
           </ExpandableMap>
           {(variant === "free" || variant === "paid") && <p className="text-[11px] text-muted-foreground text-center py-1">{variant === "free" ? (t("Showingshopswithin") !== "Showingshopswithin" ? t("Showingshopswithin") : "Showing shops within 0.5 miles") : "Showing shops within 1 mile"}</p>}
           {loading && (<div className="p-4 text-center text-sm text-muted-foreground">{t("Pleasewait")}</div>)}
