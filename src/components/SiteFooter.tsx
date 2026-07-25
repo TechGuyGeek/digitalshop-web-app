@@ -27,7 +27,7 @@ const SiteFooter = () => {
           onClick={openCookieSettings}
           className="text-muted-foreground hover:text-foreground transition-colors"
         >
-          Cookie Settings
+          {t("CookieSettings")}
         </button>
       </nav>
       <p className="mt-3 text-center text-xs text-muted-foreground">
