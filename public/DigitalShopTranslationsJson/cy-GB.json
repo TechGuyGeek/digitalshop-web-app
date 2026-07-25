@@ -495,5 +495,11 @@
   "SearchShopsOrLocations": "Chwilio siopau neu leoliadau",
   "NoShopsFound": "Ni chanfuwyd unrhyw siopau",
   "ClearSearch": "Clirio'r chwiliad",
-  "SearchResults": "Canlyniadau chwilio"
+  "SearchResults": "Canlyniadau chwilio",
+  "MyPaymentMethods": "Fy Nulliau Talu",
+  "Admin": "Gweinyddwr",
+  "CookieSettings": "Gosodiadau Cwcis",
+  "IntroDescription": "Dewch o hyd i fusnesau yn agos atoch, neu creu eich siop eich hun, hysbysebu eich cynhyrchion a'ch gwasanaethau, a chysylltu'n uniongyrchol â chwsmeriaid.",
+  "IntroHeadline": "Mae GPS Shops yn cysylltu cwsmeriaid â busnesau lleol.",
+  "IntroAboutLink": "Am GPS Shops"
 }

@@ -86,7 +86,7 @@ const SiteNav = ({ items, className }: SiteNavProps) => {
                 }}
                 className="w-full text-left block px-6 py-3 text-base font-heading tracking-wide transition-colors text-foreground hover:bg-secondary"
               >
-                Cookie Settings
+                {t("CookieSettings")}
               </button>
             </li>
           </ul>

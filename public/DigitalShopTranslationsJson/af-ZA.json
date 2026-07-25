@@ -495,5 +495,11 @@
   "SearchShopsOrLocations": "Soek winkels of liggings",
   "NoShopsFound": "Geen winkels gevind nie",
   "ClearSearch": "Vee soektog uit",
-  "SearchResults": "Soekresultate"
+  "SearchResults": "Soekresultate",
+  "MyPaymentMethods": "My Betaalmetodes",
+  "Admin": "Admin",
+  "CookieSettings": "Koekie-instellings",
+  "IntroDescription": "Vind besighede naby jou, of skep jou eie winkel, adverteer jou produkte en dienste, en koppel direk met kliënte.",
+  "IntroHeadline": "GPS Shops verbind kliënte met plaaslike besighede.",
+  "IntroAboutLink": "Oor GPS Shops"
 }

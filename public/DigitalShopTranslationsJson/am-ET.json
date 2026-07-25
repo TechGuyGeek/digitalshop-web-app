@@ -495,5 +495,11 @@
   "SearchShopsOrLocations": "ሱቆችን ወይም ቦታዎችን ይፈልጉ",
   "NoShopsFound": "ምንም ሱቆች አልተገኙም",
   "ClearSearch": "ፍለጋን አጽዳ",
-  "SearchResults": "የፍለጋ ውጤቶች"
+  "SearchResults": "የፍለጋ ውጤቶች",
+  "MyPaymentMethods": "የክፍያ ዘዴዎቼ",
+  "Admin": "አስተዳዳሪ",
+  "CookieSettings": "የኩኪ ቅንብሮች",
+  "IntroDescription": "በአቅራቢያዎ ያሉ ንግዶችን ያግኙ፣ ወይም የራስዎን ሱቅ ይፍጠሩ፣ ምርቶችዎን እና አገልግሎቶችዎን ያስተዋውቁ፣ እና ከደንበኞች ጋር በቀጥታ ይገናኙ።",
+  "IntroHeadline": "GPS Shops ደንበኞችን ከአካባቢያዊ ንግዶች ጋር ያገናኛል።",
+  "IntroAboutLink": "ስለ GPS Shops"
 }

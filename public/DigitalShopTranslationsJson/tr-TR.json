@@ -498,5 +498,8 @@
   "SearchShopsOrLocations": "Mağaza veya konum ara",
   "NoShopsFound": "Mağaza bulunamadı",
   "ClearSearch": "Aramayı temizle",
-  "SearchResults": "Arama sonuçları"
+  "SearchResults": "Arama sonuçları",
+  "MyPaymentMethods": "Ödeme yöntemlerim",
+  "Admin": "Yönetici",
+  "CookieSettings": "Çerez Ayarları"
 }

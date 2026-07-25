@@ -498,5 +498,8 @@
   "SearchShopsOrLocations": "Hae kauppoja tai sijainteja",
   "NoShopsFound": "Kauppoja ei löytynyt",
   "ClearSearch": "Tyhjennä haku",
-  "SearchResults": "Hakutulokset"
+  "SearchResults": "Hakutulokset",
+  "MyPaymentMethods": "Omat maksutapani",
+  "Admin": "Ylläpitäjä",
+  "CookieSettings": "Evästeasetukset"
 }

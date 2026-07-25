@@ -498,5 +498,8 @@
   "SearchShopsOrLocations": "Boltok vagy helyek keresése",
   "NoShopsFound": "Nem található bolt",
   "ClearSearch": "Keresés törlése",
-  "SearchResults": "Keresési eredmények"
+  "SearchResults": "Keresési eredmények",
+  "MyPaymentMethods": "Fizetési módjaim",
+  "Admin": "Adminisztrátor",
+  "CookieSettings": "Süti beállítások"
 }

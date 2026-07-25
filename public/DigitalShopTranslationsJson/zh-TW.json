@@ -498,5 +498,8 @@
   "SearchShopsOrLocations": "搜尋商店或位置",
   "NoShopsFound": "找不到商店",
   "ClearSearch": "清除搜尋",
-  "SearchResults": "搜尋結果"
+  "SearchResults": "搜尋結果",
+  "MyPaymentMethods": "我的付款方式",
+  "Admin": "管理員",
+  "CookieSettings": "Cookie 設定"
 }

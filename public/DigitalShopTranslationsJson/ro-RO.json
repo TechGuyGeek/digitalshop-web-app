@@ -498,5 +498,8 @@
   "SearchShopsOrLocations": "Caută magazine sau locații",
   "NoShopsFound": "Nu s-au găsit magazine",
   "ClearSearch": "Șterge căutarea",
-  "SearchResults": "Rezultatele căutării"
+  "SearchResults": "Rezultatele căutării",
+  "MyPaymentMethods": "Metodele mele de plată",
+  "Admin": "Administrator",
+  "CookieSettings": "Setări cookie-uri"
 }

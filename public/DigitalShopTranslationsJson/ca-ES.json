@@ -498,5 +498,8 @@
   "SearchShopsOrLocations": "Cerca botigues o ubicacions",
   "NoShopsFound": "No s'han trobat botigues",
   "ClearSearch": "Esborra la cerca",
-  "SearchResults": "Resultats de la cerca"
+  "SearchResults": "Resultats de la cerca",
+  "MyPaymentMethods": "Els meus mètodes de pagament",
+  "Admin": "Administrador",
+  "CookieSettings": "Configuració de galetes"
 }

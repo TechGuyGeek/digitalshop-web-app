@@ -498,5 +498,8 @@
   "SearchShopsOrLocations": "Search shops or locations",
   "NoShopsFound": "No shops found",
   "ClearSearch": "Clear search",
-  "SearchResults": "Search results"
+  "SearchResults": "Search results",
+  "MyPaymentMethods": "My Payment Methods",
+  "Admin": "Admin",
+  "CookieSettings": "Cookie Settings"
 }

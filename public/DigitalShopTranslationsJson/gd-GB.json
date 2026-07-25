@@ -495,5 +495,11 @@
   "SearchShopsOrLocations": "Lorg bùithtean no àiteachan",
   "NoShopsFound": "Cha deach bùithtean a lorg",
   "ClearSearch": "Glan an lorg",
-  "SearchResults": "Toraidhean luirg"
+  "SearchResults": "Toraidhean luirg",
+  "MyPaymentMethods": "Mo dhòighean pàighidh",
+  "Admin": "Rianaire",
+  "CookieSettings": "Roghainnean bhriosgaidean",
+  "IntroDescription": "Lorg gnìomhachasan faisg ort, no cruthaich do bhùth fhèin, sanasaich do bhathar is do sheirbheisean, agus ceangail gu dìreach ri luchd-ceannach.",
+  "IntroHeadline": "Bidh GPS Shops a' ceangal luchd-ceannach ri gnìomhachasan ionadail.",
+  "IntroAboutLink": "Mu dheidhinn GPS Shops"
 }

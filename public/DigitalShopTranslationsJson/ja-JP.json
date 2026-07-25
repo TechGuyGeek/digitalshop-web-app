@@ -498,5 +498,8 @@
   "SearchShopsOrLocations": "店舗または場所を検索",
   "NoShopsFound": "店舗が見つかりませんでした",
   "ClearSearch": "検索をクリア",
-  "SearchResults": "検索結果"
+  "SearchResults": "検索結果",
+  "MyPaymentMethods": "お支払い方法",
+  "Admin": "管理者",
+  "CookieSettings": "Cookie 設定"
 }

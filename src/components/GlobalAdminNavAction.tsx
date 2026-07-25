@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useRegisterNavActions } from "@/contexts/SiteNavExtras";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const ADMIN_EMAIL = "jason.purkiss.bsc@gmail.com";
 
@@ -18,6 +19,7 @@ const readAdminEmail = (): string => {
 const GlobalAdminNavAction = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const { t } = useLanguage();
   const [email, setEmail] = useState<string>(readAdminEmail);
 
   // Re-check on route change
@@ -62,7 +64,7 @@ const GlobalAdminNavAction = () => {
       ? [
           {
             id: "admin-shops",
-            label: "Admin",
+            label: t("Admin") || "Admin",
             onClick: handleClick,
             order: 50,
           },
