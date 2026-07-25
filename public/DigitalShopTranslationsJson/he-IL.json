@@ -494,5 +494,9 @@
   "AIAssistant_Send": "Need review",
   "AIAssistant_Stop": "Need review",
   "HomeAssistant_WelcomeFirst": "ברוכים הבאים ל-GPS Shops. מצאו חנויות מקומיות בקרבתכם, או צרו חנות דיגיטלית משלכם כדי שלקוחות יוכלו למצוא אתכם. כדי להמשיך, אנא הירשמו או היכנסו.",
-  "HomeAssistant_WelcomeBack": "ברוכים הבאים ל-GPS Shops. מצאו חנויות מקומיות בקרבתכם, או צרו חנות דיגיטלית משלכם כדי שלקוחות יוכלו למצוא אתכם. כדי להמשיך, אנא הירשמו או היכנסו."
+  "HomeAssistant_WelcomeBack": "ברוכים הבאים ל-GPS Shops. מצאו חנויות מקומיות בקרבתכם, או צרו חנות דיגיטלית משלכם כדי שלקוחות יוכלו למצוא אתכם. כדי להמשיך, אנא הירשמו או היכנסו.",
+  "SearchShopsOrLocations": "חפש חנויות או מיקומים",
+  "NoShopsFound": "לא נמצאו חנויות",
+  "ClearSearch": "נקה חיפוש",
+  "SearchResults": "תוצאות חיפוש"
 }

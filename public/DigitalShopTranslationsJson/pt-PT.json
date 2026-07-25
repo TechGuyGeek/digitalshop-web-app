@@ -494,5 +494,9 @@
   "AIAssistant_Send": "Enviar",
   "AIAssistant_Stop": "Parar",
   "HomeAssistant_WelcomeFirst": "Bem-vindo ao GPS Shops. Encontre lojas locais perto de si, ou crie a sua própria loja digital para que os clientes o possam encontrar. Para continuar, registe-se ou inicie sessão.",
-  "HomeAssistant_WelcomeBack": "Bem-vindo ao GPS Shops. Encontre lojas locais perto de si, ou crie a sua própria loja digital para que os clientes o possam encontrar. Para continuar, registe-se ou inicie sessão."
+  "HomeAssistant_WelcomeBack": "Bem-vindo ao GPS Shops. Encontre lojas locais perto de si, ou crie a sua própria loja digital para que os clientes o possam encontrar. Para continuar, registe-se ou inicie sessão.",
+  "SearchShopsOrLocations": "Pesquisar lojas ou locais",
+  "NoShopsFound": "Nenhuma loja encontrada",
+  "ClearSearch": "Limpar pesquisa",
+  "SearchResults": "Resultados da pesquisa"
 }

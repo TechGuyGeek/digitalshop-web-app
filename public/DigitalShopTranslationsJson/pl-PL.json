@@ -494,5 +494,9 @@
   "AIAssistant_Send": "Need review",
   "AIAssistant_Stop": "Need review",
   "HomeAssistant_WelcomeFirst": "Witamy w GPS Shops. Znajdź lokalne sklepy w pobliżu lub utwórz własny cyfrowy sklep, aby klienci mogli Cię znaleźć. Aby kontynuować, zarejestruj się lub zaloguj.",
-  "HomeAssistant_WelcomeBack": "Witamy w GPS Shops. Znajdź lokalne sklepy w pobliżu lub utwórz własny cyfrowy sklep, aby klienci mogli Cię znaleźć. Aby kontynuować, zarejestruj się lub zaloguj."
+  "HomeAssistant_WelcomeBack": "Witamy w GPS Shops. Znajdź lokalne sklepy w pobliżu lub utwórz własny cyfrowy sklep, aby klienci mogli Cię znaleźć. Aby kontynuować, zarejestruj się lub zaloguj.",
+  "SearchShopsOrLocations": "Szukaj sklepów lub lokalizacji",
+  "NoShopsFound": "Nie znaleziono sklepów",
+  "ClearSearch": "Wyczyść wyszukiwanie",
+  "SearchResults": "Wyniki wyszukiwania"
 }

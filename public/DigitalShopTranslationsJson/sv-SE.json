@@ -494,5 +494,9 @@
   "AIAssistant_Send": "Need review",
   "AIAssistant_Stop": "Need review",
   "HomeAssistant_WelcomeFirst": "Välkommen till GPS Shops. Hitta lokala butiker nära dig, eller skapa din egen digitala butik så att kunder kan hitta dig. För att fortsätta, vänligen registrera dig eller logga in.",
-  "HomeAssistant_WelcomeBack": "Välkommen till GPS Shops. Hitta lokala butiker nära dig, eller skapa din egen digitala butik så att kunder kan hitta dig. För att fortsätta, vänligen registrera dig eller logga in."
+  "HomeAssistant_WelcomeBack": "Välkommen till GPS Shops. Hitta lokala butiker nära dig, eller skapa din egen digitala butik så att kunder kan hitta dig. För att fortsätta, vänligen registrera dig eller logga in.",
+  "SearchShopsOrLocations": "Sök butiker eller platser",
+  "NoShopsFound": "Inga butiker hittades",
+  "ClearSearch": "Rensa sökning",
+  "SearchResults": "Sökresultat"
 }

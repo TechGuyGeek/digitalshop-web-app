@@ -491,5 +491,9 @@
   "AIAssistant_Send": "Need review",
   "AIAssistant_Stop": "Need review",
   "HomeAssistant_WelcomeFirst": "Croeso i GPS Shops. Dewch o hyd i siopau lleol yn agos atoch, neu crëwch eich siop ddigidol eich hun fel y gall cwsmeriaid eich darganfod. I barhau, cofrestrwch neu mewngofnodwch.",
-  "HomeAssistant_WelcomeBack": "Croeso i GPS Shops. Dewch o hyd i siopau lleol yn agos atoch, neu crëwch eich siop ddigidol eich hun fel y gall cwsmeriaid eich darganfod. I barhau, cofrestrwch neu mewngofnodwch."
+  "HomeAssistant_WelcomeBack": "Croeso i GPS Shops. Dewch o hyd i siopau lleol yn agos atoch, neu crëwch eich siop ddigidol eich hun fel y gall cwsmeriaid eich darganfod. I barhau, cofrestrwch neu mewngofnodwch.",
+  "SearchShopsOrLocations": "Chwilio siopau neu leoliadau",
+  "NoShopsFound": "Ni chanfuwyd unrhyw siopau",
+  "ClearSearch": "Clirio'r chwiliad",
+  "SearchResults": "Canlyniadau chwilio"
 }

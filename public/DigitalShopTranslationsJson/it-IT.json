@@ -494,5 +494,9 @@
   "AIAssistant_Send": "Invia",
   "AIAssistant_Stop": "Ferma",
   "HomeAssistant_WelcomeFirst": "Benvenuto su GPS Shops. Trova negozi locali vicino a te, o crea il tuo negozio digitale così i clienti possono trovarti. Per continuare, registrati o accedi.",
-  "HomeAssistant_WelcomeBack": "Benvenuto su GPS Shops. Trova negozi locali vicino a te, o crea il tuo negozio digitale così i clienti possono trovarti. Per continuare, registrati o accedi."
+  "HomeAssistant_WelcomeBack": "Benvenuto su GPS Shops. Trova negozi locali vicino a te, o crea il tuo negozio digitale così i clienti possono trovarti. Per continuare, registrati o accedi.",
+  "SearchShopsOrLocations": "Cerca negozi o luoghi",
+  "NoShopsFound": "Nessun negozio trovato",
+  "ClearSearch": "Cancella ricerca",
+  "SearchResults": "Risultati della ricerca"
 }
