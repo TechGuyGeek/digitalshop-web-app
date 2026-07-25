@@ -113,16 +113,77 @@ function sanitizeRegistration(reg: Registration): { clean: Registration; rejecte
   return { clean, rejected };
 }
 
-function offTopicReply(missing: string[]): string {
-  const next = missing[0]?.replace(/_/g, " ");
-  return next
+const LANGUAGE_NAMES: Record<string, string> = {
+  "af-ZA": "Afrikaans",
+  "am-ET": "Amharic",
+  "ar-AE": "Arabic",
+  "ca-ES": "Catalan",
+  "cy-GB": "Welsh",
+  "da-DK": "Danish",
+  "de-DE": "German",
+  "el-GR": "Greek",
+  "en-AU": "Australian English",
+  "en-GB": "British English",
+  "en-IE": "Irish English",
+  "en-US": "American English",
+  "en": "English",
+  "es-ES": "Spanish",
+  "fi-FI": "Finnish",
+  "fr-FR": "French",
+  "gd-GB": "Scottish Gaelic",
+  "he-IL": "Hebrew",
+  "hi-IN": "Hindi",
+  "hu-HU": "Hungarian",
+  "is-IS": "Icelandic",
+  "it-IT": "Italian",
+  "ja-JP": "Japanese",
+  "kkj": "Kako",
+  "ko-KR": "Korean",
+  "nl-NL": "Dutch",
+  "pa-IN": "Punjabi",
+  "pl-PL": "Polish",
+  "pt-PT": "Portuguese",
+  "ro-RO": "Romanian",
+  "ru-RU": "Russian",
+  "sv-SE": "Swedish",
+  "th-TH": "Thai",
+  "tr-TR": "Turkish",
+  "uk-UA": "Ukrainian",
+  "zh-CN": "Simplified Chinese",
+  "zh-TW": "Traditional Chinese",
+};
+
+const UK_FIELD_LABELS: Record<string, string> = {
+  first_name: "ім’я",
+  last_name: "прізвище",
+  email: "електронну адресу",
+  mobile_number: "номер мобільного телефону",
+  password: "пароль",
+  gender: "стать",
+};
+
+function fieldLabel(field: string | undefined, language?: string): string {
+  if (!field) return "details";
+  if (language === "uk-UA") return UK_FIELD_LABELS[field] ?? field.replace(/_/g, " ");
+  return field.replace(/_/g, " ");
+}
+
+function offTopicReply(missing: string[], language?: string): string {
+  const next = fieldLabel(missing[0], language);
+  if (language === "uk-UA") {
+    return missing[0]
+      ? `Я можу допомогти лише з реєстрацією в GPS Shops. Будь ласка, повідомте ${next}.`
+      : "Я можу допомогти лише з реєстрацією в GPS Shops.";
+  }
+  return missing[0]
     ? `I can only help you register for GPS Shops. Please tell me your ${next}.`
     : "I can only help you register for GPS Shops.";
 }
 
 function languageInstruction(language?: string): string {
   if (!language) return "";
-  return `\nIMPORTANT: The user's preferred language code is "${language}". Write the "reply" field in that language. JSON keys and field values (names, email, etc.) must stay verbatim.`;
+  const languageName = LANGUAGE_NAMES[language] ?? language;
+  return `\nIMPORTANT: The user's preferred language is ${languageName} (code "${language}"). Write every user-facing word in the "reply" field in ${languageName}, not English, unless ${languageName} is an English variant. JSON keys and field values (names, email, phone, password, etc.) must stay verbatim.`;
 }
 
 function mergeRegistration(partial: Partial<Registration> | undefined): Registration {
@@ -143,22 +204,30 @@ function safeParse(text: string): Partial<RegistrationAIResponse> | null {
   try { return JSON.parse(cleaned.slice(start, end + 1)); } catch { return null; }
 }
 
-function normalize(raw: Partial<RegistrationAIResponse> | null, prior: Registration): RegistrationAIResponse {
+function normalize(raw: Partial<RegistrationAIResponse> | null, prior: Registration, language?: string): RegistrationAIResponse {
   const merged = mergeRegistration({ ...prior, ...(raw?.registration ?? {}) });
   const { clean: registration, rejected } = sanitizeRegistration(merged);
   const missing_fields = computeMissing(registration);
   const complete = missing_fields.length === 0;
-  const nextField = missing_fields[0]?.replace(/_/g, " ");
+  const nextField = fieldLabel(missing_fields[0], language);
   const rejectMsg = rejected.length
-    ? `That doesn't look like a valid ${rejected[0].replace(/_/g, " ")}. Please provide a valid ${nextField ?? rejected[0].replace(/_/g, " ")}.`
+    ? language === "uk-UA"
+      ? `Це не схоже на правильне значення для поля ${fieldLabel(rejected[0], language)}. Будь ласка, введіть правильне значення для поля ${nextField ?? fieldLabel(rejected[0], language)}.`
+      : `That doesn't look like a valid ${fieldLabel(rejected[0], language)}. Please provide a valid ${nextField ?? fieldLabel(rejected[0], language)}.`
     : null;
+  const completeReply = language === "uk-UA"
+    ? "Усі ваші дані заповнено — натисніть кнопку Зареєструватися, щоб завершити створення облікового запису."
+    : "All your details are complete — please click the Register button to finish creating your account.";
+  const missingReply = language === "uk-UA"
+    ? `Будь ласка, повідомте ${nextField}.`
+    : `Please provide your ${nextField}.`;
   return {
     registration,
     missing_fields,
     complete,
     reply: complete
-      ? "All your details are complete — please click the Register button to finish creating your account."
-      : (rejectMsg ?? raw?.reply ?? `Please provide your ${nextField}.`),
+      ? completeReply
+      : (rejectMsg ?? raw?.reply ?? missingReply),
   };
 }
 
@@ -197,7 +266,7 @@ const lovableProvider: AIProvider = {
     }
     const data = await res.json();
     const text: string = data?.choices?.[0]?.message?.content ?? "";
-    return normalize(safeParse(text), partial);
+    return normalize(safeParse(text), partial, language);
   },
 };
 
@@ -220,7 +289,7 @@ const gpsshopsProvider: AIProvider = {
     }
     const data = await res.json();
     // gpsshops endpoint is expected to already return the contract shape.
-    return normalize(data, partial);
+    return normalize(data, partial, language);
   },
 };
 
@@ -262,7 +331,7 @@ Deno.serve(async (req) => {
     // Server-side guard: if the model accidentally produced a long reply, truncate.
     if (result.reply && result.reply.length > 400) {
       const missing = computeMissing(result.registration);
-      result.reply = offTopicReply(missing);
+      result.reply = offTopicReply(missing, language);
     }
 
     return new Response(JSON.stringify(result), {

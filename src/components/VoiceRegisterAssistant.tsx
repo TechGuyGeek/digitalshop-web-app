@@ -88,12 +88,15 @@ export default function VoiceRegisterAssistant({ values, onFieldsUpdate, onCompl
   const speechOk = !!SR;
   const speakOk = ttsSupported();
 
-  // Auto-start intro on mount (best effort — mic may still need a tap on mobile)
+  // Auto-start intro once translations are loaded (best effort — mic may still need a tap on mobile)
   useEffect(() => {
+    if (started) return;
+    const intro = t("AIAssistant_Intro");
+    if (intro === "AIAssistant_Intro") return;
     const id = setTimeout(() => { handleStart(); }, 250);
     return () => clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [language, t, started]);
 
   // Cleanup on unmount
   useEffect(() => {
