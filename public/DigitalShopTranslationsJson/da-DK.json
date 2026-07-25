@@ -498,5 +498,8 @@
   "SearchShopsOrLocations": "Søg efter butikker eller steder",
   "NoShopsFound": "Ingen butikker fundet",
   "ClearSearch": "Ryd søgning",
-  "SearchResults": "Søgeresultater"
+  "SearchResults": "Søgeresultater",
+  "MyPaymentMethods": "Mine betalingsmetoder",
+  "Admin": "Administrator",
+  "CookieSettings": "Cookie-indstillinger"
 }

@@ -498,5 +498,8 @@
   "SearchShopsOrLocations": "חפש חנויות או מיקומים",
   "NoShopsFound": "לא נמצאו חנויות",
   "ClearSearch": "נקה חיפוש",
-  "SearchResults": "תוצאות חיפוש"
+  "SearchResults": "תוצאות חיפוש",
+  "MyPaymentMethods": "אמצעי התשלום שלי",
+  "Admin": "מנהל",
+  "CookieSettings": "הגדרות עוגיות"
 }

@@ -498,5 +498,8 @@
   "SearchShopsOrLocations": "Sök butiker eller platser",
   "NoShopsFound": "Inga butiker hittades",
   "ClearSearch": "Rensa sökning",
-  "SearchResults": "Sökresultat"
+  "SearchResults": "Sökresultat",
+  "MyPaymentMethods": "Mina betalningsmetoder",
+  "Admin": "Administratör",
+  "CookieSettings": "Cookie-inställningar"
 }

@@ -498,5 +498,8 @@
   "SearchShopsOrLocations": "Αναζήτηση καταστημάτων ή τοποθεσιών",
   "NoShopsFound": "Δεν βρέθηκαν καταστήματα",
   "ClearSearch": "Καθαρισμός αναζήτησης",
-  "SearchResults": "Αποτελέσματα αναζήτησης"
+  "SearchResults": "Αποτελέσματα αναζήτησης",
+  "MyPaymentMethods": "Οι μέθοδοι πληρωμής μου",
+  "Admin": "Διαχειριστής",
+  "CookieSettings": "Ρυθμίσεις cookies"
 }

@@ -498,5 +498,8 @@
   "SearchShopsOrLocations": "ابحث عن المتاجر أو المواقع",
   "NoShopsFound": "لم يتم العثور على متاجر",
   "ClearSearch": "مسح البحث",
-  "SearchResults": "نتائج البحث"
+  "SearchResults": "نتائج البحث",
+  "MyPaymentMethods": "طرق الدفع الخاصة بي",
+  "Admin": "المشرف",
+  "CookieSettings": "إعدادات ملفات تعريف الارتباط"
 }

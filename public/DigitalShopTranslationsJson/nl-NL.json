@@ -498,5 +498,8 @@
   "SearchShopsOrLocations": "Zoek winkels of locaties",
   "NoShopsFound": "Geen winkels gevonden",
   "ClearSearch": "Zoekopdracht wissen",
-  "SearchResults": "Zoekresultaten"
+  "SearchResults": "Zoekresultaten",
+  "MyPaymentMethods": "Mijn betaalmethoden",
+  "Admin": "Beheerder",
+  "CookieSettings": "Cookie-instellingen"
 }

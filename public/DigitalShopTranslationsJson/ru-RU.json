@@ -498,5 +498,8 @@
   "SearchShopsOrLocations": "Поиск магазинов или мест",
   "NoShopsFound": "Магазины не найдены",
   "ClearSearch": "Очистить поиск",
-  "SearchResults": "Результаты поиска"
+  "SearchResults": "Результаты поиска",
+  "MyPaymentMethods": "Мои способы оплаты",
+  "Admin": "Администратор",
+  "CookieSettings": "Настройки файлов cookie"
 }

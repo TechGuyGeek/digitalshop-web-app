@@ -495,5 +495,11 @@
   "SearchShopsOrLocations": "Пошук магазинів або місць",
   "NoShopsFound": "Магазинів не знайдено",
   "ClearSearch": "Очистити пошук",
-  "SearchResults": "Результати пошуку"
+  "SearchResults": "Результати пошуку",
+  "MyPaymentMethods": "Мої способи оплати",
+  "Admin": "Адміністратор",
+  "CookieSettings": "Налаштування файлів cookie",
+  "IntroDescription": "Знаходьте підприємства поруч із вами або створіть власну крамницю, рекламуйте свої товари та послуги і спілкуйтеся з клієнтами напряму.",
+  "IntroHeadline": "GPS Shops поєднує клієнтів із місцевими підприємствами.",
+  "IntroAboutLink": "Про GPS Shops"
 }

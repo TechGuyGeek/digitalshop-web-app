@@ -498,5 +498,8 @@
   "SearchShopsOrLocations": "Cerca negozi o luoghi",
   "NoShopsFound": "Nessun negozio trovato",
   "ClearSearch": "Cancella ricerca",
-  "SearchResults": "Risultati della ricerca"
+  "SearchResults": "Risultati della ricerca",
+  "MyPaymentMethods": "I miei metodi di pagamento",
+  "Admin": "Amministratore",
+  "CookieSettings": "Impostazioni dei cookie"
 }

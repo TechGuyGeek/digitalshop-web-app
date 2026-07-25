@@ -498,5 +498,8 @@
   "SearchShopsOrLocations": "दुकानें या स्थान खोजें",
   "NoShopsFound": "कोई दुकान नहीं मिली",
   "ClearSearch": "खोज साफ़ करें",
-  "SearchResults": "खोज परिणाम"
+  "SearchResults": "खोज परिणाम",
+  "MyPaymentMethods": "मेरे भुगतान के तरीके",
+  "Admin": "व्यवस्थापक",
+  "CookieSettings": "कुकी सेटिंग्स"
 }

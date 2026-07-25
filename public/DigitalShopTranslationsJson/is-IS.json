@@ -495,5 +495,11 @@
   "SearchShopsOrLocations": "Leita að verslunum eða stöðum",
   "NoShopsFound": "Engar verslanir fundust",
   "ClearSearch": "Hreinsa leit",
-  "SearchResults": "Leitarniðurstöður"
+  "SearchResults": "Leitarniðurstöður",
+  "MyPaymentMethods": "Greiðslumátar mínir",
+  "Admin": "Stjórnandi",
+  "CookieSettings": "Vafrakökustillingar",
+  "IntroDescription": "Finndu fyrirtæki nálægt þér, eða stofnaðu þína eigin verslun, auglýstu vörur og þjónustu, og tengdu beint við viðskiptavini.",
+  "IntroHeadline": "GPS Shops tengir viðskiptavini við staðbundin fyrirtæki.",
+  "IntroAboutLink": "Um GPS Shops"
 }
