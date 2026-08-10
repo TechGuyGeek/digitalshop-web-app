@@ -572,6 +572,19 @@ const EditMenuGroupsPage = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {imageGroup && (
+        <MenuGroupImagePicker
+          open={!!imageGroup}
+          onOpenChange={(o) => { if (!o) setImageGroup(null); }}
+          companyId={companyId}
+          groupId={imageGroup.ID}
+          groupName={imageGroup.OrderGroup}
+          current={groupImages[String(imageGroup.ID)]}
+          auth={getAuth()}
+          onSaved={() => { refreshGroupImages(); }}
+        />
+      )}
     </div>
   );
 };
