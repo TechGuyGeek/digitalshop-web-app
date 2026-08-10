@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { getLanguageFlag } from "@/lib/languageFlags";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { loginUser, registerUser, requestPasswordReset } from "@/lib/api";
 import { toast } from "sonner";
@@ -566,7 +567,17 @@ const Index = () => {
                     <SelectContent>
                       {availableLanguages.map((lang) => (
                         <SelectItem key={lang.code} value={lang.code}>
-                          {lang.name} – {lang.code}
+                          <span className="flex items-center gap-2">
+                            <span
+                              aria-hidden="true"
+                              className="inline-flex w-6 shrink-0 justify-center text-base leading-none"
+                            >
+                              {getLanguageFlag(lang.code)}
+                            </span>
+                            <span className="truncate">
+                              {lang.name} – {lang.code}
+                            </span>
+                          </span>
                         </SelectItem>
                       ))}
                     </SelectContent>
