@@ -20,6 +20,9 @@ import VideoAdvert from "@/components/adverts/VideoAdvert";
 import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 import { ADVERT_LIBRARY, ADVERT_SETTINGS, VIDEO_TRIGGERS } from "@/lib/advertConfig";
 import { SERVER_DOMAIN } from "@/lib/companyApi";
+import MenuGroupBanner from "@/components/MenuGroupBanner";
+import MenuGroupImagePicker from "@/components/MenuGroupImagePicker";
+import { fetchMenuGroupImages, MenuGroupImageMap, resolveMenuGroupImageUrl } from "@/lib/menuGroupImages";
 import {
   Dialog,
   DialogContent,
@@ -255,6 +258,8 @@ const EditMenuGroupsPage = () => {
   const [editGroup, setEditGroup] = useState<MenuGroup | null>(null);
   const [editName, setEditName] = useState("");
   const [savingEdit, setSavingEdit] = useState(false);
+  const [groupImages, setGroupImages] = useState<MenuGroupImageMap>({});
+  const [imageGroup, setImageGroup] = useState<MenuGroup | null>(null);
 
   const getStoredUser = () => {
     try {
@@ -287,8 +292,15 @@ const EditMenuGroupsPage = () => {
     setLoading(false);
   };
 
+  const refreshGroupImages = async () => {
+    if (companyId > 0) setGroupImages(await fetchMenuGroupImages(companyId));
+  };
+
   useEffect(() => {
-    if (companyId > 0) fetchGroups();
+    if (companyId > 0) {
+      fetchGroups();
+      refreshGroupImages();
+    }
     else setLoading(false);
   }, [companyId]);
 
@@ -461,17 +473,24 @@ const EditMenuGroupsPage = () => {
                 className="border border-border rounded-lg p-4 space-y-3 cursor-pointer hover:border-primary/50 transition-colors bg-card"
                 onClick={() => navigateToGroup(group.ID, group.OrderGroup)}
               >
+                <MenuGroupBanner
+                  src={resolveMenuGroupImageUrl(groupImages[String(group.ID)])}
+                  alt={group.OrderGroup}
+                />
                 <h3 className="text-center text-lg font-bold text-foreground">{group.OrderGroup}</h3>
                 <div className="flex items-center justify-between" onClick={(e) => e.stopPropagation()}>
                   <span className="text-sm text-muted-foreground">{t("TheItemisEnabled")}</span>
                   <Switch checked={(group.MenuEnable || group.menuGroupEnabled) === "1"} onCheckedChange={(v) => handleToggle(group, v)} />
                 </div>
-                <div className="grid grid-cols-3 gap-2" onClick={(e) => e.stopPropagation()}>
+                <div className="grid grid-cols-4 gap-2" onClick={(e) => e.stopPropagation()}>
                   <Button variant="secondary" size="sm" onClick={() => navigateToGroup(group.ID, group.OrderGroup)}>
                     {t("Add")}
                   </Button>
                   <Button variant="secondary" size="sm" onClick={() => openEdit(group)}>
                     {t("Edit")}
+                  </Button>
+                  <Button variant="secondary" size="sm" onClick={() => setImageGroup(group)}>
+                    {t("GroupImageShort")}
                   </Button>
                   <Button variant="secondary" size="sm" onClick={() => setDeleteConfirm(group)}>
                     {t("Delete")}
@@ -553,6 +572,19 @@ const EditMenuGroupsPage = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {imageGroup && (
+        <MenuGroupImagePicker
+          open={!!imageGroup}
+          onOpenChange={(o) => { if (!o) setImageGroup(null); }}
+          companyId={companyId}
+          groupId={imageGroup.ID}
+          groupName={imageGroup.OrderGroup}
+          current={groupImages[String(imageGroup.ID)]}
+          auth={getAuth()}
+          onSaved={() => { refreshGroupImages(); }}
+        />
+      )}
     </div>
   );
 };

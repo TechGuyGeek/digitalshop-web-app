@@ -5,6 +5,8 @@ import { useBasket } from "@/contexts/BasketContext";
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
+import MenuGroupBanner from "@/components/MenuGroupBanner";
+import { fetchMenuGroupImages, MenuGroupImageMap, resolveMenuGroupImageUrl } from "@/lib/menuGroupImages";
 
 const SERVER_DOMAIN = "https://web.gpsshops.com/";
 
@@ -23,6 +25,14 @@ const ShopInterior = () => {
   const [groups, setGroups] = useState<MenuGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [groupImages, setGroupImages] = useState<MenuGroupImageMap>({});
+
+  useEffect(() => {
+    if (!companyId) return;
+    let cancelled = false;
+    fetchMenuGroupImages(companyId).then((map) => { if (!cancelled) setGroupImages(map); });
+    return () => { cancelled = true; };
+  }, [companyId]);
 
   useEffect(() => {
     if (!companyId) { setError(t("Therewasanerror")); setLoading(false); return; }
@@ -64,12 +74,18 @@ const ShopInterior = () => {
             <Button variant="outline" onClick={() => navigate(`/shop-profile?companyid=${encodeURIComponent(companyId)}`)}>{t("Back")}</Button>
           </div>
         )}
-        {!loading && !error && groups.length > 0 && groups.map((group) => (
-          <button key={group.ID} className="w-full py-5 text-center text-foreground font-bold text-lg uppercase tracking-wide border-b border-border bg-card hover:bg-accent/50 transition-colors"
-            onClick={() => navigate(`/category-items?companyid=${encodeURIComponent(companyId)}&shop=${encodeURIComponent(shopName)}&groupId=${group.ID}&category=${encodeURIComponent(group.OrderGroup)}`)}>
-            {group.OrderGroup}
-          </button>
-        ))}
+        {!loading && !error && groups.length > 0 && groups.map((group) => {
+          const bannerUrl = resolveMenuGroupImageUrl(groupImages[String(group.ID)]);
+          return (
+            <button key={group.ID} className="w-full text-center text-foreground font-bold text-lg uppercase tracking-wide border-b border-border bg-card hover:bg-accent/50 transition-colors"
+              onClick={() => navigate(`/category-items?companyid=${encodeURIComponent(companyId)}&shop=${encodeURIComponent(shopName)}&groupId=${group.ID}&category=${encodeURIComponent(group.OrderGroup)}`)}>
+              {bannerUrl && (
+                <MenuGroupBanner src={bannerUrl} alt={group.OrderGroup} className="rounded-none" />
+              )}
+              <span className="block py-5">{group.OrderGroup}</span>
+            </button>
+          );
+        })}
       </div>
       {count > 0 && (
         <div className="sticky bottom-0 left-0 right-0 bg-card border-t border-border px-6 py-4 flex items-center justify-center">
