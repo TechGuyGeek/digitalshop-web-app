@@ -566,7 +566,17 @@ const Index = () => {
                     <SelectContent>
                       {availableLanguages.map((lang) => (
                         <SelectItem key={lang.code} value={lang.code}>
-                          {lang.name} – {lang.code}
+                          <span className="flex items-center gap-2">
+                            <span
+                              aria-hidden="true"
+                              className="inline-flex w-6 shrink-0 justify-center text-base leading-none"
+                            >
+                              {getLanguageFlag(lang.code)}
+                            </span>
+                            <span className="truncate">
+                              {lang.name} – {lang.code}
+                            </span>
+                          </span>
                         </SelectItem>
                       ))}
                     </SelectContent>
