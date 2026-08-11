@@ -525,5 +525,12 @@
   "YourcurrentGPSisnegative": "Tá do GPS reatha diúltach, logáil amach agus ar ais isteach nó athraigh do nasc idirlín reatha",
   "YourLivetorecieveOrders": "Faigheann do Bheo Orduithe",
   "YourShopAnywhere": "Your shop — anywhere.",
-  "Zero": "0"
+  "Zero": "0",
+  "Category": "Category",
+  "Address1": "Address 1",
+  "Address2": "Address 2",
+  "PayonPhone": "Pay on phone",
+  "Tables": "Tables",
+  "Delivery": "Delivery",
+  "MobileNumber": "Mobile Number"
 }
