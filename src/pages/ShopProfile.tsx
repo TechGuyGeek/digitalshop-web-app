@@ -11,9 +11,6 @@ import { SHOP_CATEGORIES } from "@/lib/shopCategories";
 
 const SERVER_DOMAIN = "https://web.gpsshops.com/";
 
-function buildAddress(company: CompanyDetails): string {
-  return [company.LineOneAddress, company.LineTwoAddress, company.LineThreeAddress, company.LineFourAddress, company.LineCountryAddress].filter((line) => line && line.trim() !== "").join(", ");
-}
 
 function formatOpeningHours(opening?: string, closing?: string): string | null {
   if (!opening || !closing) return null;
