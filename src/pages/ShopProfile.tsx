@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { QRCodeCanvas } from "qrcode.react";
 import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
+import { SHOP_CATEGORIES } from "@/lib/shopCategories";
 
 const SERVER_DOMAIN = "https://web.gpsshops.com/";
 
@@ -220,41 +221,105 @@ const ShopProfile = () => {
     </div>
   );
 
+  const addressLines = company
+    ? [company.LineOneAddress, company.LineTwoAddress, company.LineThreeAddress, company.LineFourAddress, company.LineCountryAddress].filter((l) => l && l.trim() !== "")
+    : [];
+  const categoryLabel = SHOP_CATEGORIES.find((c) => c.emoji === fallbackIcon)?.label;
+  const isOn = (v?: string) => v === "1" || v?.toLowerCase() === "true" || v?.toLowerCase() === "yes";
+  const tables = company?.TableNumbers && company.TableNumbers !== "0" ? company.TableNumbers : null;
+
+  const Row = ({ label, value }: { label: string; value: React.ReactNode }) => (
+    <div className="flex items-start justify-between gap-4 py-2.5 first:pt-0 last:pb-0 border-b border-border/60 last:border-b-0">
+      <span className="text-sm text-muted-foreground shrink-0">{label}</span>
+      <span className="text-sm font-semibold text-foreground text-right break-words">{value}</span>
+    </div>
+  );
+
+  const Card = ({ children }: { children: React.ReactNode }) => (
+    <div className="rounded-2xl bg-card border border-border shadow-sm px-4 py-3">{children}</div>
+  );
+
+  const Flag = ({ on }: { on: boolean }) => (
+    <span className={on ? "text-foreground" : "text-muted-foreground"}>{on ? "✓" : "—"}</span>
+  );
+
   return (
     <div className="min-h-screen bg-muted flex flex-col">
       <div className="bg-primary px-4 py-4 flex items-center gap-3">
         <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary/80" onClick={handleBack}><ArrowLeft size={20} /></Button>
         <h1 className="text-lg font-bold text-primary-foreground font-heading truncate">{shopName}</h1>
       </div>
-      <div className="w-full h-48 bg-card flex items-center justify-center overflow-hidden">
-        {imageUrl && !imgError ? (<img src={imageUrl} alt={shopName} className="w-full h-full object-cover" onError={() => setImgError(true)} />) : (<span className="text-5xl">{fallbackIcon}</span>)}
-      </div>
       <div ref={qrRef} className="hidden">
         <QRCodeCanvas value={String(companyIdParam || "")} size={300} level="M" includeMargin />
       </div>
-      <div className="flex-1 flex flex-col items-center px-6 pt-6 pb-28 text-center">
-        <div className="w-full max-w-sm text-left">
+      <div className="flex-1 px-4 pt-4 pb-24">
+        <div className="w-full max-w-md mx-auto space-y-4">
           <ProfileHelpAssistant translationKey="HELPFRONTDOOR" />
+
+          <div className="w-full aspect-[16/9] rounded-2xl overflow-hidden bg-card border border-border shadow-sm flex items-center justify-center">
+            {imageUrl && !imgError ? (
+              <img src={imageUrl} alt={shopName} className="w-full h-full object-cover" onError={() => setImgError(true)} />
+            ) : (
+              <span className="text-5xl">{fallbackIcon}</span>
+            )}
+          </div>
+
+          <div>
+            <h2 className="text-2xl font-bold text-foreground font-heading">{shopName}</h2>
+            {activityDays !== null && (
+              <div className="flex items-center gap-2 text-muted-foreground text-xs mt-1">
+                <Activity size={13} /><span>{t("ShopActivity")} {activityDays === 0 ? t("Today") : `${activityDays} ${t("Daysago")}`}</span>
+              </div>
+            )}
+          </div>
+
+          <Button className="w-full rounded-2xl h-12 text-base font-semibold" onClick={handleEnterShop}>{t("EnterShop")}</Button>
+
+          {company?.CompanyDescription && (
+            <Card><p className="text-sm text-muted-foreground py-1">{company.CompanyDescription}</p></Card>
+          )}
+
+          {(categoryLabel || hours) && (
+            <Card>
+              {categoryLabel && <Row label={t("Category")} value={categoryLabel} />}
+              {hours && (
+                <Row
+                  label={`${t("OpeningTimes")} / ${t("ClosingTimes")}`}
+                  value={<span className="inline-flex items-center gap-1.5"><Clock size={13} />{hours}</span>}
+                />
+              )}
+            </Card>
+          )}
+
+          {addressLines.length > 0 && (
+            <Card>
+              {addressLines.map((line, i) => (
+                <Row key={i} label={i === 0 ? t("Address1") : `${t("Address2")}`} value={<span className="inline-flex items-center gap-1.5">{i === 0 && <Store size={13} />}{line}</span>} />
+              ))}
+            </Card>
+          )}
+
+          {(company?.CompanyMobile || company?.CompanyEmail) && (
+            <Card>
+              {company?.CompanyMobile && <Row label={t("MobileNumber")} value={company.CompanyMobile} />}
+              {company?.CompanyEmail && <Row label={t("Email")} value={company.CompanyEmail} />}
+            </Card>
+          )}
+
+          {company && (
+            <Card>
+              <Row label={t("Orders")} value={<Flag on={isOn(company.OrderEnable)} />} />
+              <Row label={t("TakeAway")} value={<Flag on={isOn(company.TakeawayEnable)} />} />
+              <Row label={t("Delivery")} value={<Flag on={isOn(company.DeliveryEnable)} />} />
+              <Row label={t("PayonPhone")} value={<Flag on={isOn(company.PayOnPhoneEnable)} />} />
+              {tables && <Row label={t("Tables")} value={tables} />}
+            </Card>
+          )}
         </div>
-        {activityDays !== null && (
-          <div className="flex items-center gap-2 text-muted-foreground text-sm mb-2">
-            <Activity size={14} /><span>{t("ShopActivity")} {activityDays === 0 ? t("Today") : `${activityDays} ${t("Daysago")}`}</span>
-          </div>
-        )}
-        <h2 className="text-2xl font-bold text-foreground font-heading uppercase mb-2">{shopName}</h2>
-        {hours && (<div className="flex items-center gap-2 text-foreground font-semibold text-base mb-2"><Clock size={16} /><span>{hours}</span></div>)}
-        {address && (<div className="flex items-center gap-2 text-muted-foreground text-sm mb-4"><Store size={14} /><span>{address}</span></div>)}
-        {company?.CompanyDescription && (<p className="text-muted-foreground text-sm mt-2">{company.CompanyDescription}</p>)}
-        {(company?.CompanyMobile || company?.CompanyEmail) && (
-          <div className="mt-4 text-sm text-muted-foreground space-y-1">
-            {company.CompanyMobile && <p>📞 {company.CompanyMobile}</p>}
-            {company.CompanyEmail && <p>✉️ {company.CompanyEmail}</p>}
-          </div>
-        )}
       </div>
-      <div className="fixed bottom-0 left-0 right-0 bg-muted border-t border-border px-6 py-4 flex items-center justify-between max-w-[430px] mx-auto">
-        <Button variant="outline" className="rounded-full px-6" onClick={handleEnterShop}>{t("EnterShop")}</Button>
-        <Button variant="outline" className="rounded-full px-6 gap-2" onClick={handleShare}><Share2 size={16} />{t("Share")}</Button>
+      <div className="fixed bottom-0 left-0 right-0 bg-muted/95 backdrop-blur border-t border-border px-4 py-3 flex items-center gap-3 max-w-[430px] mx-auto">
+        <Button className="flex-1 rounded-2xl h-11 font-semibold" onClick={handleEnterShop}>{t("EnterShop")}</Button>
+        <Button variant="outline" className="rounded-2xl h-11 px-5 gap-2 border-2" onClick={handleShare}><Share2 size={16} />{t("Share")}</Button>
       </div>
     </div>
   );
