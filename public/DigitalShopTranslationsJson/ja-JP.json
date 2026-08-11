@@ -525,5 +525,7 @@
   "YourcurrentGPSisnegative": "現在のGPSがマイナスですログアウトして再度ログインするか、現在のインターネット接続を変更してください",
   "YourLivetorecieveOrders": "注文を受け取るためのライブ",
   "YourShopAnywhere": "あなたの店 — どこでも。",
-  "Zero": "0"
+  "Zero": "0",
+  "GroupImageDefaultBadge": "Default image",
+  "GroupImageDefaultNote": "This is an automatic default image, not a saved selection."
 }

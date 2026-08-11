@@ -525,5 +525,7 @@
   "YourcurrentGPSisnegative": "U huidige GPS is negatief. Meld asseblief aan en weer in of verander u huidige internetverbinding",
   "YourLivetorecieveOrders": "U Live om bestellings te ontvang",
   "YourShopAnywhere": "Jou winkel — oral.",
-  "Zero": "0"
+  "Zero": "0",
+  "GroupImageDefaultBadge": "Default image",
+  "GroupImageDefaultNote": "This is an automatic default image, not a saved selection."
 }

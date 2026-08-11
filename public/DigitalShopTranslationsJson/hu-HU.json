@@ -525,5 +525,7 @@
   "YourcurrentGPSisnegative": "Az Ön jelenlegi GPS-je negatív. Kérjük, jelentkezzen ki, és jelentkezzen be, vagy módosítsa a jelenlegi internetkapcsolatot",
   "YourLivetorecieveOrders": "Élő a megrendelések fogadásához",
   "YourShopAnywhere": "Az Ön üzlete – bárhol.",
-  "Zero": "0"
+  "Zero": "0",
+  "GroupImageDefaultBadge": "Default image",
+  "GroupImageDefaultNote": "This is an automatic default image, not a saved selection."
 }

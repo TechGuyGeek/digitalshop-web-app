@@ -525,5 +525,7 @@
   "YourcurrentGPSisnegative": "Nykyinen GPS on negatiivinen, kirjaudu ulos ja takaisin tai muuta nykyistä Internet-yhteyttä",
   "YourLivetorecieveOrders": "Live-tilauksesi tilausten vastaanottamiseen",
   "YourShopAnywhere": "Sinun kauppasi – missä tahansa.",
-  "Zero": "0"
+  "Zero": "0",
+  "GroupImageDefaultBadge": "Default image",
+  "GroupImageDefaultNote": "This is an automatic default image, not a saved selection."
 }

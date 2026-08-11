@@ -525,5 +525,7 @@
   "YourcurrentGPSisnegative": "GPS ปัจจุบันของคุณเป็นลบโปรดออกจากระบบและกลับเข้าหรือเปลี่ยนการเชื่อมต่ออินเทอร์เน็ตปัจจุบันของคุณ",
   "YourLivetorecieveOrders": "สดของคุณเพื่อรับคำสั่งซื้อ",
   "YourShopAnywhere": "ร้านค้าของคุณ—ทุกที่",
-  "Zero": "0"
+  "Zero": "0",
+  "GroupImageDefaultBadge": "Default image",
+  "GroupImageDefaultNote": "This is an automatic default image, not a saved selection."
 }

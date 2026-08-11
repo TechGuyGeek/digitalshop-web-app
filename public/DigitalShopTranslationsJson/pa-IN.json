@@ -525,5 +525,7 @@
   "YourcurrentGPSisnegative": "ਤੁਹਾਡਾ ਮੌਜੂਦਾ ਜੀਪੀਐਸ ਨਾਕਾਰਾਤਮਕ ਹੈ ਕਿਰਪਾ ਕਰਕੇ ਲੌਗ ਆਉਟ ਕਰੋ ਅਤੇ ਵਾਪਸ ਆਓ ਜਾਂ ਆਪਣਾ ਮੌਜੂਦਾ ਇੰਟਰਨੈਟ ਕਨੈਕਸ਼ਨ ਬਦਲੋ",
   "YourLivetorecieveOrders": "ਆਰਡਰ ਪ੍ਰਾਪਤ ਕਰਨ ਲਈ ਤੁਹਾਡਾ ਲਾਈਵ",
   "YourShopAnywhere": "ਤੁਹਾਡੀ ਦੁਕਾਨ — ਕਿਤੇ ਵੀ।",
-  "Zero": "0"
+  "Zero": "0",
+  "GroupImageDefaultBadge": "Default image",
+  "GroupImageDefaultNote": "This is an automatic default image, not a saved selection."
 }

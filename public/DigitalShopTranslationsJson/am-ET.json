@@ -525,5 +525,7 @@
   "YourcurrentGPSisnegative": "የእርስዎ የአሁኑ ጂፒኤስ አሉታዊ ነው እባክዎን ይግቡ እና ተመልሰው ይግቡ ወይም የአሁኑን የበይነመረብ ግንኙነትዎን ይቀይሩ",
   "YourLivetorecieveOrders": "ትዕዛዞችን ለመቀበል የእርስዎ ቀጥታ ስርጭት",
   "YourShopAnywhere": "ሱቅዎ — የትም ቦታ።",
-  "Zero": "0"
+  "Zero": "0",
+  "GroupImageDefaultBadge": "Default image",
+  "GroupImageDefaultNote": "This is an automatic default image, not a saved selection."
 }

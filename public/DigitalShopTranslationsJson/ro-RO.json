@@ -525,5 +525,7 @@
   "YourcurrentGPSisnegative": "GPS-ul dvs. actual este negativ, vă rugăm să vă deconectați și să vă conectați din nou sau să vă schimbați conexiunea curentă la internet",
   "YourLivetorecieveOrders": "Live-ul dvs. pentru a primi comenzi",
   "YourShopAnywhere": "Magazinul tău — oriunde.",
-  "Zero": "0"
+  "Zero": "0",
+  "GroupImageDefaultBadge": "Default image",
+  "GroupImageDefaultNote": "This is an automatic default image, not a saved selection."
 }

@@ -22,7 +22,7 @@ import { ADVERT_LIBRARY, ADVERT_SETTINGS, VIDEO_TRIGGERS } from "@/lib/advertCon
 import { SERVER_DOMAIN } from "@/lib/companyApi";
 import MenuGroupBanner from "@/components/MenuGroupBanner";
 import MenuGroupImagePicker from "@/components/MenuGroupImagePicker";
-import { fetchMenuGroupImages, MenuGroupImageMap, resolveMenuGroupImageUrl } from "@/lib/menuGroupImages";
+import { fetchMenuGroupImages, MenuGroupImageMap, getMenuGroupDisplayImage } from "@/lib/menuGroupImages";
 import {
   Dialog,
   DialogContent,
@@ -467,16 +467,22 @@ const EditMenuGroupsPage = () => {
         ) : (
           <>
             <ProfileHelpAssistant translationKey="HELPCOMPANYGROUPANDROID" />
-            {groups.map((group) => (
+            {groups.map((group) => {
+              const display = getMenuGroupDisplayImage(group.ID, groupImages);
+              return (
               <div
                 key={group.ID}
                 className="border border-border rounded-lg p-4 space-y-3 cursor-pointer hover:border-primary/50 transition-colors bg-card"
                 onClick={() => navigateToGroup(group.ID, group.OrderGroup)}
               >
-                <MenuGroupBanner
-                  src={resolveMenuGroupImageUrl(groupImages[String(group.ID)])}
-                  alt={group.OrderGroup}
-                />
+                <div className="relative">
+                  <MenuGroupBanner src={display.url} alt={group.OrderGroup} />
+                  {display.url && display.isFallback && (
+                    <span className="absolute top-2 left-2 rounded bg-background/85 px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                      {t("GroupImageDefaultBadge")}
+                    </span>
+                  )}
+                </div>
                 <h3 className="text-center text-lg font-bold text-foreground">{group.OrderGroup}</h3>
                 <div className="flex items-center justify-between" onClick={(e) => e.stopPropagation()}>
                   <span className="text-sm text-muted-foreground">{t("TheItemisEnabled")}</span>
@@ -497,7 +503,8 @@ const EditMenuGroupsPage = () => {
                   </Button>
                 </div>
               </div>
-            ))}
+              );
+            })}
 
             {groups.length === 0 && <p className="text-center text-muted-foreground py-8">{t("NoOrdersToshow")}</p>}
 

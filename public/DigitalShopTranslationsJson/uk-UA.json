@@ -525,5 +525,7 @@
   "YourcurrentGPSisnegative": "Ваш поточний GPS є негативним, будь ласка, вийдіть із системи та знову ввійдіть у систему, або змініть поточне підключення до Інтернету",
   "YourLivetorecieveOrders": "Ваш Live для отримання замовлень",
   "YourShopAnywhere": "Ваш магазин — будь-де.",
-  "Zero": "0"
+  "Zero": "0",
+  "GroupImageDefaultBadge": "Default image",
+  "GroupImageDefaultNote": "This is an automatic default image, not a saved selection."
 }

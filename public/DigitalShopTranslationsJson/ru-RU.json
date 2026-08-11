@@ -525,5 +525,7 @@
   "YourcurrentGPSisnegative": "Ваш текущий GPS отрицательный, пожалуйста, выйдите из системы и снова войдите или измените текущее интернет-соединение",
   "YourLivetorecieveOrders": "Ваш Live для получения заказов",
   "YourShopAnywhere": "Ваш магазин — везде.",
-  "Zero": "0"
+  "Zero": "0",
+  "GroupImageDefaultBadge": "Default image",
+  "GroupImageDefaultNote": "This is an automatic default image, not a saved selection."
 }
