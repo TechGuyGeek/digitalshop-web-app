@@ -26,11 +26,14 @@ const ShopInterior = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [groupImages, setGroupImages] = useState<MenuGroupImageMap>({});
+  const [imagesLoaded, setImagesLoaded] = useState(false);
 
   useEffect(() => {
     if (!companyId) return;
     let cancelled = false;
-    fetchMenuGroupImages(companyId).then((map) => { if (!cancelled) setGroupImages(map); });
+    fetchMenuGroupImages(companyId).then((map) => {
+      if (!cancelled) { setGroupImages(map); setImagesLoaded(true); }
+    });
     return () => { cancelled = true; };
   }, [companyId]);
 
@@ -75,7 +78,7 @@ const ShopInterior = () => {
           </div>
         )}
         {!loading && !error && groups.length > 0 && groups.map((group) => {
-          const bannerUrl = getMenuGroupDisplayImage(group.ID, groupImages).url;
+          const bannerUrl = imagesLoaded ? getMenuGroupDisplayImage(group.ID, groupImages).url : null;
           return (
             <button key={group.ID} className="w-full text-center text-foreground font-bold text-lg uppercase tracking-wide border-b border-border bg-card hover:bg-accent/50 transition-colors"
               onClick={() => navigate(`/category-items?companyid=${encodeURIComponent(companyId)}&shop=${encodeURIComponent(shopName)}&groupId=${group.ID}&category=${encodeURIComponent(group.OrderGroup)}`)}>

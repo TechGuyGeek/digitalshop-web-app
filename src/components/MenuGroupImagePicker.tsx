@@ -11,7 +11,7 @@ import {
   MenuGroupImage,
   PresetKey,
   presetSrc,
-  resolveMenuGroupImageUrl,
+  getMenuGroupDisplayImage,
   saveMenuGroupImage,
   SaveGroupImageAuth,
   SaveGroupImagePayload,
@@ -41,7 +41,9 @@ const MenuGroupImagePicker = ({
   const [saving, setSaving] = useState(false);
   const [retryPayload, setRetryPayload] = useState<SaveGroupImagePayload | null>(null);
 
-  const previewUrl = localPreview ?? resolveMenuGroupImageUrl(current);
+  const display = getMenuGroupDisplayImage(groupId, current ? { [String(groupId)]: current } : {});
+  const previewUrl = localPreview ?? display.url;
+  const showingDefault = !localPreview && display.isFallback && !!display.url;
 
   const persist = async (payload: SaveGroupImagePayload) => {
     if (!auth || !auth.userId) {
@@ -100,7 +102,12 @@ const MenuGroupImagePicker = ({
             <p className="text-center text-sm font-semibold text-foreground">{groupName}</p>
 
             {previewUrl ? (
-              <MenuGroupBanner src={previewUrl} alt={groupName} />
+              <>
+                <MenuGroupBanner src={previewUrl} alt={groupName} />
+                {showingDefault && (
+                  <p className="text-center text-xs text-muted-foreground">{t("GroupImageDefaultNote")}</p>
+                )}
+              </>
             ) : (
               <div className="w-full aspect-[3/1] rounded-lg bg-muted flex items-center justify-center text-sm text-muted-foreground">
                 {t("GroupImageNone")}
