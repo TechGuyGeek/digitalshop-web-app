@@ -1,7 +1,7 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Share2, Clock, Activity, Store, AlertTriangle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, type ReactNode } from "react";
 import { fetchCompanyById, CompanyDetails } from "@/lib/api";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -60,7 +60,6 @@ const ShopProfile = () => {
   const shopName = company?.companyname || fallbackName;
   const hours = company ? formatOpeningHours(company.OpeningTimes, company.ClosingTimes) : null;
   const activityDays = company ? daysSinceActivity(company.LastLoggedOn) : null;
-  const address = company ? buildAddress(company) : "";
   const imageUrl = company?.companyphoto ? SERVER_DOMAIN + "menu1" + encodeURI(company.companyphoto) : "";
 
   const handleEnterShop = () => {
@@ -228,14 +227,14 @@ const ShopProfile = () => {
   const isOn = (v?: string) => v === "1" || v?.toLowerCase() === "true" || v?.toLowerCase() === "yes";
   const tables = company?.TableNumbers && company.TableNumbers !== "0" ? company.TableNumbers : null;
 
-  const Row = ({ label, value }: { label: string; value: React.ReactNode }) => (
+  const Row = ({ label, value }: { label: string; value: ReactNode }) => (
     <div className="flex items-start justify-between gap-4 py-2.5 first:pt-0 last:pb-0 border-b border-border/60 last:border-b-0">
       <span className="text-sm text-muted-foreground shrink-0">{label}</span>
       <span className="text-sm font-semibold text-foreground text-right break-words">{value}</span>
     </div>
   );
 
-  const Card = ({ children }: { children: React.ReactNode }) => (
+  const Card = ({ children }: { children: ReactNode }) => (
     <div className="rounded-2xl bg-card border border-border shadow-sm px-4 py-3">{children}</div>
   );
 
