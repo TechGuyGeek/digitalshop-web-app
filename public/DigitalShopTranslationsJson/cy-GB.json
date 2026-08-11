@@ -525,5 +525,7 @@
   "YourcurrentGPSisnegative": "Mae eich GPS cyfredol yn negyddol, allgofnodwch ac yn ôl i mewn neu newid eich cysylltiad rhyngrwyd cyfredol",
   "YourLivetorecieveOrders": "Eich Byw i dderbyn Gorchmynion",
   "YourShopAnywhere": "Eich siop — unrhyw le.",
-  "Zero": "0"
+  "Zero": "0",
+  "GroupImageDefaultBadge": "Default image",
+  "GroupImageDefaultNote": "This is an automatic default image, not a saved selection."
 }

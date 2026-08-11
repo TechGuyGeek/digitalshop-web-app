@@ -525,5 +525,7 @@
   "YourcurrentGPSisnegative": "ה- GPS הנוכחי שלך שלילי אנא היכנס חזרה והתחבר או שנה את חיבור האינטרנט הנוכחי",
   "YourLivetorecieveOrders": "Live שלך \\u200b\\u200bלקבל הזמנות",
   "YourShopAnywhere": "החנות שלך — בכל מקום.",
-  "Zero": "0"
+  "Zero": "0",
+  "GroupImageDefaultBadge": "Default image",
+  "GroupImageDefaultNote": "This is an automatic default image, not a saved selection."
 }

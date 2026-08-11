@@ -525,5 +525,7 @@
   "YourcurrentGPSisnegative": "Núverandi GPS er neikvætt vinsamlegast skráðu þig út og aftur inn eða breyttu núverandi nettengingu",
   "YourLivetorecieveOrders": "Lifandi til að fá pantanir",
   "YourShopAnywhere": "Verslunin þín — hvar sem er.",
-  "Zero": "0"
+  "Zero": "0",
+  "GroupImageDefaultBadge": "Default image",
+  "GroupImageDefaultNote": "This is an automatic default image, not a saved selection."
 }

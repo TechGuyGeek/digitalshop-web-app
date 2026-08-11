@@ -525,5 +525,7 @@
   "YourcurrentGPSisnegative": "Din nuvarande GPS är negativ. Logga ut och logga in igen eller ändra din nuvarande internetanslutning",
   "YourLivetorecieveOrders": "Din Live för att ta emot beställningar",
   "YourShopAnywhere": "Din butik — överallt.",
-  "Zero": "0"
+  "Zero": "0",
+  "GroupImageDefaultBadge": "Default image",
+  "GroupImageDefaultNote": "This is an automatic default image, not a saved selection."
 }

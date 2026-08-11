@@ -525,5 +525,7 @@
   "YourcurrentGPSisnegative": "Votre GPS actuel est négatif, veuillez vous déconnecter et vous reconnecter ou modifier votre connexion Internet actuelle",
   "YourLivetorecieveOrders": "Votre Live pour recevoir des commandes",
   "YourShopAnywhere": "Votre boutique — partout.",
-  "Zero": "0"
+  "Zero": "0",
+  "GroupImageDefaultBadge": "Default image",
+  "GroupImageDefaultNote": "This is an automatic default image, not a saved selection."
 }

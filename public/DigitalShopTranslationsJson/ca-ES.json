@@ -525,5 +525,7 @@
   "YourcurrentGPSisnegative": "El vostre GPS actual és negatiu, tanqueu la sessió i torneu a iniciar la sessió o canvieu la vostra connexió a Internet actual",
   "YourLivetorecieveOrders": "El vostre Live per rebre comandes",
   "YourShopAnywhere": "La teva botiga — a qualsevol lloc.",
-  "Zero": "0"
+  "Zero": "0",
+  "GroupImageDefaultBadge": "Default image",
+  "GroupImageDefaultNote": "This is an automatic default image, not a saved selection."
 }

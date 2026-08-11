@@ -525,5 +525,7 @@
   "YourcurrentGPSisnegative": "Tha an GPS gnàthach agad àicheil feuch an log thu a-mach agus air ais a-steach no atharraich an ceangal eadar-lìn gnàthach agad",
   "YourLivetorecieveOrders": "Do bheò gus òrdughan fhaighinn",
   "YourShopAnywhere": "Do bhùth — an àite sam bith.",
-  "Zero": "0"
+  "Zero": "0",
+  "GroupImageDefaultBadge": "Default image",
+  "GroupImageDefaultNote": "This is an automatic default image, not a saved selection."
 }

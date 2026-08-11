@@ -532,5 +532,7 @@
   "PayonPhone": "Pay on phone",
   "Tables": "Tables",
   "Delivery": "Delivery",
-  "MobileNumber": "Mobile Number"
+  "MobileNumber": "Mobile Number",
+  "GroupImageDefaultBadge": "Default image",
+  "GroupImageDefaultNote": "This is an automatic default image, not a saved selection."
 }

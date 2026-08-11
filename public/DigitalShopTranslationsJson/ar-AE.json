@@ -525,5 +525,7 @@
   "YourcurrentGPSisnegative": "نظام تحديد المواقع العالمي (GPS) الحالي الخاص بك سلبي ، يرجى تسجيل الخروج والعودة مرة أخرى أو تغيير اتصال الإنترنت الحالي",
   "YourLivetorecieveOrders": "Live الخاص بك لتلقي الطلبات",
   "YourShopAnywhere": "متجرك — في أي مكان.",
-  "Zero": "0"
+  "Zero": "0",
+  "GroupImageDefaultBadge": "Default image",
+  "GroupImageDefaultNote": "This is an automatic default image, not a saved selection."
 }

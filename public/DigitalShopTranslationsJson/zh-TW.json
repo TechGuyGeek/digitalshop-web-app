@@ -525,5 +525,7 @@
   "YourcurrentGPSisnegative": "您当前的GPS为负，请注销并重新登录或更改当前的互联网连接",
   "YourLivetorecieveOrders": "你的直播接收訂單",
   "YourShopAnywhere": "您的商店 — 無處不在。",
-  "Zero": "0"
+  "Zero": "0",
+  "GroupImageDefaultBadge": "Default image",
+  "GroupImageDefaultNote": "This is an automatic default image, not a saved selection."
 }

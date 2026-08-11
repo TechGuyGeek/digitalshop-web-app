@@ -525,5 +525,7 @@
   "YourcurrentGPSisnegative": "आपका वर्तमान GPS नकारात्मक है कृपया लॉग आउट करें और वापस अपना वर्तमान इंटरनेट कनेक्शन बदलें",
   "YourLivetorecieveOrders": "आपका लाइव आदेश प्राप्त करने के लिए",
   "YourShopAnywhere": "आपकी दुकान — कहीं भी।",
-  "Zero": "0"
+  "Zero": "0",
+  "GroupImageDefaultBadge": "Default image",
+  "GroupImageDefaultNote": "This is an automatic default image, not a saved selection."
 }

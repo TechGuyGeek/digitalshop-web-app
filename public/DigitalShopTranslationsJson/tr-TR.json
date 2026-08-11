@@ -525,5 +525,7 @@
   "YourcurrentGPSisnegative": "Mevcut GPS'iniz negatif, lütfen oturumu kapatıp tekrar açın veya mevcut internet bağlantınızı değiştirin",
   "YourLivetorecieveOrders": "Sipariş almak için Canlı Yayınlarınız",
   "YourShopAnywhere": "Dükkanınız — her yerde.",
-  "Zero": "0"
+  "Zero": "0",
+  "GroupImageDefaultBadge": "Default image",
+  "GroupImageDefaultNote": "This is an automatic default image, not a saved selection."
 }
