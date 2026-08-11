@@ -74,6 +74,52 @@ export function presetSrc(key: string): string | null {
 }
 
 /**
+ * Deterministic fallback preset for groups that have NO metadata row.
+ * Stable hash of the GroupID (digits preferred) modulo the preset count, so the
+ * same group always renders the same artwork across renders/refreshes/devices.
+ */
+export function stableFallbackPresetKey(groupId: string | number): PresetKey {
+  const raw = String(groupId ?? "").trim();
+  let hash = 0;
+  if (/^\d+$/.test(raw)) {
+    hash = Number(raw);
+  } else {
+    for (let i = 0; i < raw.length; i++) hash = (hash * 31 + raw.charCodeAt(i)) >>> 0;
+  }
+  const idx = Math.abs(hash) % MENU_GROUP_PRESETS.length;
+  return MENU_GROUP_PRESETS[idx].key;
+}
+
+export interface MenuGroupDisplayImage {
+  /** Displayable URL, or null when the group must render image-free. */
+  url: string | null;
+  /** True when the URL comes from the automatic fallback (nothing saved). */
+  isFallback: boolean;
+}
+
+/**
+ * Single resolver used by both the customer and the owner views.
+ * - saved custom / saved preset  -> saved artwork
+ * - ImageSource === "none"       -> null (owner explicitly chose no image)
+ * - no metadata row at all       -> stable automatic fallback preset
+ */
+export function getMenuGroupDisplayImage(
+  groupId: string | number,
+  images: MenuGroupImageMap | undefined | null
+): MenuGroupDisplayImage {
+  const meta = images?.[String(groupId)];
+  if (!meta) {
+    return { url: presetSrc(stableFallbackPresetKey(groupId)), isFallback: true };
+  }
+  if (meta.imageSource === "none") return { url: null, isFallback: false };
+  const saved = resolveMenuGroupImageUrl(meta);
+  if (saved) return { url: saved, isFallback: false };
+  // Metadata row exists but is unusable (e.g. custom path not yet returned):
+  // treat as missing artwork rather than forcing a blank row.
+  return { url: presetSrc(stableFallbackPresetKey(groupId)), isFallback: true };
+}
+
+/**
  * One request per company (never per group). Never throws — falls back to an
  * empty map so menus keep working when the endpoint is unavailable.
  */
