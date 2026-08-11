@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 import MenuGroupBanner from "@/components/MenuGroupBanner";
-import { fetchMenuGroupImages, MenuGroupImageMap, resolveMenuGroupImageUrl } from "@/lib/menuGroupImages";
+import { fetchMenuGroupImages, MenuGroupImageMap, getMenuGroupDisplayImage } from "@/lib/menuGroupImages";
 
 const SERVER_DOMAIN = "https://web.gpsshops.com/";
 
@@ -75,7 +75,7 @@ const ShopInterior = () => {
           </div>
         )}
         {!loading && !error && groups.length > 0 && groups.map((group) => {
-          const bannerUrl = resolveMenuGroupImageUrl(groupImages[String(group.ID)]);
+          const bannerUrl = getMenuGroupDisplayImage(group.ID, groupImages).url;
           return (
             <button key={group.ID} className="w-full text-center text-foreground font-bold text-lg uppercase tracking-wide border-b border-border bg-card hover:bg-accent/50 transition-colors"
               onClick={() => navigate(`/category-items?companyid=${encodeURIComponent(companyId)}&shop=${encodeURIComponent(shopName)}&groupId=${group.ID}&category=${encodeURIComponent(group.OrderGroup)}`)}>
