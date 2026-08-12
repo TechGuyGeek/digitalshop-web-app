@@ -323,8 +323,7 @@ export async function deleteCompany(companyid: number, userId: number, email: st
     form.append("UserPassword", password);
     form.append("companyID", String(companyid));
     form.append("companyid", String(companyid));
-    console.log("[deleteCompany] POST", url);
-    console.log("[deleteCompany] body fields:", Object.fromEntries(form.entries()));
+    console.log("[deleteCompany] POST", url, "companyid:", companyid);
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -332,13 +331,15 @@ export async function deleteCompany(companyid: number, userId: number, email: st
     });
     console.log("[deleteCompany] status:", res.status);
     const text = await res.text();
-    console.log("[deleteCompany] raw response:", text);
     try {
       const data = JSON.parse(text);
+      // Backend is authoritative: surface its blocker/refusal message verbatim.
+      const serverMessage =
+        data.ServerMessage || data.message || data.Message || data.blockers || "";
       if (data.success === true) {
-        return { success: true, message: data.ServerMessage };
+        return { success: true, message: serverMessage || undefined };
       }
-      return { success: false, message: data.ServerMessage || "Delete failed" };
+      return { success: false, message: String(serverMessage || "Delete failed") };
     } catch {
       return { success: false, message: "Invalid server response" };
     }

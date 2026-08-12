@@ -11,16 +11,11 @@ import VideoAdvert from "@/components/adverts/VideoAdvert";
 import { useRegisterNavActions } from "@/contexts/SiteNavExtras";
 import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 import { Analytics } from "@/lib/analytics";
+import { placeOrderBatch, clearCheckoutId } from "@/lib/checkout";
 
 const SERVER_DOMAIN = "https://web.gpsshops.com/";
 
 const isEnabled = (value: unknown): boolean => String(value) === "1";
-const generateRandomCode = (length: number) => {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let result = "";
-  for (let i = 0; i < length; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
-  return result;
-};
 
 type OrderMode = "onsite" | "takeaway" | "delivery";
 
@@ -90,31 +85,28 @@ const Basket = () => {
     const user = getLoggedInUser();
     if (!user || !(user.PersonID || user.ID)) { toast.error(t("Signin")); return; }
     const personId = String(user.PersonID || user.ID || "");
-    const userName = String(user.Name || user.name || "");
-    const userSurname = String(user.Surname || user.surname || "");
+    const userEmail = String(user.Email || user.email || "");
+    const userPassword = String(user.Password || user.password || user.hash || "");
     setSubmitting(true);
     Analytics.orderStarted({ company_id: companyId, items: items.length, total, mode });
-    const randomCode = generateRandomCode(64);
-    const needTakeaway = mode === "takeaway" ? "1" : "0";
-    const needDelivery = mode === "delivery" ? "1" : "0";
     try {
-      const url = SERVER_DOMAIN + "menu1/PHPwrite/LiveOrders/PlaceOrderToCompany2.php";
-      for (const item of items) {
-        for (let q = 0; q < item.quantity; q++) {
-          const formData = new URLSearchParams();
-          formData.append("companyID", companyId); formData.append("CompanyName", shopName);
-          formData.append("CompanyEmail", ""); formData.append("CompanyMobile", "");
-          formData.append("MenuNotifications", "0"); formData.append("PersonID", personId);
-          formData.append("Name", userName); formData.append("Surname", userSurname);
-          formData.append("GroupID", item.groupId || "0"); formData.append("OrderID", String(item.id));
-          formData.append("TableNumber", tableNumber || "0"); formData.append("NeedTakeaway", needTakeaway);
-          formData.append("NeedDelivery", needDelivery); formData.append("RandomeCode", randomCode);
-          const response = await fetch(url, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: formData.toString() });
-          if (!response.ok) throw new Error(`Server error: ${response.status}`);
-        }
+      const result = await placeOrderBatch({
+        companyId,
+        customerId: personId,
+        userEmail,
+        userPassword,
+        mode,
+        tableNumber: tableNumber || "0",
+        items: items.map((i) => ({ productId: i.id, groupId: i.groupId || "0", quantity: i.quantity })),
+      });
+      if (!result.success) {
+        // Preserve the basket and the existing checkoutId so retry is safe.
+        toast.error(result.message || t("SaveFailed"));
+        return;
       }
+      clearCheckoutId();
       clearBasket();
-      Analytics.orderCompleted({ company_id: companyId, items: items.length, total, mode, random_code: randomCode });
+      Analytics.orderCompleted({ company_id: companyId, items: items.length, total, mode, random_code: result.checkoutId });
       toast.success(t("SaveSuccessful"));
       if (canShowVideo) {
         showVideoAd("afterOrderPlaced");
