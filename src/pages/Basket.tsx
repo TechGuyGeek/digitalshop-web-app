@@ -11,16 +11,11 @@ import VideoAdvert from "@/components/adverts/VideoAdvert";
 import { useRegisterNavActions } from "@/contexts/SiteNavExtras";
 import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 import { Analytics } from "@/lib/analytics";
+import { placeOrderBatch, clearCheckoutId } from "@/lib/checkout";
 
 const SERVER_DOMAIN = "https://web.gpsshops.com/";
 
 const isEnabled = (value: unknown): boolean => String(value) === "1";
-const generateRandomCode = (length: number) => {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let result = "";
-  for (let i = 0; i < length; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
-  return result;
-};
 
 type OrderMode = "onsite" | "takeaway" | "delivery";
 
