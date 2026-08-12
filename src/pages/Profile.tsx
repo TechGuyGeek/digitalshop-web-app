@@ -224,7 +224,6 @@ const Profile = () => {
       const companyUrl = "https://web.gpsshops.com/menu1/PHPread/Company/DoesCompanyExistorNotSecure.php";
       const companyPayload = { PersonID: personId, UserEmail: userEmail };
       console.log("[deleteProfile] company check URL:", companyUrl);
-      console.log("[deleteProfile] company check payload:", companyPayload);
 
       const companyRes = await fetch(companyUrl, {
         method: "POST",
@@ -232,12 +231,10 @@ const Profile = () => {
         body: JSON.stringify(companyPayload),
       });
       const companyText = await companyRes.text();
-      console.log("[deleteProfile] raw company response:", companyText);
 
       let hasCompany = false;
       try {
         const parsed = JSON.parse(companyText);
-        console.log("[deleteProfile] parsed company response:", parsed);
         if (parsed?.success === true && Array.isArray(parsed?.companies) && parsed.companies.length > 0) {
           const first = parsed.companies[0];
           if (Number(first?.companyid) > 0) hasCompany = true;
@@ -258,7 +255,6 @@ const Profile = () => {
       ordersForm.append("UserID", personId);
       ordersForm.append("UserEmail", userEmail);
       console.log("[deleteProfile] orders check URL:", ordersUrl);
-      console.log("[deleteProfile] orders check payload:", Object.fromEntries(ordersForm.entries()));
 
       const ordersRes = await fetch(ordersUrl, {
         method: "POST",
@@ -266,7 +262,6 @@ const Profile = () => {
         body: ordersForm.toString(),
       });
       const ordersText = await ordersRes.text();
-      console.log("[deleteProfile] raw orders response:", ordersText);
 
       let ordersOk = false;
       let hasOrders = false;
@@ -274,7 +269,6 @@ const Profile = () => {
       let serverMessage = "";
       try {
         const parsedOrders = JSON.parse(ordersText);
-        console.log("[deleteProfile] parsed orders response:", parsedOrders);
         ordersOk = parsedOrders?.success === true;
         hasOrders = parsedOrders?.HasOrders === true;
         allOrdersPaid = parsedOrders?.AllOrdersPaid === true;
@@ -318,7 +312,6 @@ const Profile = () => {
       deleteForm.append("UserEmail", userEmail);
       deleteForm.append("UserPassword", userPassword);
       console.log("[deleteProfile] delete URL:", deleteUrl);
-      console.log("[deleteProfile] delete payload:", Object.fromEntries(deleteForm.entries()));
 
       const deleteRes = await fetch(deleteUrl, {
         method: "POST",
@@ -326,7 +319,6 @@ const Profile = () => {
         body: deleteForm.toString(),
       });
       const deleteText = await deleteRes.text();
-      console.log("[deleteProfile] raw delete response:", deleteText);
 
       if (deleteText.toUpperCase().includes("TRUE")) {
         localStorage.removeItem("digitalUser");
