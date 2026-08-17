@@ -136,7 +136,9 @@ const Index = () => {
       const user = await login(email, password);
       toast.success(`Welcome back, ${user.first_name || user.email}!`);
       Analytics.loginCompleted({ method: "password" });
-      navigate("/profile");
+      const pendingQr = sessionStorage.getItem("pending_order_pay_qr");
+      if (pendingQr) { sessionStorage.removeItem("pending_order_pay_qr"); navigate(`/order-pay-scan?t=${encodeURIComponent(pendingQr)}`); }
+      else navigate("/profile");
     } catch (err) {
       toast.error(err instanceof AuthApiError ? err.message : t("Pleasecheckyourinternetconnection"));
       console.error(err);
