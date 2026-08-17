@@ -46,6 +46,7 @@ import EditProduct from "./pages/EditProduct.tsx";
 import AddProduct from "./pages/AddProduct.tsx";
 import CompanyOrders from "./pages/CompanyOrders.tsx";
 import CompanyOrderDetail from "./pages/CompanyOrderDetail.tsx";
+import OrderPayScan from "./pages/OrderPayScan.tsx";
 import CustomerProfileReadonly from "./pages/CustomerProfileReadonly.tsx";
 import CompanyProfileReadonly from "./pages/CompanyProfileReadonly.tsx";
 import ThankYou from "./pages/ThankYou.tsx";
@@ -139,6 +140,7 @@ const AppShell = () => {
                 <Route path="/add-product" element={<AddProduct />} />
                 <Route path="/company-orders" element={<CompanyOrders />} />
                 <Route path="/company-order-detail" element={<CompanyOrderDetail />} />
+                <Route path="/order-pay-scan" element={<OrderPayScan />} />
                 <Route path="/customer-profile-readonly" element={<CustomerProfileReadonly />} />
                 <Route path="/company-profile-readonly" element={<CompanyProfileReadonly />} />
                 <Route path="/thank-you" element={<ThankYou />} />

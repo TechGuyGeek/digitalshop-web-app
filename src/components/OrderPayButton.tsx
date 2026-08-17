@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
+import { createOrderPaymentQr } from "@/lib/orderPaymentQr";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -16,6 +18,7 @@ interface OrderPayButtonProps {
 const OrderPayButton = ({ companyId, orderId, totalAmount, hasPaid }: OrderPayButtonProps) => {
   const { t } = useLanguage();
   const [paying, setPaying] = useState(false);
+  const [qr, setQr] = useState<string | null>(null);
 
   const getPersonId = (): string => {
     try {
@@ -42,7 +45,7 @@ const OrderPayButton = ({ companyId, orderId, totalAmount, hasPaid }: OrderPayBu
   const handlePay = async () => {
     if (hasPaid || paying) return;
     if (totalAmount < 5) {
-      toast.info(t("OrdersOverFiveOnly") || "Orders over £5.00 only");
+      toast.info(t("OrdersOverFiveOnly"));
       return;
     }
     const personId = getPersonId();
@@ -106,11 +109,9 @@ const OrderPayButton = ({ companyId, orderId, totalAmount, hasPaid }: OrderPayBu
         {paying ? <Loader2 className="animate-spin mr-1" size={14} /> : null}
         {hasPaid ? (t("Paid") || "Paid") : (t("Pay") || "Pay")}
       </Button>
-      {!hasPaid && (
-        <p className="text-xs text-center text-muted-foreground">
-          {t("OrdersOverFiveOnly") || "Orders over £5.00 only"}
-        </p>
-      )}
+      {!hasPaid && totalAmount < 5 && <p className="text-xs text-center text-muted-foreground">{t("OrdersOverFiveOnly")}</p>}
+      {!hasPaid && totalAmount >= 5 && <Button variant="outline" className="w-full" onClick={async()=>{try{const q=await createOrderPaymentQr(orderId);setQr(`${window.location.origin}${import.meta.env.BASE_URL}order-pay-scan?t=${encodeURIComponent(q.token)}`);}catch(e){toast.error((e as Error).message);}}}>{t("PayByQR") || "Pay by QR"}</Button>}
+      {qr && <div className="flex flex-col items-center gap-2 p-3"><QRCodeSVG value={qr} size={190}/><Button variant="ghost" onClick={()=>setQr(null)}>{t("Close") || "Close"}</Button></div>}
     </div>
   );
 };

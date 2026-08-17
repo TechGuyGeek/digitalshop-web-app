@@ -1,4 +1,6 @@
 {
+  "OrdersOverFiveOnly": "Orders over £5.00 only",
+  "PayByQR": "Pay by QR",
   "1stlineAddress": "1st line Address",
   "2ndlineAddress": "2nd line Address",
   "3rdlineAddress": "3nd line Address",
