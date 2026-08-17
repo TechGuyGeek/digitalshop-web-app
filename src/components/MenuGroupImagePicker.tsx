@@ -46,10 +46,6 @@ const MenuGroupImagePicker = ({
   const showingDefault = !localPreview && display.isFallback && !!display.url;
 
   const persist = async (payload: SaveGroupImagePayload) => {
-    if (!auth || !auth.userId) {
-      toast.error(t("Therewasanerror"));
-      return;
-    }
     setSaving(true);
     const result = await saveMenuGroupImage(auth, companyId, groupId, payload);
     setSaving(false);

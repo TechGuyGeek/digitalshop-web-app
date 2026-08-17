@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { SERVER_DOMAIN } from "@/lib/companyApi";
+import { updateProduct, listProducts } from "@/lib/menuApi";
 import { useLanguage } from "@/contexts/LanguageContext";
 import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 
@@ -35,10 +36,6 @@ function resizeAndConvertToBase64(file: File, maxSize = 800): Promise<string> {
   });
 }
 
-function escapeApostrophes(str: string) {
-  return str.replace(/'/g, "\\'");
-}
-
 interface ProductLookupItem {
   ID?: string;
   ImageSize?: string;
@@ -54,31 +51,6 @@ interface EditProductResponse {
   ServerMessage?: string;
   [key: string]: unknown;
 }
-
-function getStoredUserCredentials() {
-  const stored = localStorage.getItem("digitalUser");
-  let userId = "", userEmail = "", userPassword = "";
-
-  if (stored) {
-    try {
-      const user = JSON.parse(stored);
-      userId = String(user.PersonID || user.ID || "");
-      userEmail = user.Email || user.email || "";
-      userPassword = user.Password || user.password || "";
-    } catch {}
-  }
-
-  return { userId, userEmail, userPassword };
-}
-
-function getServerMessage(data: EditProductResponse | null) {
-  return data?.ServerMessage || data?.Message || data?.Error || "";
-}
-
-const EDIT_PRODUCT_ENDPOINTS = {
-  withImage: `${SERVER_DOMAIN}menu1/PHPwrite/CompanyMenu/UpdateMenuOrderSecure.php`,
-  withoutImage: `${SERVER_DOMAIN}menu1/PHPwrite/CompanyMenu/UpdateMenuOrder2Secure.php`,
-};
 
 const EditProduct = () => {
   const navigate = useNavigate();
@@ -104,21 +76,14 @@ const EditProduct = () => {
 
   useEffect(() => {
     if (!groupId || !productId || (initialImage && initialImageSize)) return;
-    const form = new URLSearchParams();
-    form.append("GroupID", groupId);
-    fetch(SERVER_DOMAIN + "menu1/PHPread/CompanyMenu/PoppulateSubMenu1.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: form.toString(),
-    })
-      .then((res) => res.json())
-      .then((data: ProductLookupItem[]) => {
+    listProducts(Number(groupId))
+      .then((data) => {
         if (!Array.isArray(data)) return;
-        const current = data.find((item) => String(item.ID || "") === productId);
+        const current = data.find((item) => String(item.id || "") === productId);
         if (!current) return;
 
-        const nextImagePath = String(current.imagepath || "").trim();
-        const nextImageSize = String(current.ImageSize || "").trim();
+        const nextImagePath = String(current.image_path || "").trim();
+        const nextImageSize = String(current.image_size || "").trim();
 
         if (nextImagePath) {
           setCurrentImagePath(nextImagePath);
@@ -147,76 +112,10 @@ const EditProduct = () => {
     const priceNum = parseFloat(price);
     if (isNaN(priceNum) || priceNum < 0) { toast.error(t("ErrorwithPrice")); return; }
 
-    const { userId, userEmail, userPassword } = getStoredUserCredentials();
-    const hasNewImage = Boolean(newImageBase64);
-    const endpoint = hasNewImage ? EDIT_PRODUCT_ENDPOINTS.withImage : EDIT_PRODUCT_ENDPOINTS.withoutImage;
-    const payload: Record<string, string> = {
-      oldID: productId,
-      oldGroupID: groupId,
-      newOrderName: escapeApostrophes(name.trim()),
-      newOrderDesription: escapeApostrophes(description.trim()),
-      newOrderPrice: priceNum.toFixed(2),
-      oldcompanyid: companyId,
-      oldimagepath: currentImagePath,
-      UserID: userId,
-      UserEmail: userEmail,
-      UserPassword: userPassword,
-    };
-
-    if (hasNewImage) payload.newimageobject = newImageBase64!;
-    else payload.oldImageSize = currentImageSize || "0";
-
-    const requestBody = JSON.stringify(payload);
-    console.log("[EditProduct] endpoint:", endpoint);
-    console.log("[EditProduct] payload:", requestBody);
-
     setSaving(true);
     try {
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: requestBody,
-      });
-
-      console.log("[EditProduct] status:", res.status);
-      const rawResponseText = await res.text();
-      console.log("[EditProduct] raw response:", rawResponseText);
-
-      let parsedResponse: EditProductResponse | null = null;
-
-      try {
-        parsedResponse = rawResponseText ? JSON.parse(rawResponseText) as EditProductResponse : null;
-        console.log("[EditProduct] parsed response:", parsedResponse);
-      } catch (error) {
-        console.error("[EditProduct] parse error:", error);
-        toast.error(res.status === 404 ? "Edit product endpoint not found (404)." : "Server returned malformed JSON while saving this product.");
-        return;
-      }
-
-      const serverMessage = getServerMessage(parsedResponse);
-
-      if (res.status === 404) {
-        toast.error(serverMessage || "Edit product endpoint not found (404).");
-        return;
-      }
-
-      if (!res.ok) {
-        toast.error(serverMessage || `Server error (${res.status}) while saving this product.`);
-        return;
-      }
-
-      if (parsedResponse?.Result === true) {
-        toast.success(serverMessage || t("SaveSuccessful"));
-        navigate(backUrl);
-        return;
-      }
-
-      if (parsedResponse?.Result === false) {
-        toast.error(serverMessage || t("SaveFailed"));
-        return;
-      }
-
-      toast.error(serverMessage || "Unexpected server response while saving this product.");
+      await updateProduct(Number(productId), { name: name.trim(), description: description.trim(), price: priceNum.toFixed(2), image_base64: newImageBase64 || undefined });
+      toast.success(t("SaveSuccessful")); navigate(backUrl);
     } catch (error) {
       console.error("[EditProduct] network error:", error);
       toast.error(error instanceof TypeError ? "Network error while saving this product." : "Unexpected error while saving this product.");

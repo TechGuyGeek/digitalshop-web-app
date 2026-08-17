@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { SERVER_DOMAIN } from "@/lib/companyApi";
+import { listProducts, createProduct } from "@/lib/menuApi";
 import { useLanguage } from "@/contexts/LanguageContext";
 import VideoAdvert from "@/components/adverts/VideoAdvert";
 import { ADVERT_LIBRARY, ADVERT_SETTINGS, VIDEO_TRIGGERS } from "@/lib/advertConfig";
@@ -28,8 +28,6 @@ function resizeAndConvertToBase64(file: File, maxSize = 800): Promise<string> {
     reader.onerror = reject; reader.readAsDataURL(file);
   });
 }
-
-function escapeApostrophes(str: string): string { return str.replace(/'/g, "\\'"); }
 
 const AddProduct = () => {
   const navigate = useNavigate();
@@ -57,10 +55,7 @@ const AddProduct = () => {
 
   useEffect(() => {
     if (!groupId) return;
-    const form = new URLSearchParams(); form.append("GroupID", groupId);
-    fetch(SERVER_DOMAIN + "menu1/PHPread/CompanyMenu/PoppulateSubMenu1.php", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: form.toString() })
-      .then(r => r.json())
-      .then(data => { if (Array.isArray(data)) setExistingProductCount(data.length); })
+    listProducts(Number(groupId)).then(data => setExistingProductCount(data.length))
       .catch(() => {});
   }, [groupId]);
 
@@ -72,15 +67,10 @@ const AddProduct = () => {
     const priceStr = price.trim() || "0.00"; const priceNum = parseFloat(priceStr);
     if (isNaN(priceNum) || priceNum < 0) { toast.error(t("ErrorwithPrice")); return; }
     const finalName = name.trim() || "-"; const finalDesc = description.trim() || "-";
-    const stored = localStorage.getItem("digitalUser"); let userId = "", userEmail = "", userPassword = "";
-    if (stored) { try { const user = JSON.parse(stored); userId = user.PersonID || user.ID || ""; userEmail = user.Email || user.email || ""; userPassword = user.Password || user.password || ""; } catch {} }
     setSaving(true);
     try {
-      const payload = { companyid: companyId, GroupID: groupId, OrderName: escapeApostrophes(finalName), OrderDesription: escapeApostrophes(finalDesc), OrderPrice: priceNum.toFixed(2), imageobject: imageBase64, UserID: userId, UserEmail: userEmail, UserPassword: userPassword };
-      const res = await fetch(SERVER_DOMAIN + "menu1/PHPwrite/CompanyMenu/SaveMenuItemSecure.php", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-      const data = await res.json();
-      if (data?.Result === true) { toast.success(data.Message || t("SaveSuccessful")); navigate(backUrl); }
-      else { toast.error(data?.Message || t("SaveFailed")); }
+      await createProduct({ group_id: Number(groupId), name: finalName, description: finalDesc, price: priceNum.toFixed(2), enabled: true, image_base64: imageBase64 || undefined });
+      toast.success(t("SaveSuccessful")); navigate(backUrl);
     } catch { toast.error(t("Pleasecheckyourinternetconnection")); } finally { setSaving(false); }
   };
 

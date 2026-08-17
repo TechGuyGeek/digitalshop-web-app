@@ -11,9 +11,11 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { SERVER_DOMAIN } from "@/lib/companyApi";
+import { createMenuGroup, deleteMenuGroup, listMenuGroups, updateMenuGroup, asLegacyGroup } from "@/lib/menuApi";
 import VideoAdvert from "@/components/adverts/VideoAdvert";
 import { ADVERT_LIBRARY, VIDEO_TRIGGERS, ADVERT_SETTINGS } from "@/lib/advertConfig";
+import MenuGroupImagePicker from "@/components/MenuGroupImagePicker";
+import { fetchMenuGroupImages, type MenuGroupImageMap } from "@/lib/menuGroupImages";
 
 interface MenuGroup {
   ID: number;
@@ -27,156 +29,10 @@ interface EditMenuGroupsProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   companyId: number;
-  userId: number;
-  userEmail: string;
-  userPassword: string;
   onNavigateToGroup?: (groupId: number, groupName: string) => void;
 }
 
-async function loadMenuGroups(companyId: number): Promise<MenuGroup[]> {
-  try {
-    const form = new URLSearchParams();
-    form.append("companyID", String(companyId));
-    const res = await fetch(SERVER_DOMAIN + "menu1/PHPread/CompanyMenu/SelectmenuGroup.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: form.toString(),
-    });
-    const data = await res.json();
-    if (Array.isArray(data)) return data;
-    return [];
-  } catch {
-    return [];
-  }
-}
-
-async function addMenuGroup(companyId: number, groupName: string, userId: number, email: string, password: string): Promise<boolean> {
-  try {
-    const res = await fetch(SERVER_DOMAIN + "menu1/PHPwrite/CompanyMenu/AddmenuGroup.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        companyid: companyId,
-        OrderGroup: groupName,
-        UserID: userId,
-        UserEmail: email,
-        UserPassword: password,
-      }),
-    });
-    const data = await res.json();
-    return data.success === true || data.Success === true;
-  } catch {
-    return false;
-  }
-}
-
-async function countGroupProducts(companyId: number, groupId: number): Promise<number> {
-  try {
-    const form = new URLSearchParams();
-    form.append("companyid", String(companyId));
-    form.append("GroupID", String(groupId));
-    const res = await fetch(SERVER_DOMAIN + "menu1/PHPread/CompanyMenu/CountMenuDetails.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: form.toString(),
-    });
-    const data = await res.json();
-    console.log("[DeleteGroup] Count response:", data);
-    const count = Number(data?.Count ?? data?.count ?? data?.total ?? -1);
-    return count;
-  } catch (e) {
-    console.error("[DeleteGroup] Count check failed:", e);
-    return -1;
-  }
-}
-
-async function deleteMenuGroup(groupId: number, companyId: number, userId: number, email: string, password: string): Promise<{ success: boolean; message: string }> {
-  try {
-    const form = new URLSearchParams();
-    form.append("ID", String(groupId));
-    form.append("companyid", String(companyId));
-    form.append("UserID", String(userId));
-    form.append("UserEmail", email);
-    form.append("UserPassword", password);
-    const res = await fetch(SERVER_DOMAIN + "menu1/PHPwrite/CompanyMenu/DeletemenuGroup.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: form.toString(),
-    });
-    const raw = await res.text();
-    console.log("[DeleteGroup] Delete raw response:", raw);
-    try {
-      const data = JSON.parse(raw);
-      const ok = data.CanDelete === "1" || data.success === true || data.Success === true;
-      return { success: ok, message: data.ServerMessage || data.Message || (ok ? "Deleted" : "Failed") };
-    } catch {
-      return { success: false, message: "Unexpected response: " + raw.substring(0, 100) };
-    }
-  } catch (e) {
-    console.error("[DeleteGroup] Delete request failed:", e);
-    return { success: false, message: "Network error" };
-  }
-}
-
-async function updateMenuGroup(
-  companyId: number,
-  oldName: string,
-  newName: string,
-  userId: number,
-  email: string,
-  password: string,
-): Promise<{ success: boolean; message: string }> {
-  try {
-    const form = new URLSearchParams();
-    form.append("UserID", String(userId));
-    form.append("UserEmail", email);
-    form.append("UserPassword", password);
-    form.append("companyid", String(companyId));
-    form.append("OrderResult", oldName);
-    form.append("OrderGroupNew", newName);
-    const res = await fetch(SERVER_DOMAIN + "menu1/PHPwrite/CompanyMenu/UpdateGroupSecure.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: form.toString(),
-    });
-    const raw = await res.text();
-    console.log("[UpdateGroup] raw response:", raw);
-    try {
-      const data = JSON.parse(raw);
-      if (data.success) return { success: true, message: String(data.success) };
-      if (data.error) return { success: false, message: String(data.error) };
-      return { success: false, message: "Unexpected response" };
-    } catch {
-      return { success: false, message: "Unexpected response: " + raw.substring(0, 100) };
-    }
-  } catch (e) {
-    console.error("[UpdateGroup] request failed:", e);
-    return { success: false, message: "Network error" };
-  }
-}
-
-async function toggleMenuGroupEnabled(groupId: number, enabled: string, companyId: number, userId: number, email: string, password: string): Promise<boolean> {
-  try {
-    const res = await fetch(SERVER_DOMAIN + "menu1/PHPwrite/CompanyMenu/ToggleMenuGroupEnabled.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ID: groupId,
-        companyid: companyId,
-        menuGroupEnabled: enabled,
-        UserID: userId,
-        UserEmail: email,
-        UserPassword: password,
-      }),
-    });
-    const data = await res.json();
-    return data.success === true || data.Success === true;
-  } catch {
-    return false;
-  }
-}
-
-const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, userPassword, onNavigateToGroup }: EditMenuGroupsProps) => {
+const EditMenuGroups = ({ open, onOpenChange, companyId, onNavigateToGroup }: EditMenuGroupsProps) => {
   const [groups, setGroups] = useState<MenuGroup[]>([]);
   const [loading, setLoading] = useState(false);
   const [addingGroup, setAddingGroup] = useState(false);
@@ -185,6 +41,8 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, user
   const [editGroup, setEditGroup] = useState<MenuGroup | null>(null);
   const [editName, setEditName] = useState("");
   const [savingEdit, setSavingEdit] = useState(false);
+  const [groupImages, setGroupImages] = useState<MenuGroupImageMap>({});
+  const [imageGroup, setImageGroup] = useState<MenuGroup | null>(null);
 
   // Video ad state for non-paid users after first group
   const [showVideoAd, setShowVideoAd] = useState(false);
@@ -203,8 +61,9 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, user
   }, []);
   const fetchGroups = async () => {
     setLoading(true);
-    const data = await loadMenuGroups(companyId);
-    setGroups(data);
+    const data = await listMenuGroups();
+    setGroups(data.map(asLegacyGroup));
+    setGroupImages(await fetchMenuGroupImages(companyId));
     setLoading(false);
   };
 
@@ -217,7 +76,8 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, user
 
   const actuallyAddGroup = async (name: string) => {
     setAddingGroup(true);
-    const ok = await addMenuGroup(companyId, name, userId, userEmail, userPassword);
+    let ok = false;
+    try { await createMenuGroup(name); ok = true; } catch {}
     setAddingGroup(false);
     if (ok) {
       toast.success(`"${name}" added`);
@@ -267,23 +127,8 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, user
   const handleDelete = async (group: MenuGroup) => {
     console.log("[DeleteGroup] Starting delete for group:", group.ID, group.OrderGroup, "companyId:", companyId);
 
-    // Step 1: Count products in this group
-    const count = await countGroupProducts(companyId, group.ID);
-    console.log("[DeleteGroup] Product count:", count);
-
-    if (count !== 0) {
-      setDeleteConfirm(null);
-      if (count < 0) {
-        toast.error("Could not verify group contents. Please try again.");
-      } else {
-        toast.error("Please delete all products in this group before deleting the group.");
-      }
-      return;
-    }
-
-    // Step 2: Count is 0, proceed with delete
-    const result = await deleteMenuGroup(group.ID, companyId, userId, userEmail, userPassword);
-    console.log("[DeleteGroup] Delete result:", result);
+    let result: { success: boolean; message: string } = { success: false, message: "Delete failed" };
+    try { await deleteMenuGroup(group.ID); result = { success: true, message: "Deleted" }; } catch (e: any) { result.message = e?.message || "Delete failed"; }
     setDeleteConfirm(null);
 
     if (result.success) {
@@ -297,8 +142,7 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, user
   const handleToggle = async (group: MenuGroup, enabled: boolean) => {
     const newVal = enabled ? "1" : "0";
     setGroups(prev => prev.map(g => g.ID === group.ID ? { ...g, menuGroupEnabled: newVal } : g));
-    const ok = await toggleMenuGroupEnabled(group.ID, newVal, companyId, userId, userEmail, userPassword);
-    if (!ok) {
+    try { await updateMenuGroup(group.ID, { enabled }); } catch {
       setGroups(prev => prev.map(g => g.ID === group.ID ? { ...g, menuGroupEnabled: enabled ? "0" : "1" } : g));
       toast.error("Failed to update toggle");
     }
@@ -315,7 +159,8 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, user
     if (!newName) { toast.error("Please enter a group name"); return; }
     if (newName === editGroup.OrderGroup) { setEditGroup(null); return; }
     setSavingEdit(true);
-    const result = await updateMenuGroup(companyId, editGroup.OrderGroup, newName, userId, userEmail, userPassword);
+    let result: { success: boolean; message: string } = { success: false, message: "Update failed" };
+    try { await updateMenuGroup(editGroup.ID, { name: newName }); result = { success: true, message: "Updated" }; } catch (e: any) { result.message = e?.message || "Update failed"; }
     setSavingEdit(false);
     if (result.success) {
       toast.success(result.message || "Group updated");
@@ -360,6 +205,9 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, user
                     </Button>
                     <Button variant="secondary" size="sm" onClick={() => openEdit(group)}>
                       Edit
+                    </Button>
+                    <Button variant="secondary" size="sm" onClick={() => setImageGroup(group)}>
+                      Image
                     </Button>
                     <Button variant="secondary" size="sm" onClick={() => setDeleteConfirm(group)}>
                       Delete
@@ -410,6 +258,12 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, userId, userEmail, user
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <MenuGroupImagePicker open={!!imageGroup} onOpenChange={(open) => !open && setImageGroup(null)}
+        companyId={companyId} groupId={imageGroup?.ID || 0} groupName={imageGroup?.OrderGroup || ""}
+        current={imageGroup ? groupImages[String(imageGroup.ID)] : null}
+        auth={{ userId: 0, email: "", password: "" }}
+        onSaved={(meta) => { if (imageGroup) setGroupImages((prev) => ({ ...prev, [String(imageGroup.ID)]: meta })); }} />
 
       {/* Video ad overlay for non-paid users */}
       <VideoAdvert

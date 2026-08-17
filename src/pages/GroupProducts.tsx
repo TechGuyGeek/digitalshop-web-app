@@ -2,18 +2,14 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Loader2, AlertCircle, Plus, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SERVER_DOMAIN } from "@/lib/companyApi";
+import { listProducts, asLegacyProduct } from "@/lib/menuApi";
 import ProductCard, { type ProductCardItem } from "@/components/ProductCard";
 import { useLanguage } from "@/contexts/LanguageContext";
 import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 
 const OWNER_PRODUCTS_CACHE_PREFIX = "owner-group-products:";
 
-async function fetchGroupProducts(groupId: string): Promise<ProductCardItem[]> {
-  const form = new URLSearchParams(); form.append("GroupID", groupId);
-  const res = await fetch(SERVER_DOMAIN + "menu1/PHPread/CompanyMenu/PoppulateSubMenu1.php", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: form.toString() });
-  const data = await res.json(); return Array.isArray(data) ? data : [];
-}
+async function fetchGroupProducts(groupId: string): Promise<ProductCardItem[]> { return (await listProducts(Number(groupId))).map(asLegacyProduct); }
 
 function normalizeProduct(product: ProductCardItem): ProductCardItem {
   const menuEnable = product.MenuEnable ?? product.MenuItemEnable ?? "0";

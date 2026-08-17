@@ -5,6 +5,7 @@ import { Switch } from "@/components/ui/switch";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { SERVER_DOMAIN } from "@/lib/companyApi";
+import { deleteProduct, updateProduct } from "@/lib/menuApi";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
   AlertDialog,
@@ -46,63 +47,6 @@ function getImageUrl(path?: string) {
   return SERVER_DOMAIN + withPrefix;
 }
 
-function getUserAuth() {
-  try {
-    const stored = localStorage.getItem("digitalUser");
-    if (!stored) return { UserID: "", UserEmail: "", UserPassword: "" };
-    const u = JSON.parse(stored);
-    return {
-      UserID: String(u.PersonID || u.ID || u.id || ""),
-      UserEmail: u.Email || u.email || "",
-      UserPassword: u.Password || u.password || "",
-    };
-  } catch {
-    return { UserID: "", UserEmail: "", UserPassword: "" };
-  }
-}
-
-async function saveToggle(payload: Record<string, string>): Promise<{ Result: boolean; Message?: string }> {
-  const res = await fetch(SERVER_DOMAIN + "menu1/PHPwrite/CompanyMenu/SaveMenuGroupDetailsTogglexSecure.php", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  return res.json();
-}
-
-async function deleteProduct(payload: Record<string, string>): Promise<{ Result: boolean; Message?: string }> {
-  const endpoint = SERVER_DOMAIN + "menu1/PHPwrite/CompanyMenu/DeleteOrder2Secure.php";
-  const formData = new URLSearchParams();
-
-  Object.entries(payload).forEach(([key, value]) => {
-    formData.append(key, value ?? "");
-  });
-
-  const requestBody = formData.toString();
-  console.log("[DeleteProduct] endpoint:", endpoint);
-  console.log("[DeleteProduct] payload:", payload);
-  console.log("[DeleteProduct] form body:", requestBody);
-
-  const res = await fetch(endpoint, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: requestBody,
-  });
-
-  console.log("[DeleteProduct] HTTP status:", res.status);
-  const rawText = await res.text();
-  console.log("[DeleteProduct] raw response:", rawText);
-
-  try {
-    const parsed = JSON.parse(rawText);
-    console.log("[DeleteProduct] parsed JSON:", parsed);
-    return parsed;
-  } catch {
-    console.error("[DeleteProduct] JSON parse failed, raw:", rawText);
-    throw new Error("Invalid server response: " + rawText.substring(0, 200));
-  }
-}
-
 const ProductCard = ({ product, groupId, companyId, groupName, onToggleUpdate, onDelete }: ProductCardProps) => {
   const navigate = useNavigate();
   const { t } = useLanguage();
@@ -138,21 +82,8 @@ const ProductCard = ({ product, groupId, companyId, groupName, onToggleUpdate, o
     setToggling(true);
 
     try {
-      const auth = getUserAuth();
-      const result = await saveToggle({
-        companyid: companyId,
-        GroupID: groupId,
-        ID: product.ID,
-        MenuEnable: checked ? "1" : "0",
-        ...auth,
-      });
-
-      if (!result.Result) {
-        setEnabled(prev);
-        toast.error(result.Message || "Failed to update toggle");
-      } else {
-        onToggleUpdate?.(product.ID, checked ? "1" : "0");
-      }
+      await updateProduct(Number(product.ID), { enabled: checked });
+      onToggleUpdate?.(product.ID, checked ? "1" : "0");
     } catch {
       setEnabled(prev);
       toast.error("Network error updating toggle");
@@ -165,21 +96,10 @@ const ProductCard = ({ product, groupId, companyId, groupName, onToggleUpdate, o
   const handleDeleteConfirmed = async () => {
     setDeleting(true);
     try {
-      const auth = getUserAuth();
-      const result = await deleteProduct({
-        companyID: companyId,
-        companyid: companyId,
-        MenuID: product.ID,
-        OrderName: product.OrderName || "",
-        ImagePath: product.imagepath || "",
-        ...auth,
-      });
-
-      if (result.Result) {
-        toast.success(result.Message || t("DetailswereSaved"));
+      await deleteProduct(Number(product.ID));
+      {
+        toast.success(t("DetailswereSaved"));
         onDelete?.(product.ID);
-      } else {
-        toast.error(result.Message || t("DetaileswerenotSaved"));
       }
     } catch (err: any) {
       console.error("[DeleteProduct] error:", err);

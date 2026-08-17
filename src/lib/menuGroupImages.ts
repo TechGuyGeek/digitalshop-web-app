@@ -1,4 +1,5 @@
 import { SERVER_DOMAIN } from "@/lib/companyApi";
+import { listMenuGroups, updateMenuGroup } from "@/lib/menuApi";
 
 import foodPreset from "@/assets/menu-group-presets/food.jpg";
 import drinksPreset from "@/assets/menu-group-presets/drinks.jpg";
@@ -125,36 +126,17 @@ export function getMenuGroupDisplayImage(
  */
 export async function fetchMenuGroupImages(companyId: string | number): Promise<MenuGroupImageMap> {
   try {
-    const form = new URLSearchParams();
-    form.append("companyID", String(companyId));
-    const res = await fetch(SERVER_DOMAIN + "menu1/PHPread/CompanyMenu/GetMenuGroupImages.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: form.toString(),
-    });
-    const text = await res.text();
-    if (!text) return {};
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(text);
-    } catch {
-      return {};
-    }
-    if (!Array.isArray(parsed)) return {};
+    const parsed = await listMenuGroups();
     const map: MenuGroupImageMap = {};
-    for (const row of parsed as Record<string, unknown>[]) {
-      if (!row || typeof row !== "object") continue;
-      const groupId = String(row.GroupID ?? row.groupID ?? row.groupid ?? "").trim();
+    for (const row of parsed) {
+      const groupId = String(row.id).trim();
       if (!groupId) continue;
-      const rawSource = String(row.ImageSource ?? row.imageSource ?? "none").toLowerCase();
-      const imageSource: MenuGroupImage["imageSource"] =
-        rawSource === "preset" || rawSource === "custom" ? rawSource : "none";
       map[groupId] = {
         groupId,
-        imageSource,
-        presetKey: (row.PresetKey ?? row.presetKey ?? null) as string | null,
-        customImagePath: (row.CustomImagePath ?? row.customImagePath ?? null) as string | null,
-        updatedAt: (row.UpdatedAt ?? row.updatedAt ?? null) as string | null,
+        imageSource: row.image_source,
+        presetKey: row.preset_key,
+        customImagePath: row.custom_image_path,
+        updatedAt: row.updated_at,
       };
     }
     return map;
@@ -163,11 +145,7 @@ export async function fetchMenuGroupImages(companyId: string | number): Promise<
   }
 }
 
-export interface SaveGroupImageAuth {
-  userId: number | string;
-  email: string;
-  password: string;
-}
+export interface SaveGroupImageAuth { userId: number | string; email: string; password: string; }
 
 export type SaveGroupImagePayload =
   | { imageSource: "preset"; presetKey: PresetKey }
@@ -180,37 +158,12 @@ export async function saveMenuGroupImage(
   groupId: string | number,
   payload: SaveGroupImagePayload
 ): Promise<{ success: boolean; message?: string }> {
-  const body: Record<string, unknown> = {
-    UserID: String(auth.userId),
-    UserEmail: auth.email,
-    UserPassword: auth.password,
-    companyID: Number(companyId),
-    GroupID: Number(groupId),
-    ImageSource: payload.imageSource,
-  };
-  if (payload.imageSource === "preset") body.PresetKey = payload.presetKey;
-  if (payload.imageSource === "custom") body.ImageBase64 = payload.imageBase64;
-
   try {
-    const res = await fetch(SERVER_DOMAIN + "menu1/PHPwrite/CompanyMenu/SaveMenuGroupImageSecure.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    const text = await res.text();
-    try {
-      const data = JSON.parse(text);
-      const ok =
-        data.success === true ||
-        data.Success === true ||
-        String(data.success ?? "").toLowerCase() === "true" ||
-        String(data.Result ?? "").toLowerCase() === "true" ||
-        String(data.ServerMessage ?? data.Message ?? "").toLowerCase().includes("saved");
-      return { success: ok, message: data.ServerMessage || data.Message || data.error || text };
-    } catch {
-      const lower = text.trim().toLowerCase();
-      return { success: lower.includes("saved") || lower === "true", message: text };
-    }
+    const body: Record<string, unknown> = { image_source: payload.imageSource };
+    if (payload.imageSource === "preset") body.preset_key = payload.presetKey;
+    if (payload.imageSource === "custom") body.image_base64 = payload.imageBase64;
+    await updateMenuGroup(Number(groupId), body);
+    return { success: true, message: "Saved" };
   } catch {
     return { success: false, message: "Network error" };
   }
