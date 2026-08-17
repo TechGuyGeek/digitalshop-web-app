@@ -8,6 +8,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import type { DigitalPerson } from "@/lib/api";
 import { fetchCompanyOrdersByTab, groupCompanyOrders, toggleCompanyOrderFlag, deleteCompanyOrder, type CompanyGroupedOrder } from "@/lib/companyOrders";
 import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
+import { updateOwnedOrder } from "@/lib/orderApi";
 
 type TabKey = "today" | "week" | "month";
 
@@ -144,6 +145,7 @@ const CompanyOrders = () => {
                       <span className="text-foreground">{order.hasDelivered === "1" ? t("Delivered") : t("NotDelivered")}</span>
                     </div>
                     {order.requestCancel === "1" && (<div className="flex gap-2"><span className="font-semibold text-destructive">{t("RequestCancel")}</span></div>)}
+                    {order.requestCancel === "1" && <div className="flex gap-2" onClick={(e) => e.stopPropagation()}><Button size="sm" variant="outline" onClick={async () => { await updateOwnedOrder(order.orderId, { cancellation_status: "rejected" }); await loadOrders(activeTab); }}>{t("Reject") || "Reject"}</Button><Button size="sm" onClick={async () => { await updateOwnedOrder(order.orderId, { cancellation_status: "approved" }); await loadOrders(activeTab); }}>{t("Approve") || "Approve"}</Button></div>}
                     <p className="font-bold text-foreground pt-1">{order.customerName}</p>
                     <p className="text-xs text-muted-foreground">{order.dateTime}</p>
                   </div>

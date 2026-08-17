@@ -34,6 +34,11 @@ const Orders = () => {
   const loadOrders = useCallback(async () => {
     setLoading(true);
     try {
+      const [today, week, month] = await Promise.all([listMyOrders("today"), listMyOrders("week"), listMyOrders("month")]);
+      const mapRows = (rows: typeof today) => rows.map((o) => ({ randomCode:o.id, companyId:String(o.company_id), companyName:o.company_name||"Shop", companyphoto:o.company_image||"", dateTime:o.date_time, tableNumber:o.table_number, needTakeaway:o.mode==="takeaway"?"1":"0", needDelivery:o.mode==="delivery"?"1":"0", hasPaid:o.paid?"1":"0", hasDelivered:o.delivered?"1":"0", requestCancel:o.cancel_requested?"1":"0", itemCount:o.items.reduce((n,i)=>n+i.quantity,0), items:o.items.map((i)=>({companyid:String(o.company_id),clientid:String(o.customer_id),RandomeCode:o.id,DateandTime:o.date_time,TableNumber:o.table_number,NeedTakeaway:o.mode==="takeaway"?"1":"0",NeedDelivery:o.mode==="delivery"?"1":"0",HasPaid:o.paid?"1":"0",HasDelivered:o.delivered?"1":"0",OrderName:i.name,OrderPrice:i.price,OrderDesription:i.description,Productid:String(i.product_id),GroupID:String(i.group_id)})) })) as GroupedOrder[];
+      setTodayOrders(mapRows(today)); setWeekOrders(mapRows(week)); setMonthOrders(mapRows(month));
+      return;
+      /* legacy mapping retained below for reference */
       const rows = await listMyOrders();
       const mapped = rows.map((o: any) => ({ randomCode:o.id, companyId:String(o.company_id), companyName:o.company_name||"Shop", companyphoto:o.company_image||"", dateTime:o.date_time, tableNumber:o.table_number, needTakeaway:o.mode==="takeaway"?"1":"0", needDelivery:o.mode==="delivery"?"1":"0", hasPaid:o.paid?"1":"0", hasDelivered:o.delivered?"1":"0", requestCancel:o.cancel_requested?"1":"0", itemCount:o.items.length, items:o.items.map((i:any)=>({companyid:String(o.company_id),clientid:String(o.customer_id),RandomeCode:o.id,DateandTime:o.date_time,TableNumber:o.table_number,NeedTakeaway:o.mode==="takeaway"?"1":"0",NeedDelivery:o.mode==="delivery"?"1":"0",HasPaid:o.paid?"1":"0",HasDelivered:o.delivered?"1":"0",OrderName:i.name,OrderPrice:i.price,OrderDesription:i.description,Productid:String(i.product_id),GroupID:String(i.group_id)})) })) as GroupedOrder[];
       setTodayOrders(mapped); setWeekOrders(mapped); setMonthOrders(mapped);
