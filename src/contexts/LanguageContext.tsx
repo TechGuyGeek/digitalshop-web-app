@@ -55,7 +55,10 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 const STORAGE_KEY = "digitalShopLanguage";
-const TRANSLATIONS_PATH = "/DigitalShopTranslationsJson";
+// Translation assets are deployed alongside the application. This must include
+// the Vite base path for staging (/gpsshops-live/) while remaining root-relative
+// for the production GitHub Pages build.
+const TRANSLATIONS_PATH = `${import.meta.env.BASE_URL}DigitalShopTranslationsJson`.replace(/\/$/, "");
 
 const AVAILABLE_CODES = Object.keys(LANGUAGE_MAP);
 
