@@ -128,7 +128,7 @@ const CompanyOrders = () => {
             const deliveredToggleId = `${order.groupKey}-HasDelivered`;
             return (
               <div key={order.groupKey} className="rounded-xl border border-border bg-card p-4 shadow-sm cursor-pointer hover:border-primary/50 transition-colors"
-                onClick={() => { const params = new URLSearchParams({ companyid: order.companyId, clientid: order.clientId, datetime: order.dateTime, range: activeTab }); navigate(`/company-order-detail?${params.toString()}`); }}>
+                onClick={() => { const params = new URLSearchParams({ id: order.orderId || order.orderid, companyid: order.companyId, clientid: order.clientId, datetime: order.dateTime, range: activeTab }); navigate(`/company-order-detail?${params.toString()}`); }}>
                 <div className="flex gap-3">
                   <div className="flex-1 space-y-1 text-sm">
                     <div className="flex gap-2"><span className="font-semibold text-foreground">{t("Totalitems")}</span><span className="text-foreground">{order.totalItems}</span></div>

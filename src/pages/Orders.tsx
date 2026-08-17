@@ -11,7 +11,7 @@ import {
   requestCancelOrder, groupOrdersBySession, getCompanyPhotoUrl,
   type GroupedOrder,
 } from "@/lib/orderHistory";
-import { listMyOrders, deleteMyOrder } from "@/lib/orderApi";
+import { listMyOrders, requestOrderCancellation } from "@/lib/orderApi";
 
 type TabKey = "today" | "week" | "month";
 
@@ -58,14 +58,14 @@ const Orders = () => {
 
   const handleCancel = async (order: GroupedOrder) => {
     setCancellingId(order.randomCode);
-    try { await deleteMyOrder(order.randomCode); toast.success(t("DetailswereSaved")); await loadOrders(); } catch { toast.error(t("SaveFailed")); }
+    try { await requestOrderCancellation(order.randomCode); toast.success(t("DetailswereSaved")); await loadOrders(); } catch { toast.error(t("SaveFailed")); }
     setCancellingId(null);
   };
 
   const handleOrderTap = (order: GroupedOrder) => {
     const first = order.items[0];
     const clientId = String(first.clientid || first.Companyid || "");
-    const params = new URLSearchParams({ companyid: order.companyId, clientid: clientId, datetime: order.dateTime, companyname: order.companyName, haspaid: order.hasPaid === "1" ? "1" : "0" });
+    const params = new URLSearchParams({ id: order.randomCode, companyid: order.companyId, clientid: clientId, datetime: order.dateTime, companyname: order.companyName, haspaid: order.hasPaid === "1" ? "1" : "0" });
     const detailRoutes: Record<TabKey, string> = { today: "/order-detail", week: "/order-detail-week", month: "/order-detail-month" };
     navigate(`${detailRoutes[activeTab]}?${params.toString()}`);
   };
