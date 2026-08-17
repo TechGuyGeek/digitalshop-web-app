@@ -1,4 +1,7 @@
 {
+  "ShowOrderQR": "Näytä tilauksen QR-koodi",
+  "PaymentMethodComingSoon": "Maksutapa tulossa pian",
+  "OrdersOverFiveOnly": "Vain yli 5,00 £:n tilaukset",
   "1stlineAddress": "1. rivi Osoite",
   "2ndlineAddress": "2. rivi Osoite",
   "3rdlineAddress": "3. rivin osoite",

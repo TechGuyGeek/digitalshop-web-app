@@ -1,4 +1,7 @@
 {
+  "ShowOrderQR": "إظهار رمز QR للطلب",
+  "PaymentMethodComingSoon": "طريقة الدفع قريباً",
+  "OrdersOverFiveOnly": "الطلبات التي تزيد عن 5.00 جنيه إسترليني فقط",
   "1stlineAddress": "عنوان السطر الأول",
   "2ndlineAddress": "عنوان السطر الثاني",
   "3rdlineAddress": "عنوان السطر الثالث",

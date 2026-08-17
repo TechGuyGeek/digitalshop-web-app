@@ -1,4 +1,7 @@
 {
+  "ShowOrderQR": "Afișează codul QR al comenzii",
+  "PaymentMethodComingSoon": "Metoda de plată va fi disponibilă în curând",
+  "OrdersOverFiveOnly": "Doar comenzi de peste 5,00 £",
   "1stlineAddress": "Prima linie Adresa",
   "2ndlineAddress": "Adresa de 2 linie",
   "3rdlineAddress": "Adresa a 3-a linie",

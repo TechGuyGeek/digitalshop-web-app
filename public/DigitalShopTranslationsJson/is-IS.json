@@ -1,4 +1,7 @@
 {
+  "ShowOrderQR": "Sýna QR-kóða pöntunar",
+  "PaymentMethodComingSoon": "Greiðslumáti kemur fljótlega",
+  "OrdersOverFiveOnly": "Aðeins pantanir yfir £5,00",
   "1stlineAddress": "1. lína Heimilisfang",
   "2ndlineAddress": "2. lína Heimilisfang",
   "3rdlineAddress": "3. lína Heimilisfang",

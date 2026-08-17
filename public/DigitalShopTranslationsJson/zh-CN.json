@@ -1,4 +1,7 @@
 {
+  "ShowOrderQR": "显示订单二维码",
+  "PaymentMethodComingSoon": "支付方式即将推出",
+  "OrdersOverFiveOnly": "仅限超过 £5.00 的订单",
   "1stlineAddress": "第一行地址",
   "2ndlineAddress": "第二行地址",
   "3rdlineAddress": "第3行地址",

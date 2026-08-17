@@ -1,4 +1,7 @@
 {
+  "ShowOrderQR": "注文QRを表示",
+  "PaymentMethodComingSoon": "支払い方法は近日利用可能です",
+  "OrdersOverFiveOnly": "£5.00を超える注文のみ",
   "1stlineAddress": "1行目の住所",
   "2ndlineAddress": "2行目の住所",
   "3rdlineAddress": "3行目の住所",

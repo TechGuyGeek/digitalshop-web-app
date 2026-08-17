@@ -1,4 +1,7 @@
 {
+  "ShowOrderQR": "주문 QR 표시",
+  "PaymentMethodComingSoon": "결제 수단이 곧 제공됩니다",
+  "OrdersOverFiveOnly": "£5.00 초과 주문만 가능",
   "1stlineAddress": "첫 번째 줄 주소",
   "2ndlineAddress": "두 번째 줄 주소",
   "3rdlineAddress": "세 번째 줄 주소",

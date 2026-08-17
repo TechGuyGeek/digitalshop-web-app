@@ -1,4 +1,7 @@
 {
+  "ShowOrderQR": "QR-code van bestelling tonen",
+  "PaymentMethodComingSoon": "Betaalmethode binnenkort beschikbaar",
+  "OrdersOverFiveOnly": "Alleen bestellingen boven £5,00",
   "1stlineAddress": "1e regel Adres",
   "2ndlineAddress": "2e regel adres",
   "3rdlineAddress": "3e regel Adres",

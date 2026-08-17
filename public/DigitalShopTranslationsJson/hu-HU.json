@@ -1,4 +1,7 @@
 {
+  "ShowOrderQR": "Rendelési QR-kód megjelenítése",
+  "PaymentMethodComingSoon": "A fizetési mód hamarosan elérhető",
+  "OrdersOverFiveOnly": "Csak 5,00 £ feletti rendelések",
   "1stlineAddress": "1. sor Cím",
   "2ndlineAddress": "2. sor Cím",
   "3rdlineAddress": "3. sor címe",

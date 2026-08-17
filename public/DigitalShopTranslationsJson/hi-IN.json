@@ -1,4 +1,7 @@
 {
+  "ShowOrderQR": "ऑर्डर QR दिखाएँ",
+  "PaymentMethodComingSoon": "भुगतान विधि जल्द उपलब्ध होगी",
+  "OrdersOverFiveOnly": "केवल £5.00 से अधिक के ऑर्डर",
   "1stlineAddress": "पहली पंक्ति का पता",
   "2ndlineAddress": "दूसरी पंक्ति का पता",
   "3rdlineAddress": "3 वीं पंक्ति का पता",

@@ -1,4 +1,7 @@
 {
+  "ShowOrderQR": "Afficher le QR de la commande",
+  "PaymentMethodComingSoon": "Mode de paiement bientôt disponible",
+  "OrdersOverFiveOnly": "Commandes de plus de 5,00 £ uniquement",
   "1stlineAddress": "Adresse de 1ère ligne",
   "2ndlineAddress": "2ème ligne Adresse",
   "3rdlineAddress": "Adresse 3ème ligne",

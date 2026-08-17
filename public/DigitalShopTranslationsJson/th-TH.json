@@ -1,4 +1,7 @@
 {
+  "ShowOrderQR": "แสดง QR คำสั่งซื้อ",
+  "PaymentMethodComingSoon": "วิธีการชำระเงินจะพร้อมใช้งานเร็ว ๆ นี้",
+  "OrdersOverFiveOnly": "เฉพาะคำสั่งซื้อที่มากกว่า £5.00",
   "1stlineAddress": "ที่อยู่บรรทัดแรก",
   "2ndlineAddress": "ที่อยู่บรรทัดที่ 2",
   "3rdlineAddress": "ที่อยู่บรรทัดที่ 3",

@@ -1,4 +1,7 @@
 {
+  "ShowOrderQR": "Bestellungs-QR anzeigen",
+  "PaymentMethodComingSoon": "Zahlungsmethode bald verfügbar",
+  "OrdersOverFiveOnly": "Nur Bestellungen über 5,00 £",
   "1stlineAddress": "1. Zeile Adresse",
   "2ndlineAddress": "2. Zeile Adresse",
   "3rdlineAddress": "3. Zeile Adresse",

@@ -1,4 +1,7 @@
 {
+  "ShowOrderQR": "Wys bestelling-QR",
+  "PaymentMethodComingSoon": "Betaalmetode binnekort beskikbaar",
+  "OrdersOverFiveOnly": "Slegs bestellings bo £5,00",
   "1stlineAddress": "1ste reël adres",
   "2ndlineAddress": "2de reël Adres",
   "3rdlineAddress": "3de reël adres",

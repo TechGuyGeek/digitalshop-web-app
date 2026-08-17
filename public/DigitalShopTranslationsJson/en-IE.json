@@ -1,4 +1,7 @@
 {
+  "ShowOrderQR": "Taispeáin QR an Ordaithe",
+  "PaymentMethodComingSoon": "Beidh an modh íocaíochta ar fáil go luath",
+  "OrdersOverFiveOnly": "Orduithe os cionn £5.00 amháin",
   "1stlineAddress": "Seoladh 1ú líne",
   "2ndlineAddress": "Seoladh 2ú líne",
   "3rdlineAddress": "Seoladh 3ú líne",

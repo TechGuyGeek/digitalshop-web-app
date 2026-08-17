@@ -1,4 +1,7 @@
 {
+  "ShowOrderQR": "Εμφάνιση QR παραγγελίας",
+  "PaymentMethodComingSoon": "Η μέθοδος πληρωμής θα είναι σύντομα διαθέσιμη",
+  "OrdersOverFiveOnly": "Μόνο παραγγελίες άνω των 5,00 £",
   "1stlineAddress": "Διεύθυνση 1ης γραμμής",
   "2ndlineAddress": "Διεύθυνση 2ης γραμμής",
   "3rdlineAddress": "Γραμμή 3ης γραμμής",

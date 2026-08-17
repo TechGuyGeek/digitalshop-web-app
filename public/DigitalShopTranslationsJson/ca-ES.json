@@ -1,4 +1,7 @@
 {
+  "ShowOrderQR": "Mostra el QR de la comanda",
+  "PaymentMethodComingSoon": "El mètode de pagament estarà disponible aviat",
+  "OrdersOverFiveOnly": "Només comandes superiors a 5,00 £",
   "1stlineAddress": "Adreça de primera línia",
   "2ndlineAddress": "Adreça de 2a línia",
   "3rdlineAddress": "Adreça de 3a línia",

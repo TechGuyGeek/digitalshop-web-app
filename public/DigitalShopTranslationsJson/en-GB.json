@@ -1,4 +1,7 @@
 {
+  "ShowOrderQR": "Show Order QR",
+  "PaymentMethodComingSoon": "Payment method coming soon",
+  "OrdersOverFiveOnly": "Orders over £5.00 only",
   "1stlineAddress": "1st line Address",
   "2ndlineAddress": "2nd line Address",
   "3rdlineAddress": "3nd line Address",

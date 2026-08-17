@@ -1,4 +1,7 @@
 {
+  "ShowOrderQR": "Показать QR-код заказа",
+  "PaymentMethodComingSoon": "Способ оплаты скоро будет доступен",
+  "OrdersOverFiveOnly": "Только заказы свыше 5,00 £",
   "1stlineAddress": "1-я строка адреса",
   "2ndlineAddress": "2-я строка адреса",
   "3rdlineAddress": "Адрес 3-й строки",

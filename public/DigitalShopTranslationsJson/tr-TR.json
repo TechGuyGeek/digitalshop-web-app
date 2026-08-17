@@ -1,4 +1,7 @@
 {
+  "ShowOrderQR": "Sipariş QR kodunu göster",
+  "PaymentMethodComingSoon": "Ödeme yöntemi yakında kullanıma sunulacak",
+  "OrdersOverFiveOnly": "Yalnızca £5,00 üzeri siparişler",
   "1stlineAddress": "1. satır Adres",
   "2ndlineAddress": "2. satır Adres",
   "3rdlineAddress": "3. satır Adresi",

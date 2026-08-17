@@ -1,4 +1,7 @@
 {
+  "ShowOrderQR": "Dangos QR archeb",
+  "PaymentMethodComingSoon": "Dull talu ar gael yn fuan",
+  "OrdersOverFiveOnly": "Archebion dros £5.00 yn unig",
   "1stlineAddress": "Cyfeiriad llinell 1af",
   "2ndlineAddress": "Cyfeiriad 2il linell",
   "3rdlineAddress": "Cyfeiriad llinell 3nd",

@@ -1,4 +1,7 @@
 {
+  "ShowOrderQR": "Seall QR na h-òrduigh",
+  "PaymentMethodComingSoon": "Modh pàighidh ri fhaighinn a dh’aithghearr",
+  "OrdersOverFiveOnly": "Òrdughan os cionn £5.00 a-mhàin",
   "1stlineAddress": "Seòladh 1mh loidhne",
   "2ndlineAddress": "Seòladh 2na loidhne",
   "3rdlineAddress": "Seòladh loidhne 3nd",

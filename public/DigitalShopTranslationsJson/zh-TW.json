@@ -1,4 +1,7 @@
 {
+  "ShowOrderQR": "顯示訂單 QR 碼",
+  "PaymentMethodComingSoon": "付款方式即將推出",
+  "OrdersOverFiveOnly": "僅限超過 £5.00 的訂單",
   "1stlineAddress": "第一行地址",
   "2ndlineAddress": "第二行地址",
   "3rdlineAddress": "第3行地址",

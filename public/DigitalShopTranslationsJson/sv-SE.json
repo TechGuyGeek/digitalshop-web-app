@@ -1,4 +1,7 @@
 {
+  "ShowOrderQR": "Visa orderns QR-kod",
+  "PaymentMethodComingSoon": "Betalningsmetod kommer snart",
+  "OrdersOverFiveOnly": "Endast beställningar över 5,00 £",
   "1stlineAddress": "Första raden Adress",
   "2ndlineAddress": "Andra raden Adress",
   "3rdlineAddress": "3: e radens adress",

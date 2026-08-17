@@ -1,4 +1,7 @@
 {
+  "ShowOrderQR": "הצג QR של ההזמנה",
+  "PaymentMethodComingSoon": "אמצעי התשלום יהיה זמין בקרוב",
+  "OrdersOverFiveOnly": "הזמנות מעל £5.00 בלבד",
   "1stlineAddress": "כתובת שורה 1",
   "2ndlineAddress": "כתובת שורה 2",
   "3rdlineAddress": "כתובת שורה שלישית",

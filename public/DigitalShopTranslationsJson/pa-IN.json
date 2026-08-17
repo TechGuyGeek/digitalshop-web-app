@@ -1,4 +1,7 @@
 {
+  "ShowOrderQR": "ਆਰਡਰ QR ਦਿਖਾਓ",
+  "PaymentMethodComingSoon": "ਭੁਗਤਾਨ ਵਿਧੀ ਜਲਦੀ ਉਪਲਬਧ ਹੋਵੇਗੀ",
+  "OrdersOverFiveOnly": "ਸਿਰਫ਼ £5.00 ਤੋਂ ਵੱਧ ਦੇ ਆਰਡਰ",
   "1stlineAddress": "ਪਹਿਲੀ ਲਾਈਨ ਪਤਾ",
   "2ndlineAddress": "ਦੂਜੀ ਲਾਈਨ ਦਾ ਪਤਾ",
   "3rdlineAddress": "3 ਪੰਗਤੀ ਪਤਾ",

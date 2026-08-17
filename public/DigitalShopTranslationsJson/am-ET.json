@@ -1,4 +1,7 @@
 {
+  "ShowOrderQR": "የትዕዛዝ QR አሳይ",
+  "PaymentMethodComingSoon": "የክፍያ ዘዴ በቅርቡ ይገኛል",
+  "OrdersOverFiveOnly": "ከ£5.00 በላይ ያሉ ትዕዛዞች ብቻ",
   "1stlineAddress": "1 ኛ መስመር አድራሻ",
   "2ndlineAddress": "2 ኛ መስመር አድራሻ",
   "3rdlineAddress": "3 ኛ መስመር አድራሻ",

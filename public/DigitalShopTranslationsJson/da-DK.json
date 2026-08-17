@@ -1,4 +1,7 @@
 {
+  "ShowOrderQR": "Vis ordre-QR",
+  "PaymentMethodComingSoon": "Betalingsmetode kommer snart",
+  "OrdersOverFiveOnly": "Kun ordrer over £5,00",
   "1stlineAddress": "1. linje Adresse",
   "2ndlineAddress": "2. linje Adresse",
   "3rdlineAddress": "3. linje Adresse",
