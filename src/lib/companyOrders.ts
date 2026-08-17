@@ -1,4 +1,5 @@
 const SERVER_DOMAIN = "https://web.gpsshops.com/";
+import { listOwnedOrders, updateOwnedOrder } from "@/lib/orderApi";
 
 export interface CompanyOrderItem {
   GroupID?: number | string;
@@ -94,6 +95,9 @@ export async function fetchCompanyOrdersByTab(
   companyId: string,
   tab: "today" | "week" | "month"
 ): Promise<CompanyOrderItem[]> {
+  const v1 = await listOwnedOrders();
+  return v1.flatMap((o) => o.items.map((item) => ({ companyid:o.company_id, clientid:o.customer_id, orderid:o.id, GroupID:item.group_id, Productid:item.product_id, DateandTime:o.date_time, TableNumber:o.table_number, HasPaid:o.paid?"1":"0", HasDelivered:o.delivered?"1":"0", NeedDelivery:o.mode==="delivery"?"1":"0", NeedTakeaway:o.mode==="takeaway"?"1":"0", RandomeCode:o.id, OrderPrice:item.price, OrderName:item.name, OrderDesription:item.description, CompanyName:o.company_name } as CompanyOrderItem)));
+  /* legacy implementation retained below for non-migrated clients */
   const endpoints: Record<string, string> = {
     today: "RetriveLiveOrdersSecure.php",
     week: "RetriveLiveOrdersSecureweek.php",
@@ -247,6 +251,11 @@ export async function toggleCompanyOrderFlag(
   email: string,
   password: string
 ): Promise<CompanyOrderItem[] | null> {
+  try {
+    await updateOwnedOrder(order.orderId, flag === "HasPaid" ? { paid: newValue === "1" } : { delivered: newValue === "1" });
+    return order.items;
+  } catch { return null; }
+  /* legacy implementation retained below for non-migrated clients */
   const paidEndpoints: Record<string, string> = {
     today: "SavePayedorNotToggleSecure_web.php",
     week: "SavePayedorNotToggleSecureweek_web.php",

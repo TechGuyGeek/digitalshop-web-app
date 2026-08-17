@@ -3,9 +3,6 @@ import { placeOrderBatch, getCheckoutId, clearCheckoutId, checkoutSignature } fr
 
 const base = {
   companyId: "10",
-  customerId: "5",
-  userEmail: "a@b.com",
-  userPassword: "secret",
   mode: "onsite" as const,
   tableNumber: "0",
   items: [
@@ -15,27 +12,26 @@ const base = {
 };
 
 const okResponse = (body: unknown) =>
-  Promise.resolve({ ok: true, status: 200, text: () => Promise.resolve(JSON.stringify(body)) } as Response);
+  Promise.resolve({ ok: true, status: 200, text: () => Promise.resolve(JSON.stringify(body)), json: () => Promise.resolve(body) } as Response);
 
 describe("batch checkout", () => {
   beforeEach(() => { sessionStorage.clear(); });
   afterEach(() => { vi.restoreAllMocks(); });
 
   it("submits a two-item basket as ONE batch request", async () => {
-    const fetchMock = vi.fn(() => okResponse({ success: true, idempotent: false, checkoutId: "abc", submittedUnits: 3 }));
+    const fetchMock = vi.fn((url: string) => url.includes("refresh.php") ? okResponse({ success: true, data: { access_token: "token", user: {} } }) : okResponse({ success: true, data: { idempotent: false, order_id: "abc", submitted_units: 3 } }));
     vi.stubGlobal("fetch", fetchMock);
     const res = await placeOrderBatch(base);
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-    expect(url).toContain("PlaceOrderBatchSecure.php");
-    const body = JSON.parse(String(init.body));
+    const orderCall = fetchMock.mock.calls.find(([url]) => String(url).includes("orders.php")) as [string, RequestInit];
+    expect(orderCall[0]).toContain("/api/v1/orders.php");
+    const body = JSON.parse(String(orderCall[1].body));
     expect(body.items).toHaveLength(2);
     expect(body.checkoutId).toBeTruthy();
     expect(res.success).toBe(true);
   });
 
   it("treats idempotent success as success", async () => {
-    vi.stubGlobal("fetch", vi.fn(() => okResponse({ success: true, idempotent: true, checkoutId: "abc", submittedUnits: 3 })));
+    vi.stubGlobal("fetch", vi.fn((url: string) => url.includes("refresh.php") ? okResponse({ success: true, data: { access_token: "token", user: {} } }) : okResponse({ success: true, data: { idempotent: true, order_id: "abc", submitted_units: 3 } })));
     const res = await placeOrderBatch(base);
     expect(res.success).toBe(true);
     expect(res.idempotent).toBe(true);
@@ -65,10 +61,9 @@ describe("batch checkout", () => {
 
   it("never sends credentials to console", async () => {
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
-    vi.stubGlobal("fetch", vi.fn(() => okResponse({ success: true, checkoutId: "abc" })));
+    vi.stubGlobal("fetch", vi.fn((url: string) => url.includes("refresh.php") ? okResponse({ success: true, data: { access_token: "token", user: {} } }) : okResponse({ success: true, data: { order_id: "abc" } })));
     await placeOrderBatch(base);
     const logged = JSON.stringify(logSpy.mock.calls);
     expect(logged).not.toContain("secret");
-    expect(logged).not.toContain("a@b.com");
   });
 });

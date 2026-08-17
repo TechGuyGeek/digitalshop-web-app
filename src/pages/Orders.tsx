@@ -11,6 +11,7 @@ import {
   requestCancelOrder, groupOrdersBySession, getCompanyPhotoUrl,
   type GroupedOrder,
 } from "@/lib/orderHistory";
+import { listMyOrders, deleteMyOrder } from "@/lib/orderApi";
 
 type TabKey = "today" | "week" | "month";
 
@@ -30,17 +31,12 @@ const Orders = () => {
     { key: "month", label: t("Month") },
   ];
 
-  const getPersonId = (): string => {
-    try { const stored = localStorage.getItem("digitalUser"); if (stored) { const user = JSON.parse(stored); return String(user.PersonID || user.ID || ""); } } catch {} return "";
-  };
-
   const loadOrders = useCallback(async () => {
-    const personId = getPersonId();
-    if (!personId) { setLoading(false); return; }
     setLoading(true);
     try {
-      const [today, week, month] = await Promise.all([fetchOrdersToday(personId), fetchOrdersWeek(personId), fetchOrdersMonth(personId)]);
-      setTodayOrders(groupOrdersBySession(today)); setWeekOrders(groupOrdersBySession(week)); setMonthOrders(groupOrdersBySession(month));
+      const rows = await listMyOrders();
+      const mapped = rows.map((o: any) => ({ randomCode:o.id, companyId:String(o.company_id), companyName:o.company_name||"Shop", companyphoto:o.company_image||"", dateTime:o.date_time, tableNumber:o.table_number, needTakeaway:o.mode==="takeaway"?"1":"0", needDelivery:o.mode==="delivery"?"1":"0", hasPaid:o.paid?"1":"0", hasDelivered:o.delivered?"1":"0", requestCancel:o.cancel_requested?"1":"0", itemCount:o.items.length, items:o.items.map((i:any)=>({companyid:String(o.company_id),clientid:String(o.customer_id),RandomeCode:o.id,DateandTime:o.date_time,TableNumber:o.table_number,NeedTakeaway:o.mode==="takeaway"?"1":"0",NeedDelivery:o.mode==="delivery"?"1":"0",HasPaid:o.paid?"1":"0",HasDelivered:o.delivered?"1":"0",OrderName:i.name,OrderPrice:i.price,OrderDesription:i.description,Productid:String(i.product_id),GroupID:String(i.group_id)})) })) as GroupedOrder[];
+      setTodayOrders(mapped); setWeekOrders(mapped); setMonthOrders(mapped);
     } catch (err) { console.error("Failed to load orders:", err); } finally { setLoading(false); }
   }, []);
 
@@ -61,10 +57,8 @@ const Orders = () => {
   const currentOrders = activeTab === "today" ? todayOrders : activeTab === "week" ? weekOrders : monthOrders;
 
   const handleCancel = async (order: GroupedOrder) => {
-    const personId = getPersonId(); if (!personId) return;
     setCancellingId(order.randomCode);
-    const success = await requestCancelOrder(order, personId, activeTab);
-    if (success) { toast.success(t("Requestwassent")); loadOrders(); } else { toast.error(t("SaveFailed")); }
+    try { await deleteMyOrder(order.randomCode); toast.success(t("DetailswereSaved")); await loadOrders(); } catch { toast.error(t("SaveFailed")); }
     setCancellingId(null);
   };
 

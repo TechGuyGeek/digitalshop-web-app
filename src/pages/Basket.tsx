@@ -12,6 +12,7 @@ import { useRegisterNavActions } from "@/contexts/SiteNavExtras";
 import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 import { Analytics } from "@/lib/analytics";
 import { placeOrderBatch, clearCheckoutId } from "@/lib/checkout";
+import { useAuth } from "@/contexts/AuthContext";
 
 const SERVER_DOMAIN = "https://web.gpsshops.com/";
 
@@ -39,6 +40,7 @@ const Basket = () => {
   const shopName = searchParams.get("shop") || "Shop";
   const companyId = searchParams.get("companyid") || sessionStorage.getItem("basket_companyId") || "";
   const { items, count, total, removeItem, clearItem, clearBasket } = useBasket();
+  const { user } = useAuth();
   const { canShowVideo, showVideoAd, dismissVideoAd, videoAdvert, videoVisible } = useAdverts();
   const [submitting, setSubmitting] = useState(false);
   const [orderEnable, setOrderEnable] = useState(false);
@@ -82,19 +84,12 @@ const Basket = () => {
     if (submitting) return;
     if (!companyId) { toast.error(t("Pleasecreateacompanyfirst")); return; }
     if (items.length === 0) { toast.error(t("YouhaveNoOrdersselected")); return; }
-    const user = getLoggedInUser();
-    if (!user || !(user.PersonID || user.ID)) { toast.error(t("Signin")); return; }
-    const personId = String(user.PersonID || user.ID || "");
-    const userEmail = String(user.Email || user.email || "");
-    const userPassword = String(user.Password || user.password || user.hash || "");
+    if (!user) { toast.error(t("Signin")); return; }
     setSubmitting(true);
     Analytics.orderStarted({ company_id: companyId, items: items.length, total, mode });
     try {
       const result = await placeOrderBatch({
         companyId,
-        customerId: personId,
-        userEmail,
-        userPassword,
         mode,
         tableNumber: tableNumber || "0",
         items: items.map((i) => ({ productId: i.id, groupId: i.groupId || "0", quantity: i.quantity })),

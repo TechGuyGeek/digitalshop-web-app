@@ -1,0 +1,9 @@
+import { AuthApiError, authenticatedFetch } from "@/lib/authClient";
+const API = "https://web.gpsshops.com/menu1/api/v1/orders.php";
+async function read<T>(r: Response): Promise<T> { const b=await r.json().catch(()=>null); if(!r.ok||!b?.success) throw new AuthApiError(r.status,b?.error?.code||"order_request_failed",b?.error?.message||"Order request failed."); return b.data as T; }
+export interface V1Order { id:string; company_id:number; customer_id:number; date_time:string; table_number:string; mode:string; paid:boolean; delivered:boolean; cancel_requested:boolean; items:Array<{product_id:number;group_id:number;name:string;description:string;price:string;image_path:string|null;quantity:number}>; total:string; company_name?:string; company_image?:string; }
+export async function createOrder(input:{company_id:number;mode:string;table_number:string;idempotency_key:string;items:Array<{product_id:number;group_id:number;quantity:number}>}) { return read<{order_id:string;idempotent:boolean;total:string;submitted_units:number}>(await authenticatedFetch(API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(input)})); }
+export async function listMyOrders() { return (await read<{orders:V1Order[]}>(await authenticatedFetch(API))).orders; }
+export async function listOwnedOrders() { return (await read<{orders:V1Order[]}>(await authenticatedFetch(`${API}?owner=true`))).orders; }
+export async function updateOwnedOrder(id:string,input:{paid?:boolean;delivered?:boolean}) { return read<{updated:boolean}>(await authenticatedFetch(`${API}?id=${encodeURIComponent(id)}`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify(input)})); }
+export async function deleteMyOrder(id:string) { return read<{deleted:boolean}>(await authenticatedFetch(`${API}?id=${encodeURIComponent(id)}`,{method:"DELETE"})); }

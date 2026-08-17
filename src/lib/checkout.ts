@@ -1,5 +1,5 @@
-const SERVER_DOMAIN = "https://web.gpsshops.com/";
-const BATCH_ENDPOINT = "menu1/PHPwrite/LiveOrders/PlaceOrderBatchSecure.php";
+import { authenticatedFetch } from "@/lib/authClient";
+const BATCH_ENDPOINT = "https://web.gpsshops.com/menu1/api/v1/orders.php";
 const STORAGE_KEY = "checkout_session";
 
 export interface CheckoutItemInput {
@@ -10,9 +10,6 @@ export interface CheckoutItemInput {
 
 export interface CheckoutRequest {
   companyId: string;
-  customerId: string;
-  userEmail: string;
-  userPassword: string;
   mode: "onsite" | "takeaway" | "delivery";
   tableNumber: string;
   items: CheckoutItemInput[];
@@ -27,12 +24,12 @@ export interface CheckoutResult {
 }
 
 /** Stable signature of the logical basket + fulfilment details. */
-export function checkoutSignature(req: Omit<CheckoutRequest, "userPassword" | "userEmail">): string {
+export function checkoutSignature(req: CheckoutRequest): string {
   const items = [...req.items]
     .map((i) => `${i.productId}:${i.groupId}:${i.quantity}`)
     .sort()
     .join("|");
-  return `${req.companyId}#${req.customerId}#${req.mode}#${req.tableNumber}#${items}`;
+  return `${req.companyId}#${req.mode}#${req.tableNumber}#${items}`;
 }
 
 function randomId(length = 64): string {
@@ -78,7 +75,6 @@ export function clearCheckoutId(): void {
 export async function placeOrderBatch(req: CheckoutRequest): Promise<CheckoutResult> {
   const signature = checkoutSignature({
     companyId: req.companyId,
-    customerId: req.customerId,
     mode: req.mode,
     tableNumber: req.tableNumber,
     items: req.items,
@@ -87,15 +83,12 @@ export async function placeOrderBatch(req: CheckoutRequest): Promise<CheckoutRes
 
   const payload = {
     checkoutId,
-    companyId: req.companyId,
-    customerId: req.customerId,
-    userEmail: req.userEmail,
-    userPassword: req.userPassword,
+    company_id: Number(req.companyId),
     mode: req.mode,
     tableNumber: req.tableNumber || "0",
     items: req.items.map((i) => ({
-      productId: String(i.productId),
-      groupId: String(i.groupId ?? "0"),
+      product_id: Number(i.productId),
+      group_id: Number(i.groupId ?? "0"),
       quantity: Number(i.quantity) || 1,
     })),
   };
@@ -103,17 +96,13 @@ export async function placeOrderBatch(req: CheckoutRequest): Promise<CheckoutRes
   // Safe logging only — never credentials.
   console.log("[checkout] batch submit", {
     checkoutId,
-    companyId: payload.companyId,
+    companyId: payload.company_id,
     mode: payload.mode,
     lines: payload.items.length,
   });
 
   try {
-    const res = await fetch(SERVER_DOMAIN + BATCH_ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+    const res = await authenticatedFetch(BATCH_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...payload, idempotency_key: checkoutId, table_number: payload.tableNumber }) });
     const text = await res.text();
     let data: Record<string, unknown> | null = null;
     try { data = JSON.parse(text); } catch { data = null; }
@@ -123,9 +112,11 @@ export async function placeOrderBatch(req: CheckoutRequest): Promise<CheckoutRes
       return { success: false, idempotent: false, checkoutId, message: "Checkout failed" };
     }
 
-    const success = data.success === true || data.Success === true;
-    const idempotent = data.idempotent === true || data.Idempotent === true;
-    const message = String((data.ServerMessage as string) || (data.message as string) || "");
+    const envelope = data as any;
+    const result = envelope.data || envelope;
+    const success = envelope.success === true;
+    const idempotent = result.idempotent === true;
+    const message = String(result.message || envelope.error?.message || "");
 
     console.log("[checkout] batch result", {
       checkoutId,
@@ -137,8 +128,8 @@ export async function placeOrderBatch(req: CheckoutRequest): Promise<CheckoutRes
     return {
       success,
       idempotent,
-      checkoutId: String(data.checkoutId || checkoutId),
-      submittedUnits: Number(data.submittedUnits) || undefined,
+      checkoutId: String(result.order_id || checkoutId),
+      submittedUnits: Number(result.submitted_units) || undefined,
       message: message || undefined,
     };
   } catch (err) {
