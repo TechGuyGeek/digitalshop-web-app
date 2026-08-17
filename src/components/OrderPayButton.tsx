@@ -1,12 +1,9 @@
 import { useState } from "react";
-import { Loader2 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { createOrderPaymentQr } from "@/lib/orderPaymentQr";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
-
-const SERVER_DOMAIN = "https://web.gpsshops.com/";
 
 interface OrderPayButtonProps {
   companyId: string;
@@ -17,100 +14,22 @@ interface OrderPayButtonProps {
 
 const OrderPayButton = ({ companyId, orderId, totalAmount, hasPaid }: OrderPayButtonProps) => {
   const { t } = useLanguage();
-  const [paying, setPaying] = useState(false);
   const [qr, setQr] = useState<string | null>(null);
 
-  const getPersonId = (): string => {
-    try {
-      const stored = localStorage.getItem("digitalUser");
-      if (stored) {
-        const u = JSON.parse(stored);
-        return String(u.PersonID || u.ID || "");
-      }
-    } catch {}
-    return "";
-  };
-
-  const getEmail = (): string => {
-    try {
-      const stored = localStorage.getItem("digitalUser");
-      if (stored) {
-        const u = JSON.parse(stored);
-        return String(u.Email || u.email || "");
-      }
-    } catch {}
-    return "";
-  };
-
   const handlePay = async () => {
-    if (hasPaid || paying) return;
-    if (totalAmount < 5) {
-      toast.info(t("OrdersOverFiveOnly"));
-      return;
-    }
-    const personId = getPersonId();
-    if (!personId || !companyId) return;
-    setPaying(true);
-    try {
-      const checkBody = new URLSearchParams();
-      checkBody.append("companyID", companyId);
-      checkBody.append("UserID", personId);
-      let checkData: { success?: boolean; [k: string]: unknown } | null = null;
-      try {
-        const res = await fetch(SERVER_DOMAIN + "menu1/PHPread/Stripe/CheckStripePaymentAllowed.php", {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: checkBody.toString(),
-        });
-        const text = await res.text();
-        console.log("[Pay] CheckStripePaymentAllowed:", res.status, text);
-        try { checkData = JSON.parse(text); } catch { checkData = null; }
-      } catch (e) { console.error("[Pay] check err", e); }
-      if (!checkData || checkData.success !== true) {
-        toast.info(t("PaymentMethodComingSoon") || "Payments aren't set up yet.");
-        return;
-      }
-
-      const sessionBody = new URLSearchParams();
-      sessionBody.append("companyID", companyId);
-      sessionBody.append("UserID", personId);
-      sessionBody.append("clientID", personId);
-      sessionBody.append("orderID", orderId);
-      sessionBody.append("amount", totalAmount.toFixed(2));
-      sessionBody.append("email", getEmail());
-      let sessionData: { success?: boolean; checkoutUrl?: string; [k: string]: unknown } | null = null;
-      try {
-        const res = await fetch(SERVER_DOMAIN + "menu1/PHPwrite/Stripe/CreateOrderCheckoutSession.php", {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: sessionBody.toString(),
-        });
-        const text = await res.text();
-        console.log("[Pay] CreateOrderCheckoutSession:", res.status, text);
-        try { sessionData = JSON.parse(text); } catch { sessionData = null; }
-      } catch (e) { console.error("[Pay] session err", e); }
-      if (sessionData && sessionData.success === true && sessionData.checkoutUrl) {
-        window.location.href = String(sessionData.checkoutUrl);
-        return;
-      }
-      toast.error(t("SaveFailed") || "Could not start checkout.");
-    } finally {
-      setPaying(false);
-    }
+    if (!hasPaid) toast.info(t("PaymentMethodComingSoon"));
   };
 
   return (
     <div className="px-4 py-3 bg-card border-t border-border shrink-0 space-y-1">
       <Button
         className="w-full rounded-full text-sm"
-        disabled={hasPaid || paying}
+        disabled={hasPaid}
         onClick={handlePay}
       >
-        {paying ? <Loader2 className="animate-spin mr-1" size={14} /> : null}
         {hasPaid ? (t("Paid") || "Paid") : (t("Pay") || "Pay")}
       </Button>
-      {!hasPaid && totalAmount < 5 && <p className="text-xs text-center text-muted-foreground">{t("OrdersOverFiveOnly")}</p>}
-      {!hasPaid && totalAmount >= 5 && <Button variant="outline" className="w-full" onClick={async()=>{try{const q=await createOrderPaymentQr(orderId);setQr(`${window.location.origin}${import.meta.env.BASE_URL}order-pay-scan?t=${encodeURIComponent(q.token)}`);}catch(e){toast.error((e as Error).message);}}}>{t("PayByQR") || "Pay by QR"}</Button>}
+      <Button variant="outline" className="w-full" onClick={async()=>{try{const q=await createOrderPaymentQr(orderId);setQr(`${window.location.origin}${import.meta.env.BASE_URL}order-pay-scan?t=${encodeURIComponent(q.token)}`);}catch(e){toast.error((e as Error).message);}}}>{t("ShowOrderQR")}</Button>
       {qr && <div className="flex flex-col items-center gap-2 p-3"><QRCodeSVG value={qr} size={190}/><Button variant="ghost" onClick={()=>setQr(null)}>{t("Close") || "Close"}</Button></div>}
     </div>
   );
