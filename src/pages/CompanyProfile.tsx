@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Camera, Image as ImageIcon, Save, Trash2, Loader2 } from "lucide-react";
+import { ArrowLeft, Camera, Image as ImageIcon, Save, Loader2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useRegisterNavActions } from "@/contexts/SiteNavExtras";
 import MapMarkerPicker, { type MapMarkerOption } from "@/components/MapMarkerPicker";
@@ -10,14 +10,11 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import WebcamCapture from "@/components/WebcamCapture";
 import {
-  loadCompanyProfile, saveCompanyProfile, toggleOrderEnable, toggleTakeawayEnable,
-  toggleDeliveryEnable, toggleGlobalEnable, updateCompanyGPS,
-  getDeleteBlockers, deleteCompany, getCompanyImageUrl,
-  getMarkerForPublicNumber, saveMapMarker, countMenuGroups, updatePaymentMethod,
-  type CompanyProfile as CompanyProfileType
+  getOwnedCompany, updateOwnedCompany, deleteOwnedCompany, getCompanyImageUrl,
+  getMarkerForPublicNumber, countMenuGroups, type CompanyV1
 } from "@/lib/companyApi";
-import { fetchOrderCountCombined } from "@/lib/companyOrders";
-import type { DigitalPerson } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
+import { AuthApiError } from "@/lib/authClient";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -75,12 +72,12 @@ const LabeledInput = ({ label, value, onChange, inputClass, type = "text" }: Lab
 
 const CompanyProfile = () => {
   const navigate = useNavigate();
+  const { user, status } = useAuth();
   const { t } = useLanguage();
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
 
-  const [user, setUser] = useState<DigitalPerson | null>(null);
-  const [company, setCompany] = useState<CompanyProfileType | null>(null);
+  const [company, setCompany] = useState<CompanyV1 | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [pendingImageBase64, setPendingImageBase64] = useState<string | null>(null);
@@ -121,64 +118,39 @@ const CompanyProfile = () => {
 
   // Load user & company
   useEffect(() => {
-    const stored = localStorage.getItem("digitalUser");
-    if (!stored) { navigate("/"); return; }
-    const u = JSON.parse(stored) as DigitalPerson;
-    setUser(u);
-
-    const personId = String(u.PersonID || u.ID || "");
-    const email = (u.Email || u.email || "") as string;
-
-    loadCompanyProfile(personId, email).then(c => {
+    if (status === "anonymous") { navigate("/"); return; }
+    if (status !== "authenticated") return;
+    getOwnedCompany().then(c => {
       if (c) {
         setCompany(c);
         setForm({
-          shopName: c.CompanyName || c.companyname || "",
-          mobileNumber: c.CompanyMobile || "",
-          companyEmail: c.CompanyEmail || "",
-          openTime: c.OpeningTimes || "06:00",
-          closeTime: c.ClosingTimes || "23:00",
-          notificationCount: c.TableNumbers || "24",
-          notifications: c.MenuNotifications || "",
-          lineOne: c.LineOneAddress || "",
-          lineTwo: c.LineTwoAddress || "",
-          lineThree: c.LineThreeAddress || "",
-          lineFour: c.LineFourAddress || "",
-          country: c.LineCountryAddress || "",
-          description: c.CompanyDescription || "",
+          shopName: c.name, mobileNumber: c.mobile_number, companyEmail: c.company_email,
+          openTime: c.opening_time || "06:00", closeTime: c.closing_time || "23:00",
+          notificationCount: c.table_numbers || "24", notifications: c.notifications_enabled ? "1" : "0",
+          lineOne: c.line_one_address, lineTwo: c.line_two_address, lineThree: c.line_three_address,
+          lineFour: c.line_four_address, country: c.country, description: c.description,
         });
         setToggles({
-          liveOrders: c.OrderEnable === "1",
-          takeaways: c.TakeawayEnable === "1",
-          deliveries: c.DeliveryEnable === "1",
-          allowGlobal: c.PayOnPhoneEnable === "1",
+          liveOrders: c.orders_enabled, takeaways: c.takeaway_enabled,
+          deliveries: c.delivery_enabled, allowGlobal: c.global_enabled,
         });
-        setPublicNumber(Number(c.PublicNumber) || 0);
-        const marker = getMarkerForPublicNumber(c.PublicNumber);
+        setPublicNumber(c.map_marker);
+        const marker = getMarkerForPublicNumber(String(c.map_marker));
         setSelectedMarker({
           emoji: marker.emoji,
           label: marker.label,
           translationKey: marker.translationKey,
           iconUrl: marker.iconUrl,
         });
-        const pm = String((c as Record<string, unknown>).PaymentMethod ?? "0");
+        const pm = String(c.payment_method);
         setPaymentMethod(["0", "1", "2"].includes(pm) ? pm : "0");
-        setStripeEnabled(String((c as Record<string, unknown>).StripeEnabled ?? "0") === "1");
-        const imgUrl = getCompanyImageUrl(c.companyphoto);
+        setStripeEnabled(c.stripe_enabled);
+        const imgUrl = getCompanyImageUrl(c.image_path);
         if (imgUrl) setShopImage(imgUrl);
       }
       setLoading(false);
     }).catch(() => setLoading(false));
-  }, [navigate]);
-
-  const getUserAuth = useCallback(() => {
-    if (!user || !company) return null;
-    return {
-      userId: Number(user.PersonID || user.ID || 0),
-      email: (user.Email || user.email || "") as string,
-      password: (user.Password || user.password || user.Token || "") as string,
-    };
-  }, [user, company]);
+  }, [navigate, status]);
 
   const handleChange = (field: string, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -218,68 +190,44 @@ const CompanyProfile = () => {
   const handleSave = async () => {
     if (!company || !user || saving) return;
     setSaving(true);
-    const auth = getUserAuth()!;
     const payload = {
-      companyid: company.companyid,
-      PersonID: auth.userId,
-      Email: auth.email,
-      Password: auth.password,
-      companyname: form.shopName,
-      Imagepath: company.Imagepath || "",
-      companyphoto: company.companyphoto || "",
-      companylat: company.companylat || 0,
-      companylong: company.companylong || 0,
-      snippet: company.snippet || "",
-      companyPhotoBackGround: company.companyPhotoBackGround || "",
-      CompanyMobile: form.mobileNumber,
-      CompanyEmail: form.companyEmail,
-      companypath: "",
-      Switchischecked: "",
-      OpeningTimes: form.openTime,
-      ClosingTimes: form.closeTime,
-      TableNumbers: form.notificationCount,
-      MenuNotifications: form.notifications,
-      PictureBlob: pendingImageBase64 || "0",
-      OrderEnable: toggles.liveOrders ? "1" : "0",
-      TakeawayEnable: toggles.takeaways ? "1" : "0",
-      DeliveryEnable: toggles.deliveries ? "1" : "0",
-      PayOnPhoneEnable: toggles.allowGlobal ? "1" : "0",
-      PublicNumber: String(publicNumber),
-      PrivateNumber: company.PrivateNumber || "",
-      LineOneAddress: form.lineOne,
-      LineTwoAddress: form.lineTwo,
-      LineThreeAddress: form.lineThree,
-      LineFourAddress: form.lineFour,
-      LineCountryAddress: form.country,
-      CompanyDescription: form.description,
-      LastLoggedOn: "",
+      name: form.shopName, mobile_number: form.mobileNumber, company_email: form.companyEmail,
+      latitude: company.latitude, longitude: company.longitude,
+      opening_time: form.openTime, closing_time: form.closeTime, table_numbers: form.notificationCount,
+      notifications_enabled: form.notifications === "1", orders_enabled: toggles.liveOrders,
+      takeaway_enabled: toggles.takeaways, delivery_enabled: toggles.deliveries, global_enabled: toggles.allowGlobal,
+      map_marker: publicNumber, payment_method: Number(paymentMethod), line_one_address: form.lineOne,
+      line_two_address: form.lineTwo, line_three_address: form.lineThree, line_four_address: form.lineFour,
+      country: form.country, description: form.description,
+      ...(pendingImageBase64 ? { image_base64: pendingImageBase64 } : {}),
     };
 
-    const result = await saveCompanyProfile(payload);
-    setSaving(false);
-    if (result.success) {
+    try {
+      const updated = await updateOwnedCompany(payload);
+      setCompany(updated);
       setPendingImageBase64(null);
       toast.success("Company profile saved!");
-    } else {
-      toast.error(result.error || "Save failed");
+    } catch (error) {
+      toast.error(error instanceof AuthApiError ? error.message : "Save failed");
+    } finally {
+      setSaving(false);
     }
   };
 
   // Toggle handlers
   const handleToggle = async (field: string, value: boolean) => {
     setToggles(prev => ({ ...prev, [field]: value }));
-    const auth = getUserAuth();
-    if (!auth || !company) return;
+    if (!company) return;
 
     let ok = true;
     if (field === "liveOrders") {
-      ok = await toggleOrderEnable(company.companyid, value ? "1" : "0", auth.userId, auth.email, auth.password);
+      ok = true;
     } else if (field === "takeaways") {
-      ok = await toggleTakeawayEnable(company.companyid, value ? "1" : "0", auth.userId, auth.email, auth.password);
+      ok = true;
     } else if (field === "deliveries") {
-      ok = await toggleDeliveryEnable(company.companyid, value ? "1" : "0", auth.userId, auth.email, auth.password);
+      ok = true;
     } else if (field === "allowGlobal") {
-      const rawPaid = user?.PaidUser ?? user?.Paiduser ?? (user as Record<string, unknown>)?.paidUser;
+      const rawPaid = user?.paid_user;
       const isPaid = rawPaid === 2 || rawPaid === "2" || rawPaid === 1 || rawPaid === "1" || rawPaid === true;
       console.log("[GlobalGuard] user object:", JSON.stringify(user));
       console.log("[GlobalGuard] rawPaid value:", rawPaid, "typeof:", typeof rawPaid);
@@ -291,7 +239,11 @@ const CompanyProfile = () => {
         return;
       }
       console.log("[GlobalGuard] ALLOWED - proceeding with save");
-      ok = await toggleGlobalEnable(company.companyid, value ? "1" : "0", auth.userId, auth.email, auth.password);
+      ok = true;
+    }
+    if (ok) {
+      try { await updateOwnedCompany({ name: form.shopName, mobile_number: form.mobileNumber, company_email: form.companyEmail, latitude: company.latitude, longitude: company.longitude, opening_time: form.openTime, closing_time: form.closeTime, table_numbers: form.notificationCount, notifications_enabled: form.notifications === "1", orders_enabled: field === "liveOrders" ? value : toggles.liveOrders, takeaway_enabled: field === "takeaways" ? value : toggles.takeaways, delivery_enabled: field === "deliveries" ? value : toggles.deliveries, global_enabled: field === "allowGlobal" ? value : toggles.allowGlobal, map_marker: publicNumber, payment_method: Number(paymentMethod), line_one_address: form.lineOne, line_two_address: form.lineTwo, line_three_address: form.lineThree, line_four_address: form.lineFour, country: form.country, description: form.description }); }
+      catch { ok = false; }
     }
     if (!ok) {
       setToggles(prev => ({ ...prev, [field]: !value }));
@@ -313,19 +265,20 @@ const CompanyProfile = () => {
 
     if (!company || !user) return;
     setPaymentMethod(newValue);
-    const userId = Number(user.PersonID || user.ID || 0);
-    const result = await updatePaymentMethod(company.companyid, userId, Number(newValue));
-    if (!result.success) {
-      toast.error(result.message || "Failed to update payment method");
+    setPaymentMethod(newValue);
+    try {
+      await updateOwnedCompany({ name: form.shopName, mobile_number: form.mobileNumber, company_email: form.companyEmail, latitude: company.latitude, longitude: company.longitude, opening_time: form.openTime, closing_time: form.closeTime, table_numbers: form.notificationCount, notifications_enabled: form.notifications === "1", orders_enabled: toggles.liveOrders, takeaway_enabled: toggles.takeaways, delivery_enabled: toggles.deliveries, global_enabled: toggles.allowGlobal, map_marker: publicNumber, payment_method: Number(newValue), line_one_address: form.lineOne, line_two_address: form.lineTwo, line_three_address: form.lineThree, line_four_address: form.lineFour, country: form.country, description: form.description });
+    } catch (error) {
+      toast.error(error instanceof AuthApiError ? error.message : "Failed to update payment method");
       setPaymentMethod(previous);
       return;
     }
-    toast.success(result.message || "Payment method updated");
+    toast.success("Payment method updated");
   };
 
   // Update GPS
   const handleUpdateGPS = async () => {
-    if (String(user?.PaidUser ?? user?.Paiduser) !== "2") {
+    if (!['1', '2'].includes(String(user?.paid_user))) {
       toast.error("Only pro members can update GPS");
       return;
     }
@@ -339,8 +292,8 @@ const CompanyProfile = () => {
 
   const handleConfirmGpsUpdate = async () => {
     if (!company || !pendingGps) return;
-    const auth = getUserAuth()!;
-    const ok = await updateCompanyGPS(company.companyid, pendingGps.lat, pendingGps.lng, auth.userId, auth.email, auth.password);
+    let ok = false;
+    try { setCompany(await updateOwnedCompany({ name: form.shopName, mobile_number: form.mobileNumber, company_email: form.companyEmail, latitude: pendingGps.lat, longitude: pendingGps.lng, opening_time: form.openTime, closing_time: form.closeTime, table_numbers: form.notificationCount, notifications_enabled: form.notifications === "1", orders_enabled: toggles.liveOrders, takeaway_enabled: toggles.takeaways, delivery_enabled: toggles.deliveries, global_enabled: toggles.allowGlobal, map_marker: publicNumber, payment_method: Number(paymentMethod), line_one_address: form.lineOne, line_two_address: form.lineTwo, line_three_address: form.lineThree, line_four_address: form.lineFour, country: form.country, description: form.description })); ok = true; } catch { ok = false; }
     setGpsDialogOpen(false);
     setPendingGps(null);
     if (ok) toast.success("GPS updated!");
@@ -350,24 +303,24 @@ const CompanyProfile = () => {
   // Add Products — mirrors MAUI: save profile, check group count, branch
   const handleAddProducts = async () => {
     if (addProductsLoading) return;
-    if (!company || !Number(company.companyid)) {
+    if (!company || !Number(company.id)) {
       toast.error("Please create a company first");
       return;
     }
     setAddProductsLoading(true);
     try {
       await handleSave();
-      console.log("[handleAddProducts] Checking menu group count for companyid:", company.companyid);
-      const countResult = await countMenuGroups(Number(company.companyid));
+      console.log("[handleAddProducts] Checking menu group count for companyid:", company.id);
+      const countResult = await countMenuGroups(company.id);
       console.log("[handleAddProducts] countMenuGroups result:", countResult);
       // MAUI logic: if "ZERO" or "0" or empty → first-time setup, else edit
       const hasGroups = countResult !== "ZERO" && countResult !== "0" && countResult.trim() !== "";
       if (hasGroups) {
         console.log("[handleAddProducts] Groups exist, navigating to edit-menu-groups");
-        navigate(`/edit-menu-groups?companyId=${company.companyid}`);
+        navigate(`/edit-menu-groups?companyId=${company.id}`);
       } else {
         console.log("[handleAddProducts] No groups, navigating to edit-menu-groups (add mode)");
-        navigate(`/edit-menu-groups?companyId=${company.companyid}`);
+        navigate(`/edit-menu-groups?companyId=${company.id}`);
       }
     } catch (err) {
       console.error("[handleAddProducts] Error:", err);
@@ -382,42 +335,34 @@ const CompanyProfile = () => {
     await handleSave();
     if (!company) return;
 
-    if (company.companyid === 0) {
+    if (company.id === 0) {
       toast.info("Please create a company first");
       return;
     }
 
-    navigate("/company-orders", { state: { companyId: String(company.companyid) } });
+    navigate("/company-orders", { state: { companyId: String(company.id) } });
   };
 
   // Delete
   const handleDeleteClick = async () => {
     if (!company) return;
-    const blockers = await getDeleteBlockers(company.companyid);
-    if (blockers.total > 0) {
-      const msgs: string[] = [];
-      if (blockers.menuGroups > 0) msgs.push(`${blockers.menuGroups} menu group(s)`);
-      if (blockers.dayOrders > 0) msgs.push(`${blockers.dayOrders} day order(s)`);
-      if (blockers.weekOrders > 0) msgs.push(`${blockers.weekOrders} week order(s)`);
-      if (blockers.monthOrders > 0) msgs.push(`${blockers.monthOrders} month order(s)`);
-      setDeleteBlockerMsg(`Please delete the following before removing your shop:\n• ${msgs.join("\n• ")}`);
-    } else {
-      setDeleteBlockerMsg("");
-    }
+    setDeleteBlockerMsg("");
     setDeleteDialogOpen(true);
   };
 
   const handleConfirmDelete = async () => {
     if (!company) return;
-    const auth = getUserAuth()!;
-    const result = await deleteCompany(company.companyid, auth.userId, auth.email, auth.password);
-    setDeleteDialogOpen(false);
-    if (result.success) {
+    try {
+      await deleteOwnedCompany();
+      setDeleteDialogOpen(false);
       localStorage.removeItem("hasShop");
       toast.success("Shop deleted successfully");
       navigate("/");
-    } else {
-      toast.error(result.message || "Delete failed");
+    } catch (error) {
+      const details = (error as AuthApiError & { details?: { blockers?: Record<string, number> } }).details;
+      const blockers = details?.blockers || {};
+      const message = Object.entries(blockers).filter(([, count]) => count > 0).map(([name, count]) => `${count} ${name.replaceAll("_", " ")}`).join(", ");
+      setDeleteBlockerMsg(message ? `Please delete these records first: ${message}` : (error instanceof Error ? error.message : "Delete failed"));
     }
   };
 
@@ -437,7 +382,7 @@ const CompanyProfile = () => {
         order: 100,
       },
     ],
-    [t, navigate, company?.companyid],
+    [t, navigate, company?.id],
   );
 
   const inputClass =
@@ -616,21 +561,13 @@ const CompanyProfile = () => {
               setPublicNumber(marker.id);
               setMarkerPickerOpen(false);
 
-              const auth = getUserAuth();
-              if (!auth || !company) {
-                toast.error("Cannot save marker — missing auth or company data");
-                return;
-              }
-
-              const ok = await saveMapMarker(company.companyid, marker.id, auth.userId, auth.email, auth.password);
-              if (ok) {
+              if (!company) return;
+              try {
+                await updateOwnedCompany({ name: form.shopName, mobile_number: form.mobileNumber, company_email: form.companyEmail, latitude: company.latitude, longitude: company.longitude, opening_time: form.openTime, closing_time: form.closeTime, table_numbers: form.notificationCount, notifications_enabled: form.notifications === "1", orders_enabled: toggles.liveOrders, takeaway_enabled: toggles.takeaways, delivery_enabled: toggles.deliveries, global_enabled: toggles.allowGlobal, map_marker: marker.id, payment_method: Number(paymentMethod), line_one_address: form.lineOne, line_two_address: form.lineTwo, line_three_address: form.lineThree, line_four_address: form.lineFour, country: form.country, description: form.description });
                 toast.success(t("DetailswereSaved"));
-                // Refresh company data
-                const personId = String(user?.PersonID || user?.ID || "");
-                const email = (user?.Email || user?.email || "") as string;
-                const refreshed = await loadCompanyProfile(personId, email);
+                const refreshed = await getOwnedCompany();
                 if (refreshed) setCompany(refreshed);
-              } else {
+              } catch {
                 toast.error(t("DetaileswerenotSaved"));
               }
             }}
@@ -682,8 +619,8 @@ const CompanyProfile = () => {
         <QRCodeGenerator
           open={qrOpen}
           onOpenChange={setQrOpen}
-          companyId={company.companyid}
-          companyName={form.shopName || company.companyname || "Shop"}
+          companyId={company.id}
+          companyName={form.shopName || company.name || "Shop"}
         />
       )}
 
@@ -694,7 +631,7 @@ const CompanyProfile = () => {
             <AlertDialogTitle>Update GPS?</AlertDialogTitle>
             <AlertDialogDescription className="whitespace-pre-line">
               {pendingGps && company
-                ? `Old: ${company.companylat || 0}, ${company.companylong || 0}\nNew: ${pendingGps.lat.toFixed(6)}, ${pendingGps.lng.toFixed(6)}`
+                ? `Old: ${company.latitude || 0}, ${company.longitude || 0}\nNew: ${pendingGps.lat.toFixed(6)}, ${pendingGps.lng.toFixed(6)}`
                 : ""}
             </AlertDialogDescription>
           </AlertDialogHeader>

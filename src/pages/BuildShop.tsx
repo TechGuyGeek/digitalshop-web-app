@@ -9,6 +9,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 import { Analytics } from "@/lib/analytics";
+import { createOwnedCompany } from "@/lib/companyApi";
 
 const RED_MARKER_HTML = `
 <svg width="28" height="44" viewBox="0 0 28 44" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -85,39 +86,12 @@ const BuildShop = () => {
     if (!shopName.trim()) { toast.error(t("RegistrationFailedCompanyNamecannotbeempty")); return; }
     if (!companyEmail.trim()) { toast.error(t("RegistrationFailedCompanyEmailscannotbeempty")); return; }
     setSaving(true);
-    const SERVER_DOMAIN = "https://web.gpsshops.com/";
-    const user = JSON.parse(localStorage.getItem("digitalUser") || "{}");
-    const personId = user.PersonID || user.personID || user.ID || "";
-    const email = user.Email || user.email || "";
-    const password = user.Password || user.password || "";
-    const saveUrl = SERVER_DOMAIN + "menu1/PHPwrite/Company/SaveCompanyDetails2Secure.php";
-    const savePayload = { PersonID: String(personId), Email: email, Password: password, CompanyName: shopName.trim(), CompanyEmail: companyEmail.trim(), companylat: coords.lat, companylong: coords.lng };
-    console.log("[BuildShop] === STEP 1: Calling SaveCompanyDetails2Secure ===");
-    console.log("[BuildShop] Save endpoint:", saveUrl);
-    console.log("[BuildShop] Save payload:", JSON.stringify(savePayload));
     try {
-      let saveRes: Response;
-      try { saveRes = await fetch(saveUrl, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(savePayload) }); }
-      catch (fetchErr) { console.error("[BuildShop] FETCH FAILED:", fetchErr); toast.error(t("Pleasecheckyourinternetconnection")); setSaving(false); return; }
-      const saveText = await saveRes.text();
-      console.log("[BuildShop] Save response status:", saveRes.status);
-      console.log("[BuildShop] Save raw response:", saveText);
-      if (!saveRes.ok) { toast.error(t("SaveFailed")); setSaving(false); return; }
-      console.log("[BuildShop] === STEP 2: Checking company exists ===");
-      const checkUrl = SERVER_DOMAIN + "menu1/PHPread/Company/DoesCompanyExistorNotSecure.php";
-      const checkPayload = { PersonID: String(personId), UserEmail: email };
-      const checkRes = await fetch(checkUrl, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(checkPayload) });
-      const checkText = await checkRes.text();
-      let checkData: any;
-      try { checkData = JSON.parse(checkText); } catch { checkData = null; }
-      if (checkData?.success && checkData.companies?.length > 0) {
-        const company = checkData.companies[0];
-        localStorage.setItem("hasShop", "true");
-        localStorage.setItem("currentCompany", JSON.stringify(company));
-        Analytics.shopCreated({ company_id: company?.companyid ?? company?.CompanyID });
-        toast.success(t("RegistrationSuccessful"));
-        navigate("/company-profile");
-      } else { toast.error(t("RegistrationFailed")); }
+      const company = await createOwnedCompany({ name: shopName.trim(), company_email: companyEmail.trim(), latitude: coords.lat, longitude: coords.lng });
+      localStorage.setItem("hasShop", "true");
+      Analytics.shopCreated({ company_id: company.id });
+      toast.success(t("RegistrationSuccessful"));
+      navigate("/company-profile");
     } catch (err) { console.error("[BuildShop] Error:", err); toast.error(t("Pleasecheckyourinternetconnection")); }
     finally { setSaving(false); }
   };

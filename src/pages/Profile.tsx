@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { AuthUser } from "@/lib/authClient";
 import { useAuth } from "@/contexts/AuthContext";
-import { loadCompanyProfile } from "@/lib/companyApi";
+import { getOwnedCompany } from "@/lib/companyApi";
 import { toast } from "sonner";
 import WebcamCapture from "@/components/WebcamCapture";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -467,11 +467,9 @@ const Profile = () => {
               if (!user) return;
               toast.loading(t("Pleasewait"), { id: "shop-check" });
               try {
-                const personId = String(user.PersonID || user.ID || "");
-                const email = (user.Email || user.email || "") as string;
-                const company = await loadCompanyProfile(personId, email);
+                const company = await getOwnedCompany();
                 toast.dismiss("shop-check");
-                if (company && Number(company.companyid) > 0) {
+                if (company && company.id > 0) {
                   navigate("/company-profile", { state: { company } });
                 } else {
                   navigate("/build-shop");

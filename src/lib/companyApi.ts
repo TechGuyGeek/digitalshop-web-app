@@ -1,244 +1,57 @@
+import { AuthApiError, authenticatedFetch } from "@/lib/authClient";
+
 const SERVER_DOMAIN = "https://web.gpsshops.com/";
+
+const COMPANY_V1_URL = "https://web.gpsshops.com/menu1/api/v1/company.php";
+
+export interface CompanyV1 {
+  id: number; name: string; mobile_number: string; company_email: string; image_path: string;
+  latitude: number; longitude: number; opening_time: string; closing_time: string; table_numbers: string;
+  notifications_enabled: boolean; orders_enabled: boolean; takeaway_enabled: boolean; delivery_enabled: boolean;
+  global_enabled: boolean; map_marker: number; payment_method: number; stripe_enabled: boolean;
+  line_one_address: string; line_two_address: string; line_three_address: string; line_four_address: string;
+  country: string; description: string;
+}
+
+export type CompanyWrite = Omit<CompanyV1, "id" | "image_path" | "stripe_enabled"> & { image_base64?: string };
+
+async function companyEnvelope(response: Response): Promise<{ company?: CompanyV1; deleted?: boolean }> {
+  const body = await response.json().catch(() => null);
+  if (!response.ok || !body?.success) {
+    const error = new AuthApiError(response.status, body?.error?.code || "company_request_failed", body?.error?.message || "Company request failed.");
+    Object.assign(error, { details: body?.error?.details });
+    throw error;
+  }
+  return body.data;
+}
+
+export async function getOwnedCompany(): Promise<CompanyV1 | null> {
+  return (await companyEnvelope(await authenticatedFetch(COMPANY_V1_URL))).company || null;
+}
+
+export async function createOwnedCompany(input: Pick<CompanyWrite, "name" | "company_email" | "latitude" | "longitude">): Promise<CompanyV1> {
+  const response = await authenticatedFetch(COMPANY_V1_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(input) });
+  return (await companyEnvelope(response)).company!;
+}
+
+export async function updateOwnedCompany(input: CompanyWrite): Promise<CompanyV1> {
+  const response = await authenticatedFetch(COMPANY_V1_URL, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(input) });
+  return (await companyEnvelope(response)).company!;
+}
+
+export async function deleteOwnedCompany(): Promise<void> {
+  const response = await authenticatedFetch(COMPANY_V1_URL, { method: "DELETE", headers: { "Content-Type": "application/json" }, body: "{}" });
+  await companyEnvelope(response);
+}
 
 // ─── Endpoints (configurable) ───────────────────────────────────
 const ENDPOINTS = {
-  loadCompany: "menu1/PHPread/Company/DoesCompanyExistorNotSecure.php",
-  saveCompany: "menu1/PHPwrite/Company/UpdateCompanyDetailsSecure.php",
-  toggleOrder: "menu1/PHPwrite/Company/SaveCompanyOrdersTogglexSecure.php",
-  toggleTakeaway: "menu1/PHPwrite/Company/SaveCompanyTakeawaysToggleSecure.php",
-  toggleDelivery: "menu1/PHPwrite/Company/SaveCompanyDeliveriesToggleSecure.php",
-  toggleGlobal: "menu1/PHPwrite/Company/SaveCompanyLocalGlobalSecure.php",
-  updateGPS: "menu1/PHPwrite/Company/UpdateGPS.php",
   countMenuGroup: "menu1/PHPread/CompanyMenu/CountMenuGroup.php",
   liveOrderCountAll: "menu1/PHPread/CompanyLiveOrders/LiveOrderCountAll.php",
-  deleteCountMenuGroup: "menu1/PHPread/CompanyMenu/DeleteCountMenuGroup.php",
-  liveOrderCount: "menu1/PHPread/CompanyLiveOrders/LiveOrderCount.php",
-  liveOrderCountWeek: "menu1/PHPread/CompanyLiveOrders/LiveOrderCountweek.php",
-  liveOrderCountMonth: "menu1/PHPread/CompanyLiveOrders/LiveOrderCountmonth.php",
-  deleteCompany: "menu1/PHPwrite/Company/DeleteCompanySecure.php",
 };
 
 export { SERVER_DOMAIN };
 
-export interface CompanyProfile {
-  companyid: number;
-  PersonID?: number;
-  CompanyName?: string;
-  companyname?: string;
-  CompanyMobile?: string;
-  CompanyEmail?: string;
-  OpeningTimes?: string;
-  ClosingTimes?: string;
-  TableNumbers?: string;
-  MenuNotifications?: string;
-  LineOneAddress?: string;
-  LineTwoAddress?: string;
-  LineThreeAddress?: string;
-  LineFourAddress?: string;
-  LineCountryAddress?: string;
-  CompanyDescription?: string;
-  companyphoto?: string;
-  Imagepath?: string;
-  OrderEnable?: string;
-  TakeawayEnable?: string;
-  DeliveryEnable?: string;
-  PayOnPhoneEnable?: string;
-  PublicNumber?: string;
-  PrivateNumber?: string;
-  snippet?: string;
-  companyPhotoBackGround?: string;
-  LastLoggedOn?: string;
-  companylat?: number;
-  companylong?: number;
-  [key: string]: unknown;
-}
-
-// ─── Load company ───────────────────────────────────────────────
-export async function loadCompanyProfile(personId: string, email: string): Promise<CompanyProfile | null> {
-  try {
-    console.log("Loading company for PersonID:", personId, "Email:", email);
-    const url = SERVER_DOMAIN + ENDPOINTS.loadCompany;
-    console.log("Company API URL:", url);
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ PersonID: personId, UserEmail: email }),
-    });
-    const text = await res.text();
-    console.log("Company API response:", text.substring(0, 500));
-    if (!text) return null;
-    const data = JSON.parse(text);
-    // Handle { success: true, companies: [...] } (case-insensitive keys)
-    const companies = data.companies || data.Companies;
-    const success = data.success ?? data.Success;
-    if (success && Array.isArray(companies) && companies.length > 0) {
-      const first = companies[0];
-      if (first && Number(first.companyid) > 0) {
-        return first as CompanyProfile;
-      }
-    }
-    // fallback: array response
-    if (Array.isArray(data) && data.length > 0 && Number(data[0].companyid) > 0) {
-      return data[0] as CompanyProfile;
-    }
-    // fallback: single object
-    if (data.companyid && Number(data.companyid) > 0) {
-      return data as CompanyProfile;
-    }
-    console.log("No company found in response:", data);
-    return null;
-  } catch (err) {
-    console.error("loadCompanyProfile error:", err);
-    return null;
-  }
-}
-
-// ─── Save company ───────────────────────────────────────────────
-export async function saveCompanyProfile(payload: Record<string, unknown>): Promise<{ success: boolean; error?: string }> {
-  try {
-    const res = await fetch(SERVER_DOMAIN + ENDPOINTS.saveCompany, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    const text = await res.text();
-    try {
-      const json = JSON.parse(text);
-      if (json.ServerMessage && json.ServerMessage !== "Success") {
-        return { success: false, error: json.ServerMessage };
-      }
-      return { success: true };
-    } catch {
-      return { success: true };
-    }
-  } catch (err) {
-    return { success: false, error: "Network error" };
-  }
-}
-
-// ─── Toggle helpers ─────────────────────────────────────────────
-async function postToggle(endpoint: string, body: Record<string, unknown>): Promise<boolean> {
-  try {
-    const res = await fetch(SERVER_DOMAIN + endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    const data = await res.json();
-    return data.success === true || data.Success === true;
-  } catch {
-    return false;
-  }
-}
-
-export async function toggleOrderEnable(companyid: number, value: string, userId: number, email: string, password: string) {
-  const url = SERVER_DOMAIN + ENDPOINTS.toggleOrder;
-  const payload = { companyid, OrderEnable: value, UserID: userId, UserEmail: email, UserPassword: password };
-  console.log("[toggleOrderEnable] URL:", url);
-  console.log("[toggleOrderEnable] Payload:", JSON.stringify(payload));
-  try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    console.log("[toggleOrderEnable] Status:", res.status);
-    const text = await res.text();
-    console.log("[toggleOrderEnable] Response:", text);
-    try {
-      const data = JSON.parse(text);
-      return data.success === true || data.Success === true;
-    } catch {
-      return false;
-    }
-  } catch (err) {
-    console.error("[toggleOrderEnable] Error:", err);
-    return false;
-  }
-}
-
-export async function toggleTakeawayEnable(companyid: number, value: string, userId: number, email: string, password: string) {
-  const url = SERVER_DOMAIN + ENDPOINTS.toggleTakeaway;
-  const payload = { companyid, TakeawayEnable: value, UserID: userId, UserEmail: email, UserPassword: password };
-  console.log("[toggleTakeawayEnable] URL:", url);
-  console.log("[toggleTakeawayEnable] Payload:", JSON.stringify(payload));
-  try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    console.log("[toggleTakeawayEnable] Status:", res.status);
-    const text = await res.text();
-    console.log("[toggleTakeawayEnable] Response:", text);
-    try {
-      const data = JSON.parse(text);
-      return data.success === true || data.Success === true;
-    } catch {
-      return false;
-    }
-  } catch (err) {
-    console.error("[toggleTakeawayEnable] Error:", err);
-    return false;
-  }
-}
-
-export async function toggleDeliveryEnable(companyid: number, value: string, userId: number, email: string, password: string) {
-  const url = SERVER_DOMAIN + ENDPOINTS.toggleDelivery;
-  const payload = { companyid, DeliveryEnable: value, UserID: userId, UserEmail: email, UserPassword: password };
-  console.log("[toggleDeliveryEnable] URL:", url);
-  console.log("[toggleDeliveryEnable] Payload:", JSON.stringify(payload));
-  try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    console.log("[toggleDeliveryEnable] Status:", res.status);
-    const text = await res.text();
-    console.log("[toggleDeliveryEnable] Response:", text);
-    try {
-      const data = JSON.parse(text);
-      return data.ServerMessage === "true" || data.success === true || data.Success === true;
-    } catch {
-      return false;
-    }
-  } catch (err) {
-    console.error("[toggleDeliveryEnable] Error:", err);
-    return false;
-  }
-}
-
-export async function toggleGlobalEnable(companyid: number, value: string, userId: number, email: string, password: string) {
-  const url = SERVER_DOMAIN + ENDPOINTS.toggleGlobal;
-  const payload = { companyid, PayOnPhoneEnable: value, UserID: userId, UserEmail: email, UserPassword: password };
-  console.log("[toggleGlobalEnable] URL:", url);
-  console.log("[toggleGlobalEnable] Payload:", JSON.stringify(payload));
-  try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    console.log("[toggleGlobalEnable] Status:", res.status);
-    const text = await res.text();
-    console.log("[toggleGlobalEnable] Response:", text);
-    try {
-      const data = JSON.parse(text);
-      return data.success === true || data.Success === true;
-    } catch {
-      return false;
-    }
-  } catch (err) {
-    console.error("[toggleGlobalEnable] Error:", err);
-    return false;
-  }
-}
-
-// ─── Update GPS ─────────────────────────────────────────────────
-export async function updateCompanyGPS(companyid: number, lat: number, lng: number, personId: number, email: string, password: string): Promise<boolean> {
-  return postToggle(ENDPOINTS.updateGPS, { companyid, companylat: lat, companylong: lng, PersonID: personId, Email: email, Password: password });
-}
 
 // ─── Count menu groups ──────────────────────────────────────────
 export async function countMenuGroups(companyid: number): Promise<string> {
@@ -273,82 +86,6 @@ export async function liveOrderCountAll(companyid: number): Promise<{ today: num
   }
 }
 
-// ─── Delete blockers ────────────────────────────────────────────
-const DELETE_COUNT_URLS = {
-  menuGroups: "https://web.gpsshops.com/menu1/PHPread/CompanyMenu/DeleteCountMenuGroup.php",
-  dayOrders: "https://web.gpsshops.com/menu1/PHPread/CompanyLiveOrders/DeleteLiveOrderCount.php",
-  weekOrders: "https://web.gpsshops.com/menu1/PHPread/CompanyLiveOrders/DeleteLiveOrderCountweek.php",
-  monthOrders: "https://web.gpsshops.com/menu1/PHPread/CompanyLiveOrders/DeleteLiveOrderCountmonth.php",
-};
-
-async function fetchDeleteCount(url: string, companyid: number): Promise<number> {
-  try {
-    const form = new URLSearchParams();
-    form.append("companyid", String(companyid));
-    console.log("[deleteBlocker] POST", url, "companyid:", companyid);
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: form.toString(),
-    });
-    const text = (await res.text()).trim();
-    console.log("[deleteBlocker] raw response from", url, ":", text);
-    const n = parseInt(text, 10);
-    return isNaN(n) ? 0 : n;
-  } catch (err) {
-    console.error("[deleteBlocker] fetch error:", url, err);
-    return 0;
-  }
-}
-
-export async function getDeleteBlockers(companyid: number) {
-  const [menuGroups, dayOrders, weekOrders, monthOrders] = await Promise.all([
-    fetchDeleteCount(DELETE_COUNT_URLS.menuGroups, companyid),
-    fetchDeleteCount(DELETE_COUNT_URLS.dayOrders, companyid),
-    fetchDeleteCount(DELETE_COUNT_URLS.weekOrders, companyid),
-    fetchDeleteCount(DELETE_COUNT_URLS.monthOrders, companyid),
-  ]);
-  const total = menuGroups + dayOrders + weekOrders + monthOrders;
-  console.log("[deleteBlocker] counts:", { menuGroups, dayOrders, weekOrders, monthOrders, total });
-  return { menuGroups, dayOrders, weekOrders, monthOrders, total };
-}
-
-// ─── Delete company (form POST) ────────────────────────────────
-export async function deleteCompany(companyid: number, userId: number, email: string, password: string): Promise<{ success: boolean; message?: string }> {
-  const url = SERVER_DOMAIN + ENDPOINTS.deleteCompany;
-  try {
-    const form = new URLSearchParams();
-    form.append("UserID", String(userId));
-    form.append("UserEmail", email);
-    form.append("UserPassword", password);
-    form.append("companyID", String(companyid));
-    form.append("companyid", String(companyid));
-    console.log("[deleteCompany] POST", url, "companyid:", companyid);
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: form.toString(),
-    });
-    console.log("[deleteCompany] status:", res.status);
-    const text = await res.text();
-    try {
-      const data = JSON.parse(text);
-      // Backend is authoritative: surface its blocker/refusal message verbatim.
-      const serverMessage =
-        data.ServerMessage || data.message || data.Message || data.blockers || "";
-      if (data.success === true) {
-        return { success: true, message: serverMessage || undefined };
-      }
-      return { success: false, message: String(serverMessage || "Delete failed") };
-    } catch {
-      return { success: false, message: "Invalid server response" };
-    }
-  } catch (err) {
-    console.error("[deleteCompany] fetch error:", err);
-    return { success: false, message: "Network error" };
-  }
-}
-
 // ─── Image URL helper ───────────────────────────────────────────
 export function getCompanyImageUrl(companyphoto?: string): string {
   if (!companyphoto) return "";
@@ -357,67 +94,6 @@ export function getCompanyImageUrl(companyphoto?: string): string {
   }
   if (companyphoto.startsWith("http")) return companyphoto;
   return encodeURI(SERVER_DOMAIN + "menu1/" + companyphoto);
-}
-
-// ─── Save map marker ────────────────────────────────────────────
-export async function saveMapMarker(
-  companyid: number, publicNumber: number, userId: number, email: string, password: string
-): Promise<boolean> {
-  const url = SERVER_DOMAIN + "menu1/PHPwrite/Company/SaveCompanyMapMarkerSecure.php";
-  const payload = { companyid, PublicNumber: publicNumber, PersonID: userId, UserEmail: email, UserPassword: password };
-  console.log("[saveMapMarker] URL:", url);
-  console.log("[saveMapMarker] Payload:", JSON.stringify(payload));
-  try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    console.log("[saveMapMarker] Status:", res.status);
-    const text = await res.text();
-    console.log("[saveMapMarker] Response:", text);
-    try {
-      const data = JSON.parse(text);
-      return data.success === true || data.Success === true;
-    } catch {
-      return res.ok;
-    }
-  } catch (err) {
-    console.error("[saveMapMarker] Error:", err);
-    return false;
-  }
-}
-
-// ─── Update Payment Method ─────────────────────────────────────
-export async function updatePaymentMethod(
-  companyid: number,
-  userId: number,
-  paymentMethod: number,
-): Promise<{ success: boolean; message?: string }> {
-  const url = SERVER_DOMAIN + "menu1/PHPwrite/Company/UpdateCompanyPaymentMethodSecure.php";
-  try {
-    const form = new URLSearchParams();
-    form.append("companyID", String(companyid));
-    form.append("UserID", String(userId));
-    form.append("PaymentMethod", String(paymentMethod));
-    console.log("[updatePaymentMethod] POST", url, Object.fromEntries(form.entries()));
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: form.toString(),
-    });
-    const text = await res.text();
-    console.log("[updatePaymentMethod] response:", text);
-    try {
-      const data = JSON.parse(text);
-      return { success: data.success === true, message: data.message };
-    } catch {
-      return { success: false, message: "Invalid server response" };
-    }
-  } catch (err) {
-    console.error("[updatePaymentMethod] error:", err);
-    return { success: false, message: "Network error" };
-  }
 }
 
 // ─── Map marker mapping ────────────────────────────────────────
