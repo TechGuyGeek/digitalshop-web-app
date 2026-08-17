@@ -1,8 +1,9 @@
-import { useEffect, useState, useCallback } from "react";
+import { useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useRegisterNavActions } from "@/contexts/SiteNavExtras";
+import { useAuth } from "@/contexts/AuthContext";
 
 const HIDDEN_ROUTES = new Set(["/", "/oauth-callback"]);
 
@@ -10,29 +11,15 @@ const GlobalSignOutNavAction = () => {
   const { t, language } = useLanguage();
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const [tick, setTick] = useState(0);
+  const { status, logout } = useAuth();
 
-  useEffect(() => {
-    const onStorage = () => setTick((n) => n + 1);
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
-  }, []);
-
-  const hasUser = (() => {
-    try {
-      return !!localStorage.getItem("digitalUser");
-    } catch {
-      return false;
-    }
-  })();
-
-  const handleLogout = useCallback(() => {
-    localStorage.removeItem("digitalUser");
+  const handleLogout = useCallback(async () => {
+    await logout();
     toast.success(t("Signin"));
     navigate("/");
-  }, [navigate, t]);
+  }, [logout, navigate, t]);
 
-  const shouldShow = !HIDDEN_ROUTES.has(pathname) && hasUser;
+  const shouldShow = !HIDDEN_ROUTES.has(pathname) && status === "authenticated";
 
   useRegisterNavActions(
     "global-signout",
@@ -46,7 +33,7 @@ const GlobalSignOutNavAction = () => {
           },
         ]
       : [],
-    [shouldShow, language, tick],
+    [shouldShow, language, handleLogout],
   );
 
   return null;

@@ -55,6 +55,7 @@ import PaymentSuccess from "./pages/PaymentSuccess.tsx";
 import PaymentCancelled from "./pages/PaymentCancelled.tsx";
 import AdminShops from "./pages/AdminShops.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 const queryClient = new QueryClient();
 
@@ -162,11 +163,13 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <LanguageProvider>
       <ThemeProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <AppShell />
-        </TooltipProvider>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <AppShell />
+          </TooltipProvider>
+        </AuthProvider>
       </ThemeProvider>
     </LanguageProvider>
   </QueryClientProvider>

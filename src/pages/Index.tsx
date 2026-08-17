@@ -7,7 +7,8 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import LanguageFlag from "@/components/LanguageFlag";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { loginUser, registerUser, requestPasswordReset } from "@/lib/api";
+import { AuthApiError, register, requestPasswordReset, resendVerification, verifyEmail } from "@/lib/authClient";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme, type ThemeMode } from "@/contexts/ThemeContext";
@@ -23,6 +24,7 @@ import { Analytics } from "@/lib/analytics";
 
 const Index = () => {
   const navigate = useNavigate();
+  const { login, status } = useAuth();
   const { t, language, setLanguage, availableLanguages } = useLanguage();
   const { theme, setTheme } = useTheme();
   const [showPassword, setShowPassword] = useState(false);
@@ -41,6 +43,11 @@ const Index = () => {
   const [resendLoading, setResendLoading] = useState(false);
   const [resendMessage, setResendMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [showIntro, setShowIntro] = useState(true);
+  const [pendingVerificationToken, setPendingVerificationToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (status === "authenticated") navigate("/profile", { replace: true });
+  }, [navigate, status]);
 
   // Mobile map intro: when on mobile + main theme, if GPS is granted, hide the
   // login UI so the BackgroundMap cinematic fly-in is visible. Reveal the UI
@@ -126,17 +133,12 @@ const Index = () => {
     }
     setLoading(true);
     try {
-      const user = await loginUser(email, password);
-      if (user && (user.Email || user.email)) {
-        toast.success(`Welcome back, ${user.Name || user.name || user.Email || user.email}!`);
-        localStorage.setItem("digitalUser", JSON.stringify(user));
-        Analytics.loginCompleted({ method: "password" });
-        navigate("/profile");
-      } else {
-        toast.error(t("MessageUsersEmailOrPassword"));
-      }
+      const user = await login(email, password);
+      toast.success(`Welcome back, ${user.first_name || user.email}!`);
+      Analytics.loginCompleted({ method: "password" });
+      navigate("/profile");
     } catch (err) {
-      toast.error(t("Pleasecheckyourinternetconnection"));
+      toast.error(err instanceof AuthApiError ? err.message : t("Pleasecheckyourinternetconnection"));
       console.error(err);
     } finally {
       setLoading(false);
@@ -163,28 +165,20 @@ const Index = () => {
     setLoading(true);
     Analytics.registrationStarted({ method: "password" });
     try {
-      const result = await registerUser({
-        name: firstName,
-        surname: lastName,
-        dateOfBirth,
+      const result = await register({
+        firstName,
+        lastName,
+        gender: dateOfBirth,
         email,
         password,
         mobileNumber,
         language,
       });
-      if (result === "SUCCESS") {
-        Analytics.registrationCompleted({ method: "password" });
-        toast.success(t("RegistrationLinkClicked"));
-        setView("login");
-        setFirstName("");
-        setLastName("");
-        setDateOfBirth("");
-        setMobileNumber("");
-        setEmail("");
-        setPassword("");
-      } else {
-        toast.error(result || t("RegistrationFailed"));
-      }
+      Analytics.registrationCompleted({ method: "password" });
+      setPendingVerificationToken(result.staging_verification_token || null);
+      toast.success("Registration complete. Verify your email before signing in.");
+      setView("login");
+      setPassword("");
     } catch (err) {
       toast.error(t("Pleasecheckyourinternetconnection"));
       console.error(err);
@@ -200,12 +194,8 @@ const Index = () => {
     }
     setLoading(true);
     try {
-      const message = await requestPasswordReset(email);
-      if (message.toLowerCase().includes("doesn't exist") || message.toLowerCase().includes("does not exist")) {
-        toast.error(message);
-      } else {
-        toast.success(message);
-      }
+      await requestPasswordReset(email);
+      toast.success("If the account exists, password reset instructions have been created.");
     } catch {
       toast.error("Something went wrong. Please try again.");
     } finally {
@@ -233,31 +223,31 @@ const Index = () => {
     setResendLoading(true);
     setResendMessage(null);
     try {
-      const body = new URLSearchParams();
-      body.append("email", trimmed);
-      body.append("user_email", trimmed);
-      const res = await fetch("https://web.gpsshops.com/menu1/Registration/resendverification.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: body.toString(),
-      });
-      const text = (await res.text()).trim();
-      const lower = text.toLowerCase();
-      const isError =
-        lower.includes("no account") ||
-        lower.includes("invalid") ||
-        lower.includes("required") ||
-        lower.includes("already activated") ||
-        lower.includes("error");
+      const result = await resendVerification(trimmed);
+      if (result.staging_verification_token) setPendingVerificationToken(result.staging_verification_token);
       setResendMessage({
-        type: isError ? "error" : "success",
-        text: text || "Verification email resent successfully",
+        type: "success",
+        text: "If an unverified account exists, a new verification was created.",
       });
     } catch (err) {
       console.error(err);
       setResendMessage({ type: "error", text: t("Pleasecheckyourinternetconnection") });
     } finally {
       setResendLoading(false);
+    }
+  };
+
+  const handleStagingVerification = async () => {
+    if (!pendingVerificationToken) return;
+    setLoading(true);
+    try {
+      await verifyEmail(pendingVerificationToken);
+      setPendingVerificationToken(null);
+      toast.success("Email verified. You can now sign in.");
+    } catch (err) {
+      toast.error(err instanceof AuthApiError ? err.message : "Verification failed.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -615,6 +605,11 @@ const Index = () => {
                 >
                   {loading ? t("Pleasewait") : view === "login" ? t("Signin") : t("Register")}
                 </Button>
+                {view === "login" && pendingVerificationToken && (
+                  <Button variant="secondary" size="lg" className="w-full" disabled={loading} onClick={handleStagingVerification}>
+                    Verify staging account
+                  </Button>
+                )}
                 <Button
                   variant="outline"
                   size="lg"

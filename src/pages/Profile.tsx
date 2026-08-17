@@ -4,7 +4,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { LogOut, User, Camera, Image, Save, Trash2, Loader2, Play, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { type DigitalPerson, updateUserProfile } from "@/lib/api";
+import type { AuthUser } from "@/lib/authClient";
+import { useAuth } from "@/contexts/AuthContext";
 import { loadCompanyProfile } from "@/lib/companyApi";
 import { toast } from "sonner";
 import WebcamCapture from "@/components/WebcamCapture";
@@ -58,9 +59,9 @@ function resizeAndConvertToBase64(file: File): Promise<string> {
 
 const Profile = () => {
   const navigate = useNavigate();
+  const { user, status, logout, refreshProfile, saveProfile } = useAuth();
   const { t } = useLanguage();
   const { showVideoAd, dismissVideoAd, videoAdvert, videoVisible } = useAdverts();
-  const [user, setUser] = useState<DigitalPerson | null>(null);
   const [form, setForm] = useState({
     name: "", surname: "", gender: "", mobileNumber: "",
     lineOne: "", lineTwo: "", lineThree: "", lineFour: "",
@@ -71,29 +72,32 @@ const Profile = () => {
   const [webcamOpen, setWebcamOpen] = useState(false);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
+  const profileRequestedRef = useRef(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   useEffect(() => {
-    const stored = localStorage.getItem("digitalUser");
-    if (stored) {
-      const parsed = JSON.parse(stored) as DigitalPerson;
-      setUser(parsed);
+    if (status === "authenticated" && !profileRequestedRef.current) {
+      profileRequestedRef.current = true;
+      refreshProfile().catch(() => navigate("/", { replace: true }));
+    } else if (status === "anonymous") navigate("/", { replace: true });
+  }, [navigate, refreshProfile, status]);
+
+  useEffect(() => {
+    if (user) {
       setForm({
-        name: (parsed.name || parsed.Name || "") as string,
-        surname: (parsed.surname || parsed.Surname || "") as string,
-        gender: ((parsed as any).DateofBirth || (parsed as any).Gender || "") as string,
-        mobileNumber: (parsed.MobileNumber || "") as string,
-        lineOne: ((parsed as any).LineOneAddress || "") as string,
-        lineTwo: ((parsed as any).LineTwoAddress || "") as string,
-        lineThree: ((parsed as any).LineThreeAddress || "") as string,
-        lineFour: ((parsed as any).LineFourAddress || "") as string,
-        country: ((parsed as any).LineCountryAddress || "") as string,
-        deliveryNotes: ((parsed as any).LineDeliveryNotesAddress || (parsed as any).DeliveryNotes || "") as string,
+        name: user.first_name || "",
+        surname: user.last_name || "",
+        gender: user.gender || "",
+        mobileNumber: user.mobile_number || "",
+        lineOne: user.line_one_address || "",
+        lineTwo: user.line_two_address || "",
+        lineThree: user.line_three_address || "",
+        lineFour: user.line_four_address || "",
+        country: user.line_country_address || "",
+        deliveryNotes: user.delivery_notes || "",
       });
-    } else {
-      navigate("/");
     }
-  }, [navigate]);
+  }, [user]);
 
   const handleChange = (field: string, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -134,15 +138,15 @@ const Profile = () => {
   const [upgradeLoading, setUpgradeLoading] = useState(false);
 
   const isPaidUser = (() => {
-    const u = user as Record<string, unknown> | null;
+    const u = user as unknown as Record<string, unknown> | null;
     if (!u) return false;
     return String(u.PaidUser ?? u.Paiduser) === "2";
   })();
 
   const handleUpgradeToPro = async () => {
-    const u = user as Record<string, unknown> | null;
-    const personId = u?.PersonID ?? u?.personID ?? u?.personid ?? u?.PersonId;
-    const userEmail = u?.Email ?? u?.email;
+    const u = user as unknown as Record<string, unknown> | null;
+    const personId = user?.id;
+    const userEmail = user?.email;
     if (!personId || !userEmail) {
       toast.error("Please log in first to upgrade to Pro.");
       return;
@@ -178,36 +182,36 @@ const Profile = () => {
     if (!user) return;
     setSaving(true);
 
-    const updatedUser: DigitalPerson = {
-      ...user,
-      Name: form.name, name: form.name,
-      Surname: form.surname, surname: form.surname,
-      MobileNumber: form.mobileNumber,
-      DateofBirth: form.gender,
-      LineOneAddress: form.lineOne, LineTwoAddress: form.lineTwo,
-      LineThreeAddress: form.lineThree, LineFourAddress: form.lineFour,
-      LineCountryAddress: form.country, LineDeliveryNotesAddress: form.deliveryNotes,
-    } as any;
-
-    const result = await updateUserProfile(updatedUser, pendingImageBase64 || undefined);
-    setSaving(false);
-
-    if (result.success && result.data) {
-      const merged = { ...user, ...result.data };
-      localStorage.setItem("digitalUser", JSON.stringify(merged));
-      setUser(merged);
+    try {
+      await saveProfile({
+        first_name: form.name,
+        last_name: form.surname,
+        mobile_number: form.mobileNumber,
+        gender: form.gender,
+        image_path: user.image_path,
+        line_one_address: form.lineOne,
+        line_two_address: form.lineTwo,
+        line_three_address: form.lineThree,
+        line_four_address: form.lineFour,
+        line_country_address: form.country,
+        delivery_notes: form.deliveryNotes,
+        ...(pendingImageBase64 ? { image_base64: pendingImageBase64 } : {}),
+      });
       setPendingImageBase64(null);
       setPreviewUrl(null);
       toast.success(t("SaveSuccessful"));
-    } else {
-      toast.error(result.error || t("SaveFailed"));
+    } catch (error) {
+      console.error(error);
+      toast.error(t("SaveFailed"));
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("digitalUser");
+  const handleLogout = async () => {
+    await logout();
     toast.success(t("Signin"));
-    navigate("/");
+    navigate("/", { replace: true });
   };
 
   const handleDeleteProfile = async () => {
@@ -351,7 +355,7 @@ const Profile = () => {
 
   const imagePath = (() => {
     if (previewUrl) return previewUrl;
-    const raw = user.Imagepath as string | undefined;
+    const raw = user.image_path;
     if (!raw) return null;
     if (raw.startsWith("http://") || raw.startsWith("https://")) return raw;
     const base = "https://web.gpsshops.com";
