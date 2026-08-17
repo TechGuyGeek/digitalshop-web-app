@@ -1,0 +1,2 @@
+# Narrow staging SPA fallback. This file is deployed only inside /gpsshops-live/.
+FallbackResource /gpsshops-live/index.html
