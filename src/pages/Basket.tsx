@@ -103,11 +103,9 @@ const Basket = () => {
       clearBasket();
       Analytics.orderCompleted({ company_id: companyId, items: items.length, total, mode, random_code: result.checkoutId });
       toast.success(t("SaveSuccessful"));
-      if (canShowVideo) {
-        showVideoAd("afterOrderPlaced");
-      } else {
-        navigate("/orders");
-      }
+      // A committed order must leave the submitted basket immediately. Any
+      // optional post-order media must not block the customer order history.
+      navigate("/orders");
     } catch (err) { console.error("Order submission failed:", err); toast.error(t("SaveFailed")); }
     finally { setSubmitting(false); }
   };
