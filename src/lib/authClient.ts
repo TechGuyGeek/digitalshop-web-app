@@ -2,6 +2,7 @@ const API_ORIGIN = "https://web.gpsshops.com";
 const AUTH_BASE = `${API_ORIGIN}/menu1/api/v1/auth`;
 const PROFILE_URL = `${API_ORIGIN}/menu1/api/v1/profile.php`;
 const BASIC_AUTH_PROTECTED = import.meta.env.VITE_BASIC_AUTH_PROTECTED === "true";
+const WEB_VERSION = (import.meta.env.VITE_APP_VERSION as string | undefined)?.trim() || undefined;
 
 export interface AuthUser {
   id: number;
@@ -83,7 +84,12 @@ function acceptSession(session: SessionPayload): AuthUser {
 }
 
 export async function login(email: string, password: string): Promise<AuthUser> {
-  return acceptSession(await post<SessionPayload>("login.php", { email, password, client: "web" }));
+  return acceptSession(await post<SessionPayload>("login.php", {
+    email,
+    password,
+    client: "web",
+    ...(WEB_VERSION ? { version: WEB_VERSION } : {}),
+  }));
 }
 
 export async function register(input: {
@@ -103,6 +109,8 @@ export async function register(input: {
     mobile_number: input.mobileNumber,
     locale: input.locale,
     gender: input.gender,
+    client: "web",
+    ...(WEB_VERSION ? { version: WEB_VERSION } : {}),
   });
 }
 
