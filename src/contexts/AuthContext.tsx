@@ -9,6 +9,7 @@ interface AuthContextValue {
   status: AuthStatus;
   login(email: string, password: string): Promise<AuthUser>;
   logout(): Promise<void>;
+  deleteProfile(): Promise<void>;
   refreshProfile(): Promise<AuthUser>;
   saveProfile(input: Parameters<typeof authClient.updateProfile>[0]): Promise<AuthUser>;
 }
@@ -84,6 +85,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, []);
 
+  const deleteProfile = useCallback(async () => {
+    await authClient.deleteProfile();
+    setUser(null);
+    setStatus("anonymous");
+    persistSafeUser(null);
+    localStorage.removeItem("hasShop");
+  }, []);
+
   const refreshProfile = useCallback(async () => {
     const profile = await authClient.getProfile();
     setUser(profile);
@@ -98,7 +107,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return profile;
   }, []);
 
-  const value = useMemo(() => ({ user, status, login, logout, refreshProfile, saveProfile }), [user, status, login, logout, refreshProfile, saveProfile]);
+  const value = useMemo(() => ({ user, status, login, logout, deleteProfile, refreshProfile, saveProfile }), [user, status, login, logout, deleteProfile, refreshProfile, saveProfile]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Camera, Image as ImageIcon, Save, Loader2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -10,8 +10,8 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import WebcamCapture from "@/components/WebcamCapture";
 import {
-  getOwnedCompany, updateOwnedCompany, deleteOwnedCompany, getCompanyImageUrl,
-  getMarkerForPublicNumber, countMenuGroups, type CompanyV1
+  getOwnedCompany, updateOwnedCompany, deleteOwnedCompany, getOwnedCompanyDeletionStatus, getCompanyImageUrl,
+  getMarkerForPublicNumber, countMenuGroups, type CompanyV1, type CompanyWrite
 } from "@/lib/companyApi";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthApiError } from "@/lib/authClient";
@@ -79,6 +79,8 @@ const CompanyProfile = () => {
 
   const [company, setCompany] = useState<CompanyV1 | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [verificationRequired, setVerificationRequired] = useState(false);
   const [saving, setSaving] = useState(false);
   const [pendingImageBase64, setPendingImageBase64] = useState<string | null>(null);
   const [shopImage, setShopImage] = useState("");
@@ -90,6 +92,7 @@ const CompanyProfile = () => {
   const [qrOpen, setQrOpen] = useState(false);
   const [gpsDialogOpen, setGpsDialogOpen] = useState(false);
   const [pendingGps, setPendingGps] = useState<{ lat: number; lng: number } | null>(null);
+  const [imageRevision, setImageRevision] = useState(0);
 
   // Form state
   const [form, setForm] = useState({
@@ -116,41 +119,73 @@ const CompanyProfile = () => {
   const [paymentMethod, setPaymentMethod] = useState<string>("0");
   const [stripeEnabled, setStripeEnabled] = useState<boolean>(false);
 
-  // Load user & company
+  const applyCompany = useCallback((next: CompanyV1, cacheBust = imageRevision) => {
+    setCompany(next);
+    setForm({
+      shopName: next.name, mobileNumber: next.mobile_number, companyEmail: next.company_email,
+      openTime: next.opening_time, closeTime: next.closing_time,
+      notificationCount: next.table_numbers, notifications: next.notifications_enabled ? "1" : "0",
+      lineOne: next.line_one_address, lineTwo: next.line_two_address, lineThree: next.line_three_address,
+      lineFour: next.line_four_address, country: next.country, description: next.description,
+    });
+    setToggles({
+      liveOrders: next.orders_enabled, takeaways: next.takeaway_enabled,
+      deliveries: next.delivery_enabled, allowGlobal: next.global_enabled,
+    });
+    setPublicNumber(next.map_marker);
+    const marker = getMarkerForPublicNumber(String(next.map_marker));
+    setSelectedMarker({ emoji: marker.emoji, label: marker.label, translationKey: marker.translationKey, iconUrl: marker.iconUrl });
+    const payment = String(next.payment_method);
+    setPaymentMethod(["0", "1", "2"].includes(payment) ? payment : "0");
+    setStripeEnabled(next.stripe_enabled);
+    setShopImage(getCompanyImageUrl(next.image_path, cacheBust));
+  }, [imageRevision]);
+
+  const companyPayload = (overrides: Partial<CompanyWrite> = {}): CompanyWrite => {
+    if (!company || !user) throw new Error("Company session is unavailable.");
+    const enteredEmail = form.companyEmail.trim();
+    const storedEmail = company.company_email.trim();
+    return {
+      name: form.shopName.trim(), mobile_number: form.mobileNumber.trim(),
+      company_email: enteredEmail || storedEmail || user.email.trim(),
+      latitude: company.latitude, longitude: company.longitude,
+      opening_time: form.openTime, closing_time: form.closeTime, table_numbers: form.notificationCount,
+      notifications_enabled: form.notifications === "1", orders_enabled: toggles.liveOrders,
+      takeaway_enabled: toggles.takeaways, delivery_enabled: toggles.deliveries, global_enabled: toggles.allowGlobal,
+      map_marker: publicNumber, payment_method: Number(paymentMethod),
+      line_one_address: form.lineOne, line_two_address: form.lineTwo, line_three_address: form.lineThree,
+      line_four_address: form.lineFour, country: form.country, description: form.description,
+      ...overrides,
+    };
+  };
+
+  const persistCompany = async (overrides: Partial<CompanyWrite> = {}): Promise<CompanyV1> => {
+    const payload = companyPayload(overrides);
+    const updated = await updateOwnedCompany(payload);
+    const refreshed = await getOwnedCompany();
+    if (!refreshed) throw new Error("The company disappeared after saving.");
+    const cacheBust = payload.image_base64 ? Date.now() : imageRevision;
+    if (payload.image_base64) setImageRevision(cacheBust);
+    applyCompany(refreshed, cacheBust);
+    return updated;
+  };
+
+  // Load user & company. A null company is a valid no-company state.
   useEffect(() => {
     if (status === "anonymous") { navigate("/"); return; }
     if (status !== "authenticated") return;
-    getOwnedCompany().then(c => {
-      if (c) {
-        setCompany(c);
-        setForm({
-          shopName: c.name, mobileNumber: c.mobile_number, companyEmail: c.company_email,
-          openTime: c.opening_time || "06:00", closeTime: c.closing_time || "23:00",
-          notificationCount: c.table_numbers || "24", notifications: c.notifications_enabled ? "1" : "0",
-          lineOne: c.line_one_address, lineTwo: c.line_two_address, lineThree: c.line_three_address,
-          lineFour: c.line_four_address, country: c.country, description: c.description,
-        });
-        setToggles({
-          liveOrders: c.orders_enabled, takeaways: c.takeaway_enabled,
-          deliveries: c.delivery_enabled, allowGlobal: c.global_enabled,
-        });
-        setPublicNumber(c.map_marker);
-        const marker = getMarkerForPublicNumber(String(c.map_marker));
-        setSelectedMarker({
-          emoji: marker.emoji,
-          label: marker.label,
-          translationKey: marker.translationKey,
-          iconUrl: marker.iconUrl,
-        });
-        const pm = String(c.payment_method);
-        setPaymentMethod(["0", "1", "2"].includes(pm) ? pm : "0");
-        setStripeEnabled(c.stripe_enabled);
-        const imgUrl = getCompanyImageUrl(c.image_path);
-        if (imgUrl) setShopImage(imgUrl);
-      }
+    setLoadError("");
+    setVerificationRequired(false);
+    getOwnedCompany().then(next => {
+      if (next) applyCompany(next);
+      else setVerificationRequired(user?.email_verified === false);
       setLoading(false);
-    }).catch(() => setLoading(false));
-  }, [navigate, status]);
+    }).catch((error) => {
+      if (error instanceof AuthApiError && error.code === "email_verification_required") setVerificationRequired(true);
+      else setLoadError(error instanceof Error ? error.message : "Unable to load company.");
+      setLoading(false);
+    });
+  }, [applyCompany, navigate, status, user?.email_verified]);
 
   const handleChange = (field: string, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -179,125 +214,78 @@ const CompanyProfile = () => {
   };
 
   const handleCameraClick = () => {
-    if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-      cameraInputRef.current?.click();
-    } else {
-      setWebcamOpen(true);
-    }
+    if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) cameraInputRef.current?.click();
+    else setWebcamOpen(true);
   };
 
-  // Save
-  const handleSave = async () => {
-    if (!company || !user || saving) return;
+  const handleSave = async (): Promise<CompanyV1 | null> => {
+    if (!company || !user || saving) return null;
     setSaving(true);
-    const payload = {
-      name: form.shopName, mobile_number: form.mobileNumber, company_email: form.companyEmail,
-      latitude: company.latitude, longitude: company.longitude,
-      opening_time: form.openTime, closing_time: form.closeTime, table_numbers: form.notificationCount,
-      notifications_enabled: form.notifications === "1", orders_enabled: toggles.liveOrders,
-      takeaway_enabled: toggles.takeaways, delivery_enabled: toggles.deliveries, global_enabled: toggles.allowGlobal,
-      map_marker: publicNumber, payment_method: Number(paymentMethod), line_one_address: form.lineOne,
-      line_two_address: form.lineTwo, line_three_address: form.lineThree, line_four_address: form.lineFour,
-      country: form.country, description: form.description,
-      ...(pendingImageBase64 ? { image_base64: pendingImageBase64 } : {}),
-    };
-
     try {
-      const updated = await updateOwnedCompany(payload);
-      setCompany(updated);
+      const updated = await persistCompany(pendingImageBase64 ? { image_base64: pendingImageBase64 } : {});
       setPendingImageBase64(null);
       toast.success("Company profile saved!");
+      return updated;
     } catch (error) {
       toast.error(error instanceof AuthApiError ? error.message : "Save failed");
+      return null;
     } finally {
       setSaving(false);
     }
   };
 
-  // Toggle handlers
-  const handleToggle = async (field: string, value: boolean) => {
-    setToggles(prev => ({ ...prev, [field]: value }));
+  const handleToggle = async (field: "liveOrders" | "takeaways" | "deliveries" | "allowGlobal", value: boolean) => {
     if (!company) return;
-
-    let ok = true;
-    if (field === "liveOrders") {
-      ok = true;
-    } else if (field === "takeaways") {
-      ok = true;
-    } else if (field === "deliveries") {
-      ok = true;
-    } else if (field === "allowGlobal") {
-      const rawPaid = user?.paid_user;
-      const isPaid = rawPaid === 2 || rawPaid === "2" || rawPaid === 1 || rawPaid === "1" || rawPaid === true;
-      console.log("[GlobalGuard] user object:", JSON.stringify(user));
-      console.log("[GlobalGuard] rawPaid value:", rawPaid, "typeof:", typeof rawPaid);
-      console.log("[GlobalGuard] isPaid:", isPaid);
-      if (value && !isPaid) {
-        console.log("[GlobalGuard] BLOCKED - user is not paid");
-        setToggles(prev => ({ ...prev, allowGlobal: false }));
-        toast.error("You need the paid version to make your Digital Shop Global. Please upgrade.");
-        return;
-      }
-      console.log("[GlobalGuard] ALLOWED - proceeding with save");
-      ok = true;
+    if (field === "allowGlobal" && value && !["1", "2"].includes(String(user?.paid_user))) {
+      toast.error("You need the paid version to make your Digital Shop Global. Please upgrade.");
+      return;
     }
-    if (ok) {
-      try { await updateOwnedCompany({ name: form.shopName, mobile_number: form.mobileNumber, company_email: form.companyEmail, latitude: company.latitude, longitude: company.longitude, opening_time: form.openTime, closing_time: form.closeTime, table_numbers: form.notificationCount, notifications_enabled: form.notifications === "1", orders_enabled: field === "liveOrders" ? value : toggles.liveOrders, takeaway_enabled: field === "takeaways" ? value : toggles.takeaways, delivery_enabled: field === "deliveries" ? value : toggles.deliveries, global_enabled: field === "allowGlobal" ? value : toggles.allowGlobal, map_marker: publicNumber, payment_method: Number(paymentMethod), line_one_address: form.lineOne, line_two_address: form.lineTwo, line_three_address: form.lineThree, line_four_address: form.lineFour, country: form.country, description: form.description }); }
-      catch { ok = false; }
-    }
-    if (!ok) {
-      setToggles(prev => ({ ...prev, [field]: !value }));
+    const previous = toggles;
+    const next = { ...toggles, [field]: value };
+    setToggles(next);
+    try {
+      await persistCompany({ orders_enabled: next.liveOrders, takeaway_enabled: next.takeaways, delivery_enabled: next.deliveries, global_enabled: next.allowGlobal });
+    } catch {
+      setToggles(previous);
       toast.error("Failed to update toggle");
     }
   };
 
-  // Payment method change
   const handlePaymentMethodChange = async (newValue: string) => {
     const previous = paymentMethod;
     if (newValue === previous) return;
-
-    // Card-only or Cash+Card require Stripe connected
     if ((newValue === "1" || newValue === "2") && !stripeEnabled) {
       toast.error("Stripe needs to be connected before card payments can be enabled.");
-      setPaymentMethod("0");
       return;
     }
-
     if (!company || !user) return;
     setPaymentMethod(newValue);
-    setPaymentMethod(newValue);
     try {
-      await updateOwnedCompany({ name: form.shopName, mobile_number: form.mobileNumber, company_email: form.companyEmail, latitude: company.latitude, longitude: company.longitude, opening_time: form.openTime, closing_time: form.closeTime, table_numbers: form.notificationCount, notifications_enabled: form.notifications === "1", orders_enabled: toggles.liveOrders, takeaway_enabled: toggles.takeaways, delivery_enabled: toggles.deliveries, global_enabled: toggles.allowGlobal, map_marker: publicNumber, payment_method: Number(newValue), line_one_address: form.lineOne, line_two_address: form.lineTwo, line_three_address: form.lineThree, line_four_address: form.lineFour, country: form.country, description: form.description });
+      await persistCompany({ payment_method: Number(newValue) });
+      toast.success("Payment method updated");
     } catch (error) {
       toast.error(error instanceof AuthApiError ? error.message : "Failed to update payment method");
       setPaymentMethod(previous);
-      return;
     }
-    toast.success("Payment method updated");
   };
 
-  // Update GPS
   const handleUpdateGPS = async () => {
-    if (!['1', '2'].includes(String(user?.paid_user))) {
-      toast.error("Only pro members can update GPS");
-      return;
-    }
+    if (!["1", "2"].includes(String(user?.paid_user))) { toast.error("Only pro members can update GPS"); return; }
     if (!company || !navigator.geolocation) { toast.error("Geolocation not supported"); return; }
-    navigator.geolocation.getCurrentPosition(async (pos) => {
-      const { latitude, longitude } = pos.coords;
-      setPendingGps({ lat: latitude, lng: longitude });
+    navigator.geolocation.getCurrentPosition((pos) => {
+      setPendingGps({ lat: pos.coords.latitude, lng: pos.coords.longitude });
       setGpsDialogOpen(true);
     }, () => toast.error("Could not get location"));
   };
 
   const handleConfirmGpsUpdate = async () => {
     if (!company || !pendingGps) return;
-    let ok = false;
-    try { setCompany(await updateOwnedCompany({ name: form.shopName, mobile_number: form.mobileNumber, company_email: form.companyEmail, latitude: pendingGps.lat, longitude: pendingGps.lng, opening_time: form.openTime, closing_time: form.closeTime, table_numbers: form.notificationCount, notifications_enabled: form.notifications === "1", orders_enabled: toggles.liveOrders, takeaway_enabled: toggles.takeaways, delivery_enabled: toggles.deliveries, global_enabled: toggles.allowGlobal, map_marker: publicNumber, payment_method: Number(paymentMethod), line_one_address: form.lineOne, line_two_address: form.lineTwo, line_three_address: form.lineThree, line_four_address: form.lineFour, country: form.country, description: form.description })); ok = true; } catch { ok = false; }
+    try {
+      await persistCompany({ latitude: pendingGps.lat, longitude: pendingGps.lng });
+      toast.success("GPS updated!");
+    } catch { toast.error("Failed to update GPS"); }
     setGpsDialogOpen(false);
     setPendingGps(null);
-    if (ok) toast.success("GPS updated!");
-    else toast.error("Failed to update GPS");
   };
 
   // Add Products — mirrors MAUI: save profile, check group count, branch
@@ -347,7 +335,20 @@ const CompanyProfile = () => {
   const handleDeleteClick = async () => {
     if (!company) return;
     setDeleteBlockerMsg("");
-    setDeleteDialogOpen(true);
+    try {
+      const status = await getOwnedCompanyDeletionStatus();
+      const blockers = Object.entries(status.blockers)
+        .filter(([, count]) => count > 0)
+        .map(([name, count]) => `${count} ${name.replace(/_/g, " ")}`)
+        .join(", ");
+      if (status.safe_to_delete !== true || blockers) {
+        setDeleteBlockerMsg(blockers ? `Please delete these records first: ${blockers}` : "Company deletion is currently blocked.");
+      }
+      setDeleteDialogOpen(true);
+    } catch (error) {
+      setDeleteBlockerMsg(error instanceof Error ? error.message : "Unable to verify company deletion safety.");
+      setDeleteDialogOpen(true);
+    }
   };
 
   const handleConfirmDelete = async () => {
@@ -355,13 +356,14 @@ const CompanyProfile = () => {
     try {
       await deleteOwnedCompany();
       setDeleteDialogOpen(false);
+      setCompany(null);
       localStorage.removeItem("hasShop");
       toast.success("Shop deleted successfully");
-      navigate("/");
+      navigate("/profile", { replace: true });
     } catch (error) {
       const details = (error as AuthApiError & { details?: { blockers?: Record<string, number> } }).details;
       const blockers = details?.blockers || {};
-      const message = Object.entries(blockers).filter(([, count]) => count > 0).map(([name, count]) => `${count} ${name.replaceAll("_", " ")}`).join(", ");
+      const message = Object.entries(blockers).filter(([, count]) => count > 0).map(([name, count]) => `${count} ${name.replace(/_/g, " ")}`).join(", ");
       setDeleteBlockerMsg(message ? `Please delete these records first: ${message}` : (error instanceof Error ? error.message : "Delete failed"));
     }
   };
@@ -405,8 +407,16 @@ const CompanyProfile = () => {
         </div>
         <div className="flex-1 flex items-center justify-center p-8">
           <div className="text-center">
-            <p className="text-muted-foreground text-lg mb-4">{t("Pleasecreateacompanyfirst")}</p>
-            <Button onClick={() => navigate("/build-shop")}>{t("Build")}</Button>
+            {loadError ? (
+              <p className="text-destructive text-lg">{loadError}</p>
+            ) : verificationRequired ? (
+              <p className="text-muted-foreground text-lg">Please verify your email before creating a company.</p>
+            ) : (
+              <>
+                <p className="text-muted-foreground text-lg mb-4">{t("Pleasecreateacompanyfirst")}</p>
+                <Button onClick={() => navigate("/build-shop")}>{t("Build")}</Button>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -556,18 +566,17 @@ const CompanyProfile = () => {
             onOpenChange={setMarkerPickerOpen}
             selectedId={publicNumber}
             onSelect={async (marker: MapMarkerOption) => {
-              console.log("[MapMarker] Selected:", marker);
+              const previous = publicNumber;
               setSelectedMarker({ emoji: marker.emoji, label: marker.label, translationKey: marker.translationKey, iconUrl: marker.iconUrl });
               setPublicNumber(marker.id);
               setMarkerPickerOpen(false);
 
               if (!company) return;
               try {
-                await updateOwnedCompany({ name: form.shopName, mobile_number: form.mobileNumber, company_email: form.companyEmail, latitude: company.latitude, longitude: company.longitude, opening_time: form.openTime, closing_time: form.closeTime, table_numbers: form.notificationCount, notifications_enabled: form.notifications === "1", orders_enabled: toggles.liveOrders, takeaway_enabled: toggles.takeaways, delivery_enabled: toggles.deliveries, global_enabled: toggles.allowGlobal, map_marker: marker.id, payment_method: Number(paymentMethod), line_one_address: form.lineOne, line_two_address: form.lineTwo, line_three_address: form.lineThree, line_four_address: form.lineFour, country: form.country, description: form.description });
+                await persistCompany({ map_marker: marker.id });
                 toast.success(t("DetailswereSaved"));
-                const refreshed = await getOwnedCompany();
-                if (refreshed) setCompany(refreshed);
               } catch {
+                setPublicNumber(previous);
                 toast.error(t("DetaileswerenotSaved"));
               }
             }}

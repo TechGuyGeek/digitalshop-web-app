@@ -9,7 +9,9 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 import { Analytics } from "@/lib/analytics";
-import { createOwnedCompany } from "@/lib/companyApi";
+import { createOwnedCompany, getOwnedCompany } from "@/lib/companyApi";
+import { useAuth } from "@/contexts/AuthContext";
+import { AuthApiError } from "@/lib/authClient";
 
 const RED_MARKER_HTML = `
 <svg width="28" height="44" viewBox="0 0 28 44" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -32,6 +34,7 @@ const TILE_ATTRIBUTION = "© OpenStreetMap contributors";
 
 const BuildShop = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { t } = useLanguage();
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
@@ -42,6 +45,10 @@ const BuildShop = () => {
   const [locating, setLocating] = useState(true);
   const [saving, setSaving] = useState(false);
   const [companyEmail, setCompanyEmail] = useState("");
+
+  useEffect(() => {
+    if (!companyEmail && user?.email) setCompanyEmail(user.email);
+  }, [companyEmail, user?.email]);
 
   useEffect(() => {
     Analytics.shopCreationStarted();
@@ -87,12 +94,19 @@ const BuildShop = () => {
     if (!companyEmail.trim()) { toast.error(t("RegistrationFailedCompanyEmailscannotbeempty")); return; }
     setSaving(true);
     try {
-      const company = await createOwnedCompany({ name: shopName.trim(), company_email: companyEmail.trim(), latitude: coords.lat, longitude: coords.lng });
+      await createOwnedCompany({ name: shopName.trim(), company_email: companyEmail.trim() || user?.email.trim() || "", latitude: coords.lat, longitude: coords.lng });
+      const company = await getOwnedCompany();
+      if (!company) throw new Error("The company could not be reloaded after creation.");
       localStorage.setItem("hasShop", "true");
       Analytics.shopCreated({ company_id: company.id });
       toast.success(t("RegistrationSuccessful"));
       navigate("/company-profile");
-    } catch (err) { console.error("[BuildShop] Error:", err); toast.error(t("Pleasecheckyourinternetconnection")); }
+    } catch (err) {
+      console.error("[BuildShop] Error:", err);
+      toast.error(err instanceof AuthApiError && err.code === "email_verification_required"
+        ? "Please verify your email before creating a company."
+        : t("Pleasecheckyourinternetconnection"));
+    }
     finally { setSaving(false); }
   };
 

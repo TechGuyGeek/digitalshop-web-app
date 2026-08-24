@@ -4,6 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { LogOut, User, Camera, Image, Save, Trash2, Loader2, Play, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { getMenuImageUrl, getProfileDeletionStatus } from "@/lib/authClient";
 import type { AuthUser } from "@/lib/authClient";
 import { useAuth } from "@/contexts/AuthContext";
 import { getOwnedCompany } from "@/lib/companyApi";
@@ -59,7 +60,7 @@ function resizeAndConvertToBase64(file: File): Promise<string> {
 
 const Profile = () => {
   const navigate = useNavigate();
-  const { user, status, logout, refreshProfile, saveProfile } = useAuth();
+  const { user, status, logout, deleteProfile, refreshProfile, saveProfile } = useAuth();
   const { t } = useLanguage();
   const { showVideoAd, dismissVideoAd, videoAdvert, videoVisible } = useAdverts();
   const [form, setForm] = useState({
@@ -140,7 +141,7 @@ const Profile = () => {
   const isPaidUser = (() => {
     const u = user as unknown as Record<string, unknown> | null;
     if (!u) return false;
-    return String(u.PaidUser ?? u.Paiduser) === "2";
+    return String(u.PaidUser ?? u.Paiduser ?? u.paid_user) === "2";
   })();
 
   const handleUpgradeToPro = async () => {
@@ -188,7 +189,6 @@ const Profile = () => {
         last_name: form.surname,
         mobile_number: form.mobileNumber,
         gender: form.gender,
-        image_path: user.image_path,
         line_one_address: form.lineOne,
         line_two_address: form.lineTwo,
         line_three_address: form.lineThree,
@@ -216,89 +216,21 @@ const Profile = () => {
 
   const handleDeleteProfile = async () => {
     if (!user) return;
-
-    const personId = String((user as any).PersonID || (user as any).ID || "");
-    const userEmail = String((user as any).Email || (user as any).email || "");
-    const userPassword = String((user as any).Password || (user as any).password || (user as any).hash || "");
-
     toast.loading(t("Pleasewait"), { id: "delete-profile" });
-
     try {
-      // 1) Check whether user has a company
-      const companyUrl = "https://web.gpsshops.com/menu1/PHPread/Company/DoesCompanyExistorNotSecure.php";
-      const companyPayload = { PersonID: personId, UserEmail: userEmail };
-      console.log("[deleteProfile] company check URL:", companyUrl);
-
-      const companyRes = await fetch(companyUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(companyPayload),
-      });
-      const companyText = await companyRes.text();
-
-      let hasCompany = false;
-      try {
-        const parsed = JSON.parse(companyText);
-        if (parsed?.success === true && Array.isArray(parsed?.companies) && parsed.companies.length > 0) {
-          const first = parsed.companies[0];
-          if (Number(first?.companyid) > 0) hasCompany = true;
-        }
-      } catch (e) {
-        console.error("[deleteProfile] company JSON parse failed:", e);
-      }
-
-      if (hasCompany) {
-        toast.dismiss("delete-profile");
-        toast.error("You must delete your shop before deleting your profile.");
-        return;
-      }
-
-      // 2) Check orders paid status
-      const ordersUrl = "https://web.gpsshops.com/menu1/PHPread/User/CheckUserOrdersPaidStatusSecure.php";
-      const ordersForm = new URLSearchParams();
-      ordersForm.append("UserID", personId);
-      ordersForm.append("UserEmail", userEmail);
-      console.log("[deleteProfile] orders check URL:", ordersUrl);
-
-      const ordersRes = await fetch(ordersUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: ordersForm.toString(),
-      });
-      const ordersText = await ordersRes.text();
-
-      let ordersOk = false;
-      let hasOrders = false;
-      let allOrdersPaid = true;
-      let serverMessage = "";
-      try {
-        const parsedOrders = JSON.parse(ordersText);
-        ordersOk = parsedOrders?.success === true;
-        hasOrders = parsedOrders?.HasOrders === true;
-        allOrdersPaid = parsedOrders?.AllOrdersPaid === true;
-        serverMessage = String(parsedOrders?.ServerMessage || "");
-      } catch (e) {
-        console.error("[deleteProfile] orders JSON parse failed:", e);
-      }
-
-      if (!ordersOk) {
-        toast.dismiss("delete-profile");
-        toast.error(serverMessage || t("Pleasecheckyourinternetconnection"));
-        return;
-      }
-
-      if (hasOrders && !allOrdersPaid) {
-        toast.dismiss("delete-profile");
-        toast.error("You still have unpaid orders. Please settle them before deleting your profile.");
-        return;
-      }
-
+      const status = await getProfileDeletionStatus();
       toast.dismiss("delete-profile");
-
-      // 3) Open confirm dialog (actual delete in performDelete)
+      if (status.safe_to_delete !== true || status.owns_company || status.outstanding_order_count > 0) {
+        const blockers = [
+          status.owns_company ? "Delete your shop before deleting your profile." : "",
+          status.outstanding_order_count > 0 ? "Outstanding unpaid orders must be resolved first." : "",
+        ].filter(Boolean).join(" ");
+        toast.error(blockers || "Profile deletion is currently blocked.");
+        return;
+      }
       setConfirmDeleteOpen(true);
     } catch (err) {
-      console.error("[deleteProfile] exception:", err);
+      console.error("[deleteProfile] status exception:", err);
       toast.dismiss("delete-profile");
       toast.error(t("Pleasecheckyourinternetconnection"));
     }
@@ -306,31 +238,11 @@ const Profile = () => {
 
   const performDelete = async () => {
     if (!user) return;
-    const personId = String((user as any).PersonID || (user as any).ID || "");
-    const userEmail = String((user as any).Email || (user as any).email || "");
-    const userPassword = String((user as any).Password || (user as any).password || (user as any).hash || "");
     try {
-      const deleteUrl = "https://web.gpsshops.com/menu1/PHPwrite/User/DeleteUserSecure.php";
-      const deleteForm = new URLSearchParams();
-      deleteForm.append("UserID", personId);
-      deleteForm.append("UserEmail", userEmail);
-      deleteForm.append("UserPassword", userPassword);
-      console.log("[deleteProfile] delete URL:", deleteUrl);
-
-      const deleteRes = await fetch(deleteUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: deleteForm.toString(),
-      });
-      const deleteText = await deleteRes.text();
-
-      if (deleteText.toUpperCase().includes("TRUE")) {
-        localStorage.removeItem("digitalUser");
-        toast.success(t("Delete"));
-        navigate("/");
-      } else {
-        toast.error(t("SaveFailed"));
-      }
+      await deleteProfile();
+      setConfirmDeleteOpen(false);
+      toast.success(t("Delete"));
+      navigate("/", { replace: true });
     } catch (err) {
       console.error("[deleteProfile] exception:", err);
       toast.error(t("Pleasecheckyourinternetconnection"));
@@ -357,11 +269,7 @@ const Profile = () => {
     if (previewUrl) return previewUrl;
     const raw = user.image_path;
     if (!raw) return null;
-    if (raw.startsWith("http://") || raw.startsWith("https://")) return raw;
-    const base = "https://web.gpsshops.com";
-    const cleaned = raw.replace(/^\/+/, "");
-    const fullPath = cleaned.startsWith("menu1/") ? cleaned : `menu1/${cleaned}`;
-    return `${base}/${fullPath}`;
+    return getMenuImageUrl(raw, user.id);
   })();
 
   return (
@@ -426,6 +334,12 @@ const Profile = () => {
         <h1 className="text-lg font-bold text-foreground font-heading text-center mb-6">
           {t("UserProfilePageTitle")}
         </h1>
+
+        <div className="space-y-2 mb-6 text-center">
+          <p className="text-sm font-medium text-foreground">{user.email}</p>
+          <p className="text-xs text-muted-foreground">{user.email_verified ? "Email verified" : "Email verification required"}</p>
+          <p className="text-xs text-muted-foreground">{isPaidUser ? "Paid account" : "Free account"}</p>
+        </div>
 
         {Object.values(form).some((v) => !String(v).trim()) && (
           <ProfileHelpAssistant />

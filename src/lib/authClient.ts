@@ -1,6 +1,6 @@
 import { WEB_CLIENT, WEB_VERSION } from "./buildInfo";
 
-const API_ORIGIN = "https://web.gpsshops.com";
+export const API_ORIGIN = import.meta.env.VITE_API_ORIGIN || "https://web.gpsshops.com";
 const AUTH_BASE = `${API_ORIGIN}/menu1/api/v1/auth`;
 const ME_URL = `${AUTH_BASE}/me.php`;
 const PROFILE_URL = `${API_ORIGIN}/menu1/api/v1/profile.php`;
@@ -211,13 +211,85 @@ export async function getProfile(): Promise<AuthUser> {
   return readEnvelope<{ user: AuthUser }>(await authenticatedFetch(PROFILE_URL)).then((data) => data.user);
 }
 
-export async function updateProfile(input: Omit<AuthUser, "id" | "email" | "email_verified" | "locale" | "paid_user"> & { image_base64?: string }): Promise<AuthUser> {
+export interface ProfileUpdate {
+  first_name: string;
+  last_name: string;
+  gender: string;
+  mobile_number: string;
+  line_one_address: string;
+  line_two_address: string;
+  line_three_address: string;
+  line_four_address: string;
+  line_country_address: string;
+  delivery_notes: string;
+  image_base64?: string;
+}
+
+export interface ProfileDeletionStatus {
+  safe_to_delete: boolean;
+  owns_company: boolean;
+  company_count: number;
+  outstanding_order_count: number;
+  order_history_count: number;
+}
+
+export async function updateProfile(input: ProfileUpdate): Promise<AuthUser> {
   const response = await authenticatedFetch(PROFILE_URL, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input),
   });
   return readEnvelope<{ user: AuthUser }>(response).then((data) => data.user);
+}
+
+function validProfileDeletionStatus(value: unknown): value is ProfileDeletionStatus {
+  if (!value || typeof value !== "object") return false;
+  const status = value as Record<string, unknown>;
+  return typeof status.safe_to_delete === "boolean"
+    && typeof status.owns_company === "boolean"
+    && ["company_count", "outstanding_order_count", "order_history_count"]
+      .every((key) => Number.isInteger(status[key]) && Number(status[key]) >= 0);
+}
+
+export async function getProfileDeletionStatus(): Promise<ProfileDeletionStatus> {
+  const response = await authenticatedFetch(`${PROFILE_URL}?action=deletion_status`);
+  const status = await readEnvelope<ProfileDeletionStatus>(response);
+  if (!validProfileDeletionStatus(status)) {
+    throw new AuthApiError(502, "invalid_deletion_status", "The account deletion status was invalid.");
+  }
+  return status;
+}
+
+export async function deleteProfile(): Promise<void> {
+  const response = await authenticatedFetch(PROFILE_URL, { method: "DELETE" });
+  await readEnvelope<{ deleted: boolean }>(response);
+  clearInMemoryAccessToken();
+}
+
+export function getMenuImageUrl(imagePath: string | null | undefined, cacheBust?: string | number): string {
+  const raw = String(imagePath || "").trim();
+  if (!raw) return "";
+
+  let path = raw;
+  if (/^https?:\/\//i.test(path)) {
+    try {
+      const parsed = new URL(path);
+      const marker = "/menu1/Images/";
+      const index = parsed.pathname.indexOf(marker);
+      if (index < 0) return path;
+      path = parsed.pathname.slice(index + "/menu1".length);
+    } catch {
+      return "";
+    }
+  }
+  if (path.startsWith("Images/")) path = `/${path}`;
+  if (!path.startsWith("/Images/")) {
+    path = path.startsWith("/menu1/Images/") ? path.slice("/menu1".length) : `/Images/${path.replace(/^\/+/, "")}`;
+  }
+
+  const query = new URLSearchParams({ path });
+  if (cacheBust !== undefined) query.set("v", String(cacheBust));
+  return `${API_ORIGIN}/menu1/api/v1/menu-image.php?${query.toString()}`;
 }
 
 export function clearInMemoryAccessToken(): void {

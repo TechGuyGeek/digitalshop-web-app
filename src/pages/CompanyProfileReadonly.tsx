@@ -4,10 +4,11 @@ import { ArrowLeft, Loader2, Store, MessageSquare, Phone, Mail } from "lucide-re
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { getCompanyImageUrl as getCanonicalCompanyImageUrl } from "@/lib/companyApi";
 
 const SERVER_DOMAIN = "https://web.gpsshops.com/";
 
-interface CompanyData { CompanyID?: string; CompanyName?: string; companyphoto?: string; LineOneAddress?: string; LineTwoAddress?: string; LineThreeAddress?: string; LineFourAddress?: string; LineCountryAddress?: string; CompanyMobile?: string; CompanyEmail?: string; [key: string]: any; }
+interface CompanyData { CompanyID?: string; CompanyName?: string; companyname?: string; companyphoto?: string; LineOneAddress?: string; LineTwoAddress?: string; LineThreeAddress?: string; LineFourAddress?: string; LineCountryAddress?: string; CompanyMobile?: string; CompanyEmail?: string; [key: string]: unknown; }
 
 async function fetchCompanyProfile(companyId: string): Promise<CompanyData | null> {
   const url = SERVER_DOMAIN + "menu1/PHPread/Company/RetrieveCompanyProfiledetails2.php";
@@ -18,8 +19,7 @@ async function fetchCompanyProfile(companyId: string): Promise<CompanyData | nul
 }
 
 function getCompanyImageUrl(photo: string | undefined): string | null {
-  const path = String(photo || ""); if (!path) return null; if (path.startsWith("http")) return path;
-  const clean = path.startsWith("/") ? path : "/" + path; return SERVER_DOMAIN + "menu1" + clean;
+  return getCanonicalCompanyImageUrl(photo) || null;
 }
 
 const CompanyProfileReadonly = () => {

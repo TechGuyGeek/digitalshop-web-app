@@ -1,8 +1,8 @@
-import { AuthApiError, authenticatedFetch } from "@/lib/authClient";
+import { API_ORIGIN, AuthApiError, authenticatedFetch, getMenuImageUrl } from "@/lib/authClient";
 
-const SERVER_DOMAIN = "https://web.gpsshops.com/";
+const SERVER_DOMAIN = `${API_ORIGIN}/`;
 
-const COMPANY_V1_URL = "https://web.gpsshops.com/menu1/api/v1/company.php";
+export const COMPANY_V1_URL = `${API_ORIGIN}/menu1/api/v1/company.php`;
 
 export interface CompanyV1 {
   id: number; name: string; mobile_number: string; company_email: string; image_path: string;
@@ -13,7 +13,35 @@ export interface CompanyV1 {
   country: string; description: string;
 }
 
-export type CompanyWrite = Omit<CompanyV1, "id" | "image_path" | "stripe_enabled"> & { image_base64?: string };
+export interface CompanyWrite {
+  name: string;
+  mobile_number: string;
+  company_email: string;
+  latitude: number;
+  longitude: number;
+  opening_time: string;
+  closing_time: string;
+  table_numbers: string;
+  notifications_enabled: boolean;
+  orders_enabled: boolean;
+  takeaway_enabled: boolean;
+  delivery_enabled: boolean;
+  global_enabled: boolean;
+  map_marker: number;
+  payment_method: number;
+  line_one_address: string;
+  line_two_address: string;
+  line_three_address: string;
+  line_four_address: string;
+  country: string;
+  description: string;
+  image_base64?: string;
+}
+
+export interface CompanyDeletionStatus {
+  safe_to_delete: boolean;
+  blockers: Record<string, number>;
+}
 
 async function companyEnvelope(response: Response): Promise<{ company?: CompanyV1; deleted?: boolean }> {
   const body = await response.json().catch(() => null);
@@ -22,11 +50,18 @@ async function companyEnvelope(response: Response): Promise<{ company?: CompanyV
     Object.assign(error, { details: body?.error?.details });
     throw error;
   }
+  if (!body.data || typeof body.data !== "object") {
+    throw new AuthApiError(502, "invalid_company_response", "The company response was invalid.");
+  }
   return body.data;
 }
 
 export async function getOwnedCompany(): Promise<CompanyV1 | null> {
-  return (await companyEnvelope(await authenticatedFetch(COMPANY_V1_URL))).company || null;
+  const data = await companyEnvelope(await authenticatedFetch(COMPANY_V1_URL));
+  if (!Object.prototype.hasOwnProperty.call(data, "company")) {
+    throw new AuthApiError(502, "invalid_company_response", "The company response was invalid.");
+  }
+  return data.company ?? null;
 }
 
 export async function createOwnedCompany(input: Pick<CompanyWrite, "name" | "company_email" | "latitude" | "longitude">): Promise<CompanyV1> {
@@ -42,6 +77,23 @@ export async function updateOwnedCompany(input: CompanyWrite): Promise<CompanyV1
 export async function deleteOwnedCompany(): Promise<void> {
   const response = await authenticatedFetch(COMPANY_V1_URL, { method: "DELETE", headers: { "Content-Type": "application/json" }, body: "{}" });
   await companyEnvelope(response);
+}
+
+function validCompanyDeletionStatus(value: unknown): value is CompanyDeletionStatus {
+  if (!value || typeof value !== "object") return false;
+  const status = value as Record<string, unknown>;
+  if (typeof status.safe_to_delete !== "boolean" || !status.blockers || typeof status.blockers !== "object") return false;
+  const blockers = status.blockers as Record<string, unknown>;
+  return ["products", "menu_groups", "orders_today", "orders_week", "orders_month"]
+    .every((key) => Number.isInteger(blockers[key]) && Number(blockers[key]) >= 0);
+}
+
+export async function getOwnedCompanyDeletionStatus(): Promise<CompanyDeletionStatus> {
+  const data = await companyEnvelope(await authenticatedFetch(`${COMPANY_V1_URL}?action=deletion_status`));
+  if (!validCompanyDeletionStatus(data)) {
+    throw new AuthApiError(502, "invalid_deletion_status", "The company deletion status was invalid.");
+  }
+  return data as CompanyDeletionStatus;
 }
 
 // ─── Endpoints (configurable) ───────────────────────────────────
@@ -87,13 +139,8 @@ export async function liveOrderCountAll(companyid: number): Promise<{ today: num
 }
 
 // ─── Image URL helper ───────────────────────────────────────────
-export function getCompanyImageUrl(companyphoto?: string): string {
-  if (!companyphoto) return "";
-  if (companyphoto.startsWith("/")) {
-    return encodeURI(SERVER_DOMAIN + "menu1" + companyphoto);
-  }
-  if (companyphoto.startsWith("http")) return companyphoto;
-  return encodeURI(SERVER_DOMAIN + "menu1/" + companyphoto);
+export function getCompanyImageUrl(companyphoto?: string, cacheBust?: string | number): string {
+  return getMenuImageUrl(companyphoto, cacheBust);
 }
 
 // ─── Map marker mapping ────────────────────────────────────────

@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import AdvertSlot from "@/components/adverts/AdvertSlot";
 import type { DigitalPerson } from "@/lib/api";
+import { getMenuImageUrl } from "@/lib/authClient";
 
 const SERVER_DOMAIN = "https://web.gpsshops.com/";
 
@@ -18,8 +19,8 @@ async function fetchCustomerProfile(userId: string): Promise<DigitalPerson | nul
 }
 
 function getProfileImageUrl(person: DigitalPerson): string | null {
-  const path = String(person.Imagepath || person.imagename || ""); if (!path) return null; if (path.startsWith("http")) return path;
-  const clean = path.startsWith("/") ? path : "/" + path; return SERVER_DOMAIN + "menu1" + clean;
+  const path = String(person.Imagepath || person.imagename || ""); if (!path) return null;
+  return getMenuImageUrl(path);
 }
 
 const CustomerProfileReadonly = () => {
@@ -53,12 +54,12 @@ const CustomerProfileReadonly = () => {
     { label: t("LastName"), value: String(person.Surname || person.surname || "") },
     { label: t("Gender"), value: String(person.DateofBirth || "") },
     { label: t("Mobile"), value: mobile },
-    { label: t("1stlineAddress"), value: String((person as any).LineOneAddress || "") },
-    { label: t("2ndlineAddress"), value: String((person as any).LineTwoAddress || "") },
-    { label: t("3rdlineAddress"), value: String((person as any).LineThreeAddress || "") },
-    { label: t("4thLineAddress"), value: String((person as any).LineFourAddress || "") },
-    { label: t("Country"), value: String((person as any).LineCountryAddress || "") },
-    { label: t("DeliveryNotes"), value: String((person as any).LineDeliveryNotesAddress || "") },
+    { label: t("1stlineAddress"), value: String(person.LineOneAddress || "") },
+    { label: t("2ndlineAddress"), value: String(person.LineTwoAddress || "") },
+    { label: t("3rdlineAddress"), value: String(person.LineThreeAddress || "") },
+    { label: t("4thLineAddress"), value: String(person.LineFourAddress || "") },
+    { label: t("Country"), value: String(person.LineCountryAddress || "") },
+    { label: t("DeliveryNotes"), value: String(person.LineDeliveryNotesAddress || "") },
   ] : [];
 
   return (
