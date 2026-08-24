@@ -1,8 +1,10 @@
+import { WEB_CLIENT, WEB_VERSION } from "./buildInfo";
+
 const API_ORIGIN = "https://web.gpsshops.com";
 const AUTH_BASE = `${API_ORIGIN}/menu1/api/v1/auth`;
+const ME_URL = `${AUTH_BASE}/me.php`;
 const PROFILE_URL = `${API_ORIGIN}/menu1/api/v1/profile.php`;
 const BASIC_AUTH_PROTECTED = import.meta.env.VITE_BASIC_AUTH_PROTECTED === "true";
-const WEB_VERSION = (import.meta.env.VITE_APP_VERSION as string | undefined)?.trim() || undefined;
 
 export interface AuthUser {
   id: number;
@@ -83,12 +85,33 @@ function acceptSession(session: SessionPayload): AuthUser {
   return session.user;
 }
 
+async function currentUser(token: string): Promise<AuthUser> {
+  const response = await fetch(ME_URL, {
+    credentials: "include",
+    headers: bearerHeaders(token),
+  });
+  return readEnvelope<{ user: AuthUser }>(response).then((data) => data.user);
+}
+
+async function acceptSessionAndResolveIdentity(session: SessionPayload): Promise<AuthUser> {
+  const token = session.access_token;
+  acceptSession(session);
+  try {
+    // The session response is only token material.  /me is the authority for
+    // the authenticated identity and verification state.
+    return await currentUser(token);
+  } catch (error) {
+    accessToken = null;
+    throw error;
+  }
+}
+
 export async function login(email: string, password: string): Promise<AuthUser> {
-  return acceptSession(await post<SessionPayload>("login.php", {
+  return acceptSessionAndResolveIdentity(await post<SessionPayload>("login.php", {
     email,
     password,
-    client: "web",
-    ...(WEB_VERSION ? { version: WEB_VERSION } : {}),
+    client: WEB_CLIENT,
+    version: WEB_VERSION,
   }));
 }
 
@@ -109,8 +132,8 @@ export async function register(input: {
     mobile_number: input.mobileNumber,
     locale: input.locale,
     gender: input.gender,
-    client: "web",
-    ...(WEB_VERSION ? { version: WEB_VERSION } : {}),
+    client: WEB_CLIENT,
+    version: WEB_VERSION,
   });
 }
 
@@ -129,7 +152,7 @@ export async function requestPasswordReset(email: string): Promise<void> {
 export async function restoreSession(): Promise<AuthUser | null> {
   if (refreshInFlight) return refreshInFlight;
   refreshInFlight = post<SessionPayload>("refresh.php", {})
-    .then(acceptSession)
+    .then(acceptSessionAndResolveIdentity)
     .catch((error) => {
       accessToken = null;
       if (error instanceof AuthApiError && error.status === 401) return null;
@@ -140,23 +163,28 @@ export async function restoreSession(): Promise<AuthUser | null> {
 }
 
 export async function logout(): Promise<void> {
-  if (!accessToken) await restoreSession();
-  if (accessToken) {
-    const sendLogout = () => fetch(`${AUTH_BASE}/logout.php`, {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json", ...bearerHeaders(accessToken!) },
-      body: "{}",
-    });
-    let response = await sendLogout();
-    if (response.status === 401) {
-      accessToken = null;
-      await restoreSession();
-      if (accessToken) response = await sendLogout();
+  try {
+    if (!accessToken) await restoreSession();
+    if (accessToken) {
+      const sendLogout = () => fetch(`${AUTH_BASE}/logout.php`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json", ...bearerHeaders(accessToken!) },
+        body: "{}",
+      });
+      let response = await sendLogout();
+      if (response.status === 401) {
+        accessToken = null;
+        await restoreSession();
+        if (accessToken) response = await sendLogout();
+      }
+      if (!response.ok && response.status !== 401) await readEnvelope(response);
     }
-    if (!response.ok && response.status !== 401) await readEnvelope(response);
+  } finally {
+    // A terminal server-side logout failure must never leave usable local
+    // credentials in memory.
+    accessToken = null;
   }
-  accessToken = null;
 }
 
 export async function authenticatedFetch(input: RequestInfo | URL, init: RequestInit = {}): Promise<Response> {
@@ -196,4 +224,4 @@ export function clearInMemoryAccessToken(): void {
   accessToken = null;
 }
 
-export const authApiUrls = { AUTH_BASE, PROFILE_URL };
+export const authApiUrls = { AUTH_BASE, ME_URL, PROFILE_URL };

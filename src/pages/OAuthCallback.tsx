@@ -7,38 +7,15 @@ const OAuthCallback = () => {
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    // Accept multiple param shapes from different PHP callbacks
-    const serverMessage = searchParams.get("ServerMessage");
-    const status = searchParams.get("status");
-    const email = searchParams.get("email") || searchParams.get("Email");
-    const name = searchParams.get("name") || searchParams.get("Name");
-    const surname = searchParams.get("surname") || searchParams.get("Surname");
-    const personId = searchParams.get("personId") || searchParams.get("PersonID");
-    const password = searchParams.get("password") || searchParams.get("Password");
-    const error = searchParams.get("error") || searchParams.get("ServerMessage");
-
-    const ok =
-      serverMessage === "Success" ||
-      (status && status.toLowerCase() === "success");
-
-    if (ok && email) {
-      const user: Record<string, unknown> = {
-        Email: email,
-        Name: name || "",
-        Surname: surname || "",
-      };
-      if (personId) {
-        user.PersonID = personId;
-        user.ID = personId;
-      }
-      if (password) user.Password = password;
-      localStorage.setItem("digitalUser", JSON.stringify(user));
-      toast.success(`Welcome, ${name || email}!`);
-      navigate("/profile", { replace: true });
-    } else {
-      toast.error(error || "OAuth login failed");
-      navigate("/", { replace: true });
-    }
+    // The legacy OAuth callbacks return identity and (for Facebook) a newly
+    // generated plaintext password in the URL.  They do not create a
+    // canonical V1 session, so accepting them would bypass /me and persist
+    // credentials in browser history/storage.  Leave the route as a safe
+    // terminal landing page until the backend exposes a canonical OAuth
+    // contract.
+    localStorage.removeItem("digitalUser");
+    toast.error("Social sign-in is not available yet. Please use email and password.");
+    navigate("/", { replace: true });
   }, [searchParams, navigate]);
 
   return (
