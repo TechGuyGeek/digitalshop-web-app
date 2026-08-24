@@ -9,6 +9,7 @@ import AdvertSlot from "@/components/adverts/AdvertSlot";
 import { getMarkerIconUrl, DEFAULT_MARKER_ICON } from "@/lib/mapMarkerIcons";
 import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 import ShopSearch from "@/components/ShopSearch";
+import { MAP_SEARCH_OVERLAY_CLASS } from "@/lib/mapLayout";
 
 interface ShopListingPageProps { title: string; variant?: "free" | "paid" | "global"; helpKey?: string; }
 
@@ -89,7 +90,7 @@ const ShopListingPage = ({ title, variant = "free", helpKey }: ShopListingPagePr
         {activeTab === "hybrid" && (<>
           <div className="relative h-56 w-full">
             <GoogleMap className="h-full w-full" shops={mapShops} onShopClick={handleShopMapClick} defaultZoom={isGlobal ? 3 : 14} rangeCircleMetres={isGlobal ? undefined : 1609.34} focusTarget={focusTarget} />
-            <div className="absolute top-2 left-2 right-12 z-[1000]">
+            <div className={MAP_SEARCH_OVERLAY_CLASS}>
               <ShopSearch shops={shops} onSelect={handleSearchSelect} />
             </div>
           </div>
@@ -99,7 +100,7 @@ const ShopListingPage = ({ title, variant = "free", helpKey }: ShopListingPagePr
         {activeTab === "map" && (<>
           <ExpandableMap expanded={mapExpanded} onToggle={() => setMapExpanded(v => !v)} baseClassName="relative w-full h-[60vh] min-h-[400px]">
             <GoogleMap className="h-full w-full" shops={mapShops} onShopClick={handleShopMapClick} defaultZoom={isGlobal ? 3 : 14} rangeCircleMetres={isGlobal ? undefined : 1609.34} focusTarget={focusTarget} />
-            <div className="absolute top-2 left-2 right-12 z-[1000]">
+            <div className={MAP_SEARCH_OVERLAY_CLASS}>
               <ShopSearch shops={shops} onSelect={handleSearchSelect} />
             </div>
           </ExpandableMap>
