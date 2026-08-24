@@ -1,80 +1,26 @@
-import { getCategoryByCode } from "./shopCategories";
+import { fetchPublicGlobalShops, fetchPublicNearbyShops, type NearbyShop } from "@/lib/publicShopsApi";
+import type { Coordinates } from "@/lib/geo";
 
-const SERVER_DOMAIN = "https://web.gpsshops.com/";
+export type { NearbyShop } from "@/lib/publicShopsApi";
 
 export interface NearbyCompany {
   companyid: number;
-  companyname: string;
-  companylat: number;
-  companylong: number;
+  companyname?: string;
+  companylat?: number | string;
+  companylong?: number | string;
   companyphoto?: string;
   CompanyDescription?: string;
-  PublicNumber: number;
-  distance: number;
+  PublicNumber?: number | string;
 }
 
-export interface NearbyShop {
-  companyid: number;
-  name: string;
-  icon: string;
-  lat: number;
-  lng: number;
-  photo?: string;
-  description?: string;
-  categoryCode: number;
-  categoryLabel: string;
-  distance: number;
+export function fetchGlobalShops(userPosition: Coordinates | null = null): Promise<NearbyShop[]> {
+  return fetchPublicGlobalShops(userPosition);
 }
 
-export async function fetchGlobalShops(): Promise<NearbyShop[]> {
-  const url = SERVER_DOMAIN + "menu1/PHPread/ClientMenu/GetlocationPointsGlobal.php";
-  const response = await fetch(url);
-  return parseShopsResponse(await response.text(), false);
-}
-
-export async function fetchNearbyShops(lat: number, lng: number, variant: "free" | "paid" = "free"): Promise<NearbyShop[]> {
-  const endpoint = variant === "paid"
-    ? "menu1/PHPread/ClientMenu/GetlocationPointsPaid.php"
-    : "menu1/PHPread/ClientMenu/GetlocationPoints.php";
-  const url = SERVER_DOMAIN + endpoint;
-
-  const formData = new URLSearchParams();
-  formData.append("lat", String(lat));
-  formData.append("lon", String(lng));
-
-  const response = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: formData.toString(),
-  });
-
-  return parseShopsResponse(await response.text(), true);
-}
-
-function parseShopsResponse(text: string, hasDistance: boolean): NearbyShop[] {
-  if (!text || text.trim() === "") return [];
-
-  try {
-    const companies: NearbyCompany[] = JSON.parse(text);
-    if (!Array.isArray(companies)) return [];
-
-    return companies.map((c) => {
-      const cat = getCategoryByCode(Number(c.PublicNumber) || 0);
-      return {
-        companyid: c.companyid,
-        name: c.companyname || "Unknown Shop",
-        icon: cat.emoji,
-        lat: Number(c.companylat),
-        lng: Number(c.companylong),
-        photo: c.companyphoto || undefined,
-        description: c.CompanyDescription || undefined,
-        categoryCode: cat.id,
-        categoryLabel: cat.label,
-        distance: hasDistance ? (Number(c.distance) || 0) : 0,
-      };
-    });
-  } catch {
-    console.error("Failed to parse shops response:", text);
-    return [];
-  }
+export function fetchNearbyShops(
+  lat: number | undefined,
+  lng: number | undefined,
+  variant: "free" | "paid" = "free",
+): Promise<NearbyShop[]> {
+  return fetchPublicNearbyShops(lat, lng, variant);
 }

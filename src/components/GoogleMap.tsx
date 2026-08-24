@@ -2,10 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { getMarkerIconUrl, DEFAULT_MARKER_ICON } from "@/lib/mapMarkerIcons";
+import { formatDistanceMiles, isValidCoordinate } from "@/lib/geo";
 
 interface GoogleMapProps {
   className?: string;
-  shops?: { name: string; icon: string; lat?: number; lng?: number; companyid?: number }[];
+  shops?: { name: string; icon: string; lat?: number; lng?: number; companyid?: number; distance?: number | null }[];
   onShopClick?: (shop: { name: string; icon: string; companyid?: number }) => void;
   defaultZoom?: number;
   forcedCenter?: { lat: number; lng: number } | null;
@@ -37,8 +38,8 @@ const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, 
   // Get user GPS
   useEffect(() => {
     if (forcedCenter) {
-      setUserPos(forcedCenter);
-      setLocating(false);
+        if (isValidCoordinate(forcedCenter)) setUserPos(forcedCenter);
+        setLocating(false);
       return;
     }
     if (!navigator.geolocation) {
@@ -57,7 +58,8 @@ const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, 
         if (settled) return;
         settled = true;
         window.clearTimeout(promptTimer);
-        setUserPos({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        if (isValidCoordinate(coords)) setUserPos(coords);
         setLocating(false);
       },
       () => {
@@ -189,7 +191,8 @@ const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, 
     shopMarkersRef.current.clear();
 
     shops.forEach((shop) => {
-      if (shop.lat == null || shop.lng == null) return;
+      const coords = shop.lat !== undefined && shop.lng !== undefined ? { lat: shop.lat, lng: shop.lng } : null;
+      if (!isValidCoordinate(coords)) return;
       const iconUrl = getMarkerIconUrl({ emoji: shop.icon });
       const size = 40;
       const html = `<img src="${iconUrl}" style="width:${size}px;height:${size}px;display:block;object-fit:contain;" alt="" onerror="this.onerror=null;this.src='${DEFAULT_MARKER_ICON}';" />`;
@@ -199,8 +202,9 @@ const GoogleMap = ({ className = "", shops = [], onShopClick, defaultZoom = 14, 
         iconSize: [size, size],
         iconAnchor: [size / 2, size / 2],
       });
-      const marker = L.marker([shop.lat, shop.lng], { icon: divIcon, title: shop.name }).addTo(layer);
-      marker.bindPopup(`<div style="font-family:inherit;font-size:13px;font-weight:600;">${shop.name.replace(/</g, "&lt;")}</div>`);
+      const marker = L.marker([coords.lat, coords.lng], { icon: divIcon, title: shop.name }).addTo(layer);
+      const distance = formatDistanceMiles(shop.distance);
+      marker.bindPopup(`<div style="font-family:inherit;font-size:13px;font-weight:600;">${shop.name.replace(/[<>&"']/g, (value) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", "\"": "&quot;", "'": "&#39;" })[value] || value)}${distance ? `<br><span style="font-weight:400;">${distance}</span>` : ""}</div>`);
       if (shop.companyid != null) shopMarkersRef.current.set(shop.companyid, marker);
       if (onShopClick) {
         marker.on("click", () => onShopClick(shop));

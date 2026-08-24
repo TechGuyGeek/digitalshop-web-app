@@ -2,15 +2,13 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Share2, Clock, Activity, Store, AlertTriangle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState, useRef, useCallback, type ReactNode } from "react";
-import { fetchCompanyById, CompanyDetails } from "@/lib/api";
+import { fetchPublicShopDetail, type PublicShopDetail } from "@/lib/publicShopsApi";
+import { getMenuImageUrl } from "@/lib/authClient";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { QRCodeCanvas } from "qrcode.react";
 import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 import { SHOP_CATEGORIES } from "@/lib/shopCategories";
-
-const SERVER_DOMAIN = "https://web.gpsshops.com/";
-
 
 function formatOpeningHours(opening?: string, closing?: string): string | null {
   if (!opening || !closing) return null;
@@ -42,7 +40,7 @@ const ShopProfile = () => {
   const companyIdParam = searchParams.get("companyid");
   const fallbackName = searchParams.get("name") || "Shop";
   const fallbackIcon = searchParams.get("icon") || "🏪";
-  const [company, setCompany] = useState<CompanyDetails | null>(null);
+  const [company, setCompany] = useState<PublicShopDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [imgError, setImgError] = useState(false);
@@ -51,13 +49,13 @@ const ShopProfile = () => {
   useEffect(() => {
     const id = companyIdParam ? parseInt(companyIdParam, 10) : NaN;
     if (isNaN(id) || id <= 0) { setLoading(false); setNotFound(true); return; }
-    fetchCompanyById(id).then((data) => { if (data) setCompany(data); else setNotFound(true); setLoading(false); });
+    fetchPublicShopDetail(id).then((data) => { if (data) setCompany(data); else setNotFound(true); setLoading(false); }).catch(() => { setNotFound(true); setLoading(false); });
   }, [companyIdParam]);
 
   const shopName = company?.companyname || fallbackName;
   const hours = company ? formatOpeningHours(company.OpeningTimes, company.ClosingTimes) : null;
   const activityDays = company ? daysSinceActivity(company.LastLoggedOn) : null;
-  const imageUrl = company?.companyphoto ? SERVER_DOMAIN + "menu1" + encodeURI(company.companyphoto) : "";
+  const imageUrl = company?.companyphoto ? getMenuImageUrl(company.companyphoto, company.companyid) : "";
 
   const handleEnterShop = () => {
     if (!company) return;

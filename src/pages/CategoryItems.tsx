@@ -6,10 +6,7 @@ import { useBasket } from "@/contexts/BasketContext";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
-
-const SERVER_DOMAIN = "https://web.gpsshops.com/";
-
-interface Product { ID: string; OrderName: string; OrderPrice?: string; OrderDesription?: string; imagepath?: string; count?: number; }
+import { fetchPublicMenuItems, getPublicProductImageUrl, type PublicProduct } from "@/lib/publicShopsApi";
 
 const CategoryItems = () => {
   const navigate = useNavigate();
@@ -20,7 +17,7 @@ const CategoryItems = () => {
   const groupId = searchParams.get("groupId") || "";
   const category = searchParams.get("category") || "Items";
   const { count, addItem } = useBasket();
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<PublicProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,20 +26,16 @@ const CategoryItems = () => {
     const fetchProducts = async () => {
       setLoading(true); setError(null);
       try {
-        const url = SERVER_DOMAIN + "menu1/PHPread/CompanyMenu/PoppulateSubMenuDetail.php";
-        const formData = new URLSearchParams(); formData.append("GroupID", groupId);
-        const response = await fetch(url, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: formData.toString() });
-        const text = await response.text();
-        if (!text || text.trim().toLowerCase().includes("no items for sale")) { setProducts([]); setLoading(false); return; }
-        setProducts(Array.isArray(JSON.parse(text)) ? JSON.parse(text) : []);
+        const parsed = await fetchPublicMenuItems(Number(companyId), Number(groupId));
+        setProducts(parsed.filter((product) => product.MenuEnable === "1" || product.MenuEnable?.toLowerCase() === "true"));
       } catch { setError(t("Pleasecheckyourinternetconnection")); } finally { setLoading(false); }
     };
     fetchProducts();
   }, [groupId]);
 
-  const handleAddToBasket = (product: Product) => {
+  const handleAddToBasket = (product: PublicProduct) => {
     const price = parseFloat(product.OrderPrice || "0");
-    addItem({ id: parseInt(product.ID) || 0, name: product.OrderName, price, description: product.OrderDesription || "", image: product.imagepath ? SERVER_DOMAIN + "menu1" + encodeURI(product.imagepath) : "", groupId });
+    addItem({ id: parseInt(product.ID) || 0, name: product.OrderName, price, description: product.OrderDesription || "", image: getPublicProductImageUrl(product.imagepath, product.ID), groupId });
     toast.success(t("ItemAddedtoBasket"));
   };
 
@@ -71,10 +64,10 @@ const CategoryItems = () => {
         )}
         {!loading && !error && products.map((product) => {
           const price = parseFloat(product.OrderPrice || "0");
-          const imageUrl = product.imagepath ? SERVER_DOMAIN + "menu1" + encodeURI(product.imagepath) : "";
+          const imageUrl = getPublicProductImageUrl(product.imagepath, product.ID);
           return (
             <button key={product.ID} className="w-full text-left rounded-xl overflow-hidden bg-card shadow-md hover:shadow-lg transition-shadow" onClick={() => handleAddToBasket(product)}>
-              <div className="relative w-full h-44 bg-muted">
+              <div className="relative w-full aspect-video bg-muted">
                 {imageUrl ? (<img src={imageUrl} alt={product.OrderName} className="w-full h-full object-cover" />) : (
                   <div className="w-full h-full bg-gradient-to-br from-accent/30 to-muted flex items-center justify-center"><span className="text-4xl">🍽️</span></div>
                 )}

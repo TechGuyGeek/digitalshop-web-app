@@ -6,11 +6,7 @@ import { useEffect, useState } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 import MenuGroupBanner from "@/components/MenuGroupBanner";
-import { fetchMenuGroupImages, MenuGroupImageMap, getMenuGroupDisplayImage } from "@/lib/menuGroupImages";
-
-const SERVER_DOMAIN = "https://web.gpsshops.com/";
-
-interface MenuGroup { ID: string; OrderGroup: string; companyid?: string; MenuEnable?: string; }
+import { fetchPublicMenuGroups, getPublicMenuGroupImageUrl, type PublicMenuGroup } from "@/lib/publicShopsApi";
 
 const ShopInterior = () => {
   const navigate = useNavigate();
@@ -22,32 +18,17 @@ const ShopInterior = () => {
 
   useEffect(() => { if (companyId) sessionStorage.setItem("basket_companyId", companyId); }, [companyId]);
 
-  const [groups, setGroups] = useState<MenuGroup[]>([]);
+  const [groups, setGroups] = useState<PublicMenuGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [groupImages, setGroupImages] = useState<MenuGroupImageMap>({});
-  const [imagesLoaded, setImagesLoaded] = useState(false);
-
-  useEffect(() => {
-    if (!companyId) return;
-    let cancelled = false;
-    fetchMenuGroupImages(companyId).then((map) => {
-      if (!cancelled) { setGroupImages(map); setImagesLoaded(true); }
-    });
-    return () => { cancelled = true; };
-  }, [companyId]);
 
   useEffect(() => {
     if (!companyId) { setError(t("Therewasanerror")); setLoading(false); return; }
     const fetchGroups = async () => {
       setLoading(true); setError(null);
       try {
-        const url = SERVER_DOMAIN + "menu1/PHPread/CompanyMenu/SelectmenuGroup.php";
-        const formData = new URLSearchParams(); formData.append("companyID", companyId);
-        const response = await fetch(url, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: formData.toString() });
-        const text = await response.text();
-        if (!text || text.toLowerCase().includes("no items for sale")) { setGroups([]); setLoading(false); return; }
-        const parsed = JSON.parse(text); setGroups(Array.isArray(parsed) ? parsed : []);
+        const parsed = await fetchPublicMenuGroups(Number(companyId));
+        setGroups(parsed.filter((group) => group.MenuEnable === "1" || group.MenuEnable.toLowerCase() === "true"));
       } catch (err) { console.error("Failed to load menu groups:", err); setError(t("Pleasecheckyourinternetconnection")); }
       finally { setLoading(false); }
     };
@@ -78,7 +59,7 @@ const ShopInterior = () => {
           </div>
         )}
         {!loading && !error && groups.length > 0 && groups.map((group) => {
-          const bannerUrl = imagesLoaded ? getMenuGroupDisplayImage(group.ID, groupImages).url : null;
+          const bannerUrl = getPublicMenuGroupImageUrl(group);
           return (
             <button key={group.ID} className="w-full text-center text-foreground font-bold text-lg uppercase tracking-wide border-b border-border bg-card hover:bg-accent/50 transition-colors"
               onClick={() => navigate(`/category-items?companyid=${encodeURIComponent(companyId)}&shop=${encodeURIComponent(shopName)}&groupId=${group.ID}&category=${encodeURIComponent(group.OrderGroup)}`)}>

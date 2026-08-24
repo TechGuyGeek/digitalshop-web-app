@@ -34,17 +34,34 @@ const ShopListingPage = ({ title, variant = "free", helpKey }: ShopListingPagePr
 
   const loadShops = async (lat?: number, lng?: number) => {
     setLoading(true); setError(null);
-    try { const results = isGlobal ? await fetchGlobalShops() : await fetchNearbyShops(lat!, lng!, variant as "free" | "paid"); setShops(results); }
+    try {
+      const results = isGlobal
+        ? await fetchGlobalShops(lat !== undefined && lng !== undefined ? { lat, lng } : null)
+        : await fetchNearbyShops(lat, lng, variant as "free" | "paid");
+      setShops(results);
+    }
     catch { setError(t("Pleasecheckyourinternetconnection")); } finally { setLoading(false); }
   };
 
   useEffect(() => {
-    if (isGlobal) { loadShops(); if (navigator.geolocation) navigator.geolocation.getCurrentPosition((pos) => setUserPos({ lat: pos.coords.latitude, lng: pos.coords.longitude }), () => {}, { enableHighAccuracy: true, timeout: 10000 }); return; }
-    if (!navigator.geolocation) { setError(t("LocationDenied")); setLoading(false); return; }
-    navigator.geolocation.getCurrentPosition((pos) => { const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude }; setUserPos(coords); loadShops(coords.lat, coords.lng); }, () => { setError(t("LocationDenied")); setLoading(false); }, { enableHighAccuracy: true, timeout: 10000 });
+    let cancelled = false;
+    if (isGlobal) loadShops();
+    if (!navigator.geolocation) {
+      if (!isGlobal) loadShops();
+      return () => { cancelled = true; };
+    }
+    navigator.geolocation.getCurrentPosition((pos) => {
+      if (cancelled) return;
+      const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      setUserPos(coords);
+      loadShops(coords.lat, coords.lng);
+    }, () => {
+      if (!cancelled && !isGlobal) loadShops();
+    }, { enableHighAccuracy: true, timeout: 10000 });
+    return () => { cancelled = true; };
   }, []);
 
-  const mapShops = shops.map((s) => ({ name: s.name, icon: s.icon, lat: s.lat, lng: s.lng, companyid: s.companyid }));
+  const mapShops = shops.map((s) => ({ name: s.name, icon: s.icon, lat: s.lat, lng: s.lng, companyid: s.companyid, distance: s.distance }));
   const handleShopMapClick = (shop: { name: string; icon: string; companyid?: number }) => { if (shop.companyid) navigate(`/shop-profile?companyid=${shop.companyid}&name=${encodeURIComponent(shop.name)}&icon=${encodeURIComponent(shop.icon)}`); };
   const handleSearchSelect = (shop: NearbyShop) => {
     setFocusTarget({ lat: shop.lat, lng: shop.lng, zoom: 17, companyid: shop.companyid, name: shop.name });
@@ -71,25 +88,25 @@ const ShopListingPage = ({ title, variant = "free", helpKey }: ShopListingPagePr
       <div className="flex-1 flex flex-col">
         {activeTab === "hybrid" && (<>
           <div className="relative h-56 w-full">
-            <GoogleMap className="h-full w-full" shops={mapShops} onShopClick={handleShopMapClick} defaultZoom={isGlobal ? 3 : 14} rangeCircleMetres={variant === "free" ? 804.67 : variant === "paid" ? 1609.34 : undefined} focusTarget={focusTarget} />
+            <GoogleMap className="h-full w-full" shops={mapShops} onShopClick={handleShopMapClick} defaultZoom={isGlobal ? 3 : 14} rangeCircleMetres={isGlobal ? undefined : 1609.34} focusTarget={focusTarget} />
             <div className="absolute top-2 left-2 right-12 z-[1000]">
               <ShopSearch shops={shops} onSelect={handleSearchSelect} />
             </div>
           </div>
-          {(variant === "free" || variant === "paid") && <p className="text-[11px] text-muted-foreground text-center py-1">{variant === "free" ? (t("Showingshopswithin") !== "Showingshopswithin" ? t("Showingshopswithin") : "Showing shops within 0.5 miles") : "Showing shops within 1 mile"}</p>}
-          <ShopContent shops={shops} loading={loading} error={error} isGlobal={isGlobal} onRetry={() => isGlobal ? loadShops() : userPos && loadShops(userPos.lat, userPos.lng)} />
+          {(variant === "free" || variant === "paid") && <p className="text-[11px] text-muted-foreground text-center py-1">Showing shops within 1 mile</p>}
+          <ShopContent shops={shops} loading={loading} error={error} isGlobal={isGlobal} onRetry={() => isGlobal ? loadShops() : loadShops(userPos?.lat, userPos?.lng)} />
         </>)}
         {activeTab === "map" && (<>
           <ExpandableMap expanded={mapExpanded} onToggle={() => setMapExpanded(v => !v)} baseClassName="relative w-full h-[60vh] min-h-[400px]">
-            <GoogleMap className="h-full w-full" shops={mapShops} onShopClick={handleShopMapClick} defaultZoom={isGlobal ? 3 : 14} rangeCircleMetres={variant === "free" ? 804.67 : variant === "paid" ? 1609.34 : undefined} focusTarget={focusTarget} />
+            <GoogleMap className="h-full w-full" shops={mapShops} onShopClick={handleShopMapClick} defaultZoom={isGlobal ? 3 : 14} rangeCircleMetres={isGlobal ? undefined : 1609.34} focusTarget={focusTarget} />
             <div className="absolute top-2 left-2 right-12 z-[1000]">
               <ShopSearch shops={shops} onSelect={handleSearchSelect} />
             </div>
           </ExpandableMap>
-          {(variant === "free" || variant === "paid") && <p className="text-[11px] text-muted-foreground text-center py-1">{variant === "free" ? (t("Showingshopswithin") !== "Showingshopswithin" ? t("Showingshopswithin") : "Showing shops within 0.5 miles") : "Showing shops within 1 mile"}</p>}
+          {(variant === "free" || variant === "paid") && <p className="text-[11px] text-muted-foreground text-center py-1">Showing shops within 1 mile</p>}
           {loading && (<div className="p-4 text-center text-sm text-muted-foreground">{t("Pleasewait")}</div>)}
         </>)}
-        {activeTab === "list" && (<ShopContent shops={shops} loading={loading} error={error} isGlobal={isGlobal} onRetry={() => isGlobal ? loadShops() : userPos && loadShops(userPos.lat, userPos.lng)} />)}
+        {activeTab === "list" && (<ShopContent shops={shops} loading={loading} error={error} isGlobal={isGlobal} onRetry={() => isGlobal ? loadShops() : loadShops(userPos?.lat, userPos?.lng)} />)}
       </div>
       <AdvertSlot position="bottomBanner" className="px-4 pb-3" />
     </div>
@@ -133,7 +150,7 @@ const ShopList = ({ shops, isGlobal = false }: { shops: NearbyShop[]; isGlobal?:
           />
           <div className="flex-1 min-w-0">
             <span className="text-sm font-medium text-foreground block truncate">{shop.name}</span>
-            <span className="text-xs text-muted-foreground">{shop.categoryLabel}{!isGlobal && shop.distance > 0 ? ` · ${shop.distance.toFixed(2)} mi` : ""}</span>
+            <span className="text-xs text-muted-foreground">{shop.categoryLabel}{shop.distance !== null ? ` · ${shop.distance.toFixed(2)} mi` : ""}</span>
           </div>
         </button>
       ))}

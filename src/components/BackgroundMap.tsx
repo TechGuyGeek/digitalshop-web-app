@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import GoogleMap from "@/components/GoogleMap";
 import { fetchNearbyShops, NearbyShop } from "@/lib/nearbyShops";
+import { isValidCoordinate } from "@/lib/geo";
 
 /**
  * Live map shown as the app background for the "main" theme.
@@ -26,7 +27,7 @@ const BackgroundMap = () => {
       if (raw) shared = JSON.parse(raw);
     } catch { /* ignore */ }
 
-    if (shared && Number.isFinite(shared.lat) && Number.isFinite(shared.lng)) {
+    if (shared && isValidCoordinate(shared)) {
       fetchNearbyShops(shared.lat, shared.lng, "free").then(setShops).catch(() => {});
       // Seed a fake geolocation so GoogleMap centers on the shared coords.
       setForcedCenter(shared);
@@ -44,7 +45,7 @@ const BackgroundMap = () => {
     }
 
     let settled = false;
-    const useFallback = () => {
+    const fallbackToCenter = () => {
       if (settled) return;
       settled = true;
       setForcedCenter(FALLBACK_CENTER);
@@ -55,7 +56,7 @@ const BackgroundMap = () => {
 
     // If the user doesn't answer the permission prompt within 8s,
     // start the fallback cinematic animation so the app isn't stuck.
-    const promptTimer = window.setTimeout(useFallback, 8000);
+    const promptTimer = window.setTimeout(fallbackToCenter, 8000);
 
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
@@ -71,13 +72,20 @@ const BackgroundMap = () => {
       },
       () => {
         window.clearTimeout(promptTimer);
-        useFallback();
+        fallbackToCenter();
       },
       { enableHighAccuracy: true, timeout: 8000 }
     );
   }, []);
 
-  const mapShops: { name: string; icon: string; lat?: number; lng?: number; companyid?: number }[] = [];
+  const mapShops = shops.map((shop) => ({
+    name: shop.name,
+    icon: shop.icon,
+    lat: shop.lat,
+    lng: shop.lng,
+    companyid: shop.companyid,
+    distance: shop.distance,
+  }));
 
   return (
     <div
