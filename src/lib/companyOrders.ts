@@ -35,6 +35,7 @@ export interface CompanyOrderItem {
   OrderName?: string;
   OrderDesription?: string;
   product_imagepath?: string;
+  imagepath?: string;
   ImageSize?: string | number;
   [key: string]: unknown;
 }
@@ -169,6 +170,10 @@ export function groupCompanyOrders(orders: CompanyOrderItem[]): CompanyGroupedOr
 
   return [...map.entries()].map(([groupKey, items]) => {
     const first = items[0] || {};
+    const normalizedItems = items.map((item) => ({
+      ...item,
+      product_imagepath: clean(item.product_imagepath || item.imagepath),
+    }));
     const statuses = items.map((item) => clean(item.cancellation_status || item.CancellationStatus).toLowerCase());
     const status = ["approved", "rejected", "requested"].find((candidate) => statuses.includes(candidate)) || "none";
     const requested = items.some((item) => truthyFlag(item.cancel_requested) || truthyFlag(item.RequestCancel))
@@ -205,7 +210,7 @@ export function groupCompanyOrders(orders: CompanyOrderItem[]): CompanyGroupedOr
       cancellationStatus: status,
       totalItems: items.length,
       totalPrice: total.toFixed(2),
-      items,
+      items: normalizedItems,
     };
   }).sort((left, right) => right.dateTime.localeCompare(left.dateTime));
 }

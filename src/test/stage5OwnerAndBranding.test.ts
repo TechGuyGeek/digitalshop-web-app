@@ -82,6 +82,19 @@ describe("Stage 5 owner cancellation and share branding", () => {
     expect(readFileSync("src/components/WebcamCapture.tsx", "utf8")).toContain("Could not access camera");
   });
 
+  it("keeps Edit Product gallery and camera on separate paths", () => {
+    const source = readFileSync("src/pages/EditProduct.tsx", "utf8");
+    expect(source).toContain("WebcamCapture");
+    expect(source).toContain("setWebcamOpen(true)");
+    expect(source).toContain("onClick={handleCameraClick}");
+    expect(source).toContain("cameraInputRef.current?.click()");
+    expect(source).toContain("fileInputRef.current?.click()");
+    expect(source).toContain('capture="environment"');
+    expect(source).toContain("onCapture={handleWebcamCapture}");
+    expect(source).toContain("setNewImageBase64(base64)");
+    expect(source).toContain("updateProduct");
+  });
+
   it("changes only the known demo share copy to GPS Shops", () => {
     expect(gpsShopsShareDescription("This is a demo shop to show what a shop could look like on Digital shop for testing purposes"))
       .toBe("This is a demo shop to show what a shop could look like on GPS Shops for testing purposes");

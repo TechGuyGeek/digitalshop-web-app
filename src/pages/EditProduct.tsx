@@ -9,6 +9,7 @@ import { SERVER_DOMAIN } from "@/lib/companyApi";
 import { updateProduct, listProducts } from "@/lib/menuApi";
 import { useLanguage } from "@/contexts/LanguageContext";
 import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
+import WebcamCapture from "@/components/WebcamCapture";
 
 function getImageUrl(path?: string) {
   if (!path) return "";
@@ -71,6 +72,7 @@ const EditProduct = () => {
   const initialImageSize = searchParams.get("imageSize") || "";
   const [currentImagePath, setCurrentImagePath] = useState(initialImage);
   const [currentImageSize, setCurrentImageSize] = useState(initialImageSize);
+  const [webcamOpen, setWebcamOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null); const cameraInputRef = useRef<HTMLInputElement>(null);
   const backUrl = `/group-products?groupId=${groupId}&companyId=${companyId}&groupName=${encodeURIComponent(groupName)}`;
 
@@ -107,6 +109,21 @@ const EditProduct = () => {
     } catch { toast.error(t("SaveFailed")); }
   };
 
+  const handleWebcamCapture = (base64: string) => {
+    setNewImageBase64(base64);
+    setImagePreview(`data:image/jpeg;base64,${base64}`);
+    setImageLoadFailed(false);
+  };
+
+  const handleCameraClick = () => {
+    const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (mobile || !navigator.mediaDevices?.getUserMedia) {
+      cameraInputRef.current?.click();
+      return;
+    }
+    setWebcamOpen(true);
+  };
+
   const handleSave = async () => {
     if (!name.trim()) { toast.error(t("ItemName")); return; }
     const priceNum = parseFloat(price);
@@ -136,7 +153,7 @@ const EditProduct = () => {
           )}
         </div>
         <div className="grid grid-cols-3 gap-3 p-4">
-          <Button variant="outline" onClick={() => cameraInputRef.current?.click()}><Camera size={16} className="mr-1" />{t("Camera")}</Button>
+          <Button variant="outline" onClick={handleCameraClick}><Camera size={16} className="mr-1" />{t("Camera")}</Button>
           <Button variant="outline" onClick={() => fileInputRef.current?.click()}><ImageIcon size={16} className="mr-1" />{t("Gallery")}</Button>
           <Button onClick={handleSave} disabled={saving}>{saving ? <Loader2 size={16} className="mr-1 animate-spin" /> : <Save size={16} className="mr-1" />}{t("Save")}</Button>
         </div>
@@ -153,6 +170,7 @@ const EditProduct = () => {
           </Button>
         </div>
       </div>
+      <WebcamCapture open={webcamOpen} onOpenChange={setWebcamOpen} onCapture={handleWebcamCapture} maxSize={800} />
     </div>
   );
 };

@@ -6,7 +6,7 @@ import {
   toggleCompanyOrderFlag, updateCompanyOrderCancellation, type CompanyGroupedOrder,
 } from "@/lib/companyOrders";
 import { customerOrderImageUrl } from "@/lib/customerOrderImage";
-import { formatOrderDateTime } from "@/lib/orderHistory";
+import { formatOrderDateTime, getProductPhotoUrl } from "@/lib/orderHistory";
 
 const user = { id: 42, email: "owner@example.test", first_name: "Owner", last_name: "Test" };
 const envelope = (data: unknown, status = 200) => new Response(JSON.stringify({ success: true, data }), { status, headers: { "Content-Type": "application/json" } });
@@ -93,6 +93,24 @@ describe("Web Stage 5 canonical owner orders", () => {
     expect(customerOrderImageUrl(order.customerImagePath)).toContain("/menu1/api/v1/menu-image.php?path=");
     expect(customerOrderImageUrl("")).toBe("");
     expect(customerOrderImageUrl("https://untrusted.example/customer.jpg")).toBe("");
+  });
+
+  it("normalizes owner detail imagepath rows into separate product proxy images", () => {
+    const [group] = groupCompanyOrders([
+      { companyid: "82", clientid: "42", orderid: "1001", RandomeCode: order.reference, DateandTime: order.dateTime, customer_imagepath: order.customerImagePath, imagepath: "/Images/Menu/bedroom.jpg", OrderName: "Picture for the Bedroom", OrderPrice: "2.00" },
+      { companyid: "82", clientid: "42", orderid: "1002", RandomeCode: order.reference, DateandTime: order.dateTime, customer_imagepath: order.customerImagePath, imagepath: "/Images/Menu/gold-drink.jpg", OrderName: "Gold drink", OrderPrice: "3.00" },
+      { companyid: "82", clientid: "42", orderid: "1003", RandomeCode: order.reference, DateandTime: order.dateTime, customer_imagepath: order.customerImagePath, OrderName: "No artwork", OrderPrice: "1.00" },
+    ]);
+    expect(group.items.map((item) => item.product_imagepath)).toEqual([
+      "/Images/Menu/bedroom.jpg", "/Images/Menu/gold-drink.jpg", "",
+    ]);
+    expect(group.items[0].product_imagepath).not.toBe(group.customerImagePath);
+    expect(getProductPhotoUrl(group.items[0].product_imagepath)).toContain("/menu1/api/v1/menu-image.php?path=");
+    expect(getProductPhotoUrl(group.items[2].product_imagepath)).toBe("");
+    const detail = readFileSync("src/pages/CompanyOrderDetail.tsx", "utf8");
+    const customer = readFileSync("src/components/CustomerOrderDetail.tsx", "utf8");
+    expect(detail).toContain("getProductPhotoUrl(item.product_imagepath)");
+    expect(customer).toContain("getProductPhotoUrl(String(item.product_imagepath || \"\"))");
   });
 
   it("uses canonical paid and delivered PATCH fields", async () => {
