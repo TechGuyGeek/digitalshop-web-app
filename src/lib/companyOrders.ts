@@ -1,5 +1,5 @@
 const SERVER_DOMAIN = "https://web.gpsshops.com/";
-import { listOwnedOrders, updateOwnedOrder } from "@/lib/orderApi";
+import { listOwnedOrders, updateOwnedOrder, type V1Order } from "@/lib/orderApi";
 
 export interface CompanyOrderItem {
   GroupID?: number | string;
@@ -19,6 +19,7 @@ export interface CompanyOrderItem {
   NeedDelivery?: string;
   NeedTakeaway?: string;
   RequestCancel?: string;
+  CancellationStatus?: string;
   RandomeCode?: string;
   TotalItems?: string | number;
   TotalPrice?: string | number;
@@ -96,7 +97,7 @@ export async function fetchCompanyOrdersByTab(
   tab: "today" | "week" | "month"
 ): Promise<CompanyOrderItem[]> {
   const v1 = await listOwnedOrders();
-  return v1.flatMap((o) => o.items.map((item) => ({ companyid:o.company_id, clientid:o.customer_id, orderid:o.id, GroupID:item.group_id, Productid:item.product_id, DateandTime:o.date_time, TableNumber:o.table_number, HasPaid:o.paid?"1":"0", HasDelivered:o.delivered?"1":"0", NeedDelivery:o.mode==="delivery"?"1":"0", NeedTakeaway:o.mode==="takeaway"?"1":"0", RandomeCode:o.id, OrderPrice:item.price, OrderName:item.name, OrderDesription:item.description, CompanyName:o.company_name } as CompanyOrderItem)));
+  return v1.flatMap(mapOwnedOrderToItems);
   /* legacy implementation retained below for non-migrated clients */
   const endpoints: Record<string, string> = {
     today: "RetriveLiveOrdersSecure.php",
@@ -135,6 +136,31 @@ export async function fetchCompanyOrdersByTab(
     console.error(`fetchCompanyOrdersByTab(${tab}) error:`, err);
     throw err;
   }
+}
+
+/** Preserve canonical owner cancellation state while adapting V1 lines to the existing UI model. */
+export function mapOwnedOrderToItems(order: V1Order): CompanyOrderItem[] {
+  const requestCancel = order.cancel_requested || order.cancellation_status === "requested" || order.cancellation_status === "approved" ? "1" : "0";
+  return order.items.map((item) => ({
+    companyid: order.company_id,
+    clientid: order.customer_id,
+    orderid: order.id,
+    GroupID: item.group_id,
+    Productid: item.product_id,
+    DateandTime: order.date_time,
+    TableNumber: order.table_number,
+    HasPaid: order.paid ? "1" : "0",
+    HasDelivered: order.delivered ? "1" : "0",
+    NeedDelivery: order.mode === "delivery" ? "1" : "0",
+    NeedTakeaway: order.mode === "takeaway" ? "1" : "0",
+    RequestCancel: requestCancel,
+    CancellationStatus: order.cancellation_status || "none",
+    RandomeCode: order.id,
+    OrderPrice: item.price,
+    OrderName: item.name,
+    OrderDesription: item.description,
+    CompanyName: order.company_name,
+  }));
 }
 
 /**

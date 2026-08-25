@@ -165,14 +165,14 @@ const Basket = () => {
         <div className="bg-card border-t border-border px-4 py-3 shrink-0 flex items-center justify-between">
           <p className="text-muted-foreground text-sm font-medium">{t("TableNumber")}</p>
           <Select value={tableNumber} onValueChange={setTableNumber}>
-            <SelectTrigger className="w-28 h-9 rounded-full"><SelectValue placeholder={t("TableNumber")} /></SelectTrigger>
+            <SelectTrigger className="w-40 sm:w-44 h-10 rounded-full"><SelectValue placeholder={t("TableNumber")} /></SelectTrigger>
             <SelectContent className="max-h-60">
               {Array.from({ length: totalTables + 1 }, (_, i) => (<SelectItem key={i} value={String(i)}>{i}</SelectItem>))}
             </SelectContent>
           </Select>
         </div>
       )}
-      <div className="bg-card border-t border-border px-4 py-4 flex items-center justify-between gap-3 shrink-0">
+      <div className="bg-card border-t border-border px-4 py-4 grid grid-cols-3 items-center gap-2 shrink-0">
         {!settingsLoaded ? (
           <div className="flex-1 flex justify-center"><Loader2 className="animate-spin text-muted-foreground" size={18} /></div>
         ) : !orderEnable && !takeawayEnable && !deliveryEnable ? (
@@ -180,18 +180,18 @@ const Basket = () => {
         ) : (
           <>
             {takeawayEnable && (
-              <Button variant="outline" className="flex-1 rounded-full" onClick={() => placeOrder("takeaway")} disabled={submitting || items.length === 0}>
+              <Button variant="outline" className="min-w-0 w-full rounded-full px-2 text-sm whitespace-nowrap" onClick={() => placeOrder("takeaway")} disabled={submitting || items.length === 0}>
                 {submitting ? <Loader2 className="animate-spin mr-1" size={14} /> : null}{t("TakeAway")}
               </Button>
             )}
             {orderEnable && (
-              <Button variant="outline" className="flex-1 rounded-full" onClick={() => placeOrder("onsite")} disabled={submitting || items.length === 0}>
+              <Button variant="outline" className="min-w-0 w-full rounded-full px-2 text-sm whitespace-nowrap" onClick={() => placeOrder("onsite")} disabled={submitting || items.length === 0}>
                 {submitting ? <Loader2 className="animate-spin mr-1" size={14} /> : null}{t("OnSite")}
               </Button>
             )}
             {deliveryEnable && (
-              <Button variant="outline" className="flex-1 rounded-full" onClick={() => placeOrder("delivery")} disabled={submitting || items.length === 0}>
-                {submitting ? <Loader2 className="animate-spin mr-1" size={14} /> : null}{t("Deliver")}
+              <Button variant="outline" className="min-w-0 w-full rounded-full px-2 text-sm whitespace-nowrap" onClick={() => placeOrder("delivery")} disabled={submitting || items.length === 0}>
+                {submitting ? <Loader2 className="animate-spin mr-1" size={14} /> : null}{t("Delivery") || t("Deliver") || "Delivery"}
               </Button>
             )}
           </>

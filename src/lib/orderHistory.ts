@@ -149,13 +149,34 @@ export function groupOrdersBySession(orders: OrderSummary[]): GroupedOrder[] {
   }).sort((left, right) => orderTimestamp(right.dateTime) - orderTimestamp(left.dateTime));
 }
 
-/** The backend emits SQL DATETIME in UTC; offset-bearing ISO values are already absolute. */
+/**
+ * Convert the backend's timestamp deliberately instead of relying on the
+ * browser's interpretation of a timezone-less SQL DATETIME.
+ *
+ * customer-orders.php returns the value written by PHP date('Y-m-d H:i:s').
+ * The deployed PHP runtime is UTC, so a timezone-less SQL value is UTC. An
+ * ISO value carrying Z or an explicit offset is already absolute and must not
+ * be converted a second time.
+ */
 export function orderTimestamp(raw: string): number {
   const value = clean(raw);
   if (!value) return 0;
+
   const explicitZone = /(?:Z|[+-]\d{2}:?\d{2})$/i.test(value);
-  const parsed = Date.parse(explicitZone ? value : `${value.replace(" ", "T")}Z`);
-  return Number.isNaN(parsed) ? 0 : parsed;
+  if (explicitZone) {
+    const parsed = Date.parse(value);
+    return Number.isNaN(parsed) ? 0 : parsed;
+  }
+
+  const sql = /^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})(?:\.(\d{1,6}))?$/u.exec(value);
+  if (!sql) return 0;
+  const [, year, month, day, hour, minute, second, fraction = ""] = sql;
+  const milliseconds = Number(fraction.padEnd(3, "0").slice(0, 3));
+  const timestamp = Date.UTC(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute), Number(second), milliseconds);
+  const check = new Date(timestamp);
+  if (check.getUTCFullYear() !== Number(year) || check.getUTCMonth() !== Number(month) - 1 || check.getUTCDate() !== Number(day)
+    || check.getUTCHours() !== Number(hour) || check.getUTCMinutes() !== Number(minute) || check.getUTCSeconds() !== Number(second)) return 0;
+  return timestamp;
 }
 
 export function formatOrderDateTime(raw: string, timeZone?: string): string {

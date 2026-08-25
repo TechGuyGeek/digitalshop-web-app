@@ -43,9 +43,9 @@ const CustomerProfileReadonly = () => {
   const isMobileDevice = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const normalizeForWhatsApp = (num: string): string => { let cleaned = num.replace(/[\s\-()]/g, ""); if (cleaned.startsWith("0")) cleaned = "44" + cleaned.slice(1); return cleaned; };
 
-  const handleSms = () => { if (!mobile) return; if (isMobileDevice) window.open(`sms:${mobile}?body=${encodeURIComponent("Welcome to Digital shop")}`, "_self"); else { navigator.clipboard.writeText(mobile); toast.info(t("Therewasanerror")); } };
+  const handleSms = () => { if (!mobile) return; if (isMobileDevice) window.open(`sms:${mobile}?body=${encodeURIComponent("Welcome to GPS Shops")}`, "_self"); else { navigator.clipboard.writeText(mobile); toast.info(t("Therewasanerror")); } };
   const handlePhone = () => { if (!mobile) return; if (isMobileDevice) window.open(`tel:${mobile}`, "_self"); else { navigator.clipboard.writeText(mobile); toast.info(t("Therewasanerror")); } };
-  const handleWhatsApp = () => { if (!mobile) return; window.open(`https://wa.me/${normalizeForWhatsApp(mobile)}?text=Welcome%20to%20Digital%20shop`, "_blank"); };
+  const handleWhatsApp = () => { if (!mobile) return; window.open(`https://wa.me/${normalizeForWhatsApp(mobile)}?text=Welcome%20to%20GPS%20Shops`, "_blank"); };
   const handleEmail = () => { if (!email) return; window.open(`mailto:${email}`, "_self"); };
 
   const imgUrl = person ? getProfileImageUrl(person) : null;

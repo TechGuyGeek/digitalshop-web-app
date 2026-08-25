@@ -80,11 +80,13 @@ describe("Web Stage 4 customer order flow", () => {
   });
 
   it("converts UTC SQL time to local DST/GMT/alternate zones and handles offsets/fallbacks", () => {
-    expect(orderTimestamp("2026-08-24 12:00:00")).toBe(Date.parse("2026-08-24T12:00:00Z"));
+    expect(orderTimestamp("2026-08-24 12:00:00")).toBe(Date.UTC(2026, 7, 24, 12));
+    expect(orderTimestamp("2026-08-24T12:00:00")).toBe(Date.UTC(2026, 7, 24, 12));
     expect(formatOrderDateTime("2026-08-24 12:00:00", "Europe/London")).toContain("13:00");
     expect(formatOrderDateTime("2026-01-24 12:00:00", "Europe/London")).toContain("12:00");
     expect(formatOrderDateTime("2026-08-24 12:00:00", "America/New_York")).toContain("08:00");
     expect(orderTimestamp("2026-08-24T13:00:00+01:00")).toBe(Date.parse("2026-08-24T12:00:00Z"));
+    expect(orderTimestamp("2026-08-24 25:00:00")).toBe(0);
     expect(formatOrderDateTime("not-a-time")).toBe("not-a-time");
     expect(formatOrderDateTime("")).toBe("—");
   });

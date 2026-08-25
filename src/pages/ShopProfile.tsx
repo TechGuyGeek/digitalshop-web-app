@@ -9,6 +9,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { QRCodeCanvas } from "qrcode.react";
 import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 import { SHOP_CATEGORIES } from "@/lib/shopCategories";
+import { gpsShopsShareDescription } from "@/lib/branding";
 
 function formatOpeningHours(opening?: string, closing?: string): string | null {
   if (!opening || !closing) return null;
@@ -65,7 +66,8 @@ const ShopProfile = () => {
   };
 
   const handleShare = useCallback(async () => {
-    const description = company?.CompanyDescription || "";
+    // Future: add Google Play and Apple App Store links when production URLs exist.
+    const description = gpsShopsShareDescription(company?.CompanyDescription || "");
     const shareText = `${shopName}\n${description}`;
 
     const qrCanvas = qrRef.current?.querySelector("canvas");
@@ -270,7 +272,7 @@ const ShopProfile = () => {
           <Button className="w-full rounded-2xl h-12 text-base font-semibold" onClick={handleEnterShop}>{t("EnterShop")}</Button>
 
           {company?.CompanyDescription && (
-            <Card><p className="text-sm text-muted-foreground py-1">{company.CompanyDescription}</p></Card>
+            <Card><p className="text-sm text-muted-foreground py-1">{gpsShopsShareDescription(company.CompanyDescription)}</p></Card>
           )}
 
           {(categoryLabel || hours) && (
