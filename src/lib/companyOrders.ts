@@ -1,49 +1,62 @@
-const SERVER_DOMAIN = "https://web.gpsshops.com/";
-import { listOwnedOrders, updateOwnedOrder, type V1Order } from "@/lib/orderApi";
+import { deleteV1, getV1, patchV1 } from "@/lib/v1Api";
+
+export type CompanyOrderBucket = "today" | "week" | "month";
 
 export interface CompanyOrderItem {
   GroupID?: number | string;
   companyid?: number | string;
-  Companyid?: string;
   clientid?: number | string;
   orderid?: number | string;
   Productid?: number | string;
-  PersonID?: number | string;
   Name?: string;
   Surname?: string;
-  Imagepath?: string;
+  customer_imagepath?: string;
+  customer_email?: string;
+  customer_mobile?: string;
+  customer_address_line_1?: string;
+  customer_address_line_2?: string;
+  customer_address_line_3?: string;
+  customer_address_line_4?: string;
+  customer_country?: string;
+  customer_delivery_notes?: string;
+  customer_email_verified?: boolean | number | string;
   DateandTime?: string;
   TableNumber?: string;
-  HasPaid?: string;
-  HasDelivered?: string;
-  NeedDelivery?: string;
-  NeedTakeaway?: string;
-  RequestCancel?: string;
+  HasPaid?: string | number | boolean;
+  HasDelivered?: string | number | boolean;
+  NeedDelivery?: string | number | boolean;
+  NeedTakeaway?: string | number | boolean;
+  RequestCancel?: string | number | boolean;
+  cancel_requested?: string | number | boolean;
+  cancellation_status?: string;
   CancellationStatus?: string;
   RandomeCode?: string;
-  TotalItems?: string | number;
-  TotalPrice?: string | number;
   OrderPrice?: string | number;
-  orderPrice?: string | number;
-  CompanyName?: string;
-  companyname?: string;
-  companyphoto?: string;
   OrderName?: string;
   OrderDesription?: string;
-  imagepath?: string;
+  product_imagepath?: string;
+  ImageSize?: string | number;
   [key: string]: unknown;
 }
 
 export interface CompanyGroupedOrder {
   groupKey: string;
+  reference: string;
   companyId: string;
   clientId: string;
   orderId: string;
-  orderid?: string;
-  OrderID?: string;
-  OrderId?: string;
   customerName: string;
+  customerImagePath: string;
   customerPhoto: string;
+  customerEmail: string;
+  customerMobile: string;
+  customerAddressLine1: string;
+  customerAddressLine2: string;
+  customerAddressLine3: string;
+  customerAddressLine4: string;
+  customerCountry: string;
+  customerDeliveryNotes: string;
+  customerEmailVerified: boolean;
   dateTime: string;
   tableNumber: string;
   needTakeaway: string;
@@ -51,393 +64,146 @@ export interface CompanyGroupedOrder {
   hasPaid: string;
   hasDelivered: string;
   requestCancel: string;
+  cancellationStatus: string;
   totalItems: number;
   totalPrice: string;
   items: CompanyOrderItem[];
 }
 
-const COMPANY_ORDER_DELETE_ENDPOINTS: Record<"today" | "week" | "month", string> = {
-  today: "DeleteusersOrder2Secure.php",
-  week: "DeleteusersOrder2Secureweek.php",
-  month: "DeleteusersOrder2Securemonth.php",
-};
+const clean = (value: unknown): string => String(value ?? "").trim();
 
-const COMPANY_ORDER_DELETE_BASE = SERVER_DOMAIN + "menu1/PHPwrite/ClientMenu/";
-
-/** Check order counts using the combined endpoint */
-export async function fetchOrderCountCombined(companyId: string): Promise<{ today: number; week: number; month: number }> {
-  try {
-    const form = new URLSearchParams();
-    form.append("companyid", companyId);
-
-    const res = await fetch(SERVER_DOMAIN + "menu1/PHPread/CompanyLiveOrders/LiveOrderCountCombined.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: form.toString(),
-    });
-
-    const data = await res.json();
-    return {
-      today: parseInt(data.today || "0", 10),
-      week: parseInt(data.week || "0", 10),
-      month: parseInt(data.month || "0", 10),
-    };
-  } catch (err) {
-    console.error("fetchOrderCountCombined error:", err);
-    return { today: 0, week: 0, month: 0 };
-  }
+function trustedReference(value: unknown): string {
+  const reference = clean(value);
+  return reference.length >= 16 && reference.length <= 64
+    && /^[A-Za-z0-9_-]+$/.test(reference)
+    && !["0", "null", "undefined"].includes(reference.toLowerCase()) ? reference : "";
 }
 
-/** Fetch company orders for a specific tab using the correct endpoint */
-export async function fetchCompanyOrdersByTab(
-  personId: string,
-  email: string,
-  password: string,
+export function isTrustedCompanyOrderReference(value: unknown): boolean {
+  return trustedReference(value) !== "";
+}
+
+function truthyFlag(value: unknown): boolean {
+  return value === true || value === 1 || value === "1" || value === "true";
+}
+
+function ownerOrdersPath(bucket: CompanyOrderBucket, companyId: string, detail?: { clientId: string; dateTime: string }): string {
+  const query = new URLSearchParams({
+    action: detail ? "details" : "orders",
+    bucket,
+    company_id: companyId,
+  });
+  if (detail) {
+    query.set("client_id", detail.clientId);
+    query.set("date_time", detail.dateTime);
+  }
+  return `/owner-orders.php?${query.toString()}`;
+}
+
+export function fetchCompanyOrdersByTab(companyId: string, bucket: CompanyOrderBucket): Promise<CompanyOrderItem[]> {
+  return getV1<CompanyOrderItem[]>(ownerOrdersPath(bucket, companyId));
+}
+
+export function fetchCompanyOrderDetail(
+  bucket: CompanyOrderBucket,
   companyId: string,
-  tab: "today" | "week" | "month"
+  clientId: string,
+  dateTime: string,
 ): Promise<CompanyOrderItem[]> {
-  const v1 = await listOwnedOrders();
-  return v1.flatMap(mapOwnedOrderToItems);
-  /* legacy implementation retained below for non-migrated clients */
-  const endpoints: Record<string, string> = {
-    today: "RetriveLiveOrdersSecure.php",
-    week: "RetriveLiveOrdersSecureweek.php",
-    month: "RetriveLiveOrdersSecuremonth.php",
+  return getV1<CompanyOrderItem[]>(ownerOrdersPath(bucket, companyId, { clientId, dateTime }));
+}
+
+function ownerOrderMutationBody(bucket: CompanyOrderBucket, order: CompanyGroupedOrder): Record<string, unknown> {
+  return {
+    bucket,
+    company_id: Number(order.companyId),
+    order_id: order.orderId,
   };
-
-  try {
-    const form = new URLSearchParams();
-    form.append("UserID", personId);
-    form.append("UserEmail", email);
-    form.append("UserPassword", password);
-    form.append("companyID", companyId);
-
-    const url = SERVER_DOMAIN + "menu1/PHPread/CompanyLiveOrders/" + endpoints[tab];
-    console.log("[CompanyOrders] fetching", tab, "from", url);
-
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: form.toString(),
-    });
-
-    const text = await res.text();
-    console.log("[CompanyOrders]", tab, "raw response:", text.substring(0, 500));
-    if (!text || text.trim() === "" || text.trim() === "[]") return [];
-
-    const parsed = JSON.parse(text);
-    if (!Array.isArray(parsed)) return [];
-    if (parsed.length > 0) {
-      console.log("[CompanyOrders] first row ALL keys:", Object.keys(parsed[0]));
-      console.log("[CompanyOrders] first row data:", JSON.stringify(parsed[0]));
-    }
-    return parsed as CompanyOrderItem[];
-  } catch (err) {
-    console.error(`fetchCompanyOrdersByTab(${tab}) error:`, err);
-    throw err;
-  }
 }
 
-/** Preserve canonical owner cancellation state while adapting V1 lines to the existing UI model. */
-export function mapOwnedOrderToItems(order: V1Order): CompanyOrderItem[] {
-  const requestCancel = order.cancel_requested || order.cancellation_status === "requested" || order.cancellation_status === "approved" ? "1" : "0";
-  return order.items.map((item) => ({
-    companyid: order.company_id,
-    clientid: order.customer_id,
-    orderid: order.id,
-    GroupID: item.group_id,
-    Productid: item.product_id,
-    DateandTime: order.date_time,
-    TableNumber: order.table_number,
-    HasPaid: order.paid ? "1" : "0",
-    HasDelivered: order.delivered ? "1" : "0",
-    NeedDelivery: order.mode === "delivery" ? "1" : "0",
-    NeedTakeaway: order.mode === "takeaway" ? "1" : "0",
-    RequestCancel: requestCancel,
-    CancellationStatus: order.cancellation_status || "none",
-    RandomeCode: order.id,
-    OrderPrice: item.price,
-    OrderName: item.name,
-    OrderDesription: item.description,
-    CompanyName: order.company_name,
-  }));
-}
-
-/**
- * Group raw order rows by companyid + clientid + DateandTime.
- * Sort descending by DateandTime and calculate totals locally.
- */
-export function groupCompanyOrders(orders: CompanyOrderItem[]): CompanyGroupedOrder[] {
-  const sorted = [...orders].sort((a, b) =>
-    (b.DateandTime || "").localeCompare(a.DateandTime || "")
-  );
-
-  const map = new Map<string, CompanyOrderItem[]>();
-  for (const order of sorted) {
-    const companyId = String(order.companyid || order.Companyid || "");
-    const clientId = String(order.clientid || "");
-    const dateTime = String(order.DateandTime || "");
-    const orderId = String(order.orderid || (order as CompanyOrderItem & { OrderID?: string | number; OrderId?: string | number }).OrderID || (order as CompanyOrderItem & { OrderID?: string | number; OrderId?: string | number }).OrderId || "");
-    const randomCode = String(order.RandomeCode || "");
-    // Group by RandomeCode (checkout session) like customer-side.
-    // Fallback: same company + same client + same DateandTime (down to the second) — items submitted together.
-    let key: string;
-    if (randomCode) {
-      key = `rc:${randomCode}`;
-    } else if (companyId || clientId || dateTime) {
-      key = `${companyId}|${clientId}|${dateTime}`;
-    } else {
-      key = `unknown_${Math.random()}`;
-    }
-    void orderId;
-
-    if (!map.has(key)) map.set(key, []);
-    map.get(key)!.push(order);
-  }
-
-  const grouped: CompanyGroupedOrder[] = [];
-  for (const [groupKey, items] of map) {
-    const first = items[0];
-    const totalItems = items.length;
-
-    let totalPrice = 0;
-    let hasPrice = false;
-
-    for (const item of items) {
-      const rawPrice = item.OrderPrice ?? item.orderPrice ?? item.TotalPrice ?? item.totalPrice;
-      if (rawPrice === undefined || rawPrice === null || String(rawPrice).trim() === "") {
-        continue;
-      }
-
-      const price = parseFloat(String(rawPrice));
-      if (!isNaN(price)) {
-        totalPrice += price;
-        hasPrice = true;
-      }
-    }
-
-    // If no per-item price found, check if there's a group-level total on the first item
-    if (!hasPrice) {
-      const groupTotal = first.TotalPrice ?? first.totalPrice ?? (first as any).totalprice;
-      if (groupTotal !== undefined && groupTotal !== null && String(groupTotal).trim() !== "") {
-        const parsed = parseFloat(String(groupTotal));
-        if (!isNaN(parsed)) {
-          totalPrice = parsed;
-          hasPrice = true;
-        }
-      }
-    }
-
-    const name = [first.Name || "", first.Surname || ""].filter(Boolean).join(" ") || "Customer";
-
-    let customerPhoto = "";
-    const imgPath = first.Imagepath || first.imagepath || "";
-    if (imgPath) {
-      if (imgPath.startsWith("http")) {
-        customerPhoto = imgPath;
-      } else {
-        const cleaned = imgPath.startsWith("/") ? imgPath.slice(1) : imgPath;
-        customerPhoto = `${SERVER_DOMAIN}menu1/${cleaned}`;
-      }
-    }
-
-    grouped.push({
-      groupKey,
-      companyId: String(first.companyid || first.Companyid || ""),
-      clientId: String(first.clientid || ""),
-      orderId: String(first.orderid || (first as CompanyOrderItem & { OrderID?: string | number; OrderId?: string | number }).OrderID || (first as CompanyOrderItem & { OrderID?: string | number; OrderId?: string | number }).OrderId || ""),
-      orderid: String(first.orderid || (first as CompanyOrderItem & { OrderID?: string | number; OrderId?: string | number }).OrderID || (first as CompanyOrderItem & { OrderID?: string | number; OrderId?: string | number }).OrderId || ""),
-      OrderID: String(first.orderid || (first as CompanyOrderItem & { OrderID?: string | number; OrderId?: string | number }).OrderID || (first as CompanyOrderItem & { OrderID?: string | number; OrderId?: string | number }).OrderId || ""),
-      OrderId: String(first.orderid || (first as CompanyOrderItem & { OrderID?: string | number; OrderId?: string | number }).OrderID || (first as CompanyOrderItem & { OrderID?: string | number; OrderId?: string | number }).OrderId || ""),
-      customerName: name,
-      customerPhoto,
-      dateTime: first.DateandTime || "",
-      tableNumber: first.TableNumber || "",
-      needTakeaway: first.NeedTakeaway || "0",
-      needDelivery: first.NeedDelivery || "0",
-      hasPaid: first.HasPaid || "0",
-      hasDelivered: first.HasDelivered || "0",
-      requestCancel: first.RequestCancel || "0",
-      totalItems,
-      totalPrice: hasPrice ? totalPrice.toFixed(2) : "",
-      items,
-    });
-  }
-
-  return grouped;
-}
-
-/** Toggle Paid or Delivered for order items, using tab-specific endpoints */
 export async function toggleCompanyOrderFlag(
-  tab: "today" | "week" | "month",
+  bucket: CompanyOrderBucket,
   flag: "HasPaid" | "HasDelivered",
   newValue: string,
   order: CompanyGroupedOrder,
-  userId: string,
-  email: string,
-  password: string
-): Promise<CompanyOrderItem[] | null> {
-  try {
-    await updateOwnedOrder(order.orderId, flag === "HasPaid" ? { paid: newValue === "1" } : { delivered: newValue === "1" });
-    return order.items;
-  } catch { return null; }
-  /* legacy implementation retained below for non-migrated clients */
-  const paidEndpoints: Record<string, string> = {
-    today: "SavePayedorNotToggleSecure_web.php",
-    week: "SavePayedorNotToggleSecureweek_web.php",
-    month: "SavePayedorNotToggleSecuremonth_web.php",
-  };
-  const deliveredEndpoints: Record<string, string> = {
-    today: "SaveDELIVEREDORNOTToggleSecure_web.php",
-    week: "SaveDELIVEREDORNOTToggleSecureweek_web.php",
-    month: "SaveDELIVEREDORNOTToggleSecuremonth_web.php",
-  };
-
-  const endpoints = flag === "HasPaid" ? paidEndpoints : deliveredEndpoints;
-  const url = SERVER_DOMAIN + "menu1/PHPwrite/LiveOrders/" + endpoints[tab];
-  const firstItem = order.items[0];
-  const companyId = String(firstItem?.companyid || firstItem?.Companyid || order.companyId || "");
-  const orderId = String(firstItem?.orderid || "");
-  const clientId = String(firstItem?.clientid || order.clientId || "");
-  const groupId = String(firstItem?.GroupID || "");
-
-  const body: Record<string, string> = {
-    companyid: companyId,
-    companyID: companyId,
-    orderid: orderId,
-    OrderID: orderId,
-    clientid: clientId,
-    ClientID: clientId,
-    UserID: String(userId),
-    PersonID: String(userId),
-    Email: email,
-    Password: password,
-    UserEmail: email,
-    UserPassword: password,
-    [flag]: newValue,
-  };
-
-  if (groupId) {
-    body.GroupID = groupId;
-  }
-
-  try {
-    console.log("[toggleFlag] endpoint:", url);
-    console.log("[toggleFlag] request body:", body);
-
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-
-    const text = await res.text();
-    console.log("[toggleFlag] HTTP status:", res.status);
-    console.log("[toggleFlag] raw response:", text);
-    if (text === "false") {
-      console.error("[toggleFlag] server returned false", { status: res.status, body });
-      return null;
-    }
-
-    // Server may return empty body, "true", or updated array — all mean success
-    if (!text.trim() || text.trim().toLowerCase() === "true") {
-      return [];
-    }
-
-    try {
-      const parsed = JSON.parse(text);
-      if (Array.isArray(parsed)) {
-        return parsed as CompanyOrderItem[];
-      }
-      console.error("[toggleFlag] unexpected response shape", parsed);
-      return null;
-    } catch (err) {
-      console.error("[toggleFlag] invalid JSON response", text, err);
-      return null;
-    }
-  } catch (err) {
-    console.error("[toggleFlag] error:", err);
-    return null;
-  }
+): Promise<void> {
+  await patchV1("/owner-orders.php", {
+    ...ownerOrderMutationBody(bucket, order),
+    field: flag,
+    value: newValue === "1",
+  });
 }
 
-/** Delete a company order using tab-specific endpoints */
-export async function deleteCompanyOrder(
-  tab: "today" | "week" | "month",
+export async function updateCompanyOrderCancellation(
+  bucket: CompanyOrderBucket,
   order: CompanyGroupedOrder,
-  userId: string,
-  email: string,
-  password: string
-): Promise<{ success: boolean; message?: string }> {
-  const url = COMPANY_ORDER_DELETE_BASE + COMPANY_ORDER_DELETE_ENDPOINTS[tab];
-  const selectedOrder = order as CompanyGroupedOrder & { orderid?: string; OrderID?: string; OrderId?: string };
-  const selectedOrderId = String(
-    selectedOrder.orderid ||
-    selectedOrder.OrderID ||
-    selectedOrder.OrderId ||
-    selectedOrder.orderId ||
-    selectedOrder.items?.[0]?.orderid ||
-    ""
-  );
+  status: "approved" | "rejected",
+): Promise<void> {
+  await patchV1("/owner-orders.php", {
+    ...ownerOrderMutationBody(bucket, order),
+    cancellation_status: status,
+  });
+}
 
-  const form = new URLSearchParams();
-  form.append("UserID", userId);
-  form.append("UserEmail", email);
-  form.append("UserPassword", password);
-  form.append("companyID", order.companyId);
-  form.append("clientid", order.clientId);
-  form.append("orderid", selectedOrderId);
-  form.append("Date", order.dateTime);
+export async function deleteCompanyOrder(bucket: CompanyOrderBucket, order: CompanyGroupedOrder): Promise<void> {
+  await deleteV1("/owner-orders.php", {
+    ...ownerOrderMutationBody(bucket, order),
+    client_id: order.clientId,
+  });
+}
 
-   const requestBody = form.toString();
-   const requestFields = Object.fromEntries(form.entries());
-   const requestHeaders = { "Content-Type": "application/x-www-form-urlencoded" };
+function fallbackIdentity(row: CompanyOrderItem): string {
+  return [row.companyid, row.clientid, row.DateandTime, row.TableNumber, row.NeedTakeaway, row.NeedDelivery]
+    .map(clean).join("|");
+}
 
-  console.log("[deleteOrder][ClientMenuDebug] tab:", tab);
-  console.log("[deleteOrder][ClientMenuDebug] exact endpoint file:", COMPANY_ORDER_DELETE_ENDPOINTS[tab]);
-  console.log("[deleteOrder][ClientMenuDebug] request URL:", url);
-  console.log("[deleteOrder][ClientMenuDebug] request headers:", requestHeaders);
-  console.log("[deleteOrder][ClientMenuDebug] POST body fields:", requestFields);
-  console.log("[deleteOrder][ClientMenuDebug] encoded POST body:", requestBody);
-
-  try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: requestHeaders,
-      body: requestBody,
-    });
-
-    console.log("[deleteOrder][ClientMenuDebug] response.url:", res.url);
-    console.log("[deleteOrder][ClientMenuDebug] response.status:", res.status);
-    console.log("[deleteOrder][ClientMenuDebug] response.ok:", res.ok);
-
-    const text = await res.text();
-    console.log("[deleteOrder][ClientMenuDebug] raw response text:", text);
-
-    let parsed: any = null;
-    try {
-      parsed = JSON.parse(text);
-      console.log("[deleteOrder][ClientMenuDebug] parsed response:", parsed);
-    } catch (parseError) {
-      console.log(
-        "[deleteOrder][ClientMenuDebug] JSON parse skipped:",
-        parseError instanceof Error ? parseError.message : String(parseError)
-      );
-    }
-
-    if (!res.ok) {
-      return { success: false, message: parsed?.Message || text.trim() || `HTTP ${res.status}` };
-    }
-
-    if (parsed?.Result === true) {
-      return { success: true, message: parsed?.Message };
-    }
-
-    return { success: false, message: parsed?.Message || text.trim() };
-  } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : String(err);
-    console.error("[deleteOrder][ClientMenuDebug] fetch exception message:", errorMessage);
-    console.error("[deleteOrder][ClientMenuDebug] fetch exception object:", err);
-    return { success: false, message: errorMessage || "Network error" };
+/** Group only by the trusted checkout-wide reference when one exists. */
+export function groupCompanyOrders(orders: CompanyOrderItem[]): CompanyGroupedOrder[] {
+  const map = new Map<string, CompanyOrderItem[]>();
+  for (const row of orders) {
+    const reference = trustedReference(row.RandomeCode);
+    const key = reference ? `reference:${reference}` : `context:${fallbackIdentity(row)}`;
+    if (!map.has(key)) map.set(key, []);
+    map.get(key)!.push(row);
   }
+
+  return [...map.entries()].map(([groupKey, items]) => {
+    const first = items[0] || {};
+    const status = clean(first.cancellation_status || first.CancellationStatus) || "none";
+    const requested = truthyFlag(first.cancel_requested) || truthyFlag(first.RequestCancel) || status === "requested" || status === "approved";
+    const total = items.reduce((sum, item) => sum + (Number(item.OrderPrice) || 0), 0);
+    const customerName = [clean(first.Name), clean(first.Surname)].filter(Boolean).join(" ") || "Customer";
+    const customerImagePath = clean(first.customer_imagepath);
+
+    return {
+      groupKey,
+      reference: trustedReference(first.RandomeCode),
+      companyId: clean(first.companyid),
+      clientId: clean(first.clientid),
+      orderId: clean(first.orderid),
+      customerName,
+      customerImagePath,
+      customerPhoto: customerImagePath,
+      customerEmail: clean(first.customer_email),
+      customerMobile: clean(first.customer_mobile),
+      customerAddressLine1: clean(first.customer_address_line_1),
+      customerAddressLine2: clean(first.customer_address_line_2),
+      customerAddressLine3: clean(first.customer_address_line_3),
+      customerAddressLine4: clean(first.customer_address_line_4),
+      customerCountry: clean(first.customer_country),
+      customerDeliveryNotes: clean(first.customer_delivery_notes),
+      customerEmailVerified: truthyFlag(first.customer_email_verified),
+      dateTime: clean(first.DateandTime),
+      tableNumber: clean(first.TableNumber),
+      needTakeaway: truthyFlag(first.NeedTakeaway) ? "1" : "0",
+      needDelivery: truthyFlag(first.NeedDelivery) ? "1" : "0",
+      hasPaid: truthyFlag(first.HasPaid) ? "1" : "0",
+      hasDelivered: truthyFlag(first.HasDelivered) ? "1" : "0",
+      requestCancel: requested ? "1" : "0",
+      cancellationStatus: status,
+      totalItems: items.length,
+      totalPrice: total.toFixed(2),
+      items,
+    };
+  }).sort((left, right) => right.dateTime.localeCompare(left.dateTime));
 }

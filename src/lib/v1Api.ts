@@ -56,6 +56,14 @@ export function patchV1<T>(path: string, body: unknown): Promise<T> {
   });
 }
 
+export function deleteV1<T>(path: string, body: unknown): Promise<T> {
+  return request<T>(path, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
+
 export function createV1OrderQr(orderId: string): Promise<{ token: string; order_id: string }> {
   return postV1<{ token: string; order_id: string }>("/order-payment-qr.php", { order_id: orderId });
 }

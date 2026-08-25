@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mapOwnedOrderToItems, groupCompanyOrders } from "@/lib/companyOrders";
+import { groupCompanyOrders } from "@/lib/companyOrders";
 import { hasCustomerCancellation, type V1Order } from "@/lib/orderApi";
 import { gpsShopsShareDescription } from "@/lib/branding";
 
@@ -20,10 +20,13 @@ const order: V1Order = {
 };
 
 describe("Stage 5 owner cancellation and share branding", () => {
-  it("retains trusted V1 cancellation state through owner list grouping", () => {
-    const rows = mapOwnedOrderToItems(order);
-    expect(rows[0]).toMatchObject({ RandomeCode: order.id, RequestCancel: "1", CancellationStatus: "requested" });
-    expect(groupCompanyOrders(rows)[0].requestCancel).toBe("1");
+  it("retains trusted checkout grouping and canonical cancellation state through owner rows", () => {
+    const rows = groupCompanyOrders([{
+      companyid: "82", clientid: "42", orderid: "1001", RandomeCode: order.id,
+      DateandTime: order.date_time, Name: "Customer", Surname: "Test",
+      cancellation_status: "requested", cancel_requested: true, OrderPrice: "5.00",
+    }]);
+    expect(rows[0]).toMatchObject({ reference: order.id, orderId: "1001", requestCancel: "1", cancellationStatus: "requested" });
     expect(hasCustomerCancellation(order)).toBe(true);
   });
 
