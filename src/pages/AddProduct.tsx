@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { listProducts, createProduct } from "@/lib/menuApi";
 import { useLanguage } from "@/contexts/LanguageContext";
 import VideoAdvert from "@/components/adverts/VideoAdvert";
+import WebcamCapture from "@/components/WebcamCapture";
 import { ADVERT_LIBRARY, ADVERT_SETTINGS, VIDEO_TRIGGERS } from "@/lib/advertConfig";
 
 function resizeAndConvertToBase64(file: File, maxSize = 800): Promise<string> {
@@ -40,6 +41,7 @@ const AddProduct = () => {
   const [imagePreview, setImagePreview] = useState<string | null>(null); const [imageBase64, setImageBase64] = useState<string>("");
   const [saving, setSaving] = useState(false);
   const [showVideoAd, setShowVideoAd] = useState(false);
+  const [webcamOpen, setWebcamOpen] = useState(false);
   const [existingProductCount, setExistingProductCount] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null); const cameraInputRef = useRef<HTMLInputElement>(null);
   const backUrl = `/group-products?groupId=${groupId}&companyId=${companyId}&groupName=${encodeURIComponent(groupName)}`;
@@ -61,6 +63,20 @@ const AddProduct = () => {
 
   const handleFileSelect = async (file: File) => {
     try { const base64 = await resizeAndConvertToBase64(file); setImageBase64(base64); setImagePreview(`data:image/jpeg;base64,${base64}`); } catch { toast.error(t("SaveFailed")); }
+  };
+
+  const handleWebcamCapture = (base64: string) => {
+    setImageBase64(base64);
+    setImagePreview(`data:image/jpeg;base64,${base64}`);
+  };
+
+  const handleCameraClick = () => {
+    const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (mobile || !navigator.mediaDevices?.getUserMedia) {
+      cameraInputRef.current?.click();
+      return;
+    }
+    setWebcamOpen(true);
   };
 
   const actuallySave = async () => {
@@ -103,7 +119,7 @@ const AddProduct = () => {
           )}
         </div>
         <div className="grid grid-cols-2 gap-3 p-4">
-          <Button variant="outline" className="h-11" onClick={() => cameraInputRef.current?.click()}><Camera size={16} className="mr-2" />{t("Camera")}</Button>
+          <Button variant="outline" className="h-11" onClick={handleCameraClick}><Camera size={16} className="mr-2" />{t("Camera")}</Button>
           <Button variant="outline" className="h-11" onClick={() => fileInputRef.current?.click()}><ImageIcon size={16} className="mr-2" />{t("Gallery")}</Button>
         </div>
         <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleFileSelect(file); e.target.value = ""; }} />
@@ -126,6 +142,7 @@ const AddProduct = () => {
         onDismiss={() => setShowVideoAd(false)}
         onComplete={handleVideoComplete}
       />
+      <WebcamCapture open={webcamOpen} onOpenChange={setWebcamOpen} onCapture={handleWebcamCapture} maxSize={800} />
     </div>
   );
 };

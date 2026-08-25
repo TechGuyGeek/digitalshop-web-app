@@ -169,8 +169,10 @@ export function groupCompanyOrders(orders: CompanyOrderItem[]): CompanyGroupedOr
 
   return [...map.entries()].map(([groupKey, items]) => {
     const first = items[0] || {};
-    const status = clean(first.cancellation_status || first.CancellationStatus) || "none";
-    const requested = truthyFlag(first.cancel_requested) || truthyFlag(first.RequestCancel) || status === "requested" || status === "approved";
+    const statuses = items.map((item) => clean(item.cancellation_status || item.CancellationStatus).toLowerCase());
+    const status = ["approved", "rejected", "requested"].find((candidate) => statuses.includes(candidate)) || "none";
+    const requested = items.some((item) => truthyFlag(item.cancel_requested) || truthyFlag(item.RequestCancel))
+      || ["requested", "approved", "rejected"].includes(status);
     const total = items.reduce((sum, item) => sum + (Number(item.OrderPrice) || 0), 0);
     const customerName = [clean(first.Name), clean(first.Surname)].filter(Boolean).join(" ") || "Customer";
     const customerImagePath = clean(first.customer_imagepath);
