@@ -7,6 +7,7 @@ export interface BasketItem {
   description: string;
   image: string;
   quantity: number;
+  companyId?: string;
   groupId?: string;
 }
 
@@ -14,7 +15,7 @@ interface BasketContextType {
   items: BasketItem[];
   count: number;
   total: number;
-  addItem: (product: Omit<BasketItem, "quantity">) => void;
+  addItem: (product: Omit<BasketItem, "quantity">) => boolean;
   removeItem: (id: number) => void;
   clearItem: (id: number) => void;
   clearBasket: () => void;
@@ -31,6 +32,11 @@ const loadBasket = (): BasketItem[] => {
   }
 };
 
+export function canAddToBasket(items: BasketItem[], companyId?: string): boolean {
+  const currentCompany = items.find((item) => item.companyId)?.companyId;
+  return !currentCompany || !companyId || currentCompany === companyId;
+}
+
 const BasketContext = createContext<BasketContextType | undefined>(undefined);
 
 export const BasketProvider = ({ children }: { children: ReactNode }) => {
@@ -43,7 +49,8 @@ export const BasketProvider = ({ children }: { children: ReactNode }) => {
   const count = items.reduce((sum, i) => sum + i.quantity, 0);
   const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
-  const addItem = (product: Omit<BasketItem, "quantity">) => {
+  const addItem = (product: Omit<BasketItem, "quantity">): boolean => {
+    if (!canAddToBasket(items, product.companyId)) return false;
     setItems((prev) => {
       const existing = prev.find((i) => i.id === product.id);
       if (existing) {
@@ -53,6 +60,7 @@ export const BasketProvider = ({ children }: { children: ReactNode }) => {
       }
       return [...prev, { ...product, quantity: 1 }];
     });
+    return true;
   };
 
   const removeItem = (id: number) => {

@@ -1,4 +1,19 @@
-const SERVER_DOMAIN = "https://web.gpsshops.com/";
+import { buildMenuImageUrl, getV1, patchV1, V1ApiError, isSessionError } from "@/lib/v1Api";
+
+export type OrderBucket = "today" | "week" | "month";
+
+export interface CustomerOrderContact {
+  companyName: string;
+  companyImagePath: string;
+  mobileNumber: string;
+  companyEmail: string;
+  lineOneAddress: string;
+  lineTwoAddress: string;
+  lineThreeAddress: string;
+  lineFourAddress: string;
+  country: string;
+  description: string;
+}
 
 export interface OrderSummary {
   clientid?: string;
@@ -9,6 +24,8 @@ export interface OrderSummary {
   CompanyName?: string;
   companyname?: string;
   companyphoto?: string;
+  company_imagepath?: string;
+  CompanyDescription?: string;
   DateandTime?: string;
   TotalItems?: string | number;
   TotalPrice?: string | number;
@@ -23,15 +40,28 @@ export interface OrderSummary {
   RandomeCode?: string;
   GroupID?: string;
   productid?: string;
+  Productid?: string;
+  OrderName?: string;
+  OrderPrice?: string | number;
+  OrderDesription?: string;
+  product_imagepath?: string;
+  ImageSize?: string | number;
+  mobile_number?: string;
+  company_email?: string;
+  line_one_address?: string;
+  line_two_address?: string;
+  line_three_address?: string;
+  line_four_address?: string;
+  country?: string;
   [key: string]: unknown;
 }
 
-/** A grouped order representing one checkout session */
-export interface GroupedOrder {
+export interface GroupedOrder extends CustomerOrderContact {
   randomCode: string;
+  reference: string;
+  orderId: string;
+  clientId: string;
   companyId: string;
-  companyName: string;
-  companyphoto: string;
   dateTime: string;
   tableNumber: string;
   needTakeaway: string;
@@ -43,112 +73,100 @@ export interface GroupedOrder {
   items: OrderSummary[];
 }
 
-export async function fetchOrdersToday(personId: string): Promise<OrderSummary[]> {
-  return fetchOrders("menu1/PHPread/CompanyLiveUserOrders/RetriveLiveUserOrders.php", personId);
+const clean = (value: unknown): string => String(value ?? "").trim();
+
+function trustedReference(value: unknown): string {
+  const reference = clean(value);
+  return reference.length >= 16 && reference.length <= 64
+    && /^[A-Za-z0-9_-]+$/.test(reference)
+    && !["0", "null", "undefined"].includes(reference.toLowerCase()) ? reference : "";
 }
 
-export async function fetchOrdersWeek(personId: string): Promise<OrderSummary[]> {
-  return fetchOrders("menu1/PHPread/CompanyLiveUserOrders/RetriveLiveUserOrdersweek.php", personId);
+export function isTrustedOrderReference(value: unknown): boolean { return trustedReference(value) !== ""; }
+
+export function fetchOrdersToday(): Promise<OrderSummary[]> { return getV1<OrderSummary[]>("/customer-orders.php?bucket=today"); }
+export function fetchOrdersWeek(): Promise<OrderSummary[]> { return getV1<OrderSummary[]>("/customer-orders.php?bucket=week"); }
+export function fetchOrdersMonth(): Promise<OrderSummary[]> { return getV1<OrderSummary[]>("/customer-orders.php?bucket=month"); }
+
+export function fetchCustomerOrderDetail(bucket: OrderBucket, companyId: string, clientId: string, dateTime: string): Promise<OrderSummary[]> {
+  const query = new URLSearchParams({ action: "details", bucket, company_id: companyId, client_id: clientId, date_time: dateTime });
+  return getV1<OrderSummary[]>(`/customer-orders.php?${query.toString()}`);
 }
 
-export async function fetchOrdersMonth(personId: string): Promise<OrderSummary[]> {
-  return fetchOrders("menu1/PHPread/CompanyLiveUserOrders/RetriveLiveUserOrdersmonth.php", personId);
+export async function requestCancelOrder(order: GroupedOrder, bucket: OrderBucket): Promise<void> {
+  await patchV1("/customer-orders.php", { bucket, company_id: Number(order.companyId), order_id: order.orderId });
 }
 
-async function fetchOrders(endpoint: string, personId: string): Promise<OrderSummary[]> {
-  try {
-    const formData = new URLSearchParams();
-    formData.append("PersonID", personId);
-
-    const response = await fetch(SERVER_DOMAIN + endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: formData.toString(),
-    });
-
-    const text = await response.text();
-    if (!text || text.trim() === "" || text.trim() === "[]") return [];
-
-    const parsed = JSON.parse(text);
-    if (!Array.isArray(parsed)) return [];
-    return parsed as OrderSummary[];
-  } catch (err) {
-    console.error("fetchOrders error:", endpoint, err);
-    return [];
-  }
+function fallbackIdentity(row: OrderSummary): string {
+  return [row.companyid || row.Companyid, row.clientid, row.DateandTime, row.TableNumber, row.NeedTakeaway, row.NeedDelivery]
+    .map(clean).join("|");
 }
 
-export async function requestCancelOrder(
-  order: GroupedOrder,
-  personId: string,
-  bucket: "today" | "week" | "month"
-): Promise<boolean> {
-  const endpoints: Record<string, string> = {
-    today: "menu1/PHPwrite/LiveOrders/RequestCancelOrder.php",
-    week: "menu1/PHPwrite/LiveOrders/RequestCancelOrderweek.php",
-    month: "menu1/PHPwrite/LiveOrders/RequestCancelOrdermonth.php",
+function contactFromRows(rows: OrderSummary[]): CustomerOrderContact {
+  const row = rows.find((candidate) => clean(candidate.companyname || candidate.CompanyName)) || rows[0] || {};
+  return {
+    companyName: clean(row.companyname || row.CompanyName) || "Shop",
+    companyImagePath: clean(row.company_imagepath || row.companyphoto),
+    mobileNumber: clean(row.mobile_number),
+    companyEmail: clean(row.company_email),
+    lineOneAddress: clean(row.line_one_address),
+    lineTwoAddress: clean(row.line_two_address),
+    lineThreeAddress: clean(row.line_three_address),
+    lineFourAddress: clean(row.line_four_address),
+    country: clean(row.country),
+    description: clean(row.CompanyDescription),
   };
-
-  try {
-    const formData = new URLSearchParams();
-    formData.append("PersonID", personId);
-    formData.append("companyID", order.companyId);
-    formData.append("DateandTime", order.dateTime);
-
-    const response = await fetch(SERVER_DOMAIN + endpoints[bucket], {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: formData.toString(),
-    });
-
-    const text = await response.text();
-    return !text.toLowerCase().includes("error");
-  } catch (err) {
-    console.error("requestCancelOrder error:", err);
-    return false;
-  }
 }
 
-/** Group raw order rows by RandomeCode into checkout sessions */
+/** Group by the trusted checkout-wide reference, never by numeric line orderid. */
 export function groupOrdersBySession(orders: OrderSummary[]): GroupedOrder[] {
   const map = new Map<string, OrderSummary[]>();
-
-  for (const o of orders) {
-    const key = o.RandomeCode || o.DateandTime || o.orderid || "";
+  for (const row of orders) {
+    const reference = trustedReference(row.RandomeCode);
+    const key = reference ? `reference:${reference}` : `context:${fallbackIdentity(row)}`;
     if (!map.has(key)) map.set(key, []);
-    map.get(key)!.push(o);
+    map.get(key)!.push(row);
   }
-
-  const grouped: GroupedOrder[] = [];
-  for (const [code, items] of map) {
+  return [...map.entries()].map(([key, items]) => {
     const first = items[0];
-    grouped.push({
-      randomCode: code,
-      companyId: first.companyid || first.Companyid || "",
-      companyName: first.CompanyName || first.companyname || "Shop",
-      companyphoto: first.companyphoto || "",
-      dateTime: first.DateandTime || "",
-      tableNumber: first.TableNumber || "",
-      needTakeaway: first.NeedTakeaway || "0",
-      needDelivery: first.NeedDelivery || "0",
-      hasPaid: first.HasPaid || "0",
-      hasDelivered: first.HasDelivered || "0",
-      requestCancel: first.RequestCancel || "0",
+    return {
+      ...contactFromRows(items),
+      randomCode: key,
+      reference: trustedReference(first.RandomeCode),
+      orderId: clean(first.orderid || first.Orderid),
+      clientId: clean(first.clientid),
+      companyId: clean(first.companyid || first.Companyid),
+      dateTime: clean(first.DateandTime),
+      tableNumber: clean(first.TableNumber),
+      needTakeaway: clean(first.NeedTakeaway) || "0",
+      needDelivery: clean(first.NeedDelivery) || "0",
+      hasPaid: clean(first.HasPaid) || "0",
+      hasDelivered: clean(first.HasDelivered) || "0",
+      requestCancel: clean(first.RequestCancel) || "0",
       itemCount: items.length,
       items,
-    });
-  }
-
-  // Sort newest first
-  grouped.sort((a, b) => b.dateTime.localeCompare(a.dateTime));
-  return grouped;
+    };
+  }).sort((left, right) => orderTimestamp(right.dateTime) - orderTimestamp(left.dateTime));
 }
 
-export function getCompanyPhotoUrl(photo: string | undefined): string {
-  if (!photo) return "";
-  if (photo.startsWith("http")) return photo;
-  const cleaned = photo.startsWith("/") ? photo.slice(1) : photo;
-  // Encode each path segment to handle spaces, '@', and other special chars
-  const encoded = cleaned.split("/").map(encodeURIComponent).join("/");
-  return `${SERVER_DOMAIN}menu1/${encoded}`;
+/** The backend emits SQL DATETIME in UTC; offset-bearing ISO values are already absolute. */
+export function orderTimestamp(raw: string): number {
+  const value = clean(raw);
+  if (!value) return 0;
+  const explicitZone = /(?:Z|[+-]\d{2}:?\d{2})$/i.test(value);
+  const parsed = Date.parse(explicitZone ? value : `${value.replace(" ", "T")}Z`);
+  return Number.isNaN(parsed) ? 0 : parsed;
 }
+
+export function formatOrderDateTime(raw: string, timeZone?: string): string {
+  const timestamp = orderTimestamp(raw);
+  if (!timestamp) return clean(raw) || "—";
+  const options: Intl.DateTimeFormatOptions = { dateStyle: "medium", timeStyle: "short" };
+  if (timeZone) options.timeZone = timeZone;
+  return new Intl.DateTimeFormat(timeZone ? "en-GB" : undefined, options).format(timestamp);
+}
+
+export function getCompanyPhotoUrl(photo: string | undefined): string { return buildMenuImageUrl(photo); }
+export function getProductPhotoUrl(photo: string | undefined): string { return buildMenuImageUrl(photo); }
+
+export { V1ApiError, isSessionError };

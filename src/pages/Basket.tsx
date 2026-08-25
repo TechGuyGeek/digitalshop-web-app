@@ -11,7 +11,7 @@ import VideoAdvert from "@/components/adverts/VideoAdvert";
 import { useRegisterNavActions } from "@/contexts/SiteNavExtras";
 import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 import { Analytics } from "@/lib/analytics";
-import { placeOrderBatch, clearCheckoutId } from "@/lib/checkout";
+import { placeOrderBatch } from "@/lib/checkout";
 import { useAuth } from "@/contexts/AuthContext";
 
 const SERVER_DOMAIN = "https://web.gpsshops.com/";
@@ -76,10 +76,6 @@ const Basket = () => {
     };
     fetchSettings();
   }, [companyId]);
-  const getLoggedInUser = () => {
-    try { const stored = localStorage.getItem("digitalUser"); if (stored) return JSON.parse(stored); } catch {} return null;
-  };
-
   const placeOrder = async (mode: OrderMode) => {
     if (submitting) return;
     if (!companyId) { toast.error(t("Pleasecreateacompanyfirst")); return; }
@@ -99,7 +95,6 @@ const Basket = () => {
         toast.error(result.message || t("SaveFailed"));
         return;
       }
-      clearCheckoutId();
       clearBasket();
       Analytics.orderCompleted({ company_id: companyId, items: items.length, total, mode, random_code: result.checkoutId });
       toast.success(t("SaveSuccessful"));

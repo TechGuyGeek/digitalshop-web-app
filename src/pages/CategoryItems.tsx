@@ -35,8 +35,8 @@ const CategoryItems = () => {
 
   const handleAddToBasket = (product: PublicProduct) => {
     const price = parseFloat(product.OrderPrice || "0");
-    addItem({ id: parseInt(product.ID) || 0, name: product.OrderName, price, description: product.OrderDesription || "", image: getPublicProductImageUrl(product.imagepath, product.ID), groupId });
-    toast.success(t("ItemAddedtoBasket"));
+    const added = addItem({ id: parseInt(product.ID) || 0, name: product.OrderName, price, description: product.OrderDesription || "", image: getPublicProductImageUrl(product.imagepath, product.ID), groupId, companyId });
+    toast[added ? "success" : "error"](added ? t("ItemAddedtoBasket") : "Please complete your current shop basket first.");
   };
 
   return (
