@@ -58,16 +58,20 @@ describe("Stage 5 owner cancellation and share branding", () => {
     expect(group).toMatchObject({ cancellationStatus: "none", requestCancel: "1" });
   });
 
-  it("keeps owner list product imagery separate from the customer image", () => {
+  it("keeps owner list imagery to the customer image and detail imagery to products", () => {
     const grouped = groupCompanyOrders([{
       companyid: "82", clientid: "42", orderid: "1001", RandomeCode: order.id, DateandTime: order.date_time,
       customer_imagepath: "/Images/UserProfile/customer.jpg", product_imagepath: "/Images/Menu/tea.jpg", OrderPrice: "5.00",
     }]);
     expect(grouped[0].customerImagePath).toBe("/Images/UserProfile/customer.jpg");
     expect(grouped[0].items[0].product_imagepath).toBe("/Images/Menu/tea.jpg");
-    const source = readFileSync("src/pages/CompanyOrders.tsx", "utf8");
-    expect(source).toContain('variant="product"');
-    expect(source).toContain("product_imagepath");
+    const list = readFileSync("src/pages/CompanyOrders.tsx", "utf8");
+    const detail = readFileSync("src/pages/CompanyOrderDetail.tsx", "utf8");
+    expect(list).toContain("path={order.customerImagePath}");
+    expect(list).not.toContain("product_imagepath");
+    expect(list).not.toContain('variant="product"');
+    expect(detail).toContain("order.items.map");
+    expect(detail).toContain("getProductPhotoUrl(item.product_imagepath)");
   });
 
   it("keeps Add Product gallery and camera on separate paths", () => {
