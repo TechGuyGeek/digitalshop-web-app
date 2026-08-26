@@ -11,7 +11,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { createMenuGroup, deleteMenuGroup, listMenuGroups, updateMenuGroup, asLegacyGroup } from "@/lib/menuApi";
+import { createMenuGroup, deleteMenuGroup, getMenuGroupUsage, listMenuGroups, renameMenuGroup, toggleMenuGroup, asLegacyGroup } from "@/lib/menuApi";
 import VideoAdvert from "@/components/adverts/VideoAdvert";
 import { ADVERT_LIBRARY, VIDEO_TRIGGERS, ADVERT_SETTINGS } from "@/lib/advertConfig";
 import MenuGroupImagePicker from "@/components/MenuGroupImagePicker";
@@ -59,25 +59,25 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, onNavigateToGroup }: Ed
       return false;
     }
   }, []);
-  const fetchGroups = async () => {
+  const fetchGroups = useCallback(async () => {
     setLoading(true);
-    const data = await listMenuGroups();
+    const data = await listMenuGroups(companyId);
     setGroups(data.map(asLegacyGroup));
     setGroupImages(await fetchMenuGroupImages(companyId));
     setLoading(false);
-  };
+  }, [companyId]);
 
   useEffect(() => {
     if (open && companyId > 0) {
       hasAddedFirstGroup.current = false;
       fetchGroups();
     }
-  }, [open, companyId]);
+  }, [open, companyId, fetchGroups]);
 
   const actuallyAddGroup = async (name: string) => {
     setAddingGroup(true);
     let ok = false;
-    try { await createMenuGroup(name); ok = true; } catch {}
+    try { await createMenuGroup(companyId, name); ok = true; } catch { /* surfaced below */ }
     setAddingGroup(false);
     if (ok) {
       toast.success(`"${name}" added`);
@@ -128,7 +128,11 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, onNavigateToGroup }: Ed
     console.log("[DeleteGroup] Starting delete for group:", group.ID, group.OrderGroup, "companyId:", companyId);
 
     let result: { success: boolean; message: string } = { success: false, message: "Delete failed" };
-    try { await deleteMenuGroup(group.ID); result = { success: true, message: "Deleted" }; } catch (e: any) { result.message = e?.message || "Delete failed"; }
+    try {
+      const usage = await getMenuGroupUsage(companyId, group.ID);
+      if (!usage.safe_to_delete) result.message = usage.product_count > 0 ? "Please delete all products first" : "This menu group is referenced by order history and cannot be deleted.";
+      else { await deleteMenuGroup(companyId, group.ID); result = { success: true, message: "Deleted" }; }
+    } catch (error: unknown) { result.message = error instanceof Error ? error.message : "Delete failed"; }
     setDeleteConfirm(null);
 
     if (result.success) {
@@ -142,7 +146,7 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, onNavigateToGroup }: Ed
   const handleToggle = async (group: MenuGroup, enabled: boolean) => {
     const newVal = enabled ? "1" : "0";
     setGroups(prev => prev.map(g => g.ID === group.ID ? { ...g, menuGroupEnabled: newVal } : g));
-    try { await updateMenuGroup(group.ID, { enabled }); } catch {
+    try { await toggleMenuGroup(companyId, group.ID, enabled); } catch {
       setGroups(prev => prev.map(g => g.ID === group.ID ? { ...g, menuGroupEnabled: enabled ? "0" : "1" } : g));
       toast.error("Failed to update toggle");
     }
@@ -160,7 +164,7 @@ const EditMenuGroups = ({ open, onOpenChange, companyId, onNavigateToGroup }: Ed
     if (newName === editGroup.OrderGroup) { setEditGroup(null); return; }
     setSavingEdit(true);
     let result: { success: boolean; message: string } = { success: false, message: "Update failed" };
-    try { await updateMenuGroup(editGroup.ID, { name: newName }); result = { success: true, message: "Updated" }; } catch (e: any) { result.message = e?.message || "Update failed"; }
+    try { await renameMenuGroup(companyId, editGroup.OrderGroup, newName); result = { success: true, message: "Updated" }; } catch (error: unknown) { result.message = error instanceof Error ? error.message : "Update failed"; }
     setSavingEdit(false);
     if (result.success) {
       toast.success(result.message || "Group updated");

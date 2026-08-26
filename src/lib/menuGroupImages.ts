@@ -1,5 +1,5 @@
-import { SERVER_DOMAIN } from "@/lib/companyApi";
-import { listMenuGroups, updateMenuGroup } from "@/lib/menuApi";
+import { getMenuImageUrl } from "@/lib/authClient";
+import { listMenuGroups, saveMenuGroupImage as saveMenuGroupImageV1 } from "@/lib/menuApi";
 
 import foodPreset from "@/assets/menu-group-presets/food.jpg";
 import drinksPreset from "@/assets/menu-group-presets/drinks.jpg";
@@ -47,15 +47,8 @@ export interface MenuGroupImage {
 /** groupId (as string) -> metadata */
 export type MenuGroupImageMap = Record<string, MenuGroupImage>;
 
-const IMAGE_BASE = SERVER_DOMAIN + "menu1";
-
 function resolveCustomPath(path: string, updatedAt?: string | null): string {
-  const clean = path.startsWith("http")
-    ? path
-    : IMAGE_BASE + (path.startsWith("/") ? path : "/" + path);
-  if (!updatedAt) return clean;
-  const token = encodeURIComponent(String(updatedAt));
-  return clean + (clean.includes("?") ? "&" : "?") + "v=" + token;
+  return getMenuImageUrl(path, updatedAt || undefined);
 }
 
 /** Returns a displayable URL for a group's banner, or null when there is none. */
@@ -126,7 +119,7 @@ export function getMenuGroupDisplayImage(
  */
 export async function fetchMenuGroupImages(companyId: string | number): Promise<MenuGroupImageMap> {
   try {
-    const parsed = await listMenuGroups();
+    const parsed = await listMenuGroups(Number(companyId));
     const map: MenuGroupImageMap = {};
     for (const row of parsed) {
       const groupId = String(row.id).trim();
@@ -159,10 +152,10 @@ export async function saveMenuGroupImage(
   payload: SaveGroupImagePayload
 ): Promise<{ success: boolean; message?: string }> {
   try {
-    const body: Record<string, unknown> = { image_source: payload.imageSource };
+    const body: { image_source: "preset" | "custom" | "none"; preset_key?: string; image_base64?: string } = { image_source: payload.imageSource };
     if (payload.imageSource === "preset") body.preset_key = payload.presetKey;
     if (payload.imageSource === "custom") body.image_base64 = payload.imageBase64;
-    await updateMenuGroup(Number(groupId), body);
+    await saveMenuGroupImageV1(Number(companyId), Number(groupId), body);
     return { success: true, message: "Saved" };
   } catch {
     return { success: false, message: "Network error" };

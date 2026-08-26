@@ -5,18 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { SERVER_DOMAIN } from "@/lib/companyApi";
+import { getMenuImageUrl } from "@/lib/authClient";
 import { updateProduct, listProducts } from "@/lib/menuApi";
 import { useLanguage } from "@/contexts/LanguageContext";
 import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 import WebcamCapture from "@/components/WebcamCapture";
 
-function getImageUrl(path?: string) {
-  if (!path) return "";
-  const cleaned = path.startsWith("/") ? path.slice(1) : path;
-  const withPrefix = cleaned.startsWith("menu1/") ? cleaned : "menu1/" + cleaned;
-  return SERVER_DOMAIN + withPrefix;
-}
+function getImageUrl(path?: string) { return getMenuImageUrl(path); }
 
 function resizeAndConvertToBase64(file: File, maxSize = 800): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -78,7 +73,7 @@ const EditProduct = () => {
 
   useEffect(() => {
     if (!groupId || !productId || (initialImage && initialImageSize)) return;
-    listProducts(Number(groupId))
+    listProducts(Number(companyId), Number(groupId))
       .then((data) => {
         if (!Array.isArray(data)) return;
         const current = data.find((item) => String(item.id || "") === productId);
@@ -98,7 +93,7 @@ const EditProduct = () => {
         if (nextImageSize) setCurrentImageSize(nextImageSize);
       })
       .catch(() => {});
-  }, [groupId, productId, initialImage, initialImageSize]);
+  }, [groupId, productId, initialImage, initialImageSize, companyId]);
 
   const handleFileSelect = async (file: File) => {
     try {
@@ -132,7 +127,7 @@ const EditProduct = () => {
 
     setSaving(true);
     try {
-      await updateProduct(Number(productId), { name: name.trim(), description: description.trim(), price: priceNum.toFixed(2), image_base64: newImageBase64 || undefined });
+      await updateProduct(Number(companyId), Number(productId), { name: name.trim(), description: description.trim(), price: priceNum.toFixed(2), image_base64: newImageBase64 || undefined });
       toast.success(t("SaveSuccessful")); navigate(backUrl);
     } catch (error) {
       console.error("[EditProduct] network error:", error);

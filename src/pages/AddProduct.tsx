@@ -57,9 +57,9 @@ const AddProduct = () => {
 
   useEffect(() => {
     if (!groupId) return;
-    listProducts(Number(groupId)).then(data => setExistingProductCount(data.length))
+    listProducts(Number(companyId), Number(groupId)).then(data => setExistingProductCount(data.length))
       .catch(() => {});
-  }, [groupId]);
+  }, [groupId, companyId]);
 
   const handleFileSelect = async (file: File) => {
     try { const base64 = await resizeAndConvertToBase64(file); setImageBase64(base64); setImagePreview(`data:image/jpeg;base64,${base64}`); } catch { toast.error(t("SaveFailed")); }
@@ -85,7 +85,7 @@ const AddProduct = () => {
     const finalName = name.trim() || "-"; const finalDesc = description.trim() || "-";
     setSaving(true);
     try {
-      await createProduct({ group_id: Number(groupId), name: finalName, description: finalDesc, price: priceNum.toFixed(2), enabled: true, image_base64: imageBase64 || undefined });
+      await createProduct(Number(companyId), { group_id: Number(groupId), name: finalName, description: finalDesc, price: priceNum.toFixed(2), image_base64: imageBase64 || undefined });
       toast.success(t("SaveSuccessful")); navigate(backUrl);
     } catch { toast.error(t("Pleasecheckyourinternetconnection")); } finally { setSaving(false); }
   };

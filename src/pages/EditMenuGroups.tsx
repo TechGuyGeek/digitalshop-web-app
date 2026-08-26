@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,10 +19,10 @@ import {
 import VideoAdvert from "@/components/adverts/VideoAdvert";
 import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 import { ADVERT_LIBRARY, ADVERT_SETTINGS, VIDEO_TRIGGERS } from "@/lib/advertConfig";
-import { createMenuGroup, deleteMenuGroup as deleteMenuGroupV1, listMenuGroups, updateMenuGroup as updateMenuGroupV1, asLegacyGroup } from "@/lib/menuApi";
+import { createMenuGroup, deleteMenuGroup as deleteMenuGroupV1, getMenuGroupUsage, listMenuGroups, renameMenuGroup, toggleMenuGroup, asLegacyGroup, type MenuGroupUsage } from "@/lib/menuApi";
 import MenuGroupBanner from "@/components/MenuGroupBanner";
 import MenuGroupImagePicker from "@/components/MenuGroupImagePicker";
-import { fetchMenuGroupImages, MenuGroupImageMap, getMenuGroupDisplayImage, saveMenuGroupImage } from "@/lib/menuGroupImages";
+import { fetchMenuGroupImages, MenuGroupImageMap, getMenuGroupDisplayImage } from "@/lib/menuGroupImages";
 import {
   Dialog,
   DialogContent,
@@ -41,7 +41,7 @@ interface MenuGroup {
 const DELETE_PRODUCTS_FIRST_MESSAGE = "Please delete all products first";
 
 async function loadMenuGroups(companyId: number): Promise<MenuGroup[]> {
-  return (await listMenuGroups()).map(asLegacyGroup);
+  return (await listMenuGroups(companyId)).map(asLegacyGroup);
 }
 
 async function addMenuGroup(
@@ -52,16 +52,14 @@ async function addMenuGroup(
   password: string
 ): Promise<{ success: boolean; message?: string }> {
   try {
-    await createMenuGroup(groupName);
+    await createMenuGroup(companyId, groupName);
     return { success: true, message: "" };
   } catch {
     return { success: false, message: "Failed to add group" };
   }
 }
 
-async function countMenuDetails(companyId: number, groupId: number): Promise<string> {
-  return "0";
-}
+async function countMenuDetails(companyId: number, groupId: number): Promise<MenuGroupUsage> { return getMenuGroupUsage(companyId, groupId); }
 
 async function deleteMenuGroup(
   groupId: number,
@@ -72,7 +70,7 @@ async function deleteMenuGroup(
   password: string
 ): Promise<{ success: boolean; message?: string }> {
   try {
-    await deleteMenuGroupV1(groupId);
+    await deleteMenuGroupV1(companyId, groupId);
     return { success: true, message: "Deleted" };
   } catch (err) {
     console.error("[DeleteGroup] Network error:", err);
@@ -89,7 +87,7 @@ async function updateMenuGroup(
   password: string,
 ): Promise<{ success: boolean; message?: string }> {
   try {
-    await updateMenuGroupV1(companyId, { name: newName });
+    await renameMenuGroup(companyId, oldName, newName);
     return { success: true, message: "Updated" };
   } catch (err) {
     console.error("[UpdateGroup] Network error:", err);
@@ -106,7 +104,7 @@ async function toggleMenuGroupEnabled(
   password: string
 ): Promise<boolean> {
   try {
-    await updateMenuGroupV1(groupId, { enabled: enabled === "1" });
+    await toggleMenuGroup(companyId, groupId, enabled === "1");
     return true;
   } catch {
     return false;
@@ -156,16 +154,16 @@ const EditMenuGroupsPage = () => {
     return String(u?.PaidUser ?? u?.Paiduser) === "2";
   };
 
-  const fetchGroups = async () => {
+  const fetchGroups = useCallback(async () => {
     setLoading(true);
     const data = await loadMenuGroups(companyId);
     setGroups(data);
     setLoading(false);
-  };
+  }, [companyId]);
 
-  const refreshGroupImages = async () => {
+  const refreshGroupImages = useCallback(async () => {
     if (companyId > 0) setGroupImages(await fetchMenuGroupImages(companyId));
-  };
+  }, [companyId]);
 
   useEffect(() => {
     if (companyId > 0) {
@@ -173,7 +171,7 @@ const EditMenuGroupsPage = () => {
       refreshGroupImages();
     }
     else setLoading(false);
-  }, [companyId]);
+  }, [companyId, fetchGroups, refreshGroupImages]);
 
   const actuallyAddGroup = async (name: string) => {
     setAddingGroup(true);
@@ -228,14 +226,14 @@ const EditMenuGroupsPage = () => {
     console.log("[DeleteGroup] Group ID:", group.ID);
     console.log("[DeleteGroup] Company ID:", companyId);
 
-    const countResponse = await countMenuDetails(companyId, group.ID);
-    const canDelete = countResponse === "0";
+    const usage = await countMenuDetails(companyId, group.ID);
+    const canDelete = usage.safe_to_delete;
 
     console.log("[DeleteGroup] Delete decision:", canDelete ? "allowed" : "blocked");
 
     if (!canDelete) {
       setDeleteConfirm(null);
-      toast.error(DELETE_PRODUCTS_FIRST_MESSAGE);
+      toast.error(usage.product_count > 0 ? DELETE_PRODUCTS_FIRST_MESSAGE : "This menu group is referenced by order history and cannot be deleted.");
       return;
     }
 

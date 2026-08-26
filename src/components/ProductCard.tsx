@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { SERVER_DOMAIN } from "@/lib/companyApi";
-import { deleteProduct, updateProduct } from "@/lib/menuApi";
+import { getMenuImageUrl } from "@/lib/authClient";
+import { deleteProduct, getProductUsage, toggleProduct } from "@/lib/menuApi";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
   AlertDialog,
@@ -40,12 +40,7 @@ interface ProductCardProps {
   onDelete?: (productId: string) => void;
 }
 
-function getImageUrl(path?: string) {
-  if (!path) return "";
-  const cleaned = path.startsWith("/") ? path.slice(1) : path;
-  const withPrefix = cleaned.startsWith("menu1/") ? cleaned : "menu1/" + cleaned;
-  return SERVER_DOMAIN + withPrefix;
-}
+function getImageUrl(path?: string) { return getMenuImageUrl(path); }
 
 const ProductCard = ({ product, groupId, companyId, groupName, onToggleUpdate, onDelete }: ProductCardProps) => {
   const navigate = useNavigate();
@@ -82,7 +77,7 @@ const ProductCard = ({ product, groupId, companyId, groupName, onToggleUpdate, o
     setToggling(true);
 
     try {
-      await updateProduct(Number(product.ID), { enabled: checked });
+      await toggleProduct(Number(companyId), Number(product.ID), checked);
       onToggleUpdate?.(product.ID, checked ? "1" : "0");
     } catch {
       setEnabled(prev);
@@ -96,14 +91,19 @@ const ProductCard = ({ product, groupId, companyId, groupName, onToggleUpdate, o
   const handleDeleteConfirmed = async () => {
     setDeleting(true);
     try {
-      await deleteProduct(Number(product.ID));
+      const usage = await getProductUsage(Number(companyId), Number(product.ID));
+      if (usage.reference_count > 0) {
+        toast.error("This product is used in order history and cannot be deleted.");
+        return;
+      }
+      await deleteProduct(Number(companyId), Number(product.ID));
       {
         toast.success(t("DetailswereSaved"));
         onDelete?.(product.ID);
       }
-    } catch (err: any) {
-      console.error("[DeleteProduct] error:", err);
-      toast.error(err?.message || "Network error deleting product");
+    } catch (error: unknown) {
+      console.error("[DeleteProduct] error:", error);
+      toast.error(error instanceof Error ? error.message : "Network error deleting product");
     } finally {
       setDeleting(false);
     }

@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Loader2, AlertCircle, Plus, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 
 const OWNER_PRODUCTS_CACHE_PREFIX = "owner-group-products:";
 
-async function fetchGroupProducts(groupId: string): Promise<ProductCardItem[]> { return (await listProducts(Number(groupId))).map(asLegacyProduct); }
+async function fetchGroupProducts(companyId: string, groupId: string): Promise<ProductCardItem[]> { return (await listProducts(Number(companyId), Number(groupId))).map(asLegacyProduct); }
 
 function normalizeProduct(product: ProductCardItem): ProductCardItem {
   const menuEnable = product.MenuEnable ?? product.MenuItemEnable ?? "0";
@@ -23,7 +23,7 @@ function readCachedGroupProducts(groupId: string): ProductCardItem[] {
 
 function writeCachedGroupProducts(groupId: string, products: ProductCardItem[]) {
   if (!groupId) return;
-  try { window.localStorage.setItem(`${OWNER_PRODUCTS_CACHE_PREFIX}${groupId}`, JSON.stringify(products.map(normalizeProduct))); } catch {}
+  try { window.localStorage.setItem(`${OWNER_PRODUCTS_CACHE_PREFIX}${groupId}`, JSON.stringify(products.map(normalizeProduct))); } catch { /* cache is optional */ }
 }
 
 const GroupProducts = () => {
@@ -36,16 +36,15 @@ const GroupProducts = () => {
   const [products, setProducts] = useState<ProductCardItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const fetchRef = useRef(false);
 
-  const loadProducts = async () => {
+  const loadProducts = useCallback(async () => {
     if (!groupId) { setError(t("Therewasanerror")); setLoading(false); return; }
     setLoading(true); setError(null);
-    try { const data = await fetchGroupProducts(groupId); const n = data.map(normalizeProduct); setProducts(n); writeCachedGroupProducts(groupId, n); }
+    try { const data = await fetchGroupProducts(companyId, groupId); const n = data.map(normalizeProduct); setProducts(n); writeCachedGroupProducts(groupId, n); }
     catch { setError(t("Pleasecheckyourinternetconnection")); } finally { setLoading(false); }
-  };
+  }, [companyId, groupId, t]);
 
-  useEffect(() => { if (fetchRef.current) return; fetchRef.current = true; loadProducts(); }, [groupId]);
+  useEffect(() => { void loadProducts(); }, [loadProducts]);
 
   const handleToggleUpdate = (productId: string, newValue: string) => {
     setProducts((prev) => { const next = prev.map((p) => p.ID === productId ? { ...p, MenuEnable: newValue, MenuItemEnable: newValue } : p); writeCachedGroupProducts(groupId, next); return next; });

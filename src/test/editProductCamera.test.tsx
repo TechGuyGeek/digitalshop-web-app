@@ -154,7 +154,7 @@ describe("Edit Product camera and gallery routing", () => {
 
     fireEvent.click(screen.getAllByRole("button", { name: "Save" })[0]);
 
-    await waitFor(() => expect(mocks.updateProduct).toHaveBeenCalledWith(7, expect.objectContaining({
+    await waitFor(() => expect(mocks.updateProduct).toHaveBeenCalledWith(2, 7, expect.objectContaining({
       image_base64: "desktop-camera-image",
     })));
   });
