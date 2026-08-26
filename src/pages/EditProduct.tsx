@@ -116,8 +116,9 @@ const EditProduct = () => {
   };
 
   const handleCameraClick = () => {
-    const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    if (mobile || !navigator.mediaDevices?.getUserMedia) {
+    const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+      || (/Macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+    if (mobile) {
       cameraInputRef.current?.click();
       return;
     }
