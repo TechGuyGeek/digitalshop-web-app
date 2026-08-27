@@ -1,82 +1,67 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, RefreshCw, MapPin, Lock, Maximize2, Minimize2 } from "lucide-react";
+import { ArrowLeft, RefreshCw, MapPin, Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import GoogleMap from "@/components/GoogleMap";
-import { getCategoryByCode } from "@/lib/shopCategories";
+import { useAuth } from "@/contexts/AuthContext";
+import { AuthApiError } from "@/lib/authClient";
+import { fetchAdminShops } from "@/lib/adminShopsApi";
+import { formatDistanceMiles } from "@/lib/geo";
 import { getMarkerIconUrl, DEFAULT_MARKER_ICON } from "@/lib/mapMarkerIcons";
-import type { NearbyShop, NearbyCompany } from "@/lib/nearbyShops";
-
-const ENDPOINT = "https://web.gpsshops.com/menu1/PHPread/ClientMenu/getallshops.php";
+import type { NearbyShop } from "@/lib/nearbyShops";
 
 const AdminShops = () => {
   const navigate = useNavigate();
-  const [password, setPassword] = useState("");
+  const { status } = useAuth();
   const [shops, setShops] = useState<NearbyShop[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [connected, setConnected] = useState(false);
+  const [restricted, setRestricted] = useState(false);
+  const [userPosition, setUserPosition] = useState<{ lat: number; lng: number } | null>(null);
   const [mapExpanded, setMapExpanded] = useState(false);
 
-  const handleConnect = async () => {
-    if (!password.trim()) {
-      setError("Enter password");
-      return;
-    }
+  const loadShops = useCallback(async (position: { lat: number; lng: number } | null) => {
     setLoading(true);
     setError(null);
+    setRestricted(false);
     try {
-      const body = new URLSearchParams();
-      body.append("AdminKey", password);
-      const res = await fetch(ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: body.toString(),
-      });
-      const text = await res.text();
-      if (!text || text.trim() === "") {
-        setError("No data returned (check password)");
-        setLoading(false);
-        return;
-      }
-      let result;
-      try {
-        result = JSON.parse(text);
-      } catch {
-        setError(`Invalid response: ${text.slice(0, 120)}`);
-        setLoading(false);
-        return;
-      }
-      if (!result.success || !Array.isArray(result.data)) {
-        setError(result.error || "Unexpected response format");
-        setLoading(false);
-        return;
-      }
-      const companies: NearbyCompany[] = result.data;
-      const mapped: NearbyShop[] = companies.map((c) => {
-        const cat = getCategoryByCode(Number(c.PublicNumber) || 0);
-        return {
-          companyid: c.companyid,
-          name: c.companyname || "Unknown Shop",
-          icon: cat.emoji,
-          lat: Number(c.companylat),
-          lng: Number(c.companylong),
-          photo: c.companyphoto || undefined,
-          description: c.CompanyDescription || undefined,
-          categoryCode: cat.id,
-          categoryLabel: cat.label,
-          distance: 0,
-        };
-      });
-      setShops(mapped);
-      setConnected(true);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Connection failed");
+      setShops(await fetchAdminShops(position));
+    } catch (requestError) {
+      setShops([]);
+      if (requestError instanceof AuthApiError && (requestError.status === 401 || requestError.status === 403)) {
+        setRestricted(true);
+        setError(requestError.status === 403 ? "Administrator access is required." : "Sign in is required.");
+      } else setError(requestError instanceof Error ? requestError.message : "Connection failed");
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (status === "loading") return;
+    if (status !== "authenticated") {
+      setShops([]);
+      setRestricted(true);
+      setError("Sign in is required.");
+      setLoading(false);
+      return;
+    }
+    let cancelled = false;
+    const load = (position: { lat: number; lng: number } | null) => {
+      if (!cancelled) void loadShops(position);
+    };
+    if (!navigator.geolocation) load(null);
+    else navigator.geolocation.getCurrentPosition(
+      (value) => {
+        const position = { lat: value.coords.latitude, lng: value.coords.longitude };
+        if (!cancelled) setUserPosition(position);
+        load(position);
+      },
+      () => load(null),
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
+    return () => { cancelled = true; };
+  }, [loadShops, status]);
 
   const mapShops = shops.map((s) => ({ name: s.name, icon: s.icon, lat: s.lat, lng: s.lng, companyid: s.companyid }));
   const handleShopMapClick = (shop: { name: string; icon: string; companyid?: number }) => {
@@ -100,26 +85,22 @@ const AdminShops = () => {
         <h1 className="text-lg font-bold text-primary-foreground font-heading">Admin Shops</h1>
       </div>
 
-      <div className="p-4 border-b border-border bg-card flex gap-2 items-center">
-        <Lock size={16} className="text-muted-foreground" />
-        <Input
-          type="password"
-          placeholder="Admin password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") handleConnect();
-          }}
-          className="flex-1"
-        />
-        <Button onClick={handleConnect} disabled={loading}>
-          {loading ? <RefreshCw size={14} className="animate-spin" /> : "Connect"}
+      <div className="p-4 border-b border-border bg-card flex items-center justify-between gap-3">
+        <p className="text-sm text-muted-foreground">Read-only administrator shop view</p>
+        <Button onClick={() => void loadShops(userPosition)} disabled={loading || status !== "authenticated"} aria-label="Refresh admin shops">
+          <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
         </Button>
       </div>
 
-      {error && <div className="px-4 py-2 text-sm text-destructive">{error}</div>}
+      {error && <div role={restricted ? "alert" : undefined} className="px-4 py-2 text-sm text-destructive">{error}</div>}
 
-      {connected && (
+      {loading && !restricted && (
+        <div className="flex-1 flex items-center justify-center p-8 text-sm text-muted-foreground">
+          <RefreshCw size={20} className="animate-spin mr-2" /> Loading administrator shops
+        </div>
+      )}
+
+      {!restricted && !loading && (
         <>
           <div
             className={
@@ -173,7 +154,7 @@ const AdminShops = () => {
                 <div className="flex-1 min-w-0">
                   <span className="text-sm font-medium text-foreground block truncate">{shop.name}</span>
                   <span className="text-xs text-muted-foreground">
-                    {shop.categoryLabel} · ID {shop.companyid}
+                    {shop.categoryLabel} · ID {shop.companyid}{formatDistanceMiles(shop.distance) ? ` · ${formatDistanceMiles(shop.distance)}` : ""}
                   </span>
                 </div>
               </button>
