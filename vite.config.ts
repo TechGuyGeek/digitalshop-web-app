@@ -37,6 +37,10 @@ export default defineConfig(({ mode }) => {
     throw new Error("VITE_APP_BASE must start and end with a slash");
   }
 
+  const paymentGateway = mode === "staging"
+    ? path.resolve(__dirname, "./src/lib/paymentGateway.staging.ts")
+    : path.resolve(__dirname, "./src/lib/paymentGateway.ts");
+
   return {
   base: appBase,
   server: {
@@ -48,9 +52,10 @@ export default defineConfig(({ mode }) => {
   },
   plugins: [apiOriginPlugin(apiOrigin), react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
+    alias: [
+      { find: "@/lib/paymentGateway", replacement: paymentGateway },
+      { find: "@", replacement: path.resolve(__dirname, "./src") },
+    ],
     dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime"],
   },
   };

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { LogOut, User, Camera, Image, Save, Trash2, Loader2, Play, Sparkles } from "lucide-react";
+import { LogOut, User, Camera, Image, Save, Trash2, Loader2, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getMenuImageUrl, getProfileDeletionStatus } from "@/lib/authClient";
@@ -136,48 +136,11 @@ const Profile = () => {
   };
 
   const [saving, setSaving] = useState(false);
-  const [upgradeLoading, setUpgradeLoading] = useState(false);
-
   const isPaidUser = (() => {
     const u = user as unknown as Record<string, unknown> | null;
     if (!u) return false;
     return String(u.PaidUser ?? u.Paiduser ?? u.paid_user) === "2";
   })();
-
-  const handleUpgradeToPro = async () => {
-    const u = user as unknown as Record<string, unknown> | null;
-    const personId = user?.id;
-    const userEmail = user?.email;
-    if (!personId || !userEmail) {
-      toast.error("Please log in first to upgrade to Pro.");
-      return;
-    }
-    setUpgradeLoading(true);
-    try {
-      const body = new URLSearchParams();
-      body.append("PersonID", String(personId));
-      body.append("Email", String(userEmail));
-      const res = await fetch(
-        "https://web.gpsshops.com/menu1/PHPwrite/User/CreateStripeCheckoutSession.php",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: body.toString(),
-        }
-      );
-      const data = await res.json();
-      if (data?.url) {
-        window.location.href = data.url;
-      } else {
-        toast.error(data?.ServerMessage || "Could not start checkout. Please try again.");
-        setUpgradeLoading(false);
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error(t("Pleasecheckyourinternetconnection"));
-      setUpgradeLoading(false);
-    }
-  };
 
   const handleSave = async () => {
     if (!user) return;

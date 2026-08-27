@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useRegisterNavActions } from "@/contexts/SiteNavExtras";
+import { beginProCheckout, PaymentUnavailableError } from "@/lib/paymentGateway";
 
 const HIDDEN_ROUTES = new Set(["/", "/oauth-callback"]);
 
@@ -43,27 +44,10 @@ const GlobalUpgradeNavAction = () => {
     }
     setLoading(true);
     try {
-      const body = new URLSearchParams();
-      body.append("PersonID", String(personId));
-      body.append("Email", String(userEmail));
-      const res = await fetch(
-        "https://web.gpsshops.com/menu1/PHPwrite/User/CreateStripeCheckoutSession.php",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: body.toString(),
-        },
-      );
-      const data = await res.json();
-      if (data?.url) {
-        window.location.href = data.url;
-      } else {
-        toast.error(data?.ServerMessage || "Could not start checkout. Please try again.");
-        setLoading(false);
-      }
+      window.location.href = await beginProCheckout({ personId: String(personId), email: String(userEmail) });
     } catch (err) {
-      console.error(err);
-      toast.error(t("Pleasecheckyourinternetconnection"));
+      toast.error(err instanceof PaymentUnavailableError ? err.message : t("Pleasecheckyourinternetconnection"));
+    } finally {
       setLoading(false);
     }
   }, [t]);

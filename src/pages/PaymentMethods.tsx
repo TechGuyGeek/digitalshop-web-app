@@ -5,23 +5,12 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Analytics } from "@/lib/analytics";
-
-const SERVER_DOMAIN = "https://web.gpsshops.com/";
-
-async function postForm(url: string, fields: Record<string, string>) {
-  const form = new URLSearchParams();
-  Object.entries(fields).forEach(([k, v]) => form.append(k, v));
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: form.toString(),
-  });
-  const text = await res.text();
-  console.log("[StripeSetup] POST", url, "status:", res.status, "body:", text);
-  let data: any = null;
-  try { data = JSON.parse(text); } catch { /* ignore */ }
-  return { status: res.status, text, data };
-}
+import {
+  beginOwnerPaymentSetup,
+  paymentsDisabledInCurrentBuild,
+  PaymentUnavailableError,
+  STAGING_PAYMENTS_DISABLED_MESSAGE,
+} from "@/lib/paymentGateway";
 
 const PaymentMethods = () => {
   const { t } = useLanguage();
@@ -64,61 +53,14 @@ const PaymentMethods = () => {
     setLoading(true);
     Analytics.paymentStarted({ flow: "stripe_onboarding" });
     try {
-      // 1. Check if Stripe setup is allowed
-      const check = await postForm(
-        SERVER_DOMAIN + "menu1/PHPread/Stripe/CheckStripeSetupAllowed.php",
-        { UserID: userId },
-      );
-      if (!check.data) {
-        toast.error("Could not reach payment service. Please try again.");
+      const result = await beginOwnerPaymentSetup({ userId, email });
+      if (result.kind === "already_setup") {
+        toast.success(result.message);
         return;
       }
-      if (check.data.success !== true) {
-        toast.info(check.data.message || t("PaymentMethodComingSoon") || "Stripe setup not available.");
-        return;
-      }
-
-      const action = check.data.action as string | undefined;
-      const companyID = String(check.data.companyID ?? check.data.companyid ?? "");
-
-      if (action === "already_setup") {
-        toast.success("Stripe is already set up for this shop");
-        return;
-      }
-
-      if (!companyID) {
-        toast.error("Missing company information.");
-        return;
-      }
-
-      // 2. Create connected account if needed
-      if (action === "create_account") {
-        const created = await postForm(
-          SERVER_DOMAIN + "menu1/PHPwrite/Stripe/CreateStripeConnectedAccount.php",
-          { companyID, UserID: userId, email },
-        );
-        if (!created.data || created.data.success !== true) {
-          toast.error(created.data?.message || "Could not create Stripe account.");
-          return;
-        }
-      } else if (action !== "continue_onboarding") {
-        toast.info(check.data.message || "Unsupported Stripe setup state.");
-        return;
-      }
-
-      // 3. Create onboarding link and redirect
-      const link = await postForm(
-        SERVER_DOMAIN + "menu1/PHPwrite/Stripe/CreateStripeOnboardingLink.php",
-        { companyID, UserID: userId },
-      );
-      if (link.data?.success === true && link.data.url) {
-        window.location.href = String(link.data.url);
-        return;
-      }
-      toast.error(link.data?.message || "Could not create onboarding link.");
+      window.location.href = result.url;
     } catch (err) {
-      console.error("[StripeSetup] error:", err);
-      toast.error("Something went wrong. Please try again.");
+      toast.error(err instanceof PaymentUnavailableError ? err.message : "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -171,6 +113,12 @@ const PaymentMethods = () => {
             ? t("ManagePaymentMethod") || "Manage payment method"
             : t("SetUpPaymentMethod") || "Set up payment method"}
         </Button>
+
+        {paymentsDisabledInCurrentBuild && (
+          <p className="text-sm text-muted-foreground mt-3 text-center" role="status">
+            {STAGING_PAYMENTS_DISABLED_MESSAGE}
+          </p>
+        )}
 
         <p className="text-xs text-muted-foreground mt-4 text-center">
           {t("PoweredByStripe") || "Payments powered by Stripe."}
