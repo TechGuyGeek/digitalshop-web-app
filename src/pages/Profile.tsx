@@ -5,7 +5,7 @@ import { LogOut, User, Camera, Image, Save, Trash2, Loader2, Play } from "lucide
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getMenuImageUrl, getProfileDeletionStatus } from "@/lib/authClient";
-import type { AuthUser } from "@/lib/authClient";
+import type { AuthUser, ProfileUpdate } from "@/lib/authClient";
 import { useAuth } from "@/contexts/AuthContext";
 import { getOwnedCompany } from "@/lib/companyApi";
 import { toast } from "sonner";
@@ -28,6 +28,50 @@ import {
 } from "@/components/ui/alert-dialog";
 
 const MAX_IMAGE_SIZE = 800;
+
+type ProfileForm = {
+  name: string;
+  surname: string;
+  gender: string;
+  mobileNumber: string;
+  lineOne: string;
+  lineTwo: string;
+  lineThree: string;
+  lineFour: string;
+  country: string;
+  deliveryNotes: string;
+};
+
+function profileFormFromUser(user: AuthUser): ProfileForm {
+  return {
+    name: user.first_name || "",
+    surname: user.last_name || "",
+    gender: user.gender || "",
+    mobileNumber: user.mobile_number || "",
+    lineOne: user.line_one_address || "",
+    lineTwo: user.line_two_address || "",
+    lineThree: user.line_three_address || "",
+    lineFour: user.line_four_address || "",
+    country: user.line_country_address || "",
+    deliveryNotes: user.delivery_notes || "",
+  };
+}
+
+function profileImageUpdateFromUser(user: AuthUser, imageBase64: string): ProfileUpdate {
+  return {
+    first_name: user.first_name || "",
+    last_name: user.last_name || "",
+    gender: user.gender || "",
+    mobile_number: user.mobile_number || "",
+    line_one_address: user.line_one_address || "",
+    line_two_address: user.line_two_address || "",
+    line_three_address: user.line_three_address || "",
+    line_four_address: user.line_four_address || "",
+    line_country_address: user.line_country_address || "",
+    delivery_notes: user.delivery_notes || "",
+    image_base64: imageBase64,
+  };
+}
 
 function resizeAndConvertToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -63,14 +107,15 @@ const Profile = () => {
   const { user, status, logout, deleteProfile, refreshProfile, saveProfile } = useAuth();
   const { t } = useLanguage();
   const { showVideoAd, dismissVideoAd, videoAdvert, videoVisible } = useAdverts();
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<ProfileForm>({
     name: "", surname: "", gender: "", mobileNumber: "",
     lineOne: "", lineTwo: "", lineThree: "", lineFour: "",
     country: "", deliveryNotes: "",
   });
-  const [pendingImageBase64, setPendingImageBase64] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [webcamOpen, setWebcamOpen] = useState(false);
+  const [imageSaving, setImageSaving] = useState(false);
+  const [formDirty, setFormDirty] = useState(false);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const profileRequestedRef = useRef(false);
@@ -84,32 +129,34 @@ const Profile = () => {
   }, [navigate, refreshProfile, status]);
 
   useEffect(() => {
-    if (user) {
-      setForm({
-        name: user.first_name || "",
-        surname: user.last_name || "",
-        gender: user.gender || "",
-        mobileNumber: user.mobile_number || "",
-        lineOne: user.line_one_address || "",
-        lineTwo: user.line_two_address || "",
-        lineThree: user.line_three_address || "",
-        lineFour: user.line_four_address || "",
-        country: user.line_country_address || "",
-        deliveryNotes: user.delivery_notes || "",
-      });
-    }
-  }, [user]);
+    if (user && !formDirty) setForm(profileFormFromUser(user));
+  }, [formDirty, user]);
 
   const handleChange = (field: string, value: string) => {
+    setFormDirty(true);
     setForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const persistImage = async (base64: string) => {
+    if (!user || imageSaving) return;
+    setImageSaving(true);
+    setPreviewUrl(`data:image/jpeg;base64,${base64}`);
+    try {
+      await saveProfile(profileImageUpdateFromUser(user, base64));
+      await refreshProfile();
+      setPreviewUrl(null);
+      toast.success(t("SaveSuccessful"));
+    } catch {
+      setPreviewUrl(null);
+      toast.error(t("SaveFailed"));
+    } finally {
+      setImageSaving(false);
+    }
   };
 
   const handleImageSelected = async (file: File) => {
     try {
-      const base64 = await resizeAndConvertToBase64(file);
-      setPendingImageBase64(base64);
-      setPreviewUrl(`data:image/jpeg;base64,${base64}`);
-      toast.success(t("SaveSuccessful"));
+      await persistImage(await resizeAndConvertToBase64(file));
     } catch {
       toast.error(t("SaveFailed"));
     }
@@ -122,9 +169,7 @@ const Profile = () => {
   };
 
   const handleWebcamCapture = (base64: string) => {
-    setPendingImageBase64(base64);
-    setPreviewUrl(`data:image/jpeg;base64,${base64}`);
-    toast.success(t("SaveSuccessful"));
+    void persistImage(base64);
   };
 
   const handleCameraClick = () => {
@@ -158,9 +203,8 @@ const Profile = () => {
         line_four_address: form.lineFour,
         line_country_address: form.country,
         delivery_notes: form.deliveryNotes,
-        ...(pendingImageBase64 ? { image_base64: pendingImageBase64 } : {}),
       });
-      setPendingImageBase64(null);
+      setFormDirty(false);
       setPreviewUrl(null);
       toast.success(t("SaveSuccessful"));
     } catch (error) {
@@ -280,15 +324,15 @@ const Profile = () => {
         </div>
 
         <div className="flex justify-center gap-3 mb-6">
-          <Button size="sm" className="rounded-full px-5" onClick={handleCameraClick}>
+          <Button size="sm" className="rounded-full px-5" onClick={handleCameraClick} disabled={imageSaving}>
             <Camera size={14} className="mr-1.5" />
             {t("Camera")}
           </Button>
-          <Button size="sm" className="rounded-full px-5" onClick={() => galleryInputRef.current?.click()}>
+          <Button size="sm" className="rounded-full px-5" onClick={() => galleryInputRef.current?.click()} disabled={imageSaving}>
             <Image size={14} className="mr-1.5" />
             {t("Gallery")}
           </Button>
-          <Button size="sm" className="rounded-full px-5" onClick={handleSave} disabled={saving}>
+          <Button size="sm" className="rounded-full px-5" onClick={handleSave} disabled={saving || imageSaving}>
             <Save size={14} className="mr-1.5" />
             {saving ? t("Pleasewait") : t("Save")}
           </Button>
