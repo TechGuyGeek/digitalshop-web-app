@@ -9,6 +9,11 @@ import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 import { resolveOrderPaymentQr } from "@/lib/orderPaymentQr";
 import { orderQrTokenFromPayload } from "@/lib/v1Api";
 
+interface DetectedBarcode { rawValue?: string | null; }
+interface BrowserBarcodeDetector { detect(source: HTMLVideoElement): Promise<DetectedBarcode[]>; }
+interface BrowserBarcodeDetectorConstructor { new (options: { formats: string[] }): BrowserBarcodeDetector; }
+type BarcodeDetectorWindow = Window & { BarcodeDetector?: BrowserBarcodeDetectorConstructor };
+
 const QRScanner = () => {
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -48,15 +53,23 @@ const QRScanner = () => {
   }, [orderMode, stopCamera, navigate, t]);
 
   const startScanning = useCallback(async (stream: MediaStream) => {
-    if ("BarcodeDetector" in window) {
+    const BarcodeDetector = (window as BarcodeDetectorWindow).BarcodeDetector;
+    if (BarcodeDetector) {
       try {
-        const detector = new (window as any).BarcodeDetector({ formats: ["qr_code", "ean_13", "ean_8", "code_128", "code_39"] });
+        const detector = new BarcodeDetector({ formats: ["qr_code", "ean_13", "ean_8", "code_128", "code_39"] });
         scanIntervalRef.current = window.setInterval(async () => {
           if (!videoRef.current || videoRef.current.readyState < 2) return;
-          try { const barcodes = await detector.detect(videoRef.current); if (barcodes.length > 0) handleResult(barcodes[0].rawValue); } catch {}
+          try {
+            const value = (await detector.detect(videoRef.current))[0]?.rawValue;
+            if (value) handleResult(value);
+          } catch {
+            // A frame can be incomplete while the camera is warming up; keep scanning.
+          }
         }, 300);
         setScanning(true); return;
-      } catch {}
+      } catch {
+        // Use the existing non-detector camera fallback below.
+      }
     }
     setScanning(true);
     setTimeout(() => { if (!processed) { setError(t("PermissionsDenied")); stopCamera(); } }, 3000);
