@@ -37,6 +37,9 @@ export interface OrderSummary {
   PaymentStatus?: string;
   DeliveryStatus?: string;
   RequestCancel?: string;
+  cancel_requested?: string | number | boolean;
+  cancellation_status?: string;
+  CancellationStatus?: string;
   RandomeCode?: string;
   GroupID?: string;
   productid?: string;
@@ -69,6 +72,7 @@ export interface GroupedOrder extends CustomerOrderContact {
   hasPaid: string;
   hasDelivered: string;
   requestCancel: string;
+  cancellationStatus: string;
   itemCount: number;
   items: OrderSummary[];
 }
@@ -83,6 +87,17 @@ function trustedReference(value: unknown): string {
 }
 
 export function isTrustedOrderReference(value: unknown): boolean { return trustedReference(value) !== ""; }
+
+function truthyFlag(value: unknown): boolean {
+  return value === true || value === 1 || value === "1" || value === "true";
+}
+
+export function customerCancellationLabel(status: string, requested: boolean, t: (key: string) => string): string {
+  if (status === "approved") return t("CancellationApproved");
+  if (status === "rejected") return t("CancellationRejected");
+  if (status === "requested" || requested) return t("CancellationRequested");
+  return "";
+}
 
 export function fetchOrdersToday(): Promise<OrderSummary[]> { return getV1<OrderSummary[]>("/customer-orders.php?bucket=today"); }
 export function fetchOrdersWeek(): Promise<OrderSummary[]> { return getV1<OrderSummary[]>("/customer-orders.php?bucket=week"); }
@@ -132,6 +147,10 @@ export function groupOrdersBySession(orders: OrderSummary[]): GroupedOrder[] {
   }
   return [...map.entries()].map(([key, items]) => {
     const first = items[0];
+    const statuses = items.map((item) => clean(item.cancellation_status || item.CancellationStatus).toLowerCase());
+    const cancellationStatus = ["approved", "rejected", "requested"].find((status) => statuses.includes(status)) || "none";
+    const requestCancel = items.some((item) => truthyFlag(item.cancel_requested) || truthyFlag(item.RequestCancel))
+      || ["requested", "approved", "rejected"].includes(cancellationStatus);
     return {
       ...contactFromRows(items),
       randomCode: key,
@@ -145,7 +164,8 @@ export function groupOrdersBySession(orders: OrderSummary[]): GroupedOrder[] {
       needDelivery: clean(first.NeedDelivery) || "0",
       hasPaid: clean(first.HasPaid) || "0",
       hasDelivered: clean(first.HasDelivered) || "0",
-      requestCancel: clean(first.RequestCancel) || "0",
+      requestCancel: requestCancel ? "1" : "0",
+      cancellationStatus,
       itemCount: items.length,
       items,
     };

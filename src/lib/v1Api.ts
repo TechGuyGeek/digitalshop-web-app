@@ -77,6 +77,20 @@ export function buildOrderQrPayload(token: string): string {
   return `${window.location.origin}${base}order-pay-scan?t=${encodeURIComponent(token)}`;
 }
 
+/** Accept only the same staging app URL emitted for opaque order QR tokens. */
+export function orderQrTokenFromPayload(payload: string): string | null {
+  try {
+    const scanned = new URL(payload.trim());
+    const expected = new URL(buildOrderQrPayload("placeholder-order-token"));
+    const tokens = scanned.searchParams.getAll("t");
+    const token = tokens.length === 1 ? tokens[0] : "";
+    if (scanned.origin !== expected.origin || scanned.pathname.replace(/\/$/, "") !== expected.pathname.replace(/\/$/, "")) return null;
+    return /^[A-Za-z0-9_-]{16,512}$/.test(token) ? token : null;
+  } catch {
+    return null;
+  }
+}
+
 export function isSessionError(error: unknown): boolean {
   return error instanceof AuthApiError && error.status === 401 || (typeof error === "object" && error !== null && "status" in error && Number((error as { status?: unknown }).status) === 401);
 }

@@ -118,6 +118,7 @@ const EditMenuGroupsPage = () => {
   const companyId = Number(searchParams.get("companyId") || "0");
 
   const [groups, setGroups] = useState<MenuGroup[]>([]);
+  const [groupProductCounts, setGroupProductCounts] = useState<Record<number, number>>({});
   const [loading, setLoading] = useState(true);
   const [addingGroup, setAddingGroup] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
@@ -158,6 +159,15 @@ const EditMenuGroupsPage = () => {
     setLoading(true);
     const data = await loadMenuGroups(companyId);
     setGroups(data);
+    const counts = await Promise.all(data.map(async (group) => {
+      try {
+        const usage = await getMenuGroupUsage(companyId, Number(group.ID));
+        return [Number(group.ID), usage.product_count] as const;
+      } catch {
+        return [Number(group.ID), 0] as const;
+      }
+    }));
+    setGroupProductCounts(Object.fromEntries(counts));
     setLoading(false);
   }, [companyId]);
 
@@ -337,6 +347,7 @@ const EditMenuGroupsPage = () => {
                   )}
                 </div>
                 <h3 className="text-center text-lg font-bold text-foreground">{group.OrderGroup}</h3>
+                <p className="text-center text-sm text-muted-foreground">{t("Products")}: {groupProductCounts[Number(group.ID)] ?? 0}</p>
                 <div className="flex items-center justify-between" onClick={(e) => e.stopPropagation()}>
                   <span className="text-sm text-muted-foreground">{t("TheItemisEnabled")}</span>
                   <Switch checked={(group.MenuEnable || group.menuGroupEnabled) === "1"} onCheckedChange={(v) => handleToggle(group, v)} />

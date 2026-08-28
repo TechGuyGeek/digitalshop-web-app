@@ -1,25 +1,28 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeft, Loader2, RefreshCw } from "lucide-react";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { ArrowLeft, Loader2, QrCode, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
   deleteCompanyOrder, fetchCompanyOrdersByTab, groupCompanyOrders,
-  toggleCompanyOrderFlag, updateCompanyOrderCancellation, type CompanyGroupedOrder, type CompanyOrderBucket,
+  isTrustedCompanyOrderReference, toggleCompanyOrderFlag, updateCompanyOrderCancellation, type CompanyGroupedOrder, type CompanyOrderBucket,
 } from "@/lib/companyOrders";
 import { V1ApiError } from "@/lib/v1Api";
 import { formatOrderDateTime } from "@/lib/orderHistory";
 import CustomerOrderImage from "@/components/CustomerOrderImage";
 import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
+import OrderDeleteConfirmation from "@/components/OrderDeleteConfirmation";
 
 const CompanyOrders = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [params] = useSearchParams();
   const { t } = useLanguage();
   const passedCompanyId = String((location.state as { companyId?: string } | null)?.companyId || "");
-  const companyId = passedCompanyId || localStorage.getItem("companyOrdersCompanyId") || "";
+  const companyId = passedCompanyId || params.get("companyid") || localStorage.getItem("companyOrdersCompanyId") || "";
+  const scanReference = params.get("scan_reference") || "";
   const [activeTab, setActiveTab] = useState<CompanyOrderBucket>("today");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -27,6 +30,7 @@ const CompanyOrders = () => {
   const [mutatingKey, setMutatingKey] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<CompanyGroupedOrder | null>(null);
   const loadInFlight = useRef<Promise<void> | null>(null);
+  const scanInFlight = useRef("");
 
   useEffect(() => {
     if (passedCompanyId) localStorage.setItem("companyOrdersCompanyId", passedCompanyId);
@@ -52,7 +56,22 @@ const CompanyOrders = () => {
     return request;
   }, [activeTab, companyId, t]);
 
-  useEffect(() => { void loadOrders(activeTab); }, [activeTab, loadOrders]);
+  useEffect(() => { if (!scanReference) void loadOrders(activeTab); }, [activeTab, loadOrders, scanReference]);
+
+  useEffect(() => {
+    if (!scanReference || !companyId || scanInFlight.current === scanReference) return;
+    if (!isTrustedCompanyOrderReference(scanReference)) { setLoading(false); setError(t("Therewasanerror")); return; }
+    scanInFlight.current = scanReference;
+    setLoading(true); setError(null);
+    void Promise.all((['today', 'week', 'month'] as CompanyOrderBucket[]).map(async (bucket) => ({ bucket, orders: groupCompanyOrders(await fetchCompanyOrdersByTab(companyId, bucket)) })))
+      .then((buckets) => {
+        const found = buckets.flatMap(({ bucket, orders: grouped }) => grouped.map((order) => ({ bucket, order }))).find(({ order }) => order.reference === scanReference);
+        if (!found) { setLoading(false); setError(t("Therewasanerror")); return; }
+        const query = new URLSearchParams({ companyid: found.order.companyId, clientid: found.order.clientId, datetime: found.order.dateTime, range: found.bucket });
+        navigate(`/company-order-detail?${query.toString()}`, { replace: true });
+      })
+      .catch((err: unknown) => { setLoading(false); setError(err instanceof V1ApiError ? err.message : t("Therewasanerror")); });
+  }, [companyId, navigate, scanReference, t]);
 
   const handleToggle = async (order: CompanyGroupedOrder, flag: "HasPaid" | "HasDelivered", value: boolean) => {
     const key = `${order.groupKey}-${flag}`;
@@ -112,6 +131,7 @@ const CompanyOrders = () => {
         <h1 className="text-lg font-bold text-primary-foreground font-heading">{t("LiveOrdersPageTitle")}</h1>
         <Button variant="ghost" size="icon" className="ml-auto text-primary-foreground hover:bg-primary/80" onClick={() => void loadOrders(activeTab)} disabled={loading} aria-label={t("Refresh") || "Refresh"}><RefreshCw size={18} className={loading ? "animate-spin" : ""} /></Button>
       </div>
+      <div className="bg-card px-4 py-2 border-b border-border shrink-0"><Button variant="outline" className="w-full rounded-full" onClick={() => navigate(`/qr-scanner?mode=order&companyid=${encodeURIComponent(companyId)}`)}><QrCode size={16} className="mr-2" />{t("ScanOrderQr")}</Button></div>
       <div className="flex border-b border-border bg-card shrink-0">{tabs.map((tab) => <button key={tab.key} onClick={() => setActiveTab(tab.key)} className={`flex-1 py-3 text-sm font-bold tracking-wide transition-colors ${activeTab === tab.key ? "text-primary border-b-2 border-primary" : "text-muted-foreground"}`}>{tab.label}</button>)}</div>
       <div className="bg-card px-4 py-2 shrink-0"><p className="text-center text-sm font-semibold text-foreground">{t("Orders")}</p></div>
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
@@ -140,7 +160,7 @@ const CompanyOrders = () => {
             </div>;
           })}
       </div>
-      {deleteConfirm && <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4" onClick={() => setDeleteConfirm(null)}><div className="bg-card rounded-xl p-6 max-w-sm w-full shadow-lg" onClick={(event) => event.stopPropagation()}><p className="text-foreground font-semibold mb-2">{t("Areyousureyouwanttodelete")}</p><p className="text-sm text-muted-foreground mb-4">{deleteConfirm.customerName} — {formatOrderDateTime(deleteConfirm.dateTime)}</p><div className="flex gap-3"><Button variant="outline" className="flex-1" onClick={() => setDeleteConfirm(null)}>{t("Cancel")}</Button><Button variant="destructive" className="flex-1" onClick={() => void handleDelete(deleteConfirm)}>{t("Delete")}</Button></div></div></div>}
+      <OrderDeleteConfirmation open={!!deleteConfirm} onOpenChange={(open) => !open && setDeleteConfirm(null)} description={deleteConfirm ? `${deleteConfirm.customerName} — ${formatOrderDateTime(deleteConfirm.dateTime)}` : ""} busy={Boolean(mutatingKey)} onConfirm={() => deleteConfirm && void handleDelete(deleteConfirm)} />
     </div>
   );
 };

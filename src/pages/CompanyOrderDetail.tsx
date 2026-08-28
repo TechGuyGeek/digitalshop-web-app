@@ -13,6 +13,7 @@ import { V1ApiError } from "@/lib/v1Api";
 import { formatOrderDateTime, getProductPhotoUrl } from "@/lib/orderHistory";
 import { buildContactLinks } from "@/lib/companyContact";
 import CustomerOrderImage from "@/components/CustomerOrderImage";
+import OrderDeleteConfirmation from "@/components/OrderDeleteConfirmation";
 
 function validBucket(value: string | null): CompanyOrderBucket {
   return value === "week" || value === "month" ? value : "today";
@@ -41,6 +42,7 @@ export default function CompanyOrderDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [mutating, setMutating] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const loadInFlight = useRef<Promise<void> | null>(null);
 
   const loadDetail = useCallback(async () => {
@@ -104,7 +106,8 @@ export default function CompanyOrderDetail() {
         {order.requestCancel === "1" && <div className={`rounded-xl border px-4 py-3 font-semibold ${order.cancellationStatus === "rejected" ? "border-border bg-card text-muted-foreground" : "border-destructive/40 bg-destructive/10 text-destructive"}`}>{cancellationLabel}{cancellationPending && <div className="flex gap-2 mt-3"><Button size="sm" variant="outline" disabled={mutating} onClick={() => void runMutation(() => updateCompanyOrderCancellation(bucket, order, "rejected"))}>{t("Reject") || "Reject"}</Button><Button size="sm" disabled={mutating} onClick={() => void runMutation(() => updateCompanyOrderCancellation(bucket, order, "approved"))}>{t("Approve") || "Approve"}</Button></div>}</div>}
         {order.items.map((item, index) => { const image = getProductPhotoUrl(item.product_imagepath); const name = String(item.OrderName || "Item"); return <div key={`${item.Productid || "item"}-${index}`} className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">{image ? <img src={image} alt={name} className="w-full h-40 object-cover" /> : <div className="px-4 py-3 font-bold">{name}</div>}<div className="px-4 py-3"><div className="flex justify-between font-semibold"><span>{name}</span><span>{item.OrderPrice || "0.00"}</span></div>{item.OrderDesription && <p className="text-sm text-muted-foreground mt-1">{item.OrderDesription}</p>}</div></div>; })}
       </div>
-      <div className="px-4 py-3 bg-card border-t border-border shrink-0 space-y-2"><div className="grid grid-cols-2 gap-3"><div className="flex items-center gap-2"><Switch checked={order.hasPaid === "1"} disabled={mutating} onCheckedChange={(checked) => void runMutation(() => toggleCompanyOrderFlag(bucket, "HasPaid", checked ? "1" : "0", order))} /><span className="text-sm">{order.hasPaid === "1" ? t("Paid") : t("NotPaid")}</span></div><div className="flex items-center gap-2"><Switch checked={order.hasDelivered === "1"} disabled={mutating} onCheckedChange={(checked) => void runMutation(() => toggleCompanyOrderFlag(bucket, "HasDelivered", checked ? "1" : "0", order))} /><span className="text-sm">{order.hasDelivered === "1" ? t("Delivered") : t("NotDelivered")}</span></div></div><Button variant="destructive" className="w-full rounded-full" disabled={mutating} onClick={() => void handleDelete()}>{mutating ? <Loader2 className="animate-spin mr-1" size={14} /> : null}{t("Delete") || "Delete Order"}</Button></div>
+      <div className="px-4 py-3 bg-card border-t border-border shrink-0 space-y-2"><div className="grid grid-cols-2 gap-3"><div className="flex items-center gap-2"><Switch checked={order.hasPaid === "1"} disabled={mutating} onCheckedChange={(checked) => void runMutation(() => toggleCompanyOrderFlag(bucket, "HasPaid", checked ? "1" : "0", order))} /><span className="text-sm">{order.hasPaid === "1" ? t("Paid") : t("NotPaid")}</span></div><div className="flex items-center gap-2"><Switch checked={order.hasDelivered === "1"} disabled={mutating} onCheckedChange={(checked) => void runMutation(() => toggleCompanyOrderFlag(bucket, "HasDelivered", checked ? "1" : "0", order))} /><span className="text-sm">{order.hasDelivered === "1" ? t("Delivered") : t("NotDelivered")}</span></div></div><Button variant="destructive" className="w-full rounded-full" disabled={mutating} onClick={() => setDeleteConfirmOpen(true)}>{mutating ? <Loader2 className="animate-spin mr-1" size={14} /> : null}{t("Delete") || "Delete Order"}</Button></div>
+      <OrderDeleteConfirmation open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen} description={`${order.customerName} — ${formatOrderDateTime(order.dateTime)}`} busy={mutating} onConfirm={() => void handleDelete()} />
     </>}
   </div>;
 }

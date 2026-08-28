@@ -1,15 +1,19 @@
 import { useRef, useState, useCallback, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, QrCode, Camera, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import AdvertSlot from "@/components/adverts/AdvertSlot";
 import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
+import { resolveOrderPaymentQr } from "@/lib/orderPaymentQr";
+import { orderQrTokenFromPayload } from "@/lib/v1Api";
 
 const QRScanner = () => {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
   const { t } = useLanguage();
+  const orderMode = params.get("mode") === "order";
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -27,12 +31,21 @@ const QRScanner = () => {
 
   const handleResult = useCallback((value: string) => {
     if (processedRef.current) return;
+    if (orderMode) {
+      const token = orderQrTokenFromPayload(value);
+      if (!token) { toast.error(t("Therewasanerror")); return; }
+      processedRef.current = true; setProcessed(true); stopCamera();
+      void resolveOrderPaymentQr(token)
+        .then((resolution) => navigate(`/company-orders?companyid=${encodeURIComponent(String(resolution.company_id))}&scan_reference=${encodeURIComponent(resolution.order_id)}`))
+        .catch((error: unknown) => { processedRef.current = false; setProcessed(false); setError(error instanceof Error ? error.message : t("Therewasanerror")); });
+      return;
+    }
     const trimmed = value.trim();
     const scannedCompanyId = parseInt(trimmed, 10);
     if (isNaN(scannedCompanyId) || scannedCompanyId <= 0) { toast.error(t("Therewasanerror")); return; }
     processedRef.current = true; setProcessed(true); stopCamera();
     navigate(`/shop-profile?companyid=${scannedCompanyId}`);
-  }, [stopCamera, navigate, t]);
+  }, [orderMode, stopCamera, navigate, t]);
 
   const startScanning = useCallback(async (stream: MediaStream) => {
     if ("BarcodeDetector" in window) {
@@ -50,7 +63,7 @@ const QRScanner = () => {
   }, [handleResult, processed, stopCamera, t]);
 
   const startCamera = useCallback(async () => {
-    setError(null); setProcessed(false);
+    setError(null); setProcessed(false); processedRef.current = false;
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
       streamRef.current = stream;
@@ -61,13 +74,16 @@ const QRScanner = () => {
   useEffect(() => { startCamera(); return () => stopCamera(); }, [startCamera, stopCamera]);
 
   const [manualId, setManualId] = useState("");
-  const handleManualGo = () => { const id = parseInt(manualId.trim(), 10); if (isNaN(id) || id <= 0) { toast.error(t("Therewasanerror")); return; } navigate(`/shop-profile?companyid=${id}`); };
+  const handleManualGo = () => {
+    if (orderMode) { handleResult(manualId); return; }
+    const id = parseInt(manualId.trim(), 10); if (isNaN(id) || id <= 0) { toast.error(t("Therewasanerror")); return; } navigate(`/shop-profile?companyid=${id}`);
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <div className="bg-primary px-4 py-4 flex items-center gap-3">
-        <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary/80" onClick={() => { stopCamera(); navigate("/view-shops"); }}><ArrowLeft size={20} /></Button>
-        <h1 className="text-lg font-bold text-primary-foreground font-heading">{t("Scan")}</h1>
+        <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary/80" onClick={() => { stopCamera(); navigate(orderMode ? "/company-orders" : "/view-shops"); }}><ArrowLeft size={20} /></Button>
+        <h1 className="text-lg font-bold text-primary-foreground font-heading">{orderMode ? t("ScanOrderQr") : t("Scan")}</h1>
       </div>
       <div className="flex-1 flex flex-col items-center justify-center px-4 py-6 gap-6">
         <div className="w-full max-w-sm">
@@ -100,7 +116,7 @@ const QRScanner = () => {
         )}
         <div className="w-full max-w-sm space-y-2 pt-4 border-t border-border">
           <div className="flex gap-2">
-            <input type="number" inputMode="numeric" placeholder="e.g. 105" value={manualId} onChange={(e) => setManualId(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleManualGo()} className="flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
+            <input type={orderMode ? "text" : "number"} inputMode={orderMode ? "url" : "numeric"} placeholder={orderMode ? "https://stage-web.gpsshops.com/…" : "e.g. 105"} value={manualId} onChange={(e) => setManualId(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleManualGo()} className="flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary" />
             <Button onClick={handleManualGo} size="sm">{t("OK")}</Button>
           </div>
         </div>

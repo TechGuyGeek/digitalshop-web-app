@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
-  fetchCustomerOrderDetail, formatOrderDateTime, getProductPhotoUrl, groupOrdersBySession,
+  customerCancellationLabel, fetchCustomerOrderDetail, formatOrderDateTime, getProductPhotoUrl, groupOrdersBySession,
   isSessionError, isTrustedOrderReference, requestCancelOrder, type GroupedOrder, type OrderBucket,
   type OrderSummary, V1ApiError,
 } from "@/lib/orderHistory";
@@ -54,6 +54,8 @@ export default function CustomerOrderDetail({ bucket }: CustomerOrderDetailProps
   const mode = first?.NeedDelivery === "1" ? t("Deliver") : first?.NeedTakeaway === "1" ? t("TakeAway") : t("OnSite");
   const passedOrder = (location.state as { order?: GroupedOrder } | null)?.order;
   const companyForProfile = grouped || passedOrder;
+  const cancellationStatus = grouped?.cancellationStatus || "none";
+  const cancellationRequested = first?.RequestCancel === "1" || cancelledLocally || cancellationStatus !== "none";
 
   const handleCancel = async () => {
     if (!grouped || cancelling || grouped.requestCancel === "1" || !grouped.orderId) return;
@@ -97,13 +99,13 @@ export default function CustomerOrderDetail({ bucket }: CustomerOrderDetailProps
         <div className="rounded-xl border border-border bg-card p-4 space-y-2">
           <div className="flex items-center gap-3"><div className="w-14 h-14 rounded-lg bg-muted overflow-hidden shrink-0">{grouped?.companyImagePath ? <img src={getProductPhotoUrl(grouped.companyImagePath)} alt={grouped.companyName} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><Store size={22} className="text-muted-foreground" /></div>}</div><div><p className="font-bold">{grouped?.companyName}</p><p className="text-xs text-muted-foreground">{formatOrderDateTime(serverDateTime)}</p></div></div>
           <div className="grid grid-cols-2 gap-2 text-sm"><span>{t("PaymentStatus")}: {first?.HasPaid === "1" ? t("Paid") : t("NotPaid")}</span><span>{t("DeliveryStatus")}: {first?.HasDelivered === "1" ? t("Delivered") : t("NotDelivered")}</span></div>
-          {(first?.RequestCancel === "1" || cancelledLocally) && <p className="font-semibold text-destructive">{t("RequestCancel")}</p>}
+          {cancellationRequested && <p className={`font-semibold ${cancellationStatus === "rejected" ? "text-muted-foreground" : "text-destructive"}`}>{customerCancellationLabel(cancellationStatus, cancellationRequested, t)}</p>}
           {companyForProfile && <Button variant="outline" className="w-full rounded-full" onClick={() => navigate("/company-profile-readonly", { state: { company: companyForProfile } })}>{t("CompanyProfile")}</Button>}
         </div>
         {items.map((item, index) => { const image = getProductPhotoUrl(String(item.product_imagepath || "")); const name = String(item.OrderName || "Item"); return <div key={`${item.Productid || item.productid || "item"}-${index}`} className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">{image ? <img src={image} alt={name} className="w-full h-40 object-cover" /> : <div className="px-4 py-3 flex items-center gap-2"><Store size={18} className="text-muted-foreground" /><span className="font-bold">{name}</span></div>}<div className="px-4 py-3"><div className="flex justify-between font-semibold"><span>{name}</span><span>£{Number(item.OrderPrice || 0).toFixed(2)}</span></div>{item.OrderDesription && <p className="text-sm text-muted-foreground mt-1">{String(item.OrderDesription)}</p>}</div></div>; })}
         {isTrustedOrderReference(orderReference) && <div className="rounded-xl border border-border bg-card p-4 space-y-3"><Button variant="outline" className="w-full rounded-full" onClick={() => void showQr()} disabled={qrLoading}><QrCode size={16} className="mr-2" />{qrLoading ? (t("Pleasewait") || "Please wait") : "Show Order QR"}</Button>{qrToken && <div className="flex flex-col items-center gap-2"><QRCodeCanvas value={buildOrderQrPayload(qrToken)} size={220} includeMargin /><p className="text-xs text-center text-muted-foreground">Show this QR code to the shop.</p></div>}</div>}
       </div>
-      <div className="px-4 py-3 bg-card border-t border-border shrink-0"><Button className="w-full rounded-full" disabled={cancelling || first?.RequestCancel === "1" || cancelledLocally || first?.HasPaid === "1" || first?.HasDelivered === "1"} onClick={() => void handleCancel()}>{cancelling && <Loader2 className="animate-spin mr-1" size={14} />}{first?.RequestCancel === "1" || cancelledLocally ? t("RequestCancel") : t("REQUESTTOCANCEL")}</Button></div>
+      <div className="px-4 py-3 bg-card border-t border-border shrink-0"><Button className="w-full rounded-full" disabled={cancelling || cancellationRequested || first?.HasPaid === "1" || first?.HasDelivered === "1"} onClick={() => void handleCancel()}>{cancelling && <Loader2 className="animate-spin mr-1" size={14} />}{cancellationRequested ? customerCancellationLabel(cancellationStatus, cancellationRequested, t) : t("REQUESTTOCANCEL")}</Button></div>
     </>}
   </div>;
 }

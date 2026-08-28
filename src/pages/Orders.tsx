@@ -8,7 +8,7 @@ import { useRegisterNavActions } from "@/contexts/SiteNavExtras";
 import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 import {
   fetchOrdersToday, fetchOrdersWeek, fetchOrdersMonth, formatOrderDateTime,
-  getCompanyPhotoUrl, groupOrdersBySession, isSessionError, requestCancelOrder,
+  customerCancellationLabel, getCompanyPhotoUrl, groupOrdersBySession, isSessionError, requestCancelOrder,
   type GroupedOrder, type OrderBucket, V1ApiError,
 } from "@/lib/orderHistory";
 
@@ -102,7 +102,7 @@ const Orders = () => {
                 <div className="flex gap-2"><span className="font-semibold">{t("DeliveryType")}</span><span>{deliveryType(order)}</span></div>
                 <div className="flex gap-2"><span className="font-semibold">{t("PaymentStatus")}</span><span>{order.hasPaid === "1" ? t("Paid") : t("NotPaid")}</span></div>
                 <div className="flex gap-2"><span className="font-semibold">{t("DeliveryStatus")}</span><span>{order.hasDelivered === "1" ? t("Delivered") : t("NotDelivered")}</span></div>
-                {order.requestCancel === "1" && <p className="font-semibold text-destructive">{t("RequestCancel")}</p>}
+                {order.requestCancel === "1" && <p className={`font-semibold ${order.cancellationStatus === "rejected" ? "text-muted-foreground" : "text-destructive"}`}>{customerCancellationLabel(order.cancellationStatus, order.requestCancel === "1", t)}</p>}
                 <p className="font-bold pt-1">{order.companyName}</p><p className="text-xs text-muted-foreground">{formatOrderDateTime(order.dateTime)}</p>
               </div><div className="w-24 h-20 rounded-lg bg-muted overflow-hidden shrink-0">{getCompanyPhotoUrl(order.companyImagePath) ? <img src={getCompanyPhotoUrl(order.companyImagePath)} alt={order.companyName} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><Store className="text-muted-foreground" size={24} /></div>}</div></div>
               <div className="flex gap-3 mt-4" onClick={(event) => event.stopPropagation()}><Button variant="outline" className="flex-1 rounded-full" disabled={cancelling || order.requestCancel === "1"} onClick={() => void handleCancel(order)}>{cancelling && <Loader2 className="animate-spin mr-1" size={14} />}{order.requestCancel === "1" ? t("RequestCancel") : t("REQUESTTOCANCEL")}</Button><Button variant="outline" className="flex-1 rounded-full" onClick={() => handleCompanyProfile(order)}>{t("CompanyProfile")}</Button></div>

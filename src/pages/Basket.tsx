@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Trash2, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useBasket } from "@/contexts/BasketContext";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
@@ -39,7 +40,7 @@ const Basket = () => {
   const [searchParams] = useSearchParams();
   const shopName = searchParams.get("shop") || "Shop";
   const companyId = searchParams.get("companyid") || sessionStorage.getItem("basket_companyId") || "";
-  const { items, count, total, removeItem, clearItem, clearBasket } = useBasket();
+  const { items, count, total, removeItem, clearBasket } = useBasket();
   const { user } = useAuth();
   const { canShowVideo, showVideoAd, dismissVideoAd, videoAdvert, videoVisible } = useAdverts();
   const [submitting, setSubmitting] = useState(false);
@@ -48,6 +49,7 @@ const Basket = () => {
   const [deliveryEnable, setDeliveryEnable] = useState(false);
   const [totalTables, setTotalTables] = useState(0);
   const [settingsLoaded, setSettingsLoaded] = useState(false);
+  const [clearConfirmOpen, setClearConfirmOpen] = useState(false);
 
   useEffect(() => {
     if (!companyId) return;
@@ -125,6 +127,7 @@ const Basket = () => {
         <div className="flex justify-between text-foreground font-semibold text-sm">
           <span>{t("TOTALPRICE")}</span><span>£{total.toFixed(2)}</span>
         </div>
+        {items.length > 0 && <Button variant="outline" size="sm" className="mt-2 self-end gap-1" onClick={() => setClearConfirmOpen(true)} disabled={submitting}><X size={14} />{t("Clear")}</Button>}
       </div>
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-6">
         <ProfileHelpAssistant translationKey="HELPTOTALORDERSNOPIC" />
@@ -152,9 +155,6 @@ const Basket = () => {
               <div className="px-4 pb-3 flex items-center justify-center gap-3">
                 <Button variant="destructive" size="sm" className="rounded-full px-5 gap-1" onClick={() => removeItem(item.id)} disabled={submitting}>
                   <Trash2 size={14} />{t("Delete")}
-                </Button>
-                <Button variant="outline" size="sm" className="rounded-full px-5 gap-1" onClick={() => clearItem(item.id)} disabled={submitting}>
-                  <X size={14} />{t("Clear")}
                 </Button>
               </div>
             </div>
@@ -204,6 +204,18 @@ const Basket = () => {
         onComplete={handleVideoFinished}
         dismissible={true}
       />
+      <AlertDialog open={clearConfirmOpen} onOpenChange={setClearConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("Clear")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("Areyousureyouwanttodelete")}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <Button variant="outline" onClick={() => setClearConfirmOpen(false)} disabled={submitting}>{t("Cancel")}</Button>
+            <Button variant="destructive" onClick={() => { clearBasket(); setClearConfirmOpen(false); }} disabled={submitting}>{t("Clear")}</Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

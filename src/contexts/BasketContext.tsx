@@ -43,7 +43,8 @@ export const BasketProvider = ({ children }: { children: ReactNode }) => {
   const [items, setItems] = useState<BasketItem[]>(loadBasket);
 
   useEffect(() => {
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    if (items.length === 0) sessionStorage.removeItem(STORAGE_KEY);
+    else sessionStorage.setItem(STORAGE_KEY, JSON.stringify(items));
   }, [items]);
 
   const count = items.reduce((sum, i) => sum + i.quantity, 0);
