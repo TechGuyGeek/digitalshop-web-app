@@ -58,14 +58,15 @@ describe("Web Stage 4 customer order flow", () => {
     expect(String(fetchMock.mock.calls.at(-1)?.[0])).toContain("customer-orders.php?bucket=month");
   });
 
-  it("uses the canonical PATCH cancellation contract and refreshable detail", async () => {
+  it("uses the canonical cancellation write and refreshable detail", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch");
     await authenticate(fetchMock);
-    fetchMock.mockResolvedValueOnce(envelope({ cancel_requested: true }));
-    await requestCancelOrder({ companyId: "82", orderId: "1001" } as never, "month");
+    fetchMock.mockResolvedValueOnce(envelope({ requested: true }));
+    await requestCancelOrder({ reference: "0123456789abcdef", companyId: "82", orderId: "1001" } as never, "month");
+    expect(String(fetchMock.mock.calls.at(-1)?.[0])).toContain("/menu1/api/v1/orders.php?id=0123456789abcdef&action=cancel");
     const init = fetchMock.mock.calls.at(-1)?.[1] as RequestInit;
-    expect(init.method).toBe("PATCH");
-    expect(JSON.parse(String(init.body))).toEqual({ bucket: "month", company_id: 82, order_id: "1001" });
+    expect(init.method).toBe("POST");
+    expect(JSON.parse(String(init.body))).toEqual({});
   });
 
   it("uses the checkout-wide reference for order QR without credential material", async () => {

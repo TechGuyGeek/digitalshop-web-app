@@ -1,4 +1,4 @@
-import { deleteV1, getV1, patchV1 } from "@/lib/v1Api";
+import { deleteV1, getV1, patchV1, V1ApiError } from "@/lib/v1Api";
 
 export type CompanyOrderBucket = "today" | "week" | "month";
 
@@ -114,12 +114,10 @@ export function fetchCompanyOrderDetail(
   return getV1<CompanyOrderItem[]>(ownerOrdersPath(bucket, companyId, { clientId, dateTime }));
 }
 
-function ownerOrderMutationBody(bucket: CompanyOrderBucket, order: CompanyGroupedOrder): Record<string, unknown> {
-  return {
-    bucket,
-    company_id: Number(order.companyId),
-    order_id: order.orderId,
-  };
+function canonicalOrderPath(order: CompanyGroupedOrder): string {
+  const reference = trustedReference(order.reference);
+  if (!reference) throw new V1ApiError(422, { code: "invalid_order_reference", message: "This order cannot be changed." });
+  return `/orders.php?id=${encodeURIComponent(reference)}`;
 }
 
 export async function toggleCompanyOrderFlag(
@@ -128,11 +126,10 @@ export async function toggleCompanyOrderFlag(
   newValue: string,
   order: CompanyGroupedOrder,
 ): Promise<void> {
-  await patchV1("/owner-orders.php", {
-    ...ownerOrderMutationBody(bucket, order),
-    field: flag,
-    value: newValue === "1",
-  });
+  void bucket;
+  await patchV1(canonicalOrderPath(order), flag === "HasPaid"
+    ? { paid: newValue === "1" }
+    : { delivered: newValue === "1" });
 }
 
 export async function updateCompanyOrderCancellation(
@@ -140,17 +137,13 @@ export async function updateCompanyOrderCancellation(
   order: CompanyGroupedOrder,
   status: "approved" | "rejected",
 ): Promise<void> {
-  await patchV1("/owner-orders.php", {
-    ...ownerOrderMutationBody(bucket, order),
-    cancellation_status: status,
-  });
+  void bucket;
+  await patchV1(canonicalOrderPath(order), { cancellation_status: status });
 }
 
 export async function deleteCompanyOrder(bucket: CompanyOrderBucket, order: CompanyGroupedOrder): Promise<void> {
-  await deleteV1("/owner-orders.php", {
-    ...ownerOrderMutationBody(bucket, order),
-    client_id: order.clientId,
-  });
+  void bucket;
+  await deleteV1(canonicalOrderPath(order), {});
 }
 
 function fallbackIdentity(row: CompanyOrderItem): string {

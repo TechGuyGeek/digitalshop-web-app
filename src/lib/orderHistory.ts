@@ -1,4 +1,4 @@
-import { buildMenuImageUrl, getV1, patchV1, V1ApiError, isSessionError } from "@/lib/v1Api";
+import { buildMenuImageUrl, getV1, postV1, V1ApiError, isSessionError } from "@/lib/v1Api";
 
 export type OrderBucket = "today" | "week" | "month";
 
@@ -94,7 +94,10 @@ export function fetchCustomerOrderDetail(bucket: OrderBucket, companyId: string,
 }
 
 export async function requestCancelOrder(order: GroupedOrder, bucket: OrderBucket): Promise<void> {
-  await patchV1("/customer-orders.php", { bucket, company_id: Number(order.companyId), order_id: order.orderId });
+  void bucket;
+  const reference = trustedReference(order.reference);
+  if (!reference) throw new V1ApiError(422, { code: "invalid_order_reference", message: "This order cannot be cancelled." });
+  await postV1(`/orders.php?id=${encodeURIComponent(reference)}&action=cancel`, {});
 }
 
 function fallbackIdentity(row: OrderSummary): string {

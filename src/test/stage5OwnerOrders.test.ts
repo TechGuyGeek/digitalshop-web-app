@@ -119,35 +119,45 @@ describe("Web Stage 5 canonical owner orders", () => {
     fetchMock.mockResolvedValueOnce(envelope({ updated: true }));
     await toggleCompanyOrderFlag("today", "HasPaid", "1", order);
     let call = fetchMock.mock.calls.at(-1)!;
-    expect(String(call[0])).toContain("/menu1/api/v1/owner-orders.php");
+    expect(String(call[0])).toContain(`/menu1/api/v1/orders.php?id=${order.reference}`);
     expect((call[1] as RequestInit).method).toBe("PATCH");
-    expect(JSON.parse(String((call[1] as RequestInit).body))).toEqual({ bucket: "today", company_id: 82, order_id: "1001", field: "HasPaid", value: true });
+    expect(JSON.parse(String((call[1] as RequestInit).body))).toEqual({ paid: true });
 
     fetchMock.mockResolvedValueOnce(envelope({ updated: true }));
     await toggleCompanyOrderFlag("today", "HasDelivered", "0", order);
     call = fetchMock.mock.calls.at(-1)!;
-    expect(JSON.parse(String((call[1] as RequestInit).body))).toMatchObject({ field: "HasDelivered", value: false });
+    expect(JSON.parse(String((call[1] as RequestInit).body))).toEqual({ delivered: false });
   });
 
-  it("uses canonical cancellation approve/reject PATCH and DELETE body", async () => {
+  it("uses canonical cancellation approve/reject PATCH and whole-checkout DELETE", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch");
     await authenticate(fetchMock);
     fetchMock.mockResolvedValueOnce(envelope({ updated: true }));
     await updateCompanyOrderCancellation("month", order, "approved");
     let call = fetchMock.mock.calls.at(-1)!;
+    expect(String(call[0])).toContain(`/menu1/api/v1/orders.php?id=${order.reference}`);
     expect((call[1] as RequestInit).method).toBe("PATCH");
-    expect(JSON.parse(String((call[1] as RequestInit).body))).toEqual({ bucket: "month", company_id: 82, order_id: "1001", cancellation_status: "approved" });
+    expect(JSON.parse(String((call[1] as RequestInit).body))).toEqual({ cancellation_status: "approved" });
 
     fetchMock.mockResolvedValueOnce(envelope({ updated: true }));
     await updateCompanyOrderCancellation("month", order, "rejected");
     call = fetchMock.mock.calls.at(-1)!;
-    expect(JSON.parse(String((call[1] as RequestInit).body))).toMatchObject({ cancellation_status: "rejected" });
+    expect(JSON.parse(String((call[1] as RequestInit).body))).toEqual({ cancellation_status: "rejected" });
 
     fetchMock.mockResolvedValueOnce(envelope({ deleted: true }));
     await deleteCompanyOrder("month", order);
     call = fetchMock.mock.calls.at(-1)!;
+    expect(String(call[0])).toContain(`/menu1/api/v1/orders.php?id=${order.reference}`);
     expect((call[1] as RequestInit).method).toBe("DELETE");
-    expect(JSON.parse(String((call[1] as RequestInit).body))).toEqual({ bucket: "month", company_id: 82, order_id: "1001", client_id: "42" });
+    expect(JSON.parse(String((call[1] as RequestInit).body))).toEqual({});
+  });
+
+  it("surfaces terminal cancellation conflicts without fabricating a successful mutation", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch");
+    await authenticate(fetchMock);
+    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ success: false, error: { code: "cancellation_approved", message: "Cancellation was approved." } }), { status: 409, headers: { "Content-Type": "application/json" } }));
+    await expect(toggleCompanyOrderFlag("today", "HasPaid", "1", order)).rejects.toMatchObject({ status: 409, code: "cancellation_approved" });
+    expect(fetchMock.mock.calls.filter(([url]) => String(url).includes("/orders.php"))).toHaveLength(1);
   });
 
   it("keeps customer payment and QR controls while owner detail has neither", () => {
