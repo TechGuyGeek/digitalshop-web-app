@@ -3,6 +3,7 @@ import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Loader2, QrCode, RefreshCw, Store } from "lucide-react";
 import { QRCodeCanvas } from "qrcode.react";
 import { Button } from "@/components/ui/button";
+import { OrderStatusRows } from "@/components/OrderStatusRows";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
@@ -98,7 +99,7 @@ export default function CustomerOrderDetail({ bucket }: CustomerOrderDetailProps
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         <div className="rounded-xl border border-border bg-card p-4 space-y-2">
           <div className="flex items-center gap-3"><div className="w-14 h-14 rounded-lg bg-muted overflow-hidden shrink-0">{grouped?.companyImagePath ? <img src={getProductPhotoUrl(grouped.companyImagePath)} alt={grouped.companyName} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><Store size={22} className="text-muted-foreground" /></div>}</div><div><p className="font-bold">{grouped?.companyName}</p><p className="text-xs text-muted-foreground">{formatOrderDateTime(serverDateTime)}</p></div></div>
-          <div className="grid grid-cols-2 gap-2 text-sm"><span>{t("PaymentStatus")}: {first?.HasPaid === "1" ? t("Paid") : t("NotPaid")}</span><span>{t("DeliveryStatus")}: {first?.HasDelivered === "1" ? t("Delivered") : t("NotDelivered")}</span></div>
+          <OrderStatusRows paymentLabel={`${t("PaymentStatus")}:`} paymentValue={first?.HasPaid === "1" ? t("Paid") : t("NotPaid")} deliveryLabel={`${t("DeliveryStatus")}:`} deliveryValue={first?.HasDelivered === "1" ? t("Delivered") : t("NotDelivered")} />
           {cancellationRequested && <p className={`font-semibold ${cancellationStatus === "rejected" ? "text-muted-foreground" : "text-destructive"}`}>{customerCancellationLabel(cancellationStatus, cancellationRequested, t)}</p>}
           {companyForProfile && <Button variant="outline" className="w-full rounded-full" onClick={() => navigate("/company-profile-readonly", { state: { company: companyForProfile } })}>{t("CompanyProfile")}</Button>}
         </div>
