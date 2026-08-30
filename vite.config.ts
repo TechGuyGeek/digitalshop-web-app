@@ -2,6 +2,7 @@ import { defineConfig, loadEnv, type Plugin } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
+import { normalizeAppBase } from "./src/lib/appBase";
 
 const PRODUCTION_API_ORIGIN = "https://web.gpsshops.com";
 
@@ -27,14 +28,10 @@ function apiOriginPlugin(apiOrigin: string): Plugin {
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   const apiOrigin = (env.VITE_API_ORIGIN || PRODUCTION_API_ORIGIN).replace(/\/$/, "");
-  const appBase = env.VITE_APP_BASE || "/";
+  const appBase = normalizeAppBase(env.VITE_APP_BASE);
 
   if (!/^https:\/\/[^/]+$/.test(apiOrigin)) {
     throw new Error("VITE_API_ORIGIN must be an HTTPS origin without a path");
-  }
-
-  if (!/^\/.*\/$/.test(appBase)) {
-    throw new Error("VITE_APP_BASE must start and end with a slash");
   }
 
   const paymentGateway = mode === "staging"
