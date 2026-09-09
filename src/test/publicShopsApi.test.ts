@@ -69,7 +69,7 @@ describe("canonical public discovery and menu V1 contracts", () => {
 
   it("uses canonical shop detail, groups, and products actions", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch")
-      .mockResolvedValueOnce(envelope({ ...shop, OpeningTimes: "08:00", ClosingTimes: "18:00", LastLoggedOn: "2026-09-09T12:00:00Z" }))
+      .mockResolvedValueOnce(envelope({ ...shop, OpeningTimes: "08:00", ClosingTimes: "18:00", LastLoggedOn: "2026-09-09T12:00:00Z", PaymentMethod: "1" }))
       .mockResolvedValueOnce(envelope([{ ID: 7, OrderGroup: "Food", MenuEnable: "1", ImageSource: "custom", GroupImagePath: "/Images/groups/7.jpg", UpdatedAt: "token-7" }]))
       .mockResolvedValueOnce(envelope([{ ID: 8, GroupID: 7, OrderName: "Soup", OrderPrice: "4.50", OrderDesription: "Hot", imagepath: "/Images/products/8.jpg", MenuEnable: "1" }]));
     const detail = await fetchPublicShopDetail(42);
@@ -81,6 +81,7 @@ describe("canonical public discovery and menu V1 contracts", () => {
     expect(detailUrl.searchParams.toString()).toContain("action=detail");
     expect(detailUrl.searchParams.get("company_id")).toBe("42");
     expect(detail?.LastLoggedOn).toBe("2026-09-09T12:00:00Z");
+    expect(detail?.PaymentMethod).toBe("1");
     expect(groupsUrl.searchParams.get("resource")).toBe("groups");
     expect(itemsUrl.searchParams.get("resource")).toBe("items");
     expect(itemsUrl.searchParams.get("group_id")).toBe("7");

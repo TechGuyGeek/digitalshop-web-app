@@ -37,6 +37,7 @@ export interface PublicShopDetail {
   TakeawayEnable?: string;
   DeliveryEnable?: string;
   PayOnPhoneEnable?: string;
+  PaymentMethod?: string;
   LineOneAddress?: string;
   LineTwoAddress?: string;
   LineThreeAddress?: string;
@@ -167,6 +168,7 @@ export async function fetchPublicShopDetail(companyId: number): Promise<PublicSh
     TakeawayEnable: text(row, "TakeawayEnable"),
     DeliveryEnable: text(row, "DeliveryEnable"),
     PayOnPhoneEnable: text(row, "PayOnPhoneEnable"),
+    PaymentMethod: text(row, "PaymentMethod", "payment_method"),
     LineOneAddress: text(row, "LineOneAddress"),
     LineTwoAddress: text(row, "LineTwoAddress"),
     LineThreeAddress: text(row, "LineThreeAddress"),

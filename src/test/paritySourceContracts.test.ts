@@ -49,4 +49,12 @@ describe("staging parity source contracts", () => {
     expect(shop).toContain("companyContact.whatsapp");
     expect(shop).toContain("companyContact.email");
   });
+
+  it("fails closed for explicit card-only Web checkout", () => {
+    const basket = source("src/pages/Basket.tsx");
+    const publicApi = source("src/lib/publicShopsApi.ts");
+    expect(publicApi).toContain("PaymentMethod?: string");
+    expect(basket).toContain("paymentMethod === 1");
+    expect(basket).toContain("card checkout is unavailable");
+  });
 });

@@ -46,6 +46,7 @@ const Basket = () => {
   const [orderEnable, setOrderEnable] = useState(false);
   const [takeawayEnable, setTakeawayEnable] = useState(false);
   const [deliveryEnable, setDeliveryEnable] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<number | null>(null);
   const [totalTables, setTotalTables] = useState(0);
   const [settingsLoaded, setSettingsLoaded] = useState(false);
   const [clearConfirmOpen, setClearConfirmOpen] = useState(false);
@@ -59,9 +60,11 @@ const Basket = () => {
         const te = isEnabled(company?.TakeawayEnable);
         const de = isEnabled(company?.DeliveryEnable);
         const tables = parseInt(String(company?.TableNumbers || "0"), 10) || 0;
+        const method = Number(company?.PaymentMethod);
         setOrderEnable(oe);
         setTakeawayEnable(te);
         setDeliveryEnable(de);
+        setPaymentMethod(Number.isInteger(method) && [0, 1, 2].includes(method) ? method : null);
         setTotalTables(tables);
         console.log(`[Basket] Company ${companyId} — OrderEnable:${oe}, TakeawayEnable:${te}, DeliveryEnable:${de}, TotalTables:${tables}`);
       } catch (err) {
@@ -77,6 +80,10 @@ const Basket = () => {
     if (!companyId) { toast.error(t("Pleasecreateacompanyfirst")); return; }
     if (items.length === 0) { toast.error(t("YouhaveNoOrdersselected")); return; }
     if (!user) { toast.error(t("Signin")); return; }
+    if (paymentMethod === 1) {
+      toast.error("This shop accepts card payments only, but card checkout is unavailable on the Web.");
+      return;
+    }
     setSubmitting(true);
     Analytics.orderStarted({ company_id: companyId, items: items.length, total, mode });
     try {
@@ -169,6 +176,8 @@ const Basket = () => {
       <div className="bg-card border-t border-border px-4 py-4 grid grid-cols-3 items-center gap-2 shrink-0">
         {!settingsLoaded ? (
           <div className="flex-1 flex justify-center"><Loader2 className="animate-spin text-muted-foreground" size={18} /></div>
+        ) : paymentMethod === 1 ? (
+          <p className="flex-1 text-center text-destructive text-sm">Card-only checkout is unavailable on this Web build.</p>
         ) : !orderEnable && !takeawayEnable && !deliveryEnable ? (
           <p className="flex-1 text-center text-muted-foreground text-sm">{t("Noitemsforsale")}</p>
         ) : (
