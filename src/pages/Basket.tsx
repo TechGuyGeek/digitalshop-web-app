@@ -14,10 +14,9 @@ import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 import { Analytics } from "@/lib/analytics";
 import { placeOrderBatch } from "@/lib/checkout";
 import { useAuth } from "@/contexts/AuthContext";
+import { fetchPublicShopDetail } from "@/lib/publicShopsApi";
 
-const SERVER_DOMAIN = "https://web.gpsshops.com/";
-
-const isEnabled = (value: unknown): boolean => String(value) === "1";
+const isEnabled = (value: unknown): boolean => value === true || value === 1 || String(value).toLowerCase() === "1" || String(value).toLowerCase() === "true";
 
 type OrderMode = "onsite" | "takeaway" | "delivery";
 
@@ -55,12 +54,7 @@ const Basket = () => {
     if (!companyId) return;
     const fetchSettings = async () => {
       try {
-        const url = SERVER_DOMAIN + "menu1/PHPread/ClientMenu/DoesCompanyExistCompanyIDnewUpgraded.php";
-        const formData = new URLSearchParams();
-        formData.append("companyID", companyId);
-        const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: formData.toString() });
-        const data = await res.json();
-        const company = Array.isArray(data) ? data[0] : data;
+        const company = await fetchPublicShopDetail(Number(companyId));
         const oe = isEnabled(company?.OrderEnable);
         const te = isEnabled(company?.TakeawayEnable);
         const de = isEnabled(company?.DeliveryEnable);

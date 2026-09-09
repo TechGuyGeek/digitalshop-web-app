@@ -1,95 +1,95 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Loader2, User, MessageSquare, Phone, Mail } from "lucide-react";
+import { ArrowLeft, Loader2, User, MessageSquare, Phone, Mail, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import AdvertSlot from "@/components/adverts/AdvertSlot";
-import type { DigitalPerson } from "@/lib/api";
+import { blockV1Customer, fetchV1AuthorizedCustomerProfile } from "@/lib/v1Api";
 import { getMenuImageUrl } from "@/lib/authClient";
+import { buildContactLinks } from "@/lib/companyContact";
 
-const SERVER_DOMAIN = "https://web.gpsshops.com/";
-
-async function fetchCustomerProfile(userId: string): Promise<DigitalPerson | null> {
-  const url = SERVER_DOMAIN + "menu1/PHPread/User/RetrievUserProfiledetails.php";
-  const body = new URLSearchParams({ user_id: userId });
-  const res = await fetch(url, { method: "POST", body }); if (!res.ok) return null;
-  const data = await res.json(); const arr = Array.isArray(data) ? data : data?.data ? (Array.isArray(data.data) ? data.data : [data.data]) : [data];
-  return arr.length > 0 ? arr[0] : null;
-}
-
-function getProfileImageUrl(person: DigitalPerson): string | null {
-  const path = String(person.Imagepath || person.imagename || ""); if (!path) return null;
-  return getMenuImageUrl(path);
+interface AuthorizedCustomer {
+  name?: string;
+  image_path?: string;
+  mobile_number?: string;
+  email?: string | null;
+  line_one_address?: string;
+  line_two_address?: string;
+  line_three_address?: string;
+  line_four_address?: string;
+  country?: string;
+  delivery_notes?: string;
 }
 
 const CustomerProfileReadonly = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { t } = useLanguage();
-  const userId = searchParams.get("userid") || "";
+  const orderId = searchParams.get("orderid") || "";
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [person, setPerson] = useState<DigitalPerson | null>(null);
+  const [blocking, setBlocking] = useState(false);
+  const [customer, setCustomer] = useState<AuthorizedCustomer | null>(null);
 
   useEffect(() => {
-    if (!userId) { setLoading(false); setError(true); return; }
-    localStorage.setItem("DontlogmeOut", "true");
-    fetchCustomerProfile(userId).then((p) => { setPerson(p); if (!p) setError(true); }).catch(() => setError(true)).finally(() => setLoading(false));
-  }, [userId]);
+    if (!orderId) { setLoading(false); setError(true); return; }
+    fetchV1AuthorizedCustomerProfile(orderId)
+      .then((result) => { setCustomer(result.customer as AuthorizedCustomer); })
+      .catch(() => setError(true))
+      .finally(() => setLoading(false));
+  }, [orderId]);
 
-  const mobile = person?.MobileNumber || "";
-  const email = String(person?.Email || person?.email || "");
-  const isMobileDevice = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  const normalizeForWhatsApp = (num: string): string => { let cleaned = num.replace(/[\s\-()]/g, ""); if (cleaned.startsWith("0")) cleaned = "44" + cleaned.slice(1); return cleaned; };
+  const mobile = String(customer?.mobile_number || "").trim();
+  const email = String(customer?.email || "").trim();
+  const links = buildContactLinks(mobile, email);
+  const fields: Array<[string, string]> = customer ? [
+    [t("Name"), String(customer.name || "")],
+    [t("Mobile"), mobile],
+    [t("1stlineAddress"), String(customer.line_one_address || "")],
+    [t("2ndlineAddress"), String(customer.line_two_address || "")],
+    [t("3rdlineAddress"), String(customer.line_three_address || "")],
+    [t("4thLineAddress"), String(customer.line_four_address || "")],
+    [t("Country"), String(customer.country || "")],
+    [t("DeliveryNotes"), String(customer.delivery_notes || "")],
+  ].filter(([, value]) => Boolean(value)) : [];
 
-  const handleSms = () => { if (!mobile) return; if (isMobileDevice) window.open(`sms:${mobile}?body=${encodeURIComponent("Welcome to GPS Shops")}`, "_self"); else { navigator.clipboard.writeText(mobile); toast.info(t("Therewasanerror")); } };
-  const handlePhone = () => { if (!mobile) return; if (isMobileDevice) window.open(`tel:${mobile}`, "_self"); else { navigator.clipboard.writeText(mobile); toast.info(t("Therewasanerror")); } };
-  const handleWhatsApp = () => { if (!mobile) return; window.open(`https://wa.me/${normalizeForWhatsApp(mobile)}?text=Welcome%20to%20GPS%20Shops`, "_blank"); };
-  const handleEmail = () => { if (!email) return; window.open(`mailto:${email}`, "_self"); };
+  const blockCustomer = async () => {
+    if (!orderId || blocking) return;
+    setBlocking(true);
+    try {
+      await blockV1Customer(orderId);
+      toast.success("Customer blocked");
+      navigate("/company-orders", { replace: true });
+    } catch (requestError) {
+      toast.error(requestError instanceof Error ? requestError.message : "Unable to block customer");
+    } finally { setBlocking(false); }
+  };
 
-  const imgUrl = person ? getProfileImageUrl(person) : null;
-  const fields: { label: string; value: string }[] = person ? [
-    { label: t("Name"), value: String(person.Name || person.name || "") },
-    { label: t("LastName"), value: String(person.Surname || person.surname || "") },
-    { label: t("Gender"), value: String(person.DateofBirth || "") },
-    { label: t("Mobile"), value: mobile },
-    { label: t("1stlineAddress"), value: String(person.LineOneAddress || "") },
-    { label: t("2ndlineAddress"), value: String(person.LineTwoAddress || "") },
-    { label: t("3rdlineAddress"), value: String(person.LineThreeAddress || "") },
-    { label: t("4thLineAddress"), value: String(person.LineFourAddress || "") },
-    { label: t("Country"), value: String(person.LineCountryAddress || "") },
-    { label: t("DeliveryNotes"), value: String(person.LineDeliveryNotesAddress || "") },
-  ] : [];
+  const openContact = (url: string) => { if (url) window.location.href = url; };
+  const imageUrl = customer?.image_path ? getMenuImageUrl(customer.image_path) : "";
 
   return (
     <div className="h-dvh bg-muted flex flex-col">
       <div className="bg-primary px-4 py-3 flex items-center gap-3 shrink-0">
         <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary/80" onClick={() => navigate(-1)}><ArrowLeft size={20} /></Button>
+        <h1 className="text-lg font-bold text-primary-foreground font-heading">Customer</h1>
       </div>
       <AdvertSlot position="topBanner" className="px-4 py-2" />
       <div className="flex-1 overflow-y-auto">
-        {loading ? (
-          <div className="flex flex-col items-center justify-center py-16 text-muted-foreground"><Loader2 className="animate-spin mb-4" size={32} /><p className="text-sm">{t("Pleasewait")}</p></div>
-        ) : error || !person ? (
-          <div className="flex flex-col items-center justify-center py-16 text-muted-foreground"><span className="text-4xl mb-4">⚠️</span><p className="text-sm">{t("Therewasanerror")}</p></div>
-        ) : (
-          <div className="flex flex-col">
-            <div className="w-full aspect-[4/3] bg-muted overflow-hidden">
-              {imgUrl ? (<img src={imgUrl} alt={String(person.Name || "Customer")} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; (e.target as HTMLImageElement).nextElementSibling?.classList.remove("hidden"); }} />) : null}
-              <div className={`w-full h-full flex items-center justify-center bg-gradient-to-br from-accent/30 to-muted ${imgUrl ? "hidden" : ""}`}><User className="text-muted-foreground" size={64} /></div>
-            </div>
-            <div className="px-6 py-4 space-y-0">
-              {fields.map((f) => (<div key={f.label} className="py-3 border-b border-border"><p className="text-center text-base font-medium text-foreground">{f.value || f.label}</p></div>))}
-            </div>
-            <div className="grid grid-cols-2 gap-3 px-6 py-4">
-              <Button variant="outline" className="rounded-full text-sm" disabled={!mobile} onClick={handleSms}><MessageSquare size={16} className="mr-1" />{t("sms")}</Button>
-              <Button variant="outline" className="rounded-full text-sm" disabled={!mobile} onClick={handlePhone}><Phone size={16} className="mr-1" />{t("call")}</Button>
-              <Button variant="outline" className="rounded-full text-sm" disabled={!mobile} onClick={handleWhatsApp}>WhatsApp</Button>
-              <Button variant="outline" className="rounded-full text-sm" disabled={!email} onClick={handleEmail}><Mail size={16} className="mr-1" />{t("Email")}</Button>
-            </div>
+        {loading ? <div className="flex flex-col items-center justify-center py-16 text-muted-foreground"><Loader2 className="animate-spin mb-4" size={32} /><p className="text-sm">{t("Pleasewait")}</p></div> : error || !customer ? <div className="flex flex-col items-center justify-center py-16 text-muted-foreground"><span className="text-4xl mb-4">⚠️</span><p className="text-sm">{t("Therewasanerror")}</p></div> : <div className="flex flex-col">
+          <div className="w-full aspect-[4/3] bg-muted overflow-hidden">
+            {imageUrl ? <img src={imageUrl} alt={customer.name || "Customer"} className="w-full h-full object-cover" onError={(event) => { event.currentTarget.style.display = "none"; }} /> : <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-accent/30 to-muted"><User className="text-muted-foreground" size={64} /></div>}
           </div>
-        )}
+          <div className="px-6 py-4 space-y-0">{fields.map(([label, value]) => <div key={label} className="py-3 border-b border-border"><p className="text-center text-base font-medium text-foreground">{value || label}</p></div>)}</div>
+          <div className="grid grid-cols-2 gap-3 px-6 py-4">
+            <Button variant="outline" className="rounded-full text-sm" disabled={!links.sms} onClick={() => openContact(links.sms)}><MessageSquare size={16} className="mr-1" />{t("sms")}</Button>
+            <Button variant="outline" className="rounded-full text-sm" disabled={!links.phone} onClick={() => openContact(links.phone)}><Phone size={16} className="mr-1" />{t("call")}</Button>
+            <Button variant="outline" className="rounded-full text-sm" disabled={!links.whatsapp} onClick={() => openContact(links.whatsapp)}>WhatsApp</Button>
+            <Button variant="outline" className="rounded-full text-sm" disabled={!links.email} onClick={() => openContact(links.email)}><Mail size={16} className="mr-1" />{t("Email")}</Button>
+            <Button variant="destructive" className="col-span-2 rounded-full text-sm" disabled={blocking} onClick={() => void blockCustomer()}><Shield size={16} className="mr-1" />{blocking ? t("Pleasewait") : "Block customer"}</Button>
+          </div>
+        </div>}
       </div>
     </div>
   );

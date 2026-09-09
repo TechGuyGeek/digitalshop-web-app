@@ -15,6 +15,7 @@ import {
   createProduct,
   deleteMenuGroup,
   deleteProduct,
+  addProductImage,
   getMenuGroupUsage,
   getProductUsage,
   listMenuGroups,
@@ -22,6 +23,8 @@ import {
   ownerMenuApiUrls,
   renameMenuGroup,
   saveMenuGroupImage,
+  removeProductImage,
+  setPrimaryProductImage,
   toggleMenuGroup,
   toggleProduct,
   updateProduct,
@@ -67,8 +70,8 @@ describe("canonical Web owner-menu contract", () => {
   });
 
   it("uses canonical actions for product list, writes, and server-side order-reference precheck", async () => {
-    mocks.authenticatedFetch.mockResolvedValueOnce(response([{ ID: 4, GroupID: 9, OrderName: "Tea", OrderDesription: "Hot", OrderPrice: "2.50", MenuEnable: "1", imagepath: "/Images/company/CompanyMenu/2/tea.jpeg", ImageSize: 1 }]));
-    await expect(listProducts(2, 9)).resolves.toEqual([expect.objectContaining({ id: 4, group_id: 9, name: "Tea", image_path: "/Images/company/CompanyMenu/2/tea.jpeg" })]);
+    mocks.authenticatedFetch.mockResolvedValueOnce(response([{ ID: 4, GroupID: 9, OrderName: "Tea", OrderDesription: "Hot", OrderPrice: "2.50", MenuEnable: "1", images: ["/Images/company/CompanyMenu/2/tea.jpeg", "/Images/company/CompanyMenu/2/tea-2.jpeg"], youtube_video_id: "M7lc1UVf-VE", ImageSize: 1 }]));
+    await expect(listProducts(2, 9)).resolves.toEqual([expect.objectContaining({ id: 4, group_id: 9, name: "Tea", image_path: "/Images/company/CompanyMenu/2/tea.jpeg", images: ["/Images/company/CompanyMenu/2/tea.jpeg", "/Images/company/CompanyMenu/2/tea-2.jpeg"], youtube_video_id: "M7lc1UVf-VE" })]);
     expect(lastRequest().url).toBe("https://stage-web.gpsshops.com/menu1/api/v1/owner-menu.php?company_id=2&resource=products&group_id=9");
     await createProduct(2, { group_id: 9, name: "Coffee", description: "Black", price: "3.00", image_base64: "image" });
     expect(lastRequest().body).toMatchObject({ action: "add_item", company_id: 2, group_id: 9, name: "Coffee" });
@@ -81,6 +84,20 @@ describe("canonical Web owner-menu contract", () => {
     expect(lastRequest().body).toMatchObject({ action: "item_usage", company_id: 2, item_id: 4 });
     await deleteProduct(2, 4);
     expect(lastRequest().body).toMatchObject({ action: "delete_item", company_id: 2, item_id: 4 });
+  });
+
+  it("uses server-enforced canonical actions for gallery image changes", async () => {
+    mocks.authenticatedFetch.mockResolvedValueOnce(response({ images: ["/one.jpg", "/two.jpg"] }));
+    await addProductImage(2, 4, "encoded-image");
+    expect(lastRequest().body).toEqual({ action: "add_product_image", company_id: 2, item_id: 4, image_base64: "encoded-image" });
+
+    mocks.authenticatedFetch.mockResolvedValueOnce(response({ images: ["/two.jpg"] }));
+    await removeProductImage(2, 4, "/one.jpg");
+    expect(lastRequest().body).toEqual({ action: "remove_product_image", company_id: 2, item_id: 4, image_path: "/one.jpg" });
+
+    mocks.authenticatedFetch.mockResolvedValueOnce(response({ images: ["/two.jpg", "/one.jpg"] }));
+    await setPrimaryProductImage(2, 4, "/two.jpg");
+    expect(lastRequest().body).toEqual({ action: "set_primary_product_image", company_id: 2, item_id: 4, image_path: "/two.jpg" });
   });
 
   it("has one staging-aware owner-menu endpoint and no production resource endpoint", () => {

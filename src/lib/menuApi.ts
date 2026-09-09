@@ -3,7 +3,7 @@ import { API_ORIGIN, AuthApiError, authenticatedFetch } from "@/lib/authClient";
 const OWNER_MENU_URL = `${API_ORIGIN}/menu1/api/v1/owner-menu.php`;
 
 export interface MenuGroupV1 { id: number; name: string; enabled: boolean; image_source: "preset" | "custom" | "none"; preset_key: string | null; custom_image_path: string | null; updated_at: string | null; }
-export interface ProductV1 { id: number; group_id: number; name: string; description: string; price: string; enabled: boolean; image_path: string | null; image_size: number; }
+export interface ProductV1 { id: number; group_id: number; name: string; description: string; price: string; enabled: boolean; image_path: string | null; image_size: number; images: string[]; youtube_video_id: string | null; }
 export interface MenuGroupUsage { group_id: number; safe_to_delete: boolean; product_count: number; order_reference_count: number; }
 export interface ProductUsage { item_id: number; reference_count: number; }
 
@@ -18,6 +18,14 @@ async function read<T>(response: Response): Promise<T> {
 function numberValue(value: unknown): number { const number = Number(value); return Number.isFinite(number) ? number : 0; }
 function stringValue(value: unknown): string { return typeof value === "string" ? value : value == null ? "" : String(value); }
 
+function imagePaths(row: OwnerMenuRow): string[] {
+  const values = Array.isArray(row.images) ? row.images : [];
+  const paths = values.map((value) => stringValue(value)).filter(Boolean);
+  if (paths.length > 0) return paths;
+  const legacy = stringValue(row.imagepath ?? row.image_path);
+  return legacy ? [legacy] : [];
+}
+
 function menuGroupFromOwnerMenu(row: OwnerMenuRow): MenuGroupV1 {
   const source = stringValue(row.ImageSource ?? row.image_source).toLowerCase();
   return {
@@ -31,11 +39,13 @@ function menuGroupFromOwnerMenu(row: OwnerMenuRow): MenuGroupV1 {
 }
 
 function productFromOwnerMenu(row: OwnerMenuRow): ProductV1 {
+  const images = imagePaths(row);
   return {
     id: numberValue(row.ID ?? row.id), group_id: numberValue(row.GroupID ?? row.group_id),
     name: stringValue(row.OrderName ?? row.name), description: stringValue(row.OrderDesription ?? row.description), price: stringValue(row.OrderPrice ?? row.price),
     enabled: stringValue(row.MenuEnable ?? row.MenuItemEnable ?? row.enabled) === "1" || row.enabled === true,
-    image_path: stringValue(row.imagepath ?? row.image_path) || null, image_size: numberValue(row.ImageSize ?? row.image_size),
+    image_path: images[0] || null, image_size: numberValue(row.ImageSize ?? row.image_size), images,
+    youtube_video_id: stringValue(row.youtube_video_id) || null,
   };
 }
 
@@ -58,12 +68,15 @@ export async function listProducts(companyId: number, groupId: number): Promise<
   const query = new URLSearchParams({ company_id: String(companyId), resource: "products", group_id: String(groupId) });
   return (await read<OwnerMenuRow[]>(await authenticatedFetch(`${OWNER_MENU_URL}?${query.toString()}`))).map(productFromOwnerMenu);
 }
-export async function createProduct(companyId: number, input: { group_id: number; name: string; description: string; price: string; image_base64?: string; }): Promise<{ id: number }> { return ownerMenuWrite(companyId, "add_item", input); }
-export async function updateProduct(companyId: number, itemId: number, input: { name: string; description: string; price: string; image_base64?: string; }): Promise<void> { await ownerMenuWrite(companyId, "update_item", { item_id: itemId, ...input }); }
+export async function createProduct(companyId: number, input: { group_id: number; name: string; description: string; price: string; image_base64?: string; youtube_video_url?: string; }): Promise<{ id: number }> { return ownerMenuWrite(companyId, "add_item", input); }
+export async function updateProduct(companyId: number, itemId: number, input: { name: string; description: string; price: string; image_base64?: string; youtube_video_url?: string; }): Promise<void> { await ownerMenuWrite(companyId, "update_item", { item_id: itemId, ...input }); }
+export async function addProductImage(companyId: number, itemId: number, imageBase64: string): Promise<{ images: string[] }> { return ownerMenuWrite(companyId, "add_product_image", { item_id: itemId, image_base64: imageBase64 }); }
+export async function removeProductImage(companyId: number, itemId: number, imagePath: string): Promise<{ images: string[] }> { return ownerMenuWrite(companyId, "remove_product_image", { item_id: itemId, image_path: imagePath }); }
+export async function setPrimaryProductImage(companyId: number, itemId: number, imagePath: string): Promise<{ images: string[] }> { return ownerMenuWrite(companyId, "set_primary_product_image", { item_id: itemId, image_path: imagePath }); }
 export async function toggleProduct(companyId: number, itemId: number, enabled: boolean): Promise<void> { await ownerMenuWrite(companyId, "toggle_item", { item_id: itemId, enabled }); }
 export async function getProductUsage(companyId: number, itemId: number): Promise<ProductUsage> { return ownerMenuWrite(companyId, "item_usage", { item_id: itemId }); }
 export async function deleteProduct(companyId: number, itemId: number): Promise<void> { await ownerMenuWrite(companyId, "delete_item", { item_id: itemId }); }
 
 export function asLegacyGroup(group: MenuGroupV1) { return { ID: String(group.id), OrderGroup: group.name, companyid: 0, MenuEnable: group.enabled ? "1" : "0", menuGroupEnabled: group.enabled ? "1" : "0" }; }
-export function asLegacyProduct(product: ProductV1) { return { ID: String(product.id), GroupID: String(product.group_id), OrderName: product.name, OrderDesription: product.description, OrderPrice: product.price, imagepath: product.image_path || "", ImageSize: String(product.image_size || 0), MenuEnable: product.enabled ? "1" : "0", MenuItemEnable: product.enabled ? "1" : "0" }; }
+export function asLegacyProduct(product: ProductV1) { return { ID: String(product.id), GroupID: String(product.group_id), OrderName: product.name, OrderDesription: product.description, OrderPrice: product.price, imagepath: product.image_path || "", images: product.images, youtube_video_id: product.youtube_video_id, ImageSize: String(product.image_size || 0), MenuEnable: product.enabled ? "1" : "0", MenuItemEnable: product.enabled ? "1" : "0" }; }
 export const ownerMenuApiUrls = { OWNER_MENU_URL };

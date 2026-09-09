@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { listProducts, createProduct } from "@/lib/menuApi";
+import { fetchV1ProStatus } from "@/lib/v1Api";
 import { useLanguage } from "@/contexts/LanguageContext";
 import VideoAdvert from "@/components/adverts/VideoAdvert";
 import WebcamCapture from "@/components/WebcamCapture";
@@ -38,6 +39,8 @@ const AddProduct = () => {
   const companyId = searchParams.get("companyId") || "";
   const groupName = searchParams.get("groupName") || "Products";
   const [name, setName] = useState(""); const [description, setDescription] = useState(""); const [price, setPrice] = useState("");
+  const [youtubeUrl, setYoutubeUrl] = useState("");
+  const [isPro, setIsPro] = useState(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null); const [imageBase64, setImageBase64] = useState<string>("");
   const [saving, setSaving] = useState(false);
   const [showVideoAd, setShowVideoAd] = useState(false);
@@ -46,7 +49,7 @@ const AddProduct = () => {
   const fileInputRef = useRef<HTMLInputElement>(null); const cameraInputRef = useRef<HTMLInputElement>(null);
   const backUrl = `/group-products?groupId=${groupId}&companyId=${companyId}&groupName=${encodeURIComponent(groupName)}`;
 
-  const isPaidUser = () => {
+  const legacyPro = () => {
     try {
       const stored = localStorage.getItem("digitalUser");
       if (!stored) return false;
@@ -57,8 +60,17 @@ const AddProduct = () => {
 
   useEffect(() => {
     if (!groupId) return;
-    listProducts(Number(companyId), Number(groupId)).then(data => setExistingProductCount(data.length))
-      .catch(() => {});
+    setIsPro(legacyPro());
+    Promise.allSettled([listProducts(Number(companyId), Number(groupId)), fetchV1ProStatus()])
+      .then(([productsResult, statusResult]) => {
+        if (productsResult.status === "fulfilled") {
+          setExistingProductCount(Array.isArray(productsResult.value) ? productsResult.value.length : 0);
+        }
+        if (statusResult.status === "fulfilled" && statusResult.value) {
+          const status = statusResult.value;
+          setIsPro(status.is_pro === true || String(status.paid_user ?? status.Paiduser ?? "") === "2" || legacyPro());
+        }
+      });
   }, [groupId, companyId]);
 
   const handleFileSelect = async (file: File) => {
@@ -85,16 +97,19 @@ const AddProduct = () => {
     const finalName = name.trim() || "-"; const finalDesc = description.trim() || "-";
     setSaving(true);
     try {
-      await createProduct(Number(companyId), { group_id: Number(groupId), name: finalName, description: finalDesc, price: priceNum.toFixed(2), image_base64: imageBase64 || undefined });
+      await createProduct(Number(companyId), {
+        group_id: Number(groupId), name: finalName, description: finalDesc, price: priceNum.toFixed(2),
+        image_base64: imageBase64 || undefined,
+        ...(isPro && youtubeUrl.trim() ? { youtube_video_url: youtubeUrl.trim() } : {}),
+      });
       toast.success(t("SaveSuccessful")); navigate(backUrl);
     } catch { toast.error(t("Pleasecheckyourinternetconnection")); } finally { setSaving(false); }
   };
 
   const handleSave = async () => {
-    if (isPaidUser()) { await actuallySave(); return; }
     const advertId = VIDEO_TRIGGERS.afterFirstGroup;
     const advert = advertId ? ADVERT_LIBRARY[advertId] : null;
-    const needsAdvert = existingProductCount > 0 && ADVERT_SETTINGS.enabled && ADVERT_SETTINGS.videoAdsEnabled;
+    const needsAdvert = !isPro && existingProductCount > 0 && ADVERT_SETTINGS.enabled && ADVERT_SETTINGS.videoAdsEnabled;
     if (needsAdvert && advert?.type === "video") { setShowVideoAd(true); return; }
     await actuallySave();
   };
@@ -128,6 +143,7 @@ const AddProduct = () => {
           <div className="space-y-1.5"><label className="text-sm font-medium text-foreground">{t("ItemName")}</label><Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t("ItemName")} className="text-foreground" /></div>
           <div className="space-y-1.5"><label className="text-sm font-medium text-foreground">{t("ItemDescription")}</label><Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder={t("ItemDescription")} rows={4} className="text-foreground" /></div>
           <div className="space-y-1.5"><label className="text-sm font-medium text-foreground">{t("Price")}</label><Input value={price} onChange={(e) => setPrice(e.target.value)} placeholder="0.00" type="number" step="0.01" min="0" className="text-foreground" /></div>
+          <div className="space-y-1.5"><label className="text-sm font-medium text-foreground">YouTube video {isPro ? "" : "(Pro)"}</label><Input value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)} placeholder="https://www.youtube.com/watch?v=M7lc1UVf-VE" disabled={!isPro} className="text-foreground" /><p className="text-xs text-muted-foreground">{isPro ? "The server validates and normalizes the YouTube URL." : "Product video is available with GPS Shops Pro."}</p></div>
           <Button className="w-full mt-2" onClick={handleSave} disabled={saving}>
             {saving ? <Loader2 size={16} className="mr-2 animate-spin" /> : <Save size={16} className="mr-2" />}
             {saving ? t("Pleasewait") : t("Save")}

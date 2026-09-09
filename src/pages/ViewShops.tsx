@@ -10,8 +10,8 @@ const ViewShops = () => {
   const { t } = useLanguage();
 
   const shopCategories = [
-    { label: t("FreeView"), icon: Store, description: t("Clickformoreinfo"), path: "/free-shops" },
     { label: t("PaidView"), icon: CreditCard, description: t("Clickformoreinfo"), path: "/paid-shops" },
+    { label: t("FreeView"), icon: Store, description: t("Clickformoreinfo"), path: "/free-shops" },
     { label: t("ViewGlobalShops"), icon: Globe, description: t("Clickformoreinfo"), path: "/global-shops" },
     { label: t("Scan"), icon: QrCode, description: t("BarcodeGenerator"), path: "/qr-scanner" },
   ];

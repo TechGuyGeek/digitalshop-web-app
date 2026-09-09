@@ -68,6 +68,26 @@ export function createV1OrderQr(orderId: string): Promise<{ token: string; order
   return postV1<{ token: string; order_id: string }>("/order-payment-qr.php", { order_id: orderId });
 }
 
+export function fetchV1ProStatus(): Promise<Record<string, unknown>> {
+  return getV1<Record<string, unknown>>("/pro/status.php");
+}
+
+export function fetchV1BlockedCustomers(): Promise<{ customers: Record<string, unknown>[] }> {
+  return getV1<{ customers: Record<string, unknown>[] }>("/company-customer-moderation.php");
+}
+
+export function blockV1Customer(orderId: string): Promise<Record<string, unknown>> {
+  return postV1<Record<string, unknown>>("/company-customer-moderation.php", { order_id: orderId });
+}
+
+export function unblockV1Customer(orderId: string): Promise<Record<string, unknown>> {
+  return deleteV1<Record<string, unknown>>("/company-customer-moderation.php", { order_id: orderId });
+}
+
+export function fetchV1AuthorizedCustomerProfile(orderId: string): Promise<{ customer: Record<string, unknown> }> {
+  return getV1<{ customer: Record<string, unknown> }>(`/company-customer-profile.php?order_id=${encodeURIComponent(orderId)}`);
+}
+
 export function buildMenuImageUrl(imagePath: string | null | undefined): string {
   return getMenuImageUrl(imagePath);
 }

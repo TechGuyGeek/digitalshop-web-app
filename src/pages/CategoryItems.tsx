@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, ShoppingBasket, Loader2, AlertCircle } from "lucide-react";
+import { ArrowLeft, ShoppingBasket, Loader2, AlertCircle, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useBasket } from "@/contexts/BasketContext";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
 import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
+import ProductMedia from "@/components/ProductMedia";
 import { fetchPublicMenuItems, getPublicProductImageUrl, type PublicProduct } from "@/lib/publicShopsApi";
 
 const CategoryItems = () => {
@@ -31,7 +32,7 @@ const CategoryItems = () => {
       } catch { setError(t("Pleasecheckyourinternetconnection")); } finally { setLoading(false); }
     };
     fetchProducts();
-  }, [groupId]);
+  }, [companyId, groupId, t]);
 
   const handleAddToBasket = (product: PublicProduct) => {
     const price = parseFloat(product.OrderPrice || "0");
@@ -64,20 +65,28 @@ const CategoryItems = () => {
         )}
         {!loading && !error && products.map((product) => {
           const price = parseFloat(product.OrderPrice || "0");
-          const imageUrl = getPublicProductImageUrl(product.imagepath, product.ID);
+          const mediaCount = (product.images?.length || (product.imagepath ? 1 : 0)) + (product.youtube_video_id ? 1 : 0);
           return (
-            <button key={product.ID} className="w-full text-left rounded-xl overflow-hidden bg-card shadow-md hover:shadow-lg transition-shadow" onClick={() => handleAddToBasket(product)}>
+            <div key={product.ID} className="rounded-xl overflow-hidden bg-card shadow-md hover:shadow-lg transition-shadow">
               <div className="relative w-full aspect-video bg-muted">
-                {imageUrl ? (<img src={imageUrl} alt={product.OrderName} className="w-full h-full object-cover" />) : (
-                  <div className="w-full h-full bg-gradient-to-br from-accent/30 to-muted flex items-center justify-center"><span className="text-4xl">🍽️</span></div>
-                )}
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-4 py-3 flex items-end justify-between">
+                <ProductMedia
+                  images={product.images?.length ? product.images : (product.imagepath ? [product.imagepath] : [])}
+                  youtubeVideoId={product.youtube_video_id}
+                  alt={product.OrderName}
+                />
+                <div className="pointer-events-none absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-4 py-3 flex items-end justify-between">
                   <span className="text-white font-bold text-sm uppercase tracking-wide">{product.OrderName}</span>
                   {price > 0 && <span className="text-white font-bold text-sm">£{price.toFixed(2)}</span>}
                 </div>
               </div>
-              {product.OrderDesription && (<div className="px-4 py-3"><p className="text-muted-foreground text-sm">{product.OrderDesription}</p></div>)}
-            </button>
+              {product.OrderDesription && (<div className="px-4 pt-3"><p className="text-muted-foreground text-sm">{product.OrderDesription}</p></div>)}
+              <div className="flex items-center justify-between gap-3 px-4 py-3">
+                <span className="text-xs text-muted-foreground">{mediaCount > 1 ? `${mediaCount} media items` : ""}</span>
+                <Button variant="default" className="rounded-full" onClick={() => handleAddToBasket(product)}>
+                  <Plus size={16} className="mr-2" />{t("Add") || "Add to basket"}
+                </Button>
+              </div>
+            </div>
           );
         })}
       </div>

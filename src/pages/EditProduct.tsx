@@ -1,51 +1,53 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Camera, Image as ImageIcon, Save, Loader2 } from "lucide-react";
+import { ArrowLeft, Camera, Image as ImageIcon, Save, Loader2, Trash2, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { getMenuImageUrl } from "@/lib/authClient";
-import { updateProduct, listProducts } from "@/lib/menuApi";
 import { useLanguage } from "@/contexts/LanguageContext";
 import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 import WebcamCapture from "@/components/WebcamCapture";
-
-function getImageUrl(path?: string) { return getMenuImageUrl(path); }
+import ProductMedia from "@/components/ProductMedia";
+import { addProductImage, listProducts, removeProductImage, setPrimaryProductImage, updateProduct, type ProductV1 } from "@/lib/menuApi";
+import { fetchV1ProStatus } from "@/lib/v1Api";
+import { getMenuImageUrl } from "@/lib/authClient";
 
 function resizeAndConvertToBase64(file: File, maxSize = 800): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = (event) => {
       const img = new window.Image();
       img.onload = () => {
         const canvas = document.createElement("canvas");
-        let w = img.width, h = img.height;
-        if (w > maxSize || h > maxSize) { if (w > h) { h = Math.round(h * maxSize / w); w = maxSize; } else { w = Math.round(w * maxSize / h); h = maxSize; } }
-        canvas.width = w; canvas.height = h;
-        canvas.getContext("2d")!.drawImage(img, 0, 0, w, h);
+        let width = img.width;
+        let height = img.height;
+        if (width > maxSize || height > maxSize) {
+          if (width > height) { height = Math.round(height * maxSize / width); width = maxSize; }
+          else { width = Math.round(width * maxSize / height); height = maxSize; }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext("2d")!.drawImage(img, 0, 0, width, height);
         resolve(canvas.toDataURL("image/jpeg", 0.85).split(",")[1]);
       };
-      img.onerror = reject; img.src = e.target?.result as string;
+      img.onerror = reject;
+      img.src = String(event.target?.result || "");
     };
-    reader.onerror = reject; reader.readAsDataURL(file);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
   });
 }
 
-interface ProductLookupItem {
-  ID?: string;
-  ImageSize?: string;
-  MenuEnable?: string;
-  MenuItemEnable?: string;
-  imagepath?: string;
-}
-
-interface EditProductResponse {
-  Error?: string;
-  Message?: string;
-  Result?: boolean;
-  ServerMessage?: string;
-  [key: string]: unknown;
+function legacyProEntitlement(): boolean {
+  try {
+    const stored = localStorage.getItem("digitalUser");
+    if (!stored) return false;
+    const user = JSON.parse(stored) as Record<string, unknown>;
+    return String(user.PaidUser ?? user.Paiduser ?? "") === "2";
+  } catch {
+    return false;
+  }
 }
 
 const EditProduct = () => {
@@ -56,84 +58,128 @@ const EditProduct = () => {
   const groupId = searchParams.get("groupId") || "";
   const companyId = searchParams.get("companyId") || "";
   const groupName = searchParams.get("groupName") || "Products";
-  const initialName = searchParams.get("name") || "";
-  const initialDesc = searchParams.get("desc") || "";
-  const initialPrice = searchParams.get("price") || "";
-  const initialImage = searchParams.get("image") || "";
-  const [name, setName] = useState(initialName); const [description, setDescription] = useState(initialDesc);
-  const [price, setPrice] = useState(initialPrice); const [imagePreview, setImagePreview] = useState(getImageUrl(initialImage));
-  const [imageLoadFailed, setImageLoadFailed] = useState(false);
-  const [newImageBase64, setNewImageBase64] = useState<string | null>(null); const [saving, setSaving] = useState(false);
-  const initialImageSize = searchParams.get("imageSize") || "";
-  const [currentImagePath, setCurrentImagePath] = useState(initialImage);
-  const [currentImageSize, setCurrentImageSize] = useState(initialImageSize);
+  const [name, setName] = useState(searchParams.get("name") || "");
+  const [description, setDescription] = useState(searchParams.get("desc") || "");
+  const [price, setPrice] = useState(searchParams.get("price") || "");
+  const [images, setImages] = useState<string[]>([]);
+  const [youtubeVideoId, setYoutubeVideoId] = useState<string | null>(null);
+  const [youtubeUrl, setYoutubeUrl] = useState("");
+  const [youtubeDirty, setYoutubeDirty] = useState(false);
+  const [newImageBase64, setNewImageBase64] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState(searchParams.get("image") ? getMenuImageUrl(searchParams.get("image")) : "");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [workingImage, setWorkingImage] = useState(false);
+  const [isPro, setIsPro] = useState(legacyProEntitlement());
   const [webcamOpen, setWebcamOpen] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null); const cameraInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const backUrl = `/group-products?groupId=${groupId}&companyId=${companyId}&groupName=${encodeURIComponent(groupName)}`;
 
   useEffect(() => {
-    if (!groupId || !productId || (initialImage && initialImageSize)) return;
-    listProducts(Number(companyId), Number(groupId))
-      .then((data) => {
-        if (!Array.isArray(data)) return;
-        const current = data.find((item) => String(item.id || "") === productId);
-        if (!current) return;
-
-        const nextImagePath = String(current.image_path || "").trim();
-        const nextImageSize = String(current.image_size || "").trim();
-
-        if (nextImagePath) {
-          setCurrentImagePath(nextImagePath);
-          if (!initialImage) {
-            setImagePreview(getImageUrl(nextImagePath));
-            setImageLoadFailed(false);
-          }
+    if (!companyId || !groupId || !productId) { setLoading(false); return; }
+    let cancelled = false;
+    Promise.all([listProducts(Number(companyId), Number(groupId)), fetchV1ProStatus().catch(() => ({}))])
+      .then(([products, status]) => {
+        if (cancelled) return;
+        const product: ProductV1 | undefined = products.find((item) => String(item.id) === productId);
+        if (product) {
+          setName(product.name);
+          setDescription(product.description);
+          setPrice(product.price);
+          const nextImages = product.images.length > 0 ? product.images : (product.image_path ? [product.image_path] : []);
+          setImages(nextImages);
+          setImagePreview(nextImages[0] ? getMenuImageUrl(nextImages[0]) : "");
+          setYoutubeVideoId(product.youtube_video_id);
+          setYoutubeUrl(product.youtube_video_id ? `https://www.youtube.com/watch?v=${product.youtube_video_id}` : "");
         }
-
-        if (nextImageSize) setCurrentImageSize(nextImageSize);
+        setIsPro(status.is_pro === true || String(status.paid_user ?? status.Paiduser ?? "") === "2" || legacyProEntitlement());
       })
-      .catch(() => {});
-  }, [groupId, productId, initialImage, initialImageSize, companyId]);
+      .catch(() => toast.error("Unable to load product"))
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [companyId, groupId, productId]);
 
-  const handleFileSelect = async (file: File) => {
+  const handlePrimaryFile = async (file: File) => {
     try {
       const base64 = await resizeAndConvertToBase64(file);
       setNewImageBase64(base64);
       setImagePreview(`data:image/jpeg;base64,${base64}`);
-      setImageLoadFailed(false);
     } catch { toast.error(t("SaveFailed")); }
+  };
+
+  const handleGalleryFile = async (file: File) => {
+    try {
+      setWorkingImage(true);
+      const base64 = await resizeAndConvertToBase64(file);
+      const result = await addProductImage(Number(companyId), Number(productId), base64);
+      const next = result.images || [];
+      setImages(next);
+      setImagePreview(next[0] ? getMenuImageUrl(next[0]) : "");
+      toast.success(t("DetailswereSaved"));
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to add image");
+    } finally { setWorkingImage(false); }
   };
 
   const handleWebcamCapture = (base64: string) => {
     setNewImageBase64(base64);
     setImagePreview(`data:image/jpeg;base64,${base64}`);
-    setImageLoadFailed(false);
   };
 
   const handleCameraClick = () => {
     const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
       || (/Macintosh/i.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
-    if (mobile) {
-      cameraInputRef.current?.click();
-      return;
-    }
-    setWebcamOpen(true);
+    if (mobile) cameraInputRef.current?.click();
+    else setWebcamOpen(true);
+  };
+
+  const removeImage = async (path: string) => {
+    try {
+      setWorkingImage(true);
+      const result = await removeProductImage(Number(companyId), Number(productId), path);
+      const next = result.images || [];
+      setImages(next);
+      setImagePreview(next[0] ? getMenuImageUrl(next[0]) : "");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to remove image");
+    } finally { setWorkingImage(false); }
+  };
+
+  const promoteImage = async (path: string) => {
+    try {
+      setWorkingImage(true);
+      const result = await setPrimaryProductImage(Number(companyId), Number(productId), path);
+      const next = result.images || images;
+      setImages(next);
+      setImagePreview(next[0] ? getMenuImageUrl(next[0]) : "");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to set primary image");
+    } finally { setWorkingImage(false); }
   };
 
   const handleSave = async () => {
     if (!name.trim()) { toast.error(t("ItemName")); return; }
-    const priceNum = parseFloat(price);
-    if (isNaN(priceNum) || priceNum < 0) { toast.error(t("ErrorwithPrice")); return; }
-
+    const priceNumber = parseFloat(price);
+    if (Number.isNaN(priceNumber) || priceNumber < 0) { toast.error(t("ErrorwithPrice")); return; }
     setSaving(true);
     try {
-      await updateProduct(Number(companyId), Number(productId), { name: name.trim(), description: description.trim(), price: priceNum.toFixed(2), image_base64: newImageBase64 || undefined });
-      toast.success(t("SaveSuccessful")); navigate(backUrl);
+      await updateProduct(Number(companyId), Number(productId), {
+        name: name.trim(),
+        description: description.trim(),
+        price: priceNumber.toFixed(2),
+        image_base64: newImageBase64 || undefined,
+        ...(youtubeDirty && isPro ? { youtube_video_url: youtubeUrl.trim() } : {}),
+      });
+      toast.success(t("SaveSuccessful"));
+      navigate(backUrl);
     } catch (error) {
-      console.error("[EditProduct] network error:", error);
-      toast.error(error instanceof TypeError ? "Network error while saving this product." : "Unexpected error while saving this product.");
+      toast.error(error instanceof Error ? error.message : t("SaveFailed"));
     } finally { setSaving(false); }
   };
+
+  const previewImages = newImageBase64 && imagePreview ? [imagePreview, ...images.slice(1)] : images;
+  const canAddProductImage = images.length === 0 || isPro;
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -143,28 +189,35 @@ const EditProduct = () => {
       </div>
       <div className="flex-1 overflow-y-auto">
         <ProfileHelpAssistant translationKey="HELPEDITDETAILSFULL" />
-        <div className="w-full h-56 bg-muted flex items-center justify-center overflow-hidden">
-          {imagePreview && !imageLoadFailed ? (<img key={imagePreview} src={imagePreview} alt={name || "Product image"} className="w-full h-full object-cover" onError={() => setImageLoadFailed(true)} />) : (
-            <div className="flex flex-col items-center gap-2 text-muted-foreground"><ImageIcon size={48} /></div>
-          )}
-        </div>
-        <div className="grid grid-cols-3 gap-3 p-4">
-          <Button variant="outline" onClick={handleCameraClick}><Camera size={16} className="mr-1" />{t("Camera")}</Button>
-          <Button variant="outline" onClick={() => fileInputRef.current?.click()}><ImageIcon size={16} className="mr-1" />{t("Gallery")}</Button>
-          <Button onClick={handleSave} disabled={saving}>{saving ? <Loader2 size={16} className="mr-1 animate-spin" /> : <Save size={16} className="mr-1" />}{t("Save")}</Button>
-        </div>
-        <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleFileSelect(file); e.target.value = ""; }} />
-        <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) handleFileSelect(file); e.target.value = ""; }} />
-        <div className="p-4 space-y-4">
-          <div><Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t("ItemName")} className="text-center font-bold text-foreground" /></div>
-          <div className="border-t border-border" />
-          <div><Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder={t("ItemDescription")} rows={4} className="text-foreground" /></div>
-          <div className="border-t border-border" />
-          <div><Input value={price} onChange={(e) => setPrice(e.target.value)} placeholder={t("Price")} type="number" step="0.01" min="0" className="text-center font-bold text-foreground" /></div>
-          <Button className="w-full max-w-[200px] mx-auto block" onClick={handleSave} disabled={saving}>
-            {saving ? <Loader2 size={16} className="mr-1 animate-spin" /> : <Save size={16} className="mr-1" />}{t("Save")}
-          </Button>
-        </div>
+        {loading && <div className="flex justify-center py-4"><Loader2 className="animate-spin" /></div>}
+          <div className="h-64 p-4"><ProductMedia images={previewImages} youtubeVideoId={youtubeVideoId} alt={name || "Product"} /></div>
+          <div className="grid grid-cols-3 gap-3 p-4">
+            <Button variant="outline" onClick={handleCameraClick}><Camera size={16} className="mr-1" />{t("Camera")}</Button>
+            <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={workingImage || images.length >= 5 || !canAddProductImage}><ImageIcon size={16} className="mr-1" />{t("Gallery")}</Button>
+            <Button onClick={handleSave} disabled={saving}>{saving ? <Loader2 size={16} className="mr-1 animate-spin" /> : <Save size={16} className="mr-1" />}{t("Save")}</Button>
+          </div>
+          <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; if (file) void handlePrimaryFile(file); event.target.value = ""; }} />
+          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; if (file) void handleGalleryFile(file); event.target.value = ""; }} />
+          <div className="px-4 space-y-3">
+            <p className="text-xs text-muted-foreground">Product images are ordered; the first image is free. Additional images are available with GPS Shops Pro and remain server-gated.</p>
+            {images.map((path, index) => <div key={path} className="flex items-center gap-2 rounded-lg border border-border p-2">
+              <img src={getMenuImageUrl(path)} alt={`Product ${index + 1}`} className="h-14 w-14 rounded object-cover" />
+              <span className="flex-1 text-xs truncate">{index === 0 ? "Primary image" : `Image ${index + 1}`}</span>
+              <Button size="icon" variant={index === 0 ? "secondary" : "outline"} onClick={() => void promoteImage(path)} disabled={workingImage || index === 0} aria-label="Set primary"><Star size={15} /></Button>
+              <Button size="icon" variant="outline" onClick={() => void removeImage(path)} disabled={workingImage} aria-label="Remove image"><Trash2 size={15} /></Button>
+            </div>)}
+          </div>
+          <div className="p-4 space-y-4">
+            <Input value={name} onChange={(event) => setName(event.target.value)} placeholder={t("ItemName")} className="text-center font-bold text-foreground" />
+            <Textarea value={description} onChange={(event) => setDescription(event.target.value)} placeholder={t("ItemDescription")} rows={4} className="text-foreground" />
+            <Input value={price} onChange={(event) => setPrice(event.target.value)} placeholder={t("Price")} type="number" step="0.01" min="0" className="text-center font-bold text-foreground" />
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-foreground">YouTube video {isPro ? "" : "(Pro)"}</label>
+              <Input value={youtubeUrl} onChange={(event) => { setYoutubeUrl(event.target.value); setYoutubeDirty(true); }} placeholder="https://www.youtube.com/watch?v=M7lc1UVf-VE" disabled={!isPro} className="text-foreground" />
+              <p className="text-xs text-muted-foreground">{isPro ? "Clear the field to remove the video. The server validates and normalizes the URL." : "Product video is available with GPS Shops Pro."}</p>
+            </div>
+            <Button className="w-full" onClick={handleSave} disabled={saving}>{saving ? <Loader2 size={16} className="mr-1 animate-spin" /> : <Save size={16} className="mr-1" />}{t("Save")}</Button>
+          </div>
       </div>
       <WebcamCapture open={webcamOpen} onOpenChange={setWebcamOpen} onCapture={handleWebcamCapture} maxSize={800} />
     </div>

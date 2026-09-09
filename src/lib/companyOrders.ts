@@ -32,6 +32,12 @@ export interface CompanyOrderItem {
   CancellationStatus?: string;
   RandomeCode?: string;
   OrderPrice?: string | number;
+  quantity?: string | number;
+  Quantity?: string | number;
+  OrderQuantity?: string | number;
+  product_quantity?: string | number;
+  line_total?: string | number;
+  LineTotal?: string | number;
   OrderName?: string;
   OrderDesription?: string;
   product_imagepath?: string;
@@ -68,7 +74,13 @@ export interface CompanyGroupedOrder {
   cancellationStatus: string;
   totalItems: number;
   totalPrice: string;
+  hasCanonicalReference: boolean;
   items: CompanyOrderItem[];
+}
+
+export interface OwnerOrderStatistics {
+  orders: number;
+  products: number;
 }
 
 const clean = (value: unknown): string => String(value ?? "").trim();
@@ -151,12 +163,47 @@ function fallbackIdentity(row: CompanyOrderItem): string {
     .map(clean).join("|");
 }
 
+function legacyOrderId(value: unknown): string {
+  const result = clean(value);
+  return result && !["0", "null", "undefined"].includes(result.toLowerCase()) ? result : "";
+}
+
+function orderIdentity(row: CompanyOrderItem): string {
+  const reference = trustedReference(row.RandomeCode);
+  if (reference) return `reference:${reference}`;
+  const orderId = legacyOrderId(row.orderid);
+  if (orderId) return `order:${orderId}`;
+  return `context:${fallbackIdentity(row)}`;
+}
+
+function quantityFor(row: CompanyOrderItem): number {
+  const value = Number(row.quantity ?? row.Quantity ?? row.OrderQuantity ?? row.product_quantity);
+  return Number.isInteger(value) && value > 0 ? value : 1;
+}
+
+function lineTotalFor(row: CompanyOrderItem): number {
+  const explicit = Number(row.line_total ?? row.LineTotal);
+  if (Number.isFinite(explicit)) return explicit;
+  const price = Number(row.OrderPrice);
+  return Number.isFinite(price) ? price * quantityFor(row) : 0;
+}
+
+const OWNER_ORDER_CONTACT_FIELDS = new Set([
+  "customer_email", "customer_mobile", "customer_address_line_1",
+  "customer_address_line_2", "customer_address_line_3", "customer_address_line_4",
+  "customer_country", "customer_delivery_notes", "PersonID", "person_id", "UserID", "user_id",
+]);
+
+/** Keep legacy order rows usable without making them a contact-data source. */
+export function withoutOwnerCustomerContact(item: CompanyOrderItem): CompanyOrderItem {
+  return Object.fromEntries(Object.entries(item).filter(([key]) => !OWNER_ORDER_CONTACT_FIELDS.has(key))) as CompanyOrderItem;
+}
+
 /** Group only by the trusted checkout-wide reference when one exists. */
 export function groupCompanyOrders(orders: CompanyOrderItem[]): CompanyGroupedOrder[] {
   const map = new Map<string, CompanyOrderItem[]>();
   for (const row of orders) {
-    const reference = trustedReference(row.RandomeCode);
-    const key = reference ? `reference:${reference}` : `context:${fallbackIdentity(row)}`;
+    const key = orderIdentity(row);
     if (!map.has(key)) map.set(key, []);
     map.get(key)!.push(row);
   }
@@ -164,14 +211,17 @@ export function groupCompanyOrders(orders: CompanyOrderItem[]): CompanyGroupedOr
   return [...map.entries()].map(([groupKey, items]) => {
     const first = items[0] || {};
     const normalizedItems = items.map((item) => ({
-      ...item,
+      // Owner order rows may contain legacy contact columns. Do not carry
+      // those values into the Web order model; contact access is exclusively
+      // through company-customer-profile.php?order_id=...
+      ...withoutOwnerCustomerContact(item),
       product_imagepath: clean(item.product_imagepath || item.imagepath),
     }));
     const statuses = items.map((item) => clean(item.cancellation_status || item.CancellationStatus).toLowerCase());
     const status = ["approved", "rejected", "requested"].find((candidate) => statuses.includes(candidate)) || "none";
     const requested = items.some((item) => truthyFlag(item.cancel_requested) || truthyFlag(item.RequestCancel))
       || ["requested", "approved", "rejected"].includes(status);
-    const total = items.reduce((sum, item) => sum + (Number(item.OrderPrice) || 0), 0);
+    const total = items.reduce((sum, item) => sum + lineTotalFor(item), 0);
     const customerName = [clean(first.Name), clean(first.Surname)].filter(Boolean).join(" ") || "Customer";
     const customerImagePath = clean(first.customer_imagepath);
 
@@ -184,14 +234,17 @@ export function groupCompanyOrders(orders: CompanyOrderItem[]): CompanyGroupedOr
       customerName,
       customerImagePath,
       customerPhoto: customerImagePath,
-      customerEmail: clean(first.customer_email),
-      customerMobile: clean(first.customer_mobile),
-      customerAddressLine1: clean(first.customer_address_line_1),
-      customerAddressLine2: clean(first.customer_address_line_2),
-      customerAddressLine3: clean(first.customer_address_line_3),
-      customerAddressLine4: clean(first.customer_address_line_4),
-      customerCountry: clean(first.customer_country),
-      customerDeliveryNotes: clean(first.customer_delivery_notes),
+      // Keep the legacy shape for callers while deliberately leaving contact
+      // fields empty. The authorized customer projection is the only source
+      // for owner-to-customer contact details.
+      customerEmail: "",
+      customerMobile: "",
+      customerAddressLine1: "",
+      customerAddressLine2: "",
+      customerAddressLine3: "",
+      customerAddressLine4: "",
+      customerCountry: "",
+      customerDeliveryNotes: "",
       customerEmailVerified: truthyFlag(first.customer_email_verified),
       dateTime: clean(first.DateandTime),
       tableNumber: clean(first.TableNumber),
@@ -201,9 +254,18 @@ export function groupCompanyOrders(orders: CompanyOrderItem[]): CompanyGroupedOr
       hasDelivered: truthyFlag(first.HasDelivered) ? "1" : "0",
       requestCancel: requested ? "1" : "0",
       cancellationStatus: status,
-      totalItems: items.length,
+      totalItems: items.reduce((sum, item) => sum + quantityFor(item), 0),
       totalPrice: total.toFixed(2),
+      hasCanonicalReference: trustedReference(first.RandomeCode) !== "",
       items: normalizedItems,
     };
   }).sort((left, right) => right.dateTime.localeCompare(left.dateTime));
+}
+
+export async function fetchOwnerStatistics(companyId: string): Promise<Record<CompanyOrderBucket, OwnerOrderStatistics>> {
+  const entries = await Promise.all((['today', 'week', 'month'] as CompanyOrderBucket[]).map(async (bucket) => {
+    const groups = groupCompanyOrders(await fetchCompanyOrdersByTab(companyId, bucket));
+    return [bucket, { orders: groups.length, products: groups.reduce((sum, order) => sum + order.totalItems, 0) }] as const;
+  }));
+  return Object.fromEntries(entries) as Record<CompanyOrderBucket, OwnerOrderStatistics>;
 }

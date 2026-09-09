@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, MapPin, List, Layers, RefreshCw, Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -32,8 +32,9 @@ const ShopListingPage = ({ title, variant = "free", helpKey }: ShopListingPagePr
   const [mapExpanded, setMapExpanded] = useState(false);
   const [focusTarget, setFocusTarget] = useState<{ lat: number; lng: number; zoom?: number; companyid?: number; name?: string } | null>(null);
   const isGlobal = variant === "global";
+  const isFree = variant === "free";
 
-  const loadShops = async (lat?: number, lng?: number) => {
+  const loadShops = useCallback(async (lat?: number, lng?: number) => {
     setLoading(true); setError(null);
     try {
       const results = isGlobal
@@ -42,7 +43,7 @@ const ShopListingPage = ({ title, variant = "free", helpKey }: ShopListingPagePr
       setShops(results);
     }
     catch { setError(t("Pleasecheckyourinternetconnection")); } finally { setLoading(false); }
-  };
+  }, [isGlobal, t, variant]);
 
   useEffect(() => {
     let cancelled = false;
@@ -60,7 +61,7 @@ const ShopListingPage = ({ title, variant = "free", helpKey }: ShopListingPagePr
       if (!cancelled && !isGlobal) loadShops();
     }, { enableHighAccuracy: true, timeout: 10000 });
     return () => { cancelled = true; };
-  }, []);
+  }, [isGlobal, loadShops]);
 
   const mapShops = shops.map((s) => ({ name: s.name, icon: s.icon, lat: s.lat, lng: s.lng, companyid: s.companyid, distance: s.distance }));
   const handleShopMapClick = (shop: { name: string; icon: string; companyid?: number }) => { if (shop.companyid) navigate(`/shop-profile?companyid=${shop.companyid}&name=${encodeURIComponent(shop.name)}&icon=${encodeURIComponent(shop.icon)}`); };
@@ -89,22 +90,24 @@ const ShopListingPage = ({ title, variant = "free", helpKey }: ShopListingPagePr
       <div className="flex-1 flex flex-col">
         {activeTab === "hybrid" && (<>
           <div className="relative h-56 w-full">
-            <GoogleMap className="h-full w-full" shops={mapShops} onShopClick={handleShopMapClick} defaultZoom={isGlobal ? 3 : 14} rangeCircleMetres={isGlobal ? undefined : 1609.34} focusTarget={focusTarget} />
+            <GoogleMap className="h-full w-full" shops={mapShops} onShopClick={handleShopMapClick} defaultZoom={isGlobal ? 3 : 14} rangeCircleMetres={isFree ? 1609.34 : undefined} focusTarget={focusTarget} />
             <div className={MAP_SEARCH_OVERLAY_CLASS}>
               <ShopSearch shops={shops} onSelect={handleSearchSelect} />
             </div>
           </div>
-          {(variant === "free" || variant === "paid") && <p className="text-[11px] text-muted-foreground text-center py-1">Showing shops within 1 mile</p>}
+          {isFree && <p className="text-[11px] text-muted-foreground text-center py-1">Showing shops within 1 mile</p>}
+          {variant === "paid" && <p className="text-[11px] text-muted-foreground text-center py-1">Showing shops using each company&apos;s server radius</p>}
           <ShopContent shops={shops} loading={loading} error={error} isGlobal={isGlobal} onRetry={() => isGlobal ? loadShops() : loadShops(userPos?.lat, userPos?.lng)} />
         </>)}
         {activeTab === "map" && (<>
           <ExpandableMap expanded={mapExpanded} onToggle={() => setMapExpanded(v => !v)} baseClassName="relative w-full h-[60vh] min-h-[400px]">
-            <GoogleMap className="h-full w-full" shops={mapShops} onShopClick={handleShopMapClick} defaultZoom={isGlobal ? 3 : 14} rangeCircleMetres={isGlobal ? undefined : 1609.34} focusTarget={focusTarget} />
+            <GoogleMap className="h-full w-full" shops={mapShops} onShopClick={handleShopMapClick} defaultZoom={isGlobal ? 3 : 14} rangeCircleMetres={isFree ? 1609.34 : undefined} focusTarget={focusTarget} />
             <div className={MAP_SEARCH_OVERLAY_CLASS}>
               <ShopSearch shops={shops} onSelect={handleSearchSelect} />
             </div>
           </ExpandableMap>
-          {(variant === "free" || variant === "paid") && <p className="text-[11px] text-muted-foreground text-center py-1">Showing shops within 1 mile</p>}
+          {isFree && <p className="text-[11px] text-muted-foreground text-center py-1">Showing shops within 1 mile</p>}
+          {variant === "paid" && <p className="text-[11px] text-muted-foreground text-center py-1">Showing shops using each company&apos;s server radius</p>}
           {loading && (<div className="p-4 text-center text-sm text-muted-foreground">{t("Pleasewait")}</div>)}
         </>)}
         {activeTab === "list" && (<ShopContent shops={shops} loading={loading} error={error} isGlobal={isGlobal} onRetry={() => isGlobal ? loadShops() : loadShops(userPos?.lat, userPos?.lng)} />)}

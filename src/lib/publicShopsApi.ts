@@ -5,6 +5,8 @@ import { presetSrc, stableFallbackPresetKey } from "@/lib/menuGroupImages";
 
 export const PUBLIC_SHOPS_URL = `${API_ORIGIN}/menu1/api/v1/public-shops.php`;
 export const FREE_PAID_RADIUS_MILES = 1;
+/** The server applies each company's canonical effective metre radius; this request cap covers the 100 km Pro maximum. */
+export const PAID_REQUEST_RADIUS_MILES = 100;
 export const MENU_GROUP_ASPECT_RATIO = "3/1";
 export const PRODUCT_IMAGE_ASPECT_RATIO = "16/9";
 
@@ -66,6 +68,8 @@ export interface PublicProduct {
   imagepath?: string;
   ImageSize?: string;
   MenuEnable?: string;
+  images?: string[];
+  youtube_video_id?: string | null;
 }
 
 async function publicData(params: Record<string, string>): Promise<unknown[]> {
@@ -131,7 +135,7 @@ export async function fetchPublicNearbyShops(
     lat: String(userPosition?.lat ?? 0),
     lon: String(userPosition?.lng ?? 0),
     tier,
-    radius: String(FREE_PAID_RADIUS_MILES),
+    radius: String(tier === "paid" ? PAID_REQUEST_RADIUS_MILES : FREE_PAID_RADIUS_MILES),
   });
   return rows.map((row) => parseNearbyShop(row, userPosition)).filter((row): row is NearbyShop => row !== null);
 }
@@ -203,15 +207,19 @@ export async function fetchPublicMenuItems(companyId: number, groupId: number): 
     const id = numberValue(row, "ID", "id");
     const group = numberValue(row, "GroupID", "group_id") ?? groupId;
     if (!id) return [];
+    const gallery = Array.isArray(row.images) ? row.images.map((path) => String(path || "").trim()).filter(Boolean) : [];
+    const legacyImage = text(row, "imagepath", "Imagepath", "ImagePath", "image_path");
     return [{
       ID: String(id),
       GroupID: String(group),
       OrderName: text(row, "OrderName", "name") || "Item",
       OrderPrice: text(row, "OrderPrice", "price"),
       OrderDesription: text(row, "OrderDesription", "description"),
-      imagepath: text(row, "imagepath", "Imagepath", "ImagePath", "image_path") || "",
+      imagepath: legacyImage || gallery[0] || "",
       ImageSize: text(row, "ImageSize", "image_size"),
       MenuEnable: text(row, "MenuEnable", "enabled") || "1",
+      images: gallery.length > 0 ? gallery : (legacyImage ? [legacyImage] : []),
+      youtube_video_id: text(row, "youtube_video_id") || null,
     }];
   });
 }

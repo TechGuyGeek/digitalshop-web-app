@@ -44,12 +44,12 @@ describe("canonical public discovery and menu V1 contracts", () => {
     expect(shops[0].distance).toBe(0);
   });
 
-  it("uses the exact Paid canonical request and one-mile radius", async () => {
+  it("uses the exact Paid canonical request and leaves the company radius to the server", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(envelope([shop]));
     await fetchPublicNearbyShops(52, -1, "paid");
     const url = new URL(String(fetchMock.mock.calls[0][0]));
     expect(url.searchParams.get("tier")).toBe("paid");
-    expect(url.searchParams.get("radius")).toBe("1");
+    expect(url.searchParams.get("radius")).toBe("100");
   });
 
   it("uses Global without radius filtering and omits distance without geolocation", async () => {
@@ -69,10 +69,10 @@ describe("canonical public discovery and menu V1 contracts", () => {
 
   it("uses canonical shop detail, groups, and products actions", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch")
-      .mockResolvedValueOnce(envelope({ ...shop, OpeningTimes: "08:00", ClosingTimes: "18:00" }))
+      .mockResolvedValueOnce(envelope({ ...shop, OpeningTimes: "08:00", ClosingTimes: "18:00", LastLoggedOn: "2026-09-09T12:00:00Z" }))
       .mockResolvedValueOnce(envelope([{ ID: 7, OrderGroup: "Food", MenuEnable: "1", ImageSource: "custom", GroupImagePath: "/Images/groups/7.jpg", UpdatedAt: "token-7" }]))
       .mockResolvedValueOnce(envelope([{ ID: 8, GroupID: 7, OrderName: "Soup", OrderPrice: "4.50", OrderDesription: "Hot", imagepath: "/Images/products/8.jpg", MenuEnable: "1" }]));
-    await fetchPublicShopDetail(42);
+    const detail = await fetchPublicShopDetail(42);
     await fetchPublicMenuGroups(42);
     await fetchPublicMenuItems(42, 7);
     const detailUrl = new URL(String(fetchMock.mock.calls[0][0]));
@@ -80,9 +80,21 @@ describe("canonical public discovery and menu V1 contracts", () => {
     const itemsUrl = new URL(String(fetchMock.mock.calls[2][0]));
     expect(detailUrl.searchParams.toString()).toContain("action=detail");
     expect(detailUrl.searchParams.get("company_id")).toBe("42");
+    expect(detail?.LastLoggedOn).toBe("2026-09-09T12:00:00Z");
     expect(groupsUrl.searchParams.get("resource")).toBe("groups");
     expect(itemsUrl.searchParams.get("resource")).toBe("items");
     expect(itemsUrl.searchParams.get("group_id")).toBe("7");
+  });
+
+  it("normalizes the ordered product gallery and optional Pro video", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(envelope([
+      { ID: 8, GroupID: 7, OrderName: "Soup", images: ["/first.jpg", "/second.jpg"], youtube_video_id: "M7lc1UVf-VE", MenuEnable: "1" },
+      { ID: 9, GroupID: 7, OrderName: "Legacy", imagepath: "/legacy.jpg", MenuEnable: "1" },
+    ]));
+
+    const products = await fetchPublicMenuItems(42, 7);
+    expect(products[0]).toMatchObject({ images: ["/first.jpg", "/second.jpg"], imagepath: "/first.jpg", youtube_video_id: "M7lc1UVf-VE" });
+    expect(products[1]).toMatchObject({ images: ["/legacy.jpg"], imagepath: "/legacy.jpg", youtube_video_id: null });
   });
 
   it("uses 3:1 groups, 16:9 products, and the image proxy", async () => {

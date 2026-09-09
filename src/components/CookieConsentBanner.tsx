@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -124,9 +125,9 @@ export default function CookieConsentBanner() {
         <p className="mb-3 text-xs text-foreground/90">
           We use cookies for essential features and, with your consent, for
           analytics and ads to improve GPS Shops. See our{" "}
-          <a href="/privacy" className="underline">
+          <Link to="/privacy" className="underline">
             privacy policy
-          </a>
+          </Link>
           .
         </p>
         <div className="flex flex-wrap gap-2">

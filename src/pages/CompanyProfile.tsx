@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import WebcamCapture from "@/components/WebcamCapture";
 import {
   getOwnedCompany, updateOwnedCompany, deleteOwnedCompany, getOwnedCompanyDeletionStatus, getCompanyImageUrl,
-  getMarkerForPublicNumber, countMenuGroups, type CompanyV1, type CompanyWrite
+  getMarkerForPublicNumber, type CompanyV1, type CompanyWrite
 } from "@/lib/companyApi";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthApiError } from "@/lib/authClient";
@@ -21,9 +21,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import QRCodeGenerator from "@/components/QRCodeGenerator";
 import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
+import { fetchOwnerStatistics, type OwnerOrderStatistics } from "@/lib/companyOrders";
 
 
 const MAX_IMAGE_SIZE = 800;
+
+function formatRadius(meters: number): string {
+  return meters < 1609.344 ? `${Math.round(meters)} m` : `${(meters / 1000).toFixed(1)} km`;
+}
 
 function resizeAndConvertToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -118,6 +123,8 @@ const CompanyProfile = () => {
   // Payment method: "0" cash only, "1" card only, "2" cash and card
   const [paymentMethod, setPaymentMethod] = useState<string>("0");
   const [stripeEnabled, setStripeEnabled] = useState<boolean>(false);
+  const [discoveryRadiusMeters, setDiscoveryRadiusMeters] = useState(1609);
+  const [statistics, setStatistics] = useState<Record<"today" | "week" | "month", OwnerOrderStatistics> | null>(null);
 
   const applyCompany = useCallback((next: CompanyV1, cacheBust = imageRevision) => {
     setCompany(next);
@@ -138,6 +145,7 @@ const CompanyProfile = () => {
     const payment = String(next.payment_method);
     setPaymentMethod(["0", "1", "2"].includes(payment) ? payment : "0");
     setStripeEnabled(next.stripe_enabled);
+    setDiscoveryRadiusMeters(Number(next.discovery_radius_meters) || 1609);
     setShopImage(getCompanyImageUrl(next.image_path, cacheBust));
   }, [imageRevision]);
 
@@ -155,6 +163,7 @@ const CompanyProfile = () => {
       map_marker: publicNumber, payment_method: Number(paymentMethod),
       line_one_address: form.lineOne, line_two_address: form.lineTwo, line_three_address: form.lineThree,
       line_four_address: form.lineFour, country: form.country, description: form.description,
+      discovery_radius_meters: discoveryRadiusMeters,
       ...overrides,
     };
   };
@@ -186,6 +195,11 @@ const CompanyProfile = () => {
       setLoading(false);
     });
   }, [applyCompany, navigate, status, user?.email_verified]);
+
+  useEffect(() => {
+    if (!company?.id) return;
+    fetchOwnerStatistics(String(company.id)).then(setStatistics).catch(() => setStatistics(null));
+  }, [company?.id]);
 
   const handleChange = (field: string, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -269,6 +283,14 @@ const CompanyProfile = () => {
     }
   };
 
+  const handleDiscoveryRadiusBlur = async () => {
+    if (!company || company.global_discovery_effective) return;
+    const next = Math.min(100000, Math.max(100, Math.round(discoveryRadiusMeters) || 100));
+    setDiscoveryRadiusMeters(next);
+    try { await persistCompany({ discovery_radius_meters: next }); }
+    catch (error) { toast.error(error instanceof Error ? error.message : "Failed to update discovery radius"); }
+  };
+
   const handleUpdateGPS = async () => {
     if (!["1", "2"].includes(String(user?.paid_user))) { toast.error("Only pro members can update GPS"); return; }
     if (!company || !navigator.geolocation) { toast.error("Geolocation not supported"); return; }
@@ -288,7 +310,7 @@ const CompanyProfile = () => {
     setPendingGps(null);
   };
 
-  // Add Products — mirrors MAUI: save profile, check group count, branch
+  // Add Products — save the profile before entering the canonical menu-group editor.
   const handleAddProducts = async () => {
     if (addProductsLoading) return;
     if (!company || !Number(company.id)) {
@@ -298,21 +320,10 @@ const CompanyProfile = () => {
     setAddProductsLoading(true);
     try {
       await handleSave();
-      console.log("[handleAddProducts] Checking menu group count for companyid:", company.id);
-      const countResult = await countMenuGroups(company.id);
-      console.log("[handleAddProducts] countMenuGroups result:", countResult);
-      // MAUI logic: if "ZERO" or "0" or empty → first-time setup, else edit
-      const hasGroups = countResult !== "ZERO" && countResult !== "0" && countResult.trim() !== "";
-      if (hasGroups) {
-        console.log("[handleAddProducts] Groups exist, navigating to edit-menu-groups");
-        navigate(`/edit-menu-groups?companyId=${company.id}`);
-      } else {
-        console.log("[handleAddProducts] No groups, navigating to edit-menu-groups (add mode)");
-        navigate(`/edit-menu-groups?companyId=${company.id}`);
-      }
+      navigate(`/edit-menu-groups?companyId=${company.id}`);
     } catch (err) {
       console.error("[handleAddProducts] Error:", err);
-      toast.error("Unable to load menu groups. Please try again.");
+      toast.error("Unable to save the company before editing products.");
     } finally {
       setAddProductsLoading(false);
     }
@@ -467,6 +478,18 @@ const CompanyProfile = () => {
           {t("CompanyProfilePageTitle")}
         </h2>
 
+        {statistics && (
+          <div className="grid grid-cols-3 gap-2 px-6 mb-5">
+            {(["today", "week", "month"] as const).map((bucket) => (
+              <div key={bucket} className="rounded-lg border border-border bg-card p-2 text-center">
+                <p className="text-xs font-semibold text-muted-foreground">{t(bucket === "today" ? "Today" : bucket === "week" ? "Week" : "Month")}</p>
+                <p className="text-lg font-bold text-foreground">{statistics[bucket].orders}</p>
+                <p className="text-[10px] text-muted-foreground">Orders · {statistics[bucket].products} Products</p>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Form fields */}
         <div className="px-6 space-y-3">
           {Object.values(form).some((v) => !String(v).trim()) && (
@@ -533,9 +556,28 @@ const CompanyProfile = () => {
               <Switch checked={toggles.deliveries} onCheckedChange={v => handleToggle("deliveries", v)} />
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-foreground">{toggles.allowGlobal ? t("GlobalEnabled") : t("EnableToAllowGlobal")}</span>
+              <span className="text-sm text-foreground">Show on Global Shops{toggles.allowGlobal ? " (enabled)" : ""}</span>
               <Switch checked={toggles.allowGlobal} onCheckedChange={v => handleToggle("allowGlobal", v)} />
             </div>
+          </div>
+
+          <div className="space-y-1 pt-2">
+            <label className="text-xs text-muted-foreground block">Discovery radius</label>
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                min={100}
+                max={100000}
+                step={1}
+                value={company.global_discovery_effective ? Math.round(company.effective_discovery_radius_meters || 100000) : discoveryRadiusMeters}
+                disabled={Boolean(company.global_discovery_effective)}
+                onChange={(event) => setDiscoveryRadiusMeters(Math.min(100000, Math.max(100, Number(event.target.value) || 100)))}
+                onBlur={() => void handleDiscoveryRadiusBlur()}
+                className={inputClass}
+              />
+              <span className="text-xs text-muted-foreground whitespace-nowrap">{company.global_discovery_effective ? "m (server effective)" : "m"}</span>
+            </div>
+            <p className="text-xs text-muted-foreground">{company.global_discovery_effective ? `Global Shops uses the server-controlled effective range (≈ ${formatRadius(Number(company.effective_discovery_radius_meters) || 100000)}).` : `Local discovery: ≈ ${formatRadius(discoveryRadiusMeters)}.`}</p>
           </div>
 
           {/* Action buttons */}

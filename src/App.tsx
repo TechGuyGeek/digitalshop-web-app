@@ -20,7 +20,7 @@ import GlobalAdminNavAction from "./components/GlobalAdminNavAction";
 import BackgroundMap from "./components/BackgroundMap";
 import CookieConsentBanner from "./components/CookieConsentBanner";
 import { useLocation } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, type CSSProperties } from "react";
 import { trackPageview } from "@/lib/analytics";
 import Profile from "./pages/Profile.tsx";
 import PaymentMethods from "./pages/PaymentMethods.tsx";
@@ -48,6 +48,7 @@ import CompanyOrders from "./pages/CompanyOrders.tsx";
 import CompanyOrderDetail from "./pages/CompanyOrderDetail.tsx";
 import OrderPayScan from "./pages/OrderPayScan.tsx";
 import CustomerProfileReadonly from "./pages/CustomerProfileReadonly.tsx";
+import CustomerModeration from "./pages/CustomerModeration.tsx";
 import CompanyProfileReadonly from "./pages/CompanyProfileReadonly.tsx";
 import ThankYou from "./pages/ThankYou.tsx";
 import PaymentComplete from "./pages/PaymentComplete.tsx";
@@ -82,19 +83,14 @@ const AppShell = () => {
   const { theme } = useTheme();
   const isLight = false;
   const isMainTheme = theme === "main";
-  const desktopBg =
-    isMainTheme
-      ? ""
-      : theme === "midnight"
-      ? "md:bg-[url('/bg-midnight.png')]"
-      : theme === "safari"
-      ? "md:bg-[url('/bg-safari.png')]"
-      : theme === "camo"
-      ? "md:bg-[url('/bg-camo.png')]"
-      : "md:bg-[url('/images/bg-desktop.png')]";
-  const outerClass = `w-full min-h-screen bg-black ${desktopBg} md:bg-cover md:bg-center md:bg-fixed flex justify-center relative`;
+  const appBase = import.meta.env.BASE_URL.endsWith("/") ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
+  const desktopBackground = isMainTheme ? "" : `${appBase}${theme === "midnight" ? "bg-midnight.png" : theme === "safari" ? "bg-safari.png" : theme === "camo" ? "bg-camo.png" : "images/bg-desktop.png"}`;
+  const outerStyle = desktopBackground
+    ? ({ "--gpsshops-desktop-background": `url("${desktopBackground}")` } as CSSProperties)
+    : undefined;
+  const outerClass = "gpsshops-desktop-background w-full min-h-screen bg-black md:bg-cover md:bg-center md:bg-fixed flex justify-center relative";
   return (
-    <div className={outerClass}>
+    <div className={outerClass} style={outerStyle}>
       <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, "") || "/"}>
         {isMainTheme && <RoutedBackgroundMap />}
         <RouteAnalytics />
@@ -142,6 +138,7 @@ const AppShell = () => {
                 <Route path="/company-order-detail" element={<CompanyOrderDetail />} />
                 <Route path="/order-pay-scan" element={<OrderPayScan />} />
                 <Route path="/customer-profile-readonly" element={<CustomerProfileReadonly />} />
+                <Route path="/customer-moderation" element={<CustomerModeration />} />
                 <Route path="/company-profile-readonly" element={<CompanyProfileReadonly />} />
                 <Route path="/thank-you" element={<ThankYou />} />
                 <Route path="/payment-complete" element={<PaymentComplete />} />

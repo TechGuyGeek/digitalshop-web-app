@@ -4,6 +4,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@media (min-width: 768px) {
+  .gpsshops-desktop-background {
+    background-image: var(--gpsshops-desktop-background);
+  }
+}
+
 @layer base {
   :root {
     --background: 225 15% 15%;

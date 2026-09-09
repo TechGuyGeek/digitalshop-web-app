@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { getMenuImageUrl } from "@/lib/authClient";
 import { deleteProduct, getProductUsage, toggleProduct } from "@/lib/menuApi";
+import ProductMedia from "@/components/ProductMedia";
 import { useLanguage } from "@/contexts/LanguageContext";
 import {
   AlertDialog,
@@ -29,6 +29,8 @@ export interface ProductCardItem {
   MenuEnable?: string;
   companyid?: string;
   GroupID?: string;
+  images?: string[];
+  youtube_video_id?: string | null;
 }
 
 interface ProductCardProps {
@@ -40,8 +42,6 @@ interface ProductCardProps {
   onDelete?: (productId: string) => void;
 }
 
-function getImageUrl(path?: string) { return getMenuImageUrl(path); }
-
 const ProductCard = ({ product, groupId, companyId, groupName, onToggleUpdate, onDelete }: ProductCardProps) => {
   const navigate = useNavigate();
   const { t } = useLanguage();
@@ -51,7 +51,7 @@ const ProductCard = ({ product, groupId, companyId, groupName, onToggleUpdate, o
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const toggleRef = useRef(false);
 
-  const imgUrl = getImageUrl(product.imagepath);
+  const images = product.images?.length ? product.images : (product.imagepath ? [product.imagepath] : []);
 
   const openEdit = () => {
     const params = new URLSearchParams({
@@ -114,25 +114,15 @@ const ProductCard = ({ product, groupId, companyId, groupName, onToggleUpdate, o
   return (
     <>
       <div className="rounded-xl overflow-hidden bg-card border border-border shadow-lg">
-        {imgUrl ? (
-          <div className="relative h-52 w-full cursor-pointer" onClick={openEdit}>
-            <img src={imgUrl} alt={product.OrderName} className="w-full h-full object-cover"
-              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+        <div className="relative h-52 w-full cursor-pointer" onClick={openEdit}>
+            <ProductMedia images={images} youtubeVideoId={product.youtube_video_id} alt={product.OrderName} />
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent px-4 pb-3 pt-10 flex items-end justify-between">
               <span className="text-white font-bold text-base uppercase tracking-wide drop-shadow-md">{product.OrderName}</span>
               {product.OrderPrice && (
                 <span className="text-white font-bold text-base drop-shadow-md">{parseFloat(product.OrderPrice).toFixed(2)}</span>
               )}
             </div>
-          </div>
-        ) : (
-          <div className="px-4 py-4 flex items-center justify-between bg-muted/30 cursor-pointer" onClick={openEdit}>
-            <span className="font-bold text-foreground text-base uppercase tracking-wide">{product.OrderName}</span>
-            {product.OrderPrice && (
-              <span className="font-bold text-foreground text-base">{parseFloat(product.OrderPrice).toFixed(2)}</span>
-            )}
-          </div>
-        )}
+        </div>
 
         <div className="px-4 py-3 space-y-3">
           {product.OrderDesription && product.OrderDesription !== "-" && (

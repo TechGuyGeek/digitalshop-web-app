@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Loader2, QrCode, RefreshCw } from "lucide-react";
+import { ArrowLeft, Loader2, QrCode, RefreshCw, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
@@ -29,6 +29,7 @@ const CompanyOrders = () => {
   const [orders, setOrders] = useState<CompanyGroupedOrder[]>([]);
   const [mutatingKey, setMutatingKey] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<CompanyGroupedOrder | null>(null);
+  const [hideUnverified, setHideUnverified] = useState(false);
   const loadInFlight = useRef<Promise<void> | null>(null);
   const scanInFlight = useRef("");
 
@@ -131,15 +132,15 @@ const CompanyOrders = () => {
         <h1 className="text-lg font-bold text-primary-foreground font-heading">{t("LiveOrdersPageTitle")}</h1>
         <Button variant="ghost" size="icon" className="ml-auto text-primary-foreground hover:bg-primary/80" onClick={() => void loadOrders(activeTab)} disabled={loading} aria-label={t("Refresh") || "Refresh"}><RefreshCw size={18} className={loading ? "animate-spin" : ""} /></Button>
       </div>
-      <div className="bg-card px-4 py-2 border-b border-border shrink-0"><Button variant="outline" className="w-full rounded-full" onClick={() => navigate(`/qr-scanner?mode=order&companyid=${encodeURIComponent(companyId)}`)}><QrCode size={16} className="mr-2" />{t("ScanOrderQr")}</Button></div>
+      <div className="bg-card px-4 py-2 border-b border-border shrink-0 grid grid-cols-2 gap-2"><Button variant="outline" className="w-full rounded-full" onClick={() => navigate(`/qr-scanner?mode=order&companyid=${encodeURIComponent(companyId)}`)}><QrCode size={16} className="mr-2" />{t("ScanOrderQr")}</Button><Button variant="outline" className="w-full rounded-full" onClick={() => navigate(`/customer-moderation?companyid=${encodeURIComponent(companyId)}`)}><Shield size={16} className="mr-2" />Manage Customers</Button></div>
       <div className="flex border-b border-border bg-card shrink-0">{tabs.map((tab) => <button key={tab.key} onClick={() => setActiveTab(tab.key)} className={`flex-1 py-3 text-sm font-bold tracking-wide transition-colors ${activeTab === tab.key ? "text-primary border-b-2 border-primary" : "text-muted-foreground"}`}>{tab.label}</button>)}</div>
-      <div className="bg-card px-4 py-2 shrink-0"><p className="text-center text-sm font-semibold text-foreground">{t("Orders")}</p></div>
+      <div className="bg-card px-4 py-2 shrink-0 flex items-center justify-between gap-3"><p className="text-sm font-semibold text-foreground">{t("Orders")}</p><label className="flex items-center gap-2 text-xs text-muted-foreground"><span>Hide unverified</span><Switch checked={hideUnverified} onCheckedChange={setHideUnverified} /></label></div>
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         <ProfileHelpAssistant translationKey="HELPLIVEORSERSNOPIC" />
         {loading ? <div className="flex flex-col items-center justify-center py-16 text-muted-foreground"><Loader2 className="animate-spin mb-4" size={32} /><p className="text-sm">{t("Pleasewait")}</p></div>
           : error ? <div className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-4"><p className="text-sm text-center">{error}</p><Button variant="outline" onClick={() => void loadOrders(activeTab)}>{t("Refresh") || "Refresh"}</Button></div>
-          : orders.length === 0 ? <div className="flex flex-col items-center justify-center py-16 text-muted-foreground"><span className="text-4xl mb-4">📦</span><p className="text-sm">{t("NoOrdersToshow")}</p></div>
-          : orders.map((order) => {
+          : orders.filter((order) => !hideUnverified || order.customerEmailVerified).length === 0 ? <div className="flex flex-col items-center justify-center py-16 text-muted-foreground"><span className="text-4xl mb-4">📦</span><p className="text-sm">{t("NoOrdersToshow")}</p></div>
+          : orders.filter((order) => !hideUnverified || order.customerEmailVerified).map((order) => {
             const paidKey = `${order.groupKey}-HasPaid`;
             const deliveredKey = `${order.groupKey}-HasDelivered`;
             const cancellationPending = order.requestCancel === "1" && ["", "none", "requested"].includes(order.cancellationStatus);
@@ -156,7 +157,7 @@ const CompanyOrders = () => {
                 {cancellationPending && <div className="flex gap-2" onClick={(event) => event.stopPropagation()}><Button size="sm" variant="outline" disabled={Boolean(mutatingKey)} onClick={() => void handleCancellation(order, "rejected")}>{t("Reject") || "Reject"}</Button><Button size="sm" disabled={Boolean(mutatingKey)} onClick={() => void handleCancellation(order, "approved")}>{t("Approve") || "Approve"}</Button></div>}
                 <p className="font-bold pt-1">{order.customerName}</p><p className="text-xs text-muted-foreground">{formatOrderDateTime(order.dateTime)}</p>
               </div><CustomerOrderImage path={order.customerImagePath} alt={order.customerName} className="w-20 h-16 rounded-lg shrink-0" /></div>
-              <div className="mt-4" onClick={(event) => event.stopPropagation()}><Button variant="outline" size="sm" className="w-full rounded-md text-xs" disabled={mutatingKey === `${order.groupKey}-delete`} onClick={() => setDeleteConfirm(order)}>{mutatingKey === `${order.groupKey}-delete` ? <Loader2 className="animate-spin" size={14} /> : t("Delete")}</Button></div>
+              <div className="mt-4 grid grid-cols-2 gap-2" onClick={(event) => event.stopPropagation()}><Button variant="outline" size="sm" className="w-full rounded-md text-xs" disabled={mutatingKey === `${order.groupKey}-delete`} onClick={() => setDeleteConfirm(order)}>{mutatingKey === `${order.groupKey}-delete` ? <Loader2 className="animate-spin" size={14} /> : t("Delete")}</Button><Button variant="outline" size="sm" className="w-full rounded-md text-xs" disabled={!order.hasCanonicalReference} onClick={() => navigate(`/customer-profile-readonly?orderid=${encodeURIComponent(order.reference)}`)}>Customer</Button></div>
             </div>;
           })}
       </div>

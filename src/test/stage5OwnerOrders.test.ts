@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { clearInMemoryAccessToken, login } from "@/lib/authClient";
 import {
   deleteCompanyOrder, fetchCompanyOrderDetail, fetchCompanyOrdersByTab, groupCompanyOrders,
-  toggleCompanyOrderFlag, updateCompanyOrderCancellation, type CompanyGroupedOrder,
+  fetchOwnerStatistics, toggleCompanyOrderFlag, updateCompanyOrderCancellation, type CompanyGroupedOrder,
 } from "@/lib/companyOrders";
 import { customerOrderImageUrl } from "@/lib/customerOrderImage";
 import { formatOrderDateTime, getProductPhotoUrl } from "@/lib/orderHistory";
@@ -86,7 +86,39 @@ describe("Web Stage 5 canonical owner orders", () => {
       { companyid: "82", clientid: "42", orderid: "1002", RandomeCode: order.reference, DateandTime: order.dateTime, OrderPrice: "2.50" },
     ]);
     expect(groups).toHaveLength(1);
-    expect(groups[0]).toMatchObject({ reference: order.reference, orderId: "1001", customerImagePath: order.customerImagePath, customerEmail: order.customerEmail, customerEmailVerified: true, cancellationStatus: "requested" });
+    expect(groups[0]).toMatchObject({ reference: order.reference, orderId: "1001", customerImagePath: order.customerImagePath, customerEmail: "", customerMobile: "", customerEmailVerified: true, cancellationStatus: "requested" });
+    expect(groups[0].items[0]).not.toHaveProperty("customer_email");
+    expect(groups[0].items[0]).not.toHaveProperty("customer_mobile");
+  });
+
+  it("computes unique order counts and quantity-based product counts from server buckets", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch");
+    await authenticate(fetchMock);
+    fetchMock.mockImplementation((input) => {
+      const url = String(input);
+      const rows = url.includes("bucket=today")
+        ? [
+          { companyid: "82", orderid: "1001", RandomeCode: order.reference, DateandTime: order.dateTime, quantity: 2, OrderPrice: "2.50" },
+          { companyid: "82", orderid: "1002", RandomeCode: order.reference, DateandTime: order.dateTime, quantity: 3, OrderPrice: "2.50" },
+        ]
+        : url.includes("bucket=week")
+          ? [
+            { companyid: "82", orderid: "2001", DateandTime: order.dateTime, quantity: 2, OrderPrice: "2.50" },
+            { companyid: "82", orderid: "2001", DateandTime: order.dateTime, quantity: 1, OrderPrice: "2.50" },
+          ]
+          : [
+            { companyid: "82", orderid: "3001", DateandTime: order.dateTime, quantity: 1, OrderPrice: "2.50" },
+            { companyid: "82", orderid: "3002", DateandTime: order.dateTime, quantity: 1, OrderPrice: "2.50" },
+          ];
+      return Promise.resolve(envelope(rows));
+    });
+
+    await expect(fetchOwnerStatistics("82")).resolves.toEqual({
+      today: { orders: 1, products: 5 },
+      week: { orders: 1, products: 3 },
+      month: { orders: 2, products: 2 },
+    });
+    expect(fetchMock.mock.calls.filter(([url]) => String(url).includes("/owner-orders.php?action=orders&bucket=")).length).toBe(3);
   });
 
   it("routes customer images through menu-image.php and safely falls back", () => {
@@ -186,6 +218,21 @@ describe("Web Stage 5 canonical owner orders", () => {
     const api = readFileSync("src/lib/companyOrders.ts", "utf8");
     expect(orders).not.toContain("CustomerProfileReadonly");
     expect(orders).not.toContain("userid=");
-    expect(api).not.toMatch(/RetriveLiveOrders|SavePayedorNot|SaveDELIVEREDORNOT|DeleteusersOrder2Secure|UserPassword|UserEmail|PersonID/);
+    expect(api).not.toMatch(/RetriveLiveOrders|SavePayedorNot|SaveDELIVEREDORNOT|DeleteusersOrder2Secure|UserPassword|UserEmail/);
+    expect(api).toContain('"PersonID"');
+  });
+
+  it("strips legacy owner-order customer identifiers before Web model use", () => {
+    const [group] = groupCompanyOrders([{
+      ...order,
+      PersonID: 42,
+      customer_email: "private@example.test",
+      customer_mobile: "07123456789",
+      customer_address_line_1: "Private address",
+    }]);
+    expect(group.items[0]).not.toHaveProperty("PersonID");
+    expect(group.items[0]).not.toHaveProperty("customer_email");
+    expect(group.items[0]).not.toHaveProperty("customer_mobile");
+    expect(group.items[0]).not.toHaveProperty("customer_address_line_1");
   });
 });

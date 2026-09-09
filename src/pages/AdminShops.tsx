@@ -125,7 +125,7 @@ const AdminShops = () => {
               {mapExpanded ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
             </Button>
           </div>
-          <div className="px-4 py-2 text-xs text-muted-foreground">{shops.length} shops loaded</div>
+          <div className="px-4 py-2 text-xs text-muted-foreground">Total Shops: {shops.length}</div>
           <div className="divide-y divide-border">
             {shops.length === 0 && (
               <div className="flex-1 flex items-center justify-center p-8">

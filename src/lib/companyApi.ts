@@ -8,7 +8,8 @@ export interface CompanyV1 {
   id: number; name: string; mobile_number: string; company_email: string; image_path: string;
   latitude: number; longitude: number; opening_time: string; closing_time: string; table_numbers: string;
   notifications_enabled: boolean; orders_enabled: boolean; takeaway_enabled: boolean; delivery_enabled: boolean;
-  global_enabled: boolean; map_marker: number; payment_method: number; stripe_enabled: boolean;
+  global_enabled: boolean; global_discovery_effective: boolean; discovery_radius_meters: number; effective_discovery_radius_meters: number;
+  map_marker: number; payment_method: number; stripe_enabled: boolean;
   line_one_address: string; line_two_address: string; line_three_address: string; line_four_address: string;
   country: string; description: string;
 }
@@ -27,6 +28,7 @@ export interface CompanyWrite {
   takeaway_enabled: boolean;
   delivery_enabled: boolean;
   global_enabled: boolean;
+  discovery_radius_meters: number;
   map_marker: number;
   payment_method: number;
   line_one_address: string;

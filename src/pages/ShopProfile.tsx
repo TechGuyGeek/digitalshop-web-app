@@ -1,5 +1,5 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Share2, Clock, Activity, Store, AlertTriangle, Loader2 } from "lucide-react";
+import { ArrowLeft, Share2, Clock, Activity, Store, AlertTriangle, Loader2, MessageSquare, Phone, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState, useRef, useCallback, type ReactNode } from "react";
 import { fetchPublicShopDetail, type PublicShopDetail } from "@/lib/publicShopsApi";
@@ -10,6 +10,8 @@ import { QRCodeCanvas } from "qrcode.react";
 import ProfileHelpAssistant from "@/components/ProfileHelpAssistant";
 import { SHOP_CATEGORIES } from "@/lib/shopCategories";
 import { gpsShopsShareDescription } from "@/lib/branding";
+import { formatLastActive, resolveLastActive } from "@/lib/lastActive";
+import { buildContactLinks } from "@/lib/companyContact";
 
 function formatOpeningHours(opening?: string, closing?: string): string | null {
   if (!opening || !closing) return null;
@@ -17,11 +19,6 @@ function formatOpeningHours(opening?: string, closing?: string): string | null {
   if (placeholders.includes(opening.toLowerCase()) || placeholders.includes(closing.toLowerCase())) return null;
   const fmt = (t: string) => { const parts = t.split(":"); return parts.length >= 2 ? `${parts[0]}:${parts[1]}` : t; };
   return `${fmt(opening)} to ${fmt(closing)}`;
-}
-
-function daysSinceActivity(lastLoggedOn?: string): number | null {
-  if (!lastLoggedOn) return null;
-  try { const d = new Date(lastLoggedOn); if (isNaN(d.getTime())) return null; return Math.max(0, Math.floor((Date.now() - d.getTime()) / (1000 * 60 * 60 * 24))); } catch { return null; }
 }
 
 function isShopOpen(opening?: string, closing?: string): boolean | null {
@@ -55,7 +52,13 @@ const ShopProfile = () => {
 
   const shopName = company?.companyname || fallbackName;
   const hours = company ? formatOpeningHours(company.OpeningTimes, company.ClosingTimes) : null;
-  const activityDays = company ? daysSinceActivity(company.LastLoggedOn) : null;
+  const lastActive = resolveLastActive(company?.LastLoggedOn);
+  const activityToneClass = {
+    green: "text-green-600",
+    amber: "text-amber-600",
+    red: "text-red-600",
+    neutral: "text-muted-foreground",
+  }[lastActive.tone];
   const imageUrl = company?.companyphoto ? getMenuImageUrl(company.companyphoto, company.companyid) : "";
 
   const handleEnterShop = () => {
@@ -197,7 +200,7 @@ const ShopProfile = () => {
         toast.error("Share failed");
       }
     }
-  }, [company, companyIdParam, shopName, imageUrl, fallbackIcon]);
+  }, [company, shopName, imageUrl]);
 
   const handleBack = () => navigate("/view-shops");
 
@@ -223,6 +226,8 @@ const ShopProfile = () => {
   const categoryLabel = SHOP_CATEGORIES.find((c) => c.emoji === fallbackIcon)?.label;
   const isOn = (v?: string) => v === "1" || v?.toLowerCase() === "true" || v?.toLowerCase() === "yes";
   const tables = company?.TableNumbers && company.TableNumbers !== "0" ? company.TableNumbers : null;
+  const companyContact = buildContactLinks(company?.CompanyMobile || "", company?.CompanyEmail || "");
+  const openContact = (url: string) => { if (url) window.location.href = url; };
 
   const Row = ({ label, value }: { label: string; value: ReactNode }) => (
     <div className="flex items-start justify-between gap-4 py-2.5 first:pt-0 last:pb-0 border-b border-border/60 last:border-b-0">
@@ -262,11 +267,9 @@ const ShopProfile = () => {
 
           <div>
             <h2 className="text-2xl font-bold text-foreground font-heading">{shopName}</h2>
-            {activityDays !== null && (
-              <div className="flex items-center gap-2 text-muted-foreground text-xs mt-1">
-                <Activity size={13} /><span>{t("ShopActivity")} {activityDays === 0 ? t("Today") : `${activityDays} ${t("Daysago")}`}</span>
-              </div>
-            )}
+            <div data-testid="last-active" className={`flex items-center gap-2 text-xs mt-1 ${activityToneClass}`}>
+              <Activity size={13} /><span>{formatLastActive(lastActive, t)}</span>
+            </div>
           </div>
 
           <Button className="w-full rounded-2xl h-12 text-base font-semibold" onClick={handleEnterShop}>{t("EnterShop")}</Button>
@@ -299,6 +302,12 @@ const ShopProfile = () => {
             <Card>
               {company?.CompanyMobile && <Row label={t("MobileNumber")} value={company.CompanyMobile} />}
               {company?.CompanyEmail && <Row label={t("Email")} value={company.CompanyEmail} />}
+              <div className="grid grid-cols-2 gap-2 pt-3">
+                <Button variant="outline" className="rounded-full text-xs" disabled={!companyContact.sms} onClick={() => openContact(companyContact.sms)}><MessageSquare size={15} className="mr-1" />{t("sms")}</Button>
+                <Button variant="outline" className="rounded-full text-xs" disabled={!companyContact.phone} onClick={() => openContact(companyContact.phone)}><Phone size={15} className="mr-1" />{t("call")}</Button>
+                <Button variant="outline" className="rounded-full text-xs" disabled={!companyContact.whatsapp} onClick={() => openContact(companyContact.whatsapp)}>WhatsApp</Button>
+                <Button variant="outline" className="rounded-full text-xs" disabled={!companyContact.email} onClick={() => openContact(companyContact.email)}><Mail size={15} className="mr-1" />{t("Email")}</Button>
+              </div>
             </Card>
           )}
 
