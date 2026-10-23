@@ -5,7 +5,7 @@ import { LogOut, User, Camera, Image, Save, Trash2, Loader2, Play, Sparkles } fr
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { type DigitalPerson, updateUserProfile } from "@/lib/api";
-import { loadCompanyProfile } from "@/lib/companyApi";
+import { loadCompanyProfile, type CompanyProfile } from "@/lib/companyApi";
 import { toast } from "sonner";
 import WebcamCapture from "@/components/WebcamCapture";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -61,6 +61,8 @@ const Profile = () => {
   const { t } = useLanguage();
   const { showVideoAd, dismissVideoAd, videoAdvert, videoVisible } = useAdverts();
   const [user, setUser] = useState<DigitalPerson | null>(null);
+  const [company, setCompany] = useState<CompanyProfile | null>(null);
+  const [companyLoading, setCompanyLoading] = useState(true);
   const [form, setForm] = useState({
     name: "", surname: "", gender: "", mobileNumber: "",
     lineOne: "", lineTwo: "", lineThree: "", lineFour: "",
@@ -94,6 +96,39 @@ const Profile = () => {
       navigate("/");
     }
   }, [navigate]);
+
+  // Ownership is deliberately loaded from the same source used by the shop
+  // button's routing check. This keeps the label and destination consistent
+  // after session restore and whenever the profile becomes visible again.
+  useEffect(() => {
+    if (!user) return;
+
+    let active = true;
+    const refreshCompany = async () => {
+      setCompanyLoading(true);
+      const personId = String(user.PersonID || user.ID || "");
+      const email = (user.Email || user.email || "") as string;
+      const loadedCompany = await loadCompanyProfile(personId, email);
+      if (active) {
+        setCompany(loadedCompany);
+        setCompanyLoading(false);
+      }
+    };
+
+    void refreshCompany();
+
+    const handleVisible = () => {
+      if (document.visibilityState === "visible") void refreshCompany();
+    };
+    window.addEventListener("focus", refreshCompany);
+    document.addEventListener("visibilitychange", handleVisible);
+
+    return () => {
+      active = false;
+      window.removeEventListener("focus", refreshCompany);
+      document.removeEventListener("visibilitychange", handleVisible);
+    };
+  }, [user]);
 
   const handleChange = (field: string, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -138,6 +173,13 @@ const Profile = () => {
     if (!u) return false;
     return String(u.PaidUser ?? u.Paiduser) === "2";
   })();
+
+  const translatedMyShop = t("MyShop");
+  const shopActionLabel = companyLoading
+    ? t("Pleasewait")
+    : company
+      ? (translatedMyShop === "MyShop" ? "My Shop" : translatedMyShop)
+      : t("Build");
 
   const handleUpgradeToPro = async () => {
     const u = user as Record<string, unknown> | null;
@@ -455,7 +497,7 @@ const Profile = () => {
           <Button
             variant="secondary"
             className="flex-1 rounded-full text-sm"
-            disabled={!user}
+            disabled={!user || companyLoading}
             onClick={async (e) => {
               const btn = e.currentTarget;
               if (btn.dataset.loading === "true") return;
@@ -465,10 +507,11 @@ const Profile = () => {
               try {
                 const personId = String(user.PersonID || user.ID || "");
                 const email = (user.Email || user.email || "") as string;
-                const company = await loadCompanyProfile(personId, email);
+                const loadedCompany = await loadCompanyProfile(personId, email);
+                setCompany(loadedCompany);
                 toast.dismiss("shop-check");
-                if (company && Number(company.companyid) > 0) {
-                  navigate("/company-profile", { state: { company } });
+                if (loadedCompany && Number(loadedCompany.companyid) > 0) {
+                  navigate("/company-profile", { state: { company: loadedCompany } });
                 } else {
                   navigate("/build-shop");
                 }
@@ -480,7 +523,7 @@ const Profile = () => {
               }
             }}
           >
-            {t("Build")}
+            {shopActionLabel}
           </Button>
           <Button variant="secondary" className="flex-1 rounded-full text-sm" onClick={() => navigate("/view-shops")}>
             {t("ViewShops")}
